@@ -1,0 +1,7 @@
+Programs for the various sub-systems of the Bartendro drink dispensing robot.
+
+Written by Robert Kaye
+Copyright (c) Party Robotics 2010
+All Rights Reserved.
+
+dispenser: Firmware for the dispenser module of Bartendro 2.0
