@@ -131,7 +131,7 @@ int main (void)
 {
     setup();
     blink_led();
+    dprintf("Welcome to Banana Jr. 2000\n");
     interrupt_loop();
     return 0;
 }
-
