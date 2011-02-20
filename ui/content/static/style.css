@@ -1,0 +1,28 @@
+body {
+    background-color: #FFF;
+    font-family: 'Lucida Sans', 'Verdana', sans-serif;
+    font-size: 14pt;
+    margin: 0;
+    padding: 0;
+    color: #000;
+}
+
+a {
+    color: #4e1a05;
+    text-decoration: none;
+    cursor: default;
+}
+
+a:hover {
+    color: #555;
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+}
+
+h1 {
+    font-size: 1em;
+}
+

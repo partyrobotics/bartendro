@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bartendro</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', file='style.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', file='js/jquery.tmpl.min.js') }}"></script>
+</head>
+<body>
+  <div class="menu">
+     <div id="search">
+        <input id="query" name="query" type="text" value=""/>
+        <input name="search" type="submit"/ value="search" onclick="search()">
+     </div>
+     <ul>
+        <li><a onclick="manage_drinks()">drinks</a></li>
+        <li>dispensers</li>
+     </ul>
+  </div>
+  <div class="body">
+      {% block body %}{% endblock %}
+  </div>
+  <script type="text/javascript" src="{{ url_for('static', file='js/admin.js') }}"></script>
+</body>
+</html>

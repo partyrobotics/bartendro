@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bartendro</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', file='style.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', file='js/jquery.tmpl.min.js') }}"></script>
+</head>
+<body>
+  <div class="body">
+      {% block body %}{% endblock %}
+  </div>
+  <script type="text/javascript" src="{{ url_for('static', file='js/drinks.js') }}"></script>
+</body>
+</html>
