@@ -16,37 +16,65 @@
 #define MAX_MOTORS 3
 typedef struct
 {
-    int8_t  motor;
-    int8_t  duty_cycle;
+    int8_t   motor;
+    uint8_t  duty_cycle;
     uint16_t duration;
 } motor_cmd;
 
 void pwm_setup(void)
 {
 	/* Set to Fast PWM */
-	TCCR0A |= _BV(WGM01) | _BV(WGM00);
-	TCCR0B |= _BV(WGM01) | _BV(WGM00);
-	TCCR1A |= _BV(WGM01) | _BV(WGM00);
+	TCCR0A = _BV(WGM01) | _BV(WGM00);
+	TCCR1A = _BV(WGM10) | _BV(WGM12);
+    TCCR0B |= _BV(CS00);
+    TCCR1B |= _BV(CS10);
 
-	// Set the compare output mode
-	TCCR0A |= _BV(COM0A1) | _BV(COM0B1);
-	TCCR1A |= _BV(COM1A1);
-
-	// Reset timers and comparators
-	OCR0A = 0;
-	OCR0B = 0;
-	OCR1A = 0;
 	TCNT0 = 0;
 	TCNT1 = 0;
+}
 
-    // Set the clock source
-	TCCR0A |= _BV(CS00);
-	TCCR0B |= _BV(CS00);
-	TCCR1B |= _BV(CS00);
+void pwm_on(uint8_t motor, uint8_t dc)
+{
+    // OCR0B = Digital 5
+    // OCR0A = Digital 6
+    // OCR1A = Digital 9
 
-    // Set PWM pins as outputs
-    DDRD |= (1<<PD6)|(1<<PD5);
-    DDRB |= (1<<PB1);
+    if (motor == 0)
+    {
+	    TCCR0A |= _BV(COM0B1);
+	    OCR0B = dc;
+    }
+    if (motor == 1)
+    {
+	    TCCR0A |= _BV(COM0A1);
+	    OCR0A = dc;
+    }
+    if (motor == 2)
+    {
+	    TCCR1A |= _BV(COM1A1);
+	    OCR1A = dc;
+    }
+}
+
+void pwm_off(uint8_t motor)
+{
+    if (motor == 0)
+    {
+	    OCR0B = 0;
+    }
+    if (motor == 1)
+    {
+	    OCR0A = 0;
+    }
+    if (motor == 2)
+    {
+	    OCR1A = 0;
+    }
+}
+
+void pwm_shutdown(void)
+{
+    TCCR0A = TCCR1A = TCCR0B = TCCR1B = 0;
 }
 
 #define MAX_CMD_LEN 16
@@ -105,15 +133,17 @@ void run(uint8_t count, motor_cmd *cmds)
 
     for(i = 0; i < count; i++)
         dprintf("%05u: motor %d on, %d duty_cycle, %u ms\n", t, cmds[i].motor, cmds[i].duty_cycle, cmds[i].duration);
+    
+    pwm_setup();
     // turn motors on
     for(i = 0; i < count; i++)
     {
         if (cmds[i].motor == 0)
-            OCR0B = cmds[i].duty_cycle;
+            pwm_on(0, cmds[i].duty_cycle);
         if (cmds[i].motor == 1)
-            OCR0A = cmds[i].duty_cycle;
+            pwm_on(1, cmds[i].duty_cycle);
         if (cmds[i].motor == 2)
-            OCR1A = cmds[i].duty_cycle;
+            pwm_on(2, cmds[i].duty_cycle);
     }
     for(i = 0; i < count; i++)
     {
@@ -126,12 +156,13 @@ void run(uint8_t count, motor_cmd *cmds)
             t += d;
         }
         if (cmds[i].motor == 0)
-            OCR0B = 0;
+            pwm_off(0);
         if (cmds[i].motor == 1)
-            OCR0A = 0;
+            pwm_off(0);
         if (cmds[i].motor == 2)
-            OCR1A = 0;
+            pwm_off(0);
     }
+    pwm_shutdown();
 }
 
 #define MAX_CMDS 3
@@ -141,8 +172,11 @@ int main(void)
     char      cmd[MAX_CMD_LEN], *t;
     motor_cmd cmds[MAX_CMDS];
 
-    pwm_setup();
     serial_init();
+
+    // Set PWM pins as outputs
+    DDRD |= (1<<PD6)|(1<<PD5);
+    DDRB |= (1<<PB1);
 
     dprintf("\nBartendro pre-prototype-prototype at your service!\n\n");
 
@@ -188,7 +222,7 @@ int main(void)
                 {
                     cmds[num_cmds].duration = atol(t);
                     if (cmds[num_cmds].motor >= 0 && cmds[num_cmds].motor <= MAX_MOTORS &&
-                        cmds[num_cmds].duty_cycle >= 0 && cmds[num_cmds].duty_cycle <= 100 &&
+                        cmds[num_cmds].duty_cycle >= 0 && cmds[num_cmds].duty_cycle <= 255 &&
                         cmds[num_cmds].duration > 0)
                     {
                         dprintf("command stored: %d,%d,%u\n", cmds[num_cmds].motor, cmds[num_cmds].duty_cycle, cmds[num_cmds].duration);
@@ -201,10 +235,6 @@ int main(void)
         dprintf("invalid command. not stored. fuck you.\n", cmd);
     }
 
-    // OCR2B = Digital 3 -- busted?? :-(
-    // OCR0A = Digital 6
-    // OCR0B = Digital 5
-    // OCR1A = Digital 9
 
 //# m,dc,dur -> 0,100,01000
     
