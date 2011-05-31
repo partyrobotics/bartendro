@@ -5,15 +5,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, metadata
 
 Base = declarative_base(metadata=metadata)
-class DrinkLiquid(Base):
+class DrinkBooze(Base):
     """
-    Join between the Drink table and the Liquid table for 1:n relationship
+    Join between the Drink table and the Booze table for 1:n relationship
     """
 
-    __tablename__ = 'drink_liquid'
+    __tablename__ = 'drink_booze'
     id = Column(Integer, primary_key=True)
     drink_id = Column(Integer, ForeignKey('drink.id'), nullable=False)
-    liquid_id = Column(Integer, ForeignKey('liquid.id'), nullable=False)
+    booze_id = Column(Integer, ForeignKey('booze.id'), nullable=False)
     value = Column(Integer, default=1)
     unit = Column(Integer, default=1)
  
@@ -32,5 +32,5 @@ class DrinkLiquid(Base):
                }
 
     def __repr__(self):
-        return "<DrinkLiquid(%d,%d,%d)>" % (self.id, self.value, self.unit)
+        return "<DrinkBooze(%d,%d,%d)>" % (self.id, self.value, self.unit)
 

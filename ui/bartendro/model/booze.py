@@ -5,16 +5,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, metadata
 
 Base = declarative_base(metadata=metadata)
-class Liquid(Base):
+class Booze(Base):
     """
-    Information about a liquid. e.g. water, vodka, grandine, bailies, oj 
+    Information about a booze. e.g. water, vodka, grandine, bailies, oj 
     """
 
-    __tablename__ = 'liquid'
+    __tablename__ = 'booze'
     id = Column(Integer, primary_key=True)
     name = Column(UnicodeText, nullable=False)
+    brand = Column(UnicodeText, nullable=True)
     desc = Column(UnicodeText, nullable=False)
     abv = Column(Integer, default=0)
+
+    # add unique constraint for name
  
     query = session.query_property()
     def __init__(self, name = u'', desc = u'', abv = 0):
@@ -31,5 +34,5 @@ class Liquid(Base):
                }
 
     def __repr__(self):
-        return "<Liquid('%s','%s')>" % (self.id, self.name)
+        return "<Booze('%s','%s')>" % (self.id, self.name)
 
