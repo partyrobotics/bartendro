@@ -1,0 +1,37 @@
+{% extends 'admin/layout' %}
+{% block body %}
+    <div class="main">
+    <div class="content">	
+        <form action="">
+            <fieldset>
+            <legend>Manage Booze:</legend><br />
+            Name: <input type="text" size="35" />
+            Brand: <input type="text" size="35" /><br /><br />
+            Description: <input type="text" size="50" />
+            ABV: <input type="text" size="3" />(percentage)<br /><br />
+            <button type="submit" value="Add">Add</button>
+            <button type="submit" value="Edit">Edit</button>
+            <button type="submit" value="Delete">Delete</button>
+            <button type="reset" value="Reset">Reset</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="side_bar">
+        <form action="">
+        <fieldset>
+        <legend>Boozes:</legend>
+            <select>
+                {% for booze in boozes %}
+                  <option><a href="">{{ booze.name }}</a></option>
+                {% endfor %}
+            </select>
+        </fieldset>
+        </form>
+    </div>
+
+    <div class="bottom_bar">
+       <a href="/admin">Admin home</a>
+    </div>
+    </div>
+{% endblock %}
