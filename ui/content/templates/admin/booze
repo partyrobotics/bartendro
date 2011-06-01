@@ -2,30 +2,38 @@
 {% block body %}
     <div class="main">
     <div class="content">	
-        <form action="">
-            <fieldset>
-            <legend>Manage Booze:</legend><br />
-            Name: <input type="text" size="35" />
-            Brand: <input type="text" size="35" /><br /><br />
-            Description: <input type="text" size="50" />
-            ABV: <input type="text" size="3" />(percentage)<br /><br />
-            <button type="submit" value="Add">Add</button>
-            <button type="submit" value="Edit">Edit</button>
-            <button type="submit" value="Delete">Delete</button>
-            <button type="reset" value="Reset">Reset</button>
-            </fieldset>
+        <h1>Booze Admin</h1>
+        <form method="POST" action="/admin/booze">
+            <div>{{ form.name.label }}: {{ form.name() }}</div>
+            {% if form.name.errors %}
+                <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+            <div>{{ form.brand.label }}: {{ form.brand() }}</div>
+            {% if form.brand.errors %}
+                <ul class="errors">{% for error in form.brand.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+            <div>{{ form.desc.label }}: {{ form.desc() }}</div>
+            {% if form.desc.errors %}
+                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+            <div>{{ form.abv.label }}: {{ form.abv() }}</div>
+            {% if form.abv.errors %}
+                <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+            <button type="submit" value="save">Save</button>
         </form>
     </div>
 
     <div class="side_bar">
-        <form action="">
+        <form method="POST" action="/admin/booze">
         <fieldset>
         <legend>Boozes:</legend>
-            <select>
+            <select name="edit">
                 {% for booze in boozes %}
-                  <option><a href="">{{ booze.name }}</a></option>
+                  <option value="{{booze.id}}">{{ booze.name }}</option>
                 {% endfor %}
             </select>
+            <button type="submit" value="edit">Edit</button>
         </fieldset>
         </form>
     </div>
