@@ -2,7 +2,7 @@
 {% block body %}
     <div class="main">
     <div class="content">	
-        <h1>Booze Admin</h1>
+        <h1>Enter New Booze:</h1>
         <form method="POST" action="/admin/booze">
             <div>{{ form.name.label }}: {{ form.name() }}</div>
             {% if form.name.errors %}
@@ -27,7 +27,7 @@
     <div class="side_bar">
         <form method="POST" action="/admin/booze">
         <fieldset>
-        <legend>Boozes:</legend>
+        <legend class="booze">Boozes:</legend>
             <select name="edit">
                 {% for booze in boozes %}
                   <option value="{{booze.id}}">{{ booze.name }}</option>
@@ -39,7 +39,7 @@
     </div>
 
     <div class="bottom_bar">
-       <a href="/admin">Admin home</a>
+       <a class="home" href="/admin">Admin home</a>
     </div>
     </div>
 {% endblock %}

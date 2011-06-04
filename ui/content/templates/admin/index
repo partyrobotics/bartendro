@@ -1,6 +1,6 @@
 {% extends 'admin/layout' %}
 {% block body %}
-    <ul>
-        <li><a href="admin/booze">Twiddle with Booze list</a></li>
-    </ul>
+
+   <a class="admin" href="admin/booze">Twiddle Booze list</a></li>
+    
 {% endblock %}

@@ -1,6 +1,9 @@
 body{
-	background-color: white; 
-	margin:0px;
+	background-color: #171772;
+	margin:	0px;
+}
+h1{
+	color: white;
 }
 div.main{
 	border-style:solid;	
@@ -37,7 +40,8 @@ div.side_bar{
 	width:280px;
 	float: right;
 	display: block;}
-
+legend.booze{
+	color:white;}
 div.bottom_bar{
 	border-style:solid;	
 	border-color: green;
@@ -52,3 +56,30 @@ div.main p {
 	margin-left: 20px;
 	color: blue;
 }
+a.home:link,a.home:visited{
+	margin-left:20px;
+	font-family:corbel;
+	font-size:18pt;
+	color: white;
+	text-decoration:none;
+}
+a.home:hover,a.home:active{
+	font-family:corbel;	
+	font-size:18pt;
+	color:#3e3e66;
+	text-decoration:none;
+}
+a.admin:link,a.admin:visited{
+        margin-left:20px;
+        font-family:corbel;
+        font-size:18pt;
+        color: white;
+        text-decoration:none;
+}
+a.admin:hover,a.admin:active{
+        font-family:corbel;
+        font-size:18pt;
+        color:#3e3e66;
+        text-decoration:none;
+}
+
