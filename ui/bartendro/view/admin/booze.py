@@ -12,16 +12,11 @@ def view(request):
     boozes = Booze.query.order_by(Booze.name)
     return render_template("admin/booze", boozes=boozes, form=form)
 
-@expose('/admin/booze/edit')
-def edit(request):
+@expose('/admin/booze/edit/<id>')
+def edit(request, id):
 
-    id = request.form.get("edit")
-    if id:
-        booze = Booze.query.filter_by(id=int(id)).first()
-        form = BoozeForm(obj=booze)
-    else:
-        form = BoozeForm(request.form)
-
+    booze = Booze.query.filter_by(id=int(id)).first()
+    form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
     return render_template("admin/booze", boozes=boozes, form=form)
 

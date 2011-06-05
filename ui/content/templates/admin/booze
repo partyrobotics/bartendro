@@ -31,15 +31,12 @@
 
     <div class="side_bar">
         <div class="boozeheading">Booze List</div>
-	<form method="POST" action="/admin/booze/edit">
 	<div class="boozelist">
-            <select name="edit">
-                {% for booze in boozes %}
-                  <option value="{{booze.id}}">{{ booze.name }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" value="edit">Edit</button>
-        </form>
+        <ul>
+            {% for booze in boozes %}
+              <li><a href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
+            {% endfor %}
+        </ul>
 	</div>
     </div>
 
