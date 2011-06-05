@@ -23,8 +23,8 @@
 	            {% endif %}
                 {{ form.id() }}
 	            <div class="button">
-                    <a href="/admin/booze">cancel</a>
-                    <button type="submit" value="save">save</button></div>
+                    <button type="submit" value="save">Save</button>
+                    <button type="submit" value="cancel">Cancel</button></div>
 	        </form>
 	</div>
     </div>
