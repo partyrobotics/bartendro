@@ -53,13 +53,12 @@ div.content{
 	width: 691px;
 	color:white;}
 div.forms{
-	margin-left:-75px;
+	margin-left:-150px;
 	float:left;
 }
 div.button{
-	background-color: #285374;
 	margin-left:350px;
-	margin-top:10px;
+	margin-top:25px;
 }
 button{
         font-family:"Arial";
@@ -69,10 +68,11 @@ button{
 	vertical-align:center;
 	background-color: #285374;
 	color:white;
-	padding-left:20px;
-	padding-right:20px;
+	padding-left:15px;
+	padding-right:15px;
 	padding-top:5px;
 	padding-bottom:5px;
+	border-radius:5px;
 }
 div.side_bar{
 	padding-left: 10px;
@@ -91,8 +91,14 @@ div.side_bar{
 div.boozelist{
 	border-width:4px;
 	border-style:solid;	
-	padding:4px;
-	color:white;}
+	color:white;
+	border-radius:5px;
+	text-alignment:left;
+}
+ul.booze{
+	list-style-type:none;
+	font-weight:bold;
+}
 div.bottom_bar{
 	float: left;
 	text-align:left;	
@@ -131,6 +137,12 @@ a.admin:hover,a.admin:active{
         font-family:corbel;
         font-size:18pt;
         color:#3e3e66;
+        text-decoration:none;
+}
+a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
+        font-family:corbel;
+        font-size:16pt;
+        color:white;
         text-decoration:none;
 }
 

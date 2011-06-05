@@ -23,8 +23,8 @@
 	            {% endif %}
                 {{ form.id() }}
 	            <div class="button">
-                    <a href="/admin/booze">cancel</a>
-                    <button type="submit" value="save">save</button></div>
+                    <button type="submit" value="save">Save</button>
+                    <button type="submit" value="cancel">Cancel</button></div>
 	        </form>
 	</div>
     </div>
@@ -33,12 +33,9 @@
         <div class="boozeheading">Booze List</div>
 	<form method="POST" action="/admin/booze/edit">
 	<div class="boozelist">
-            <select name="edit">
-                {% for booze in boozes %}
-                  <option value="{{booze.id}}">{{ booze.name }}</option>
+	        {% for booze in boozes %}
+			<ul class="booze"><a class="booze" href="admin/booze/edit">{{booze.id}}:{{ booze.name }}</a></ul>
                 {% endfor %}
-            </select>
-            <button type="submit" value="edit">Edit</button>
         </form>
 	</div>
     </div>
