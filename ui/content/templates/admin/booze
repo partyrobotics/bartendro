@@ -2,44 +2,46 @@
 {% block body %}
     <div class="main">
     <div class="content">	
-        <h1>Enter New Booze:</h1>
-        <form method="POST" action="/admin/booze">
-            <div>{{ form.name.label }}: {{ form.name() }}</div>
-            {% if form.name.errors %}
-                <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-            {% endif %}
-            <div>{{ form.brand.label }}: {{ form.brand() }}</div>
-            {% if form.brand.errors %}
-                <ul class="errors">{% for error in form.brand.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-            {% endif %}
-            <div>{{ form.desc.label }}: {{ form.desc() }}</div>
-            {% if form.desc.errors %}
-                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-            {% endif %}
-            <div>{{ form.abv.label }}: {{ form.abv() }}</div>
-            {% if form.abv.errors %}
-                <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-            {% endif %}
-            <button type="submit" value="save">Save</button>
-        </form>
+        <div class="heading">Enter New Booze</div>
+        <div class="forms">
+		<form method="POST" action="/admin/booze">
+	            <div class="forminput">{{ form.name.label }}: {{ form.name() }}</div>
+	            {% if form.name.errors %}
+	                <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+	            <div class="forminput">{{ form.brand.label }}: {{ form.brand() }}</div>
+	            {% if form.brand.errors %}
+	                <ul class="errors">{% for error in form.brand.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+	            <div class="forminput">{{ form.desc.label }}: {{ form.desc() }}</div>
+	            {% if form.desc.errors %}
+	                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+	            <div class="forminput">{{ form.abv.label }}: {{ form.abv() }}</div>
+	            {% if form.abv.errors %}
+	                <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+	            <div class="button"><button type="submit" value="save">SAVE</button></div>
+	        </form>
+	</div>
     </div>
 
     <div class="side_bar">
-        <form method="POST" action="/admin/booze">
-        <fieldset>
-        <legend class="booze">Boozes:</legend>
+        <div class="boozeheading">Booze List</div>
+	<form method="POST" action="/admin/booze">
+	<div class="boozelist">
             <select name="edit">
                 {% for booze in boozes %}
                   <option value="{{booze.id}}">{{ booze.name }}</option>
                 {% endfor %}
             </select>
             <button type="submit" value="edit">Edit</button>
-        </fieldset>
         </form>
+	</div>
     </div>
 
     <div class="bottom_bar">
-       <a class="home" href="/admin">Admin home</a>
+       <a class="home" href="/admin">HOME</a>
     </div>
     </div>
 {% endblock %}

@@ -1,57 +1,106 @@
 body{
-	background-color: #171772;
+	background-color: #7081fd;
 	margin:	0px;
 }
-h1{
+div.heading{
+	line-height:200%;
+	font-family:"Arial";
+	font-weight:bold;
+	font-size:50px;
 	color: white;
 }
+div.boozeheading{
+        line-height:250%;
+        font-family:"Arial";
+        font-weight:bold;
+        font-size:28px;
+        color: white;
+}
+.forminput{
+	color:white;
+	text-color:white;
+	font-size:20pt;
+	font-family:"Arial";
+	font-weight:bold;
+	text-align:right;
+	line-height:200%;
+}
 div.main{
+	background-color: #285374;
 	border-style:solid;	
-	border-color: black;
-	border-width:1px;
-	height:800px; 
+	border-color: white;
+	border-width:3px;
+	height:600px; 
 	width: 1024px;
 	margin:0px;
 	position; absolute;
 	top: 0px;
 	left: 0px;}
 div.content{
-	padding-left: 10px;
+	background-color: #448ec7;
+	vertical-align:top;
+	padding-left: 20px;
 	padding-right: 10px;
 	border-style:solid;	
-	border-color: red;
-	border-width:1px;
+	border-color: white;
+	border-width:3px;
 	float: left;
 	position: absolute;
+	line-height;200%;
 	top: 0px;
 	left: 0px;
-	height: 700px;
-	width: 704px;}
+	height: 550px;
+	width: 691px;
+	color:white;}
+div.forms{
+	margin-left:-75px;
+	float:left;
+}
+div.button{
+	background-color: #285374;
+	margin-left:350px;
+	margin-top:10px;
+}
+button{
+        font-family:"Arial";
+	font-size:12pt;
+	font-weight:bold;
+	text-align:center;
+	vertical-align:center;
+	background-color: #285374;
+	color:white;
+	padding-left:20px;
+	padding-right:20px;
+	padding-top:5px;
+	padding-bottom:5px;
+}
 div.side_bar{
 	padding-left: 10px;
+	background-color: #3f9ab8;
 	padding-right: 10px;
 	border-style:solid;	
-	border-color: orange;
-	border-width:1px;
+	border-color: white;
+	border-width:3px;
 	position: fixed;
 	top: 0px;
 	left: 724px;
-	height:700px;
+	height:600px;
 	width:280px;
 	float: right;
 	display: block;}
-legend.booze{
+div.boozelist{
+	border-width:4px;
+	border-style:solid;	
+	padding:4px;
 	color:white;}
 div.bottom_bar{
-	border-style:solid;	
-	border-color: green;
-	border-width:1px;
 	float: left;
+	text-align:left;	
 	position: absolute;
-	top: 700px;
+	top: 550px;
 	left: 0px;
-	height: 100px;
-	width: 1024px;}
+	width: 720px;
+	margin-top:17px;}
 div.main p {
 	margin-left: 20px;
 	color: blue;
@@ -59,13 +108,15 @@ div.main p {
 a.home:link,a.home:visited{
 	margin-left:20px;
 	font-family:corbel;
-	font-size:18pt;
+	font-size:16pt;
+	font-weight:bold;
 	color: white;
 	text-decoration:none;
+	text-align:bottom;
 }
 a.home:hover,a.home:active{
 	font-family:corbel;	
-	font-size:18pt;
+	font-size:16pt;
 	color:#3e3e66;
 	text-decoration:none;
 }
