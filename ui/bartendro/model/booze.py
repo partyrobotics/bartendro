@@ -20,11 +20,18 @@ class Booze(Base):
     # add unique constraint for name
  
     query = session.query_property()
-    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0):
+    def __init__(self, data = None, name = u'', brand = u'', desc = u'', abv = 0):
         self.name = name
         self.brand = brand
         self.desc = desc
         self.abv = abv
+
+    def update(self, data = None):
+        self.id = int(data['id'])
+        self.name = data['name']
+        self.desc = data['desc']
+        self.brand = data['brand']
+        self.abv = int(data['abv'])
 
     def json(self):
         return { 

@@ -3,7 +3,7 @@
     <div class="main">
     <div class="content">	
         <h1>Booze Admin</h1>
-        <form method="POST" action="/admin/booze">
+        <form method="POST" action="/admin/booze/save">
             <div>{{ form.name.label }}: {{ form.name() }}</div>
             {% if form.name.errors %}
                 <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
@@ -20,12 +20,14 @@
             {% if form.abv.errors %}
                 <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
             {% endif %}
-            <button type="submit" value="save">Save</button>
+            {{ form.id() }}
+            <a href="/admin/booze">Cancel</a>
+            <button type="submit" value="submit">Save</button>
         </form>
     </div>
 
     <div class="side_bar">
-        <form method="POST" action="/admin/booze">
+        <form method="POST" action="/admin/booze/edit">
         <fieldset>
         <legend>Boozes:</legend>
             <select name="edit">
