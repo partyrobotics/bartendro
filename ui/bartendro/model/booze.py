@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.orm import mapper, relationship
-from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, UnicodeText, UniqueConstraint, Text
+from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, UnicodeText, UniqueConstraint, Text, Index
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, metadata
 
@@ -18,16 +18,19 @@ class Booze(Base):
     abv = Column(Integer, default=0)
 
     # add unique constraint for name
+    UniqueConstraint('name', name='booze_name_undx')
  
     query = session.query_property()
-    def __init__(self, data = None, name = u'', brand = u'', desc = u'', abv = 0):
+    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, data = None):
+        if data: 
+            self.update(data)
+            return
         self.name = name
         self.brand = brand
         self.desc = desc
         self.abv = abv
 
-    def update(self, data = None):
-        self.id = int(data['id'])
+    def update(self, data):
         self.name = data['name']
         self.desc = data['desc']
         self.brand = data['brand']
@@ -37,10 +40,12 @@ class Booze(Base):
         return { 
                  'id' : self.id, 
                  'name' : self.name,
-                 'sortname' : self.sortname,
+                 'desc' : self.desc,
+                 'brand' : self.brand,
                  'abv' : self.abv,
                }
 
     def __repr__(self):
         return "<Booze('%s','%s')>" % (self.id, self.name)
 
+Index('booze_name_ndx', Booze.name)

@@ -28,11 +28,17 @@ def save(request):
 
     form = BoozeForm(request.form)
     if request.method == 'POST' and form.validate():
-        id = request.form.get("id")
-        booze = Booze.query.filter_by(id=int(id)).first()
-        booze.update(form.data)
-        if not booze.id:
+        id = int(request.form.get("id") or '0')
+        print "save to id: %d" % id
+        if id:
+            print "save existing entry"
+            booze = Booze.query.filter_by(id=int(id)).first()
+            booze.update(form.data)
+        else:
+            print "save new entry"
+            booze = Booze(data=form.data)
             session.add(booze)
+
         session.commit()
         return redirect('/admin/booze')
 
