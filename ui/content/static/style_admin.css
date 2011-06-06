@@ -53,7 +53,7 @@ div.content{
 	width: 691px;
 	color:white;}
 div.forms{
-	margin-left:-150px;
+	margin-left:-200px;
 	float:left;
 }
 div.button{
@@ -68,6 +68,7 @@ button{
 	vertical-align:center;
 	background-color: #285374;
 	color:white;
+	margin-left:30px;
 	padding-left:15px;
 	padding-right:15px;
 	padding-top:5px;
@@ -89,15 +90,21 @@ div.side_bar{
 	float: right;
 	display: block;}
 div.boozelist{
-	border-width:4px;
+	background-color: #327c94;
+	border-width:2px;
 	border-style:solid;	
 	color:white;
-	border-radius:5px;
+	height:515px;
+	border-radius:8px;
 	text-alignment:left;
+	overflow:auto;	
 }
-ul.booze{
+li.booze{
+	margin-left:-20px;
 	list-style-type:none;
 	font-weight:bold;
+	font-size:16pt;
+	line-height:150%;	
 }
 div.bottom_bar{
 	float: left;

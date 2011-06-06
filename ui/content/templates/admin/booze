@@ -32,9 +32,9 @@
     <div class="side_bar">
         <div class="boozeheading">Booze List</div>
 	<div class="boozelist">
-        <ul>
+	<ul>
             {% for booze in boozes %}
-              <li><a href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
+              <li class="booze"><a class="booze" ref="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
             {% endfor %}
         </ul>
 	</div>
