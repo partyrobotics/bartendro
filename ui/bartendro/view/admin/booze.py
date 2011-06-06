@@ -10,7 +10,7 @@ def view(request):
     # TODO: Show saved text
     form = BoozeForm(request.form)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form)
+    return render_template("admin/booze", boozes=boozes, form=form, title="Enter new booze")
 
 @expose('/admin/booze/edit/<id>')
 def edit(request, id):
@@ -18,10 +18,13 @@ def edit(request, id):
     booze = Booze.query.filter_by(id=int(id)).first()
     form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form)
+    return render_template("admin/booze", boozes=boozes, form=form, title="Edit booze")
 
 @expose('/admin/booze/save')
 def save(request):
+
+    cancel = request.form.get("cancel")
+    if cancel: return redirect('/admin/booze')
 
     form = BoozeForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -34,4 +37,4 @@ def save(request):
         return redirect('/admin/booze')
 
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form)
+    return render_template("admin/booze", boozes=boozes, form=form, title="Fix your shit!")

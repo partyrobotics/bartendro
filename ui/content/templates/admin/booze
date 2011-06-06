@@ -2,7 +2,7 @@
 {% block body %}
     <div class="main">
     <div class="content">	
-        <div class="heading">Enter New Booze</div>
+        <div class="heading">{{ title }}</div>
         <div class="forms">
 		<form method="POST" action="/admin/booze/save">
 	            <div class="forminput">{{ form.name.label }}: {{ form.name() }}</div>
@@ -23,8 +23,9 @@
 	            {% endif %}
                 {{ form.id() }}
 	            <div class="button">
-                    <button type="submit" value="save">Save</button>
-                    <button type="submit" value="cancel">Cancel</button></div>
+                    {{ form.cancel() }}
+                    {{ form.save() }}
+                </div>
 	        </form>
 	</div>
     </div>
