@@ -34,7 +34,7 @@
 	<div class="boozelist">
 	<ul>
             {% for booze in boozes %}
-              <li class="booze"><a class="booze" ref="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
+              <li class="booze"><a class="booze" href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
             {% endfor %}
         </ul>
 	</div>
