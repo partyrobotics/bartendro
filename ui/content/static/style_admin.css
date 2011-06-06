@@ -16,7 +16,7 @@ div.boozeheading{
         font-size:28px;
         color: white;
 }
-.forminput{
+div.forminput{
 	color:white;
 	text-color:white;
 	font-size:20pt;
@@ -24,6 +24,17 @@ div.boozeheading{
 	font-weight:bold;
 	text-align:right;
 	line-height:200%;
+	background-color:#3f9ab8;
+}
+textarea.desc{
+	height:40px;
+	width:200px;
+}
+input.form{
+	
+	height:20px;
+	width:200px;
+		
 }
 div.main{
 	background-color: #285374;
@@ -61,7 +72,7 @@ div.button{
 	margin-top:25px;
 }
 button{
-        font-family:"Arial";
+        font-family:Arial;
 	font-size:12pt;
 	font-weight:bold;
 	text-align:center;
@@ -120,7 +131,7 @@ div.main p {
 }
 a.home:link,a.home:visited{
 	margin-left:20px;
-	font-family:corbel;
+	font-family:Arial;
 	font-size:16pt;
 	font-weight:bold;
 	color: white;
@@ -128,26 +139,26 @@ a.home:link,a.home:visited{
 	text-align:bottom;
 }
 a.home:hover,a.home:active{
-	font-family:corbel;	
+	font-family:Arial;	
 	font-size:16pt;
 	color:#3e3e66;
 	text-decoration:none;
 }
 a.admin:link,a.admin:visited{
         margin-left:20px;
-        font-family:corbel;
+        font-family:Arial;
         font-size:18pt;
         color: white;
         text-decoration:none;
 }
 a.admin:hover,a.admin:active{
-        font-family:corbel;
+        font-family:Arial;
         font-size:18pt;
         color:#3e3e66;
         text-decoration:none;
 }
 a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
-        font-family:corbel;
+        font-family:Arial;
         font-size:16pt;
         color:white;
         text-decoration:none;
