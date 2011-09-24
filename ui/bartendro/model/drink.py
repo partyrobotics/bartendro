@@ -3,6 +3,7 @@ from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, UnicodeText, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, metadata
+from bartendro.model.drink_name import DrinkName
 
 Base = declarative_base(metadata=metadata)
 class Drink(Base):
@@ -17,7 +18,11 @@ class Drink(Base):
 
     query = session.query_property()
 
-    def __init__(self, desc = u''):
+    def __init__(self, desc = u'', data = None):
+        self.name = DrinkName()
+        if data: 
+            self.update(data)
+            return
         self.desc = desc
         session.add(self)
 
