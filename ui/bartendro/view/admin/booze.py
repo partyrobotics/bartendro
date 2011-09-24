@@ -43,4 +43,4 @@ def save(request):
         return redirect('/admin/booze')
 
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="Fix your shit!")
+    return render_template("admin/booze", boozes=boozes, form=form, title="")

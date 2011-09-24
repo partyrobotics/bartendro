@@ -1,0 +1,40 @@
+{% extends 'admin/layout' %}
+{% block body %}
+    <div class="main">
+    <div class="content">	
+        <div class="heading">{{ title }}</div>
+        <div class="forms">
+		<form method="POST" action="/admin/drink/save">
+	            <div class="forminput">{{ form.drink_name.label }}:<br/> {{ form.drink_name(class="form") }}</div>
+	            {% if form.drink_name.errors %}
+	                <ul class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+	            <div class="forminput">{{ form.desc.label }}:<br/> {{ form.desc(class="desc") }}</div>
+	            {% if form.desc.errors %}
+	                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	            {% endif %}
+                {{ form.id() }}
+	            <div class="button">
+                    {{ form.cancel(class="buttons") }}
+                    {{ form.save(class="buttons") }}
+                </div>
+	        </form>
+	</div>
+    </div>
+
+    <div class="side_bar">
+        <div class="boozeheading">Drink List</div>
+	<div class="boozelist">
+	<ul class="booze">
+            {% for drink in drinks %}
+              <li class="booze"><a class="booze" href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></li>
+            {% endfor %}
+        </ul>
+	</div>
+    </div>
+
+    <div class="bottom_bar">
+       <a class="home" href="/admin">HOME</a>
+    </div>
+    </div>
+{% endblock %}
