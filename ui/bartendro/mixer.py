@@ -7,7 +7,7 @@ from bartendro.model import drink_booze
 from bartendro.model import booze
 
 ML_PER_FL_OZ = 29.57
-MS_PER_ML = 50
+MS_PER_ML = 86 
 
 class Mixer(object):
     '''This is where the magic happens!'''
@@ -61,6 +61,7 @@ class Mixer(object):
             if r['ms'] > dur: dur = r['ms']
 
         self.driver.send("go");
+        dur = dur * 2
         sleep(dur / 1000)
 
         return 0 

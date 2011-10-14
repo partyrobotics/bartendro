@@ -2,22 +2,14 @@
 {% block body %}
 <div id="content">
     <div class="heading">Make a {{ drink.name.name }}</div>
+    <p class="size_text">&nbsp;&nbsp;&nbsp;&nbsp;Ingredients: {{ drink.desc }}</p>
     <div class="drink_size">
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
        </p>
-       <p class="text" id="size_text">8 fluid ounces</p>
+       <p class="text" id="size_text">4 fluid ounces</p>
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
-       </p>
-    </div>
-    <div class="drink_strength">
-       <p>
-           <button type="button" class="adjust_drink_button" onclick="strength_stronger()">stronger</button>
-       </p>
-       <p class="text" id="strength_text">normal</p>
-       <p>
-           <button type="button" class="adjust_drink_button" onclick="strength_weaker()">weaker</button>
        </p>
     </div>
     <div id="make_drink_buttons">
@@ -28,15 +20,15 @@
 <div>
 <script type="text/javascript">
 
-var drink_size = 8;
+var drink_size = 4;
 var drink_strength = 0;
 
 function size_bigger()
 {
-    if (drink_size >= 12)
+    if (drink_size >= 8)
         return;
 
-    drink_size += 2;
+    drink_size += 1;
     $("#size_text").text(drink_size + " fluid ounces");
 }
 function size_smaller()
@@ -44,7 +36,7 @@ function size_smaller()
     if (drink_size <= 2)
         return;
 
-    drink_size -= 2;
+    drink_size -= 1;
     $("#size_text").text(drink_size + " fluid ounces");
 }
 function set_strength_text()
@@ -83,7 +75,7 @@ function changed_mind()
 
 function make_drink(drink)
 {
-    lightbox('<div class="content"><div class="heading">Making a {{ drink.name.name}}!</div><img src="/static/images/spinner.png"></div>');
+    lightbox('<div class="make_drink"><div class="heading">Making a {{ drink.name.name}}!</div></div>');
     $.ajax({
             url: "/ws/drink/" + drink + "/" + drink_size + "/" + (100 + (drink_strength * 10)),
             success: function(html)

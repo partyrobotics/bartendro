@@ -9,23 +9,11 @@ from bartendro.form.booze import BoozeForm
 @expose('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(request, disp):
     driver = local.application.driver
-    count = driver.count()
-    if disp < 1 or disp > count: raise BadRequest("Invalid dispenser %d selected. We've got %d." % (disp, count))
-
-    ret = driver.start(disp)
-    if ret == 0:
-        return render_text("ok\n")
-    else:
-        raise ServiceUnavailable("Error: %s (%d)" % (driver.get_error(), ret))
+    driver.send("on %d" % (disp - 1))
+    return render_text("ok\n")
 
 @expose('/ws/dispenser/<int:disp>/off')
 def ws_dispenser_off(request, disp):
     driver = local.application.driver
-    count = driver.count()
-    if disp < 1 or disp > count: raise BadRequest("Invalid dispenser %d selected. We've got %d." % (disp, count))
-
-    ret = driver.stop(disp)
-    if ret == 0:
-        return render_text("ok\n")
-    else:
-        raise ServiceUnavailable("Error: %s (%d)" % (driver.get_error(), ret))
+    driver.send("off %d" % (disp - 1))
+    return render_text("ok\n")

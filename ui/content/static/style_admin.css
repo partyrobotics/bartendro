@@ -1,13 +1,13 @@
 body{
 	background-color: #7081fd;
 	margin:	0px;
+	font-family:"Arial";
+	color: white;
 }
 div.heading{
 	line-height:200%;
-	font-family:"Arial";
 	font-weight:bold;
 	font-size:50px;
-	color: white;
 	text-shadow: 3px 3px 2px gray;
 }
 div.subheading{
@@ -60,6 +60,7 @@ div.main{
 	left: 0px;}
 div.content{
 	background-color: #448ec7;
+        margin: 1em;
 	vertical-align:top;
 	padding-left: 20px;
 	padding-right: 10px;
@@ -200,8 +201,8 @@ table.home_table{
         text-align: center;
 }
 table.home_table td{
-        padding: 3em;
-        margin: 3em;
+        padding: 1em;
+        margin: 1em;
 }
 table.home_table a{
         font-family:Arial;
@@ -264,4 +265,8 @@ table.home_table a{
 }
 div.booze_line_hidden {
         visibility:hidden;
+}
+div.make_drink{
+	background-color: #7081fd;
+	padding:	2em;
 }
