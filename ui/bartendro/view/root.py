@@ -11,7 +11,7 @@ def process_ingredients(drinks):
         drink.drink_boozes = sorted(drink.drink_boozes, key=attrgetter('booze.abv', 'booze.name'), reverse=True)
         for db in drink.drink_boozes:
             ing.append(db.booze.name)
-        drink.ingredients = ', '.join(ing)
+        drink.ingredients = ing
 
 @expose('/')
 def index(request):

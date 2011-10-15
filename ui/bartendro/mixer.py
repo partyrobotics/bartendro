@@ -31,7 +31,6 @@ class Mixer(object):
     def make_drink(self, id, size, strength):
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
-        print "make ", drink
 
         recipe = []
         for db in drink.drink_boozes:
@@ -39,7 +38,6 @@ class Mixer(object):
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
                 if db.booze_id == disp.booze_id:
-                    print "drink_booze %d is in dispenser %d" % (db.booze_id, disp.id)
                     r = {}
                     r['dispenser'] = disp.id
                     r['booze'] = db.booze_id
@@ -56,7 +54,6 @@ class Mixer(object):
         for r in recipe:
             total_parts += r['part']
 
-        print "start making drink!"
         self.leds_color(255, 0, 255)
         dur = 0
         active_disp = []
@@ -69,24 +66,22 @@ class Mixer(object):
 
             if r['ms'] > dur: dur = r['ms']
 
-        print "commands sent, wait for completion"
-
-        print active_disp
         self.leds_color(255, 0, 0)
         while True:
             done = True
 	    for disp in active_disp:
-		if self.driver.is_dispensing(disp): 
+		if self.driver.is_dispensing(disp - 1): 
                     done = False
                     break
             if done: break
 
-        print "drink complete!"
-        for i in xrange(10):
-            self.leds_color(0, 255, 0)
-            sleep(.25)
-            self.leds_color(0, 0, 0)
-            sleep(.25)
+        self.leds_color(0, 255, 0)
+        sleep(1)
+#        for i in xrange(10):
+#            self.leds_color(0, 255, 0)
+#            sleep(.25)
+#            self.leds_color(0, 0, 0)
+#            sleep(.25)
 
         self.leds_color(0, 0, 255)
 

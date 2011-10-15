@@ -8,6 +8,8 @@ import serial
 
 BAUD_RATE = 38400
 
+MAX_DISPENSERS = 15
+
 class SttyNotFoundException:
     pass
 
@@ -81,8 +83,14 @@ class MasterDriver(object):
             break
 
         if len(r) > 0:
-            print "found %d dispensers" % int(r)
-            self.num_dispensers = int(r)
+            num = int(r)
+            if num < 1 or num > MAX_DISPENSERS:
+		print "Found an invalid number of dispensers. Communication chain busted!"
+                self.num_dispensers = -1;
+            else: 
+		print "found %d dispensers" % int(r)
+		self.num_dispensers = int(r)
+                sleep(1)
         else:
             print "Cannot communicate with dispenser chain!"
 
@@ -94,7 +102,9 @@ class MasterDriver(object):
     def send(self, cmd):
         if self.software_only: return
         self.ser.write(cmd)
-        return self.ser.readline()
+        ret = self.ser.readline()
+        if ret == "": print "Serial comms timeout after cmd '%s'." % cmd[0:len(cmd)-1]
+        return ret
 
     def count(self):
         return self.num_dispensers
@@ -114,11 +124,16 @@ class MasterDriver(object):
     def is_dispensing(self, dispenser):
         self.send("%d isdisp\n" % dispenser)
         ret = self.ser.readline()
-        disp, cmd, value = ret.split(" ")
-        if value[0] == '1': 
-            return True
-        else:
-            return False
+        if not ret: 
+	    return False
+        try:
+            disp, cmd, value = ret.split(" ")
+	    if value[0] == '1': 
+	        return True
+	    else:
+	        return False
+        except ValueError:
+	    return False
 
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyS1", "log");

@@ -19,6 +19,7 @@ class BartendroUIServer(object):
         self.dispatch = SharedDataMiddleware(self.dispatch, {
                     '/static':  bartendro.utils.STATIC_PATH
                     })
+
         self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
         self.driver.open()
         self.driver.chain_init();
