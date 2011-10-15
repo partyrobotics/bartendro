@@ -154,7 +154,6 @@ div.side_bar{
 	border-style:solid;	
 	border-color: white;
 	border-width:3px;
-	position: fixed;
 	top: 0px;
 	left: 724px;
 	height:600px;
@@ -321,6 +320,8 @@ div.drink_desc{
 	font-family:Corbel,sans-serif;
 	font-size: .85em;	
 	font-weight: normal;
+	height:75px; 
+        text-overflow: clip;
    color: grey;
    line-height: 80%
 	text-shadow:0 -1px 0 lightgray;	

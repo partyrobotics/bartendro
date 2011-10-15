@@ -15,10 +15,34 @@ MAX_BOOZES_PER_DRINK = 8
 
 @expose('/admin/drink')
 def view(request):
-    form = DrinkForm(request.form)
     drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
-    return render_template("admin/drink", drinks=drinks, form=form, title="Enter new drink")
+    class F(DrinkForm):
+        pass
+
+    boozes = session.query(Booze).order_by(Booze.id).all()
+    booze_list = [(b.id, b.name) for b in boozes] 
+    sorted_booze_list = sorted(booze_list, key=itemgetter(1))
+    fields = []
+    kwargs = {}
+    null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
+    for i in xrange(MAX_BOOZES_PER_DRINK):
+        booze = null_drink_booze
+        show = 0
+
+        bf = "booze_name_%d" % i
+        bp = "booze_parts_%d" % i
+        dbi = "drink_booze_id_%d" % i
+        setattr(F, bf, SelectField("booze", choices=sorted_booze_list)) 
+        setattr(F, bp, DecimalField("parts", [validators.NumberRange(min=1, max=100)], places=0));
+        setattr(F, dbi, HiddenField("id"))
+        kwargs[bf] = booze.booze.name
+        kwargs[bp] = booze.value
+        kwargs[dbi] = booze.id
+        fields.append((bf, bp, dbi, show))
+    form = F(**kwargs)
+
+    return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Enter new drink")
 
 @expose('/admin/drink/edit/<id>')
 def edit(request, id):
