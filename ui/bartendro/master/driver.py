@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from subprocess import call
+from gpio import GPIO
 from time import sleep
 import serial
 
@@ -36,15 +37,12 @@ class MasterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
+        self.ss = GPIO(135)
+        self.ss.setup()
 
     def open(self):
         '''Open the serial connection to the master'''
 
-#        print "The driver to the master is DISABLED!"
-#        return
-
-        print "open serial port, waiting for arduino reset.\n"
-        #call(["stty", "-F", self.device, "ispeed", "%d" % BAUD_RATE, "ospeed", "%d" % BAUD_RATE, "cs8", "-parenb"])
         try:
             self.ser = serial.Serial(self.device, 
                                      BAUD_RATE, 
@@ -56,129 +54,62 @@ class MasterDriver(object):
         except serial.serialutil.SerialException:
             raise SerialIOError;
 
-        sleep(2.5)
-        self.ser.read(self.ser.inWaiting())
+        print "Opened %s for %d baud N81" % (self.device, BAUD_RATE)
+
+    def send_test(self):
+        while True:
+            self.ser.write('A\r\n')
+
+    def receive_test(self):
+        while True:
+            print self.ser.read()
+
+    def chain_test(self):
+
+        # reset the chain
+        print "set SS low"
+        self.ss.low()
+        sleep(1)
+
+        print "set SS high"
+        self.ss.high()
+        sleep(.2)
+        print "set SS low"
+        self.ss.low()
+        sleep(.2)
+
+        print "Transmit address character"
+        while True:
+            self.ser.write(chr(0))
+	    r = self.ser.read(1)
+            if len(r) == 0:
+                continue
+            break
+
+	print "received %d chars:" % len(r)
+	for ch in r:
+	    print "  %d" % ord(r),
+        print
+        print
+
+    def addr_test(self):
+        self.ser.write(0);
 
     def close(self):
         self.ser.close()
         self.ser = None
 
-    def get_error(self):
-        return self.msg
-
     def send(self, cmd):
-        self.ser.write("%s\r" % cmd)
-        self.ser.read(self.ser.inWaiting())
-
-    def send_command(self, cmd):
-
-        # REMOVE ME
-        if not self.ser: return 0
-
-        self.ser.write("%s\r" % cmd)
-#        print "w: '%s'" % cmd
-
-        while True:
-            line = self.ser.readline()
-            if not line: 
-                return (-1, "Communication timeout")
-            if line: line = line.strip()
-#            print "r: '%s'" % line
-            if not line.startswith("#"): break
-
-        try:
-            ret, msg = line.split(" ", 1)
-        except ValueError:
-            return (-1, "Invalid response: '%s'" % line)
-
-        return int(ret), msg
-
-    def check(self):
-        self.ret, self.msg = self.send_command("check")
-        return self.ret
-
-    def count(self):
-        self.ret, self.msg = self.send_command("count")
-        if self.ret: return -1
-        try:
-            num, rest = self.msg.split(" ", 1)
-        except ValueError:
-            return -1
-        return int(num)
-
-    def start(self, dispenser):
-        self.ret, self.msg = self.send_command("on %d" % dispenser)
-        return self.ret
-
-    def stop(self, dispenser):
-        self.ret, self.msg = self.send_command("off %d" % dispenser)
-        return self.ret
-
-    def dispense(self, dispenser, duration):
-        self.ret, self.msg = self.send_command("disp %d %d" % (dispenser, duration))
-        return self.ret
-
-    def state(self, dispenser):
-        self.ret, self.msg = self.send_command("state %d" % dispenser)
-        try:
-            num, rest = self.msg.split(" ", 1)
-            num = int(num)
-        except ValueError:
-            return -1
-        return (not self.ret, num)
+        self.ser.write(cmd)
+        ret = self.ser.readline()
+        print ret
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/tty.usbmodemfa131", "log");
+    md = MasterDriver("/dev/ttyS1", "log");
     md.open()
-    print "Check: ", md.check()
-    print "Count: ", md.count()
+    md.chain_test()
+    sleep(2)
     while True:
-        r = md.dispense(1, 1000)
-        if r: 
-            print "dispense 1s"
-        else:
-            print md.get_error()
-        sleep(.25)
-
-        (r, state) = md.state(1)
-        if r: 
-            print "check %d" % (state)
-        else:
-            print md.get_error()
-        sleep(1)
-
-        (r, state) = md.state(1)
-        if r: 
-            print "check %d" % (state)
-        else:
-            print md.get_error()
-        sleep(1)
-
-        r = md.start(1)
-        if r: 
-            print "motor on"
-        else:
-            print md.get_error()
-        sleep(1)
-
-        r = md.start(2)
-        if r: 
-            print "motor on"
-        else:
-            print md.get_error()
-        sleep(1)
-
-        r = md.stop(1);
-        if r: 
-            print "motor off"
-        else:
-            print md.get_error()
-        sleep(1)
-
-        r = md.stop(2);
-        if r: 
-            print "motor off"
-        else:
-            print md.get_error()
-        sleep(1)
-    sleep(1)
+        md.send("7 disp 3000\n")
+        md.send("6 disp 3000\n")
+        sleep(15)
