@@ -79,7 +79,7 @@ class Mixer(object):
                     break
             if done: break
 
-        print "drink complete!:
+        print "drink complete!"
         for i in xrange(5):
             leds_color(0, 255, 0)
             sleep(.5)
