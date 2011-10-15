@@ -21,6 +21,7 @@ class BartendroUIServer(object):
                     })
         self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
         self.driver.open()
+        self.driver.chain_init();
         self.mixer = mixer.Mixer(self.driver)
 
     def init_database(self):
