@@ -16,7 +16,7 @@ class Mixer(object):
         self.driver = driver
         self.err = ""
         self.disp_count = self.driver.count()
-        leds_color(0, 0, 255)
+        self.leds_color(0, 0, 255)
 
     def get_error(self):
         #self.driver.get_error()
@@ -24,13 +24,12 @@ class Mixer(object):
 
     def leds_color(self, r, g, b):
         for i in xrange(self.disp_count):
-            self.driver.led(i, 255, 0, 0);
+            self.driver.led(i, r, g, b)
 
     def make_drink(self, id, size, strength):
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
         print "make ", drink
-        print "dispensers ", dispensers
 
         recipe = []
         for db in drink.drink_boozes:
@@ -58,34 +57,35 @@ class Mixer(object):
         print "start making drink!"
         self.leds_color(255, 0, 255)
         dur = 0
-        dispensers = []
+        active_disp = []
         for r in recipe:
             r['ml'] = r['part'] * size * ML_PER_FL_OZ / total_parts
             r['ms'] = r['ml'] * MS_PER_ML
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
-            dispensers.append(r['dispenser'])
+            active_disp.append(r['dispenser'])
             sleep(.01)
 
             if r['ms'] > dur: dur = r['ms']
 
         print "commands sent, wait for completion"
 
-        leds_color(255, 0, 0)
+        print active_disp
+        self.leds_color(255, 0, 0)
         while True:
             done = True
-	    for disp in dispensers:
-		if driver.is_dispensing(disp): 
+	    for disp in active_disp:
+		if self.driver.is_dispensing(disp): 
                     done = False
                     break
             if done: break
 
         print "drink complete!"
-        for i in xrange(5):
-            leds_color(0, 255, 0)
-            sleep(.5)
-            leds_color(0, 0, 0)
-            sleep(.5)
+        for i in xrange(10):
+            self.leds_color(0, 255, 0)
+            sleep(.25)
+            self.leds_color(0, 0, 0)
+            sleep(.25)
 
-        leds_color(0, 0, 255)
+        self.leds_color(0, 0, 255)
 
         return 0 
