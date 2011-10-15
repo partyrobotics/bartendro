@@ -64,7 +64,7 @@ class Mixer(object):
             total_parts += r['part']
 
         print "start making drink!"
-        leds_make_drink()
+        self.leds_make_drink()
         dur = 0
         for r in recipe:
             r['ml'] = r['part'] * size * ML_PER_FL_OZ / total_parts
