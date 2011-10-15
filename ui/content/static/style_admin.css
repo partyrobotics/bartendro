@@ -45,7 +45,7 @@ div.boozeheading{
         font-family:"Arial";
         font-weight:bold;
         font-size:28px;
-        color: white;
+        color: green;
 	text-shadow: 3px 3px 2px gray;
 }
 div.forminput{
@@ -72,12 +72,8 @@ input.form{
 		
 }
 div.main{
-	background-color: #285374;
+	background-color: white;
 	border-style:solid;	
-	border-color: white;
-	border-width:3px;
-	height:600px; 
-	width: 1024px;
 	margin:0px;
 	position; absolute;
 	top: 0px;
@@ -186,11 +182,8 @@ li.booze{
 }
 div.bottom_bar{
 	float: left;
+	vertical-align: bottom;
 	text-align:left;	
-	position: absolute;
-	top: 550px;
-	left: 0px;
-	width: 720px;
 	margin-top:17px;}
 div.main p {
 	margin-left: 20px;
@@ -201,27 +194,27 @@ a.home:link,a.home:visited{
 	font-family:Arial;
 	font-size:16pt;
 	font-weight:bold;
-	color: white;
+	color: lightgrey;
 	text-decoration:none;
 	text-align:bottom;
 }
 a.home:hover,a.home:active{
 	font-family:Arial;	
 	font-size:16pt;
-	color:#3e3e66;
+	color:#0088cc;
 	text-decoration:none;
 }
 a.admin:link,a.admin:visited{
         margin-left:20px;
         font-family:Arial;
         font-size:18pt;
-        color: white;
+        color: #0088cc;
         text-decoration:none;
 }
 a.admin:hover,a.admin:active{
         font-family:Arial;
         font-size:18pt;
-        color:#3e3e66;
+        color:lightgrey;
         text-decoration:none;
 }
 a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
