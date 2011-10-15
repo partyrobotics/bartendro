@@ -74,15 +74,15 @@ class MasterDriver(object):
 
         print "address assignment"
         while True:
-            self.ser.write(chr(0))
-            r = self.ser.read(1)
+            self.ser.write("0\n")
+            r = self.ser.readline()
             if len(r) == 0:
                 continue
             break
 
         if len(r) > 0:
-            print "found %d dispensers" % ord(r)
-            self.num_dispensers = ord(r)
+            print "found %d dispensers" % int(r)
+            self.num_dispensers = int(r)
         else:
             print "Cannot communicate with dispenser chain!"
 

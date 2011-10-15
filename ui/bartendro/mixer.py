@@ -16,23 +16,15 @@ class Mixer(object):
         self.driver = driver
         self.err = ""
         self.disp_count = self.driver.count()
-        self.leds_idle()
+        leds_color(0, 0, 255)
 
     def get_error(self):
         #self.driver.get_error()
         return self.err
 
-    def leds_idle(self):
-        for i in xrange(self.disp_count):
-            self.driver.led(i, 0, 0, 255);
-
-    def leds_make_drink(self):
+    def leds_color(self, r, g, b):
         for i in xrange(self.disp_count):
             self.driver.led(i, 255, 0, 0);
-
-    def leds_drink_complete(self):
-        for i in xrange(self.disp_count):
-            self.driver.led(i, 0, 0, 255);
 
     def make_drink(self, id, size, strength):
         drink = Drink.query.filter_by(id=int(id)).first()
@@ -64,23 +56,36 @@ class Mixer(object):
             total_parts += r['part']
 
         print "start making drink!"
-        self.leds_make_drink()
+        self.leds_color(255, 0, 255)
         dur = 0
+        dispensers = []
         for r in recipe:
             r['ml'] = r['part'] * size * ML_PER_FL_OZ / total_parts
             r['ms'] = r['ml'] * MS_PER_ML
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
+            dispensers.append(r['dispenser'])
             sleep(.01)
 
             if r['ms'] > dur: dur = r['ms']
 
-        print "commands sent"
+        print "commands sent, wait for completion"
 
-        dur = dur * 2
-        sleep(dur / 1000)
-        print "drink kinda done"
-        leds_drink_complete()
-        sleep(3)
-        leds_idle()
+        leds_color(255, 0, 0)
+        while True:
+            done = True
+	    for disp in dispensers:
+		if driver.is_dispensing(disp): 
+                    done = False
+                    break
+            if done: break
+
+        print "drink complete!:
+        for i in xrange(5):
+            leds_color(0, 255, 0)
+            sleep(.5)
+            leds_color(0, 0, 0)
+            sleep(.5)
+
+        leds_color(0, 0, 255)
 
         return 0 
