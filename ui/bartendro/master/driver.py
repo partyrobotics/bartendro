@@ -111,11 +111,20 @@ class MasterDriver(object):
     def led(self, dispenser, r, g, b):
         return self.send("%d led %d %d %d\n" % (dispenser, r, g, b))
 
+    def is_dispensing(self, dispenser):
+        self.send("%d isdisp\n" % dispenser)
+        ret = self.ser.readline()
+        disp, cmd, value = ret.split(" ")
+        if value[0] == '1': 
+            return True
+        else:
+            return False
+
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyS1", "log");
     md.open()
     md.chain_init()
-    sleep(2)
-    while True:
-        md.dispense(0, 3000);
-        sleep(5)
+    sleep(1)
+    md.dispense(0, 3000);
+    while md.is_dispensing(0):
+        sleep(.1)
