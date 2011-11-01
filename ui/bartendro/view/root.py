@@ -5,4 +5,4 @@ from bartendro.model.drink import Drink
 @expose('/')
 def index(request):
     drinks = Drink.query.all()
-    return render_template("index.html", drinks=drinks)
+    return render_template("index", drinks=drinks)

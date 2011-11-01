@@ -189,4 +189,17 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
         color:white;
         text-decoration:none;
 }
-
+table.home_table{
+        width: 100%;
+        text-align: center;
+}
+table.home_table td{
+        padding: 3em;
+        margin: 3em;
+}
+table.home_table a{
+        font-family:Arial;
+        font-size:18pt;
+        color: white;
+        text-decoration:none;
+}

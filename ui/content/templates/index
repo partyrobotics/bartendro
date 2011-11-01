@@ -1,14 +1,17 @@
-{% extends 'layout.html' %}
+{% extends 'layout' %}
 {% block body %}
 <div id="content">
-
-<h1>Available drinks</h1>
-<ul>
-{% for drink in drinks %}
-  <li><a href="">{{ drink.name.name }}</a></li>
-{% endfor %}
-</ul>
+    <table class="home_table">
+    {% for drink in drinks %}
+      {% if (loop.index0 % 4) == 0 %}
+         <tr> 
+      {% endif %}
+      <td><a href="/drink/{{ drink.id }}">{{ drink.name.name }}</a></td>
+      {% if (loop.index0 % 4) == 3 %}
+         </tr> 
+      {% endif %}
+    {% endfor %}
+    </table>
 </div>
 <div>
-<a href="/admin">Admin</a>
 {% endblock %}
