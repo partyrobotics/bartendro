@@ -1,0 +1,9 @@
+{% extends 'layout' %}
+{% block body %}
+<div id="content">
+    <h1>Make a {{ drink.name.name }}</h1>
+
+    <p>Poot!</p>
+</div>
+<div>
+{% endblock %}
