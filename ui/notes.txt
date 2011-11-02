@@ -1,0 +1,3 @@
+Feature improvements:
+
+- Allow a default size of a drink. (an 8oz sherpentine would be trouble!)

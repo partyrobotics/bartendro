@@ -10,6 +10,12 @@ div.heading{
 	color: white;
 	text-shadow: 3px 3px 2px gray;
 }
+div.subheading{
+	font-family:"Arial";
+	font-weight:bold;
+	font-size:18pt;
+	color: white;
+}
 div.boozeheading{
         line-height:250%;
         font-family:"Arial";
@@ -202,4 +208,57 @@ table.home_table a{
         font-size:18pt;
         color: white;
         text-decoration:none;
+}
+.adjust_drink_button{
+        font-family:Arial;
+        font-size:18pt;
+}
+.drink_size{
+        margin-right: 10em;
+        margin-left: 10em;
+        float: left;
+}
+#make_drink_buttons{
+        clear: both;
+        margin-top: 5em;
+}
+#changed_mind{
+        font-family:Arial;
+        font-size:14pt;
+        margin-left: 3em;
+}
+#make_drink{
+        font-family:Arial;
+        font-size:20pt;
+        margin-left: 4em;
+}
+.text{
+        color:white;
+        text-color:white;
+        font-size:20pt;
+        font-family:"Arial";
+}
+#lightbox {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 500px;
+	margin-left: -250px;
+	background: #fff;
+	z-index: 1001;
+	display: none;
+}
+#lightbox-shadow {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #000;
+	filter: alpha(opacity=75);
+	-moz-opacity: 0.75;
+	-khtml-opacity: 0.75;
+	opacity: 0.75;
+	z-index: 1000;
+	display: none;
 }

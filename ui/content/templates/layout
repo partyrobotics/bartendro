@@ -10,6 +10,5 @@
   <div class="body">
       {% block body %}{% endblock %}
   </div>
-  <script type="text/javascript" src="{{ url_for('static', file='js/drinks.js') }}"></script>
 </body>
 </html>
