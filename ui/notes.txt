@@ -1,3 +1,8 @@
 Feature improvements:
 
+- RBG Led per dispenser, programmed via SPI
 - Allow a default size of a drink. (an 8oz sherpentine would be trouble!)
+- Support quadarture input from the motors
+- PWM support for driving motors
+- 
+

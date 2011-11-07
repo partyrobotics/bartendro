@@ -19,7 +19,11 @@ class DrinkBooze(Base):
  
     query = session.query_property()
 
-    def __init__(self, value, unit):
+    def __init__(self, drink, booze, value, unit):
+        self.drink = drink
+        self.drink_id = drink.id
+        self.booze = booze
+        self.booze_id = booze.id
         self.value = value
         self.unit = unit
         session.add(self)
@@ -32,5 +36,5 @@ class DrinkBooze(Base):
                }
 
     def __repr__(self):
-        return "<DrinkBooze(%d,%d,%d)>" % (self.id, self.value, self.unit)
+        return "<DrinkBooze(%d,%d,%d,%d,%d)>" % (self.id or 0, self.drink_id or 0, self.booze_id or 0, self.value or 0, self.unit or 0)
 
