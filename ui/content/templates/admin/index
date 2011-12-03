@@ -1,10 +1,17 @@
 {% extends 'admin/layout' %}
 {% block body %}
+    <div class="main">
+    <div class="content">	
 
-<h1>Admin menu</h1>
-<ul>
-    <li><a class="admin" href="admin/booze">Edit Booze list</a></li>
-    <li><a class="admin" href="admin/drink">Edit Drink list</a></li>
-</ul>
+        <h1>Admin menu</h1>
+        <ul>
+            <li><a class="admin" href="admin/booze">Edit Booze list</a></li>
+            <li><a class="admin" href="admin/drink">Edit Drink list</a></li>
+            <li><a class="admin" href="http://www.youtube.com/watch?v=oHg5SJYRHA0">Rickroll</a></li>
+        </ul>
     
+    <div class="bottom_bar">
+       <a class="home" href="/">HOME</a>
+    </div>
+    </div>
 {% endblock %}

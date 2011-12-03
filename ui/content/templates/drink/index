@@ -1,0 +1,92 @@
+{% extends 'layout' %}
+{% block body %}
+<div id="content">
+    <div class="heading">Make a {{ drink.name.name }}</div>
+    <div class="drink_size">
+       <p>
+          <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
+       </p>
+       <p class="text" id="size_text">8 fluid ounces</p>
+       <p>
+          <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
+       </p>
+    </div>
+    <div class="drink_strength">
+       <p>
+           <button type="button" class="adjust_drink_button" onclick="strength_stronger()">stronger</button>
+       </p>
+       <p class="text" id="strength_text">normal</p>
+       <p>
+           <button type="button" class="adjust_drink_button" onclick="strength_weaker()">weaker</button>
+       </p>
+    </div>
+    <div id="make_drink_buttons">
+        <button type="button" id="changed_mind" onclick="changed_mind()">I changed my mind</button>
+        <button type="button" id="make_drink" onclick="make_drink()">Make my drink already!</button>
+    </div>
+</div>
+<div>
+<script type="text/javascript">
+
+var drink_size = 8;
+var drink_strength = 0;
+
+function size_bigger()
+{
+    if (drink_size >= 12)
+        return;
+
+    drink_size += 2;
+    $("#size_text").text(drink_size + " fluid ounces");
+}
+function size_smaller()
+{
+    if (drink_size <= 2)
+        return;
+
+    drink_size -= 2;
+    $("#size_text").text(drink_size + " fluid ounces");
+}
+function set_strength_text()
+{
+    t = "";
+    switch(drink_strength)
+    {
+        case -2: t = "really weak. wimp!"; break;
+        case -1: t = "weak"; break;
+        case 0: t = "normal"; break;
+        case 1: t = "stronger"; break;
+        case 2: t = "really strong"; break;
+    }
+    $("#strength_text").text(t);
+}
+function strength_stronger()
+{
+    if (drink_strength >= 2)
+        return;
+
+    drink_strength++;
+    set_strength_text();
+}
+function strength_weaker()
+{
+    if (drink_strength <= -2)
+        return;
+
+    drink_strength--;
+    set_strength_text();
+}
+function changed_mind()
+{
+    window.location = "/";
+}
+
+function make_drink()
+{
+    lightbox('<div class="content"><div class="heading">Making a {{ drink.name.name}}!</div><img src="/static/images/spinner.png"></div>');
+}
+
+</script>
+<script type="text/javascript" src="{{ url_for('static', file='js/lightbox.js') }}"></script>
+
+{% endblock %}
