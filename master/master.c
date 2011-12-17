@@ -79,13 +79,21 @@ char spi_transfer(char cData)
     return SPDR;
 }
 
+void make_packet(packet *p, uint8_t addr, uint8_t type)
+{
+    p->header[0] = 0xFF;
+    p->header[1] = 0xFF;
+    p->addr = addr;
+    p->type = type;
+}
+
 void transfer_packet(packet *tx, packet *rx)
 {
     uint8_t *ptx = (uint8_t*)tx;
     uint8_t *prx = (uint8_t*)rx;
     uint8_t i, ch, received = 0;
 
-
+    memset(prx, 0, sizeof(packet));
     dprintf("transfer packet: %d\n", tx->type);
     // send the packet and possibly start receiving data back
     for(i = 0; i < sizeof(packet); i++)
@@ -114,6 +122,18 @@ void transfer_packet(packet *tx, packet *rx)
         prx++;
         received++;
     }
+
+    // Compare all but the last byte of the packet. For some reason the last byte gets corrupted homehow. 
+    for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet) - 1; i++, prx++, ptx++)
+    {
+//        dprintf("%02x %02x\n", *ptx, *prx);
+        if (*ptx != *prx)
+        {
+            dprintf("Packet error!\n");
+            break;
+        }
+    }
+//    dprintf("\n");
 }
 
 void setup(void)

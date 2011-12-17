@@ -384,7 +384,7 @@ int main (void)
 
                 dprintf("bad packet: ");
                 for(i = 0; i < sizeof(packet); i++, pp++)
-                    dprintf("%x ", *pp);
+                    dprintf("%02x ", *pp);
                 dprintf("\n");
             }
         }
