@@ -30,15 +30,25 @@ void serial_init(void)
     UBRR0H = (unsigned char)(UBBR>>8); 
     UBRR0L = (unsigned char)UBBR; 
     /* Enable transmitter */ 
-    UCSR0B = (1<<TXEN0); 
+    UCSR0B = (1<<TXEN0)|(1<<RXEN0); 
     /* Set frame format: 8data, 1stop bit */ 
     UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
 }
+
 void serial_tx(unsigned char ch)
 {
     while ( !( UCSR0A & (1<<UDRE0)) );
     UDR0 = ch;
 }
+
+unsigned char serial_rx(void)
+{
+    while ( !(UCSR0A & (1<<RXC0))) 
+        ;
+
+    return UDR0;
+}
+
 #define MAX 80 
 void dprintf(const char *fmt, ...)
 {
@@ -87,7 +97,7 @@ void make_packet(packet *p, uint8_t addr, uint8_t type)
     p->type = type;
 }
 
-void transfer_packet(packet *tx, packet *rx)
+uint8_t transfer_packet(packet *tx, packet *rx)
 {
     uint8_t *ptx = (uint8_t*)tx;
     uint8_t *prx = (uint8_t*)rx;
@@ -126,14 +136,13 @@ void transfer_packet(packet *tx, packet *rx)
     // Compare all but the last byte of the packet. For some reason the last byte gets corrupted homehow. 
     for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet) - 1; i++, prx++, ptx++)
     {
-//        dprintf("%02x %02x\n", *ptx, *prx);
         if (*ptx != *prx)
         {
-            dprintf("Packet error!\n");
-            break;
+            dprintf("Data transmission error!\n");
+            return 0;
         }
     }
-//    dprintf("\n");
+    return 1;
 }
 
 void setup(void)
@@ -149,7 +158,6 @@ void address_assignment(void)
 {
     uint8_t i, ch = 0;
 
-    dprintf("Do address assignment\n\n");
     // Now all clients should be in address assignment mode
     ch = spi_transfer(1);
     for(i = 0; ch == 0 || ch == 0xFF; i++)
@@ -158,22 +166,22 @@ void address_assignment(void)
     g_num_dispensers = ch - 1;
 }
 
-void turn_on(uint8_t disp)
+uint8_t turn_on(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_START);
     in.payload[0] = 0xA0;
     in.payload[1] = 0xA1;
-    transfer_packet(&in, &out);
+    return transfer_packet(&in, &out);
 }
 
-void turn_off(uint8_t disp)
+uint8_t turn_off(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_STOP);
     in.payload[0] = 0xA0;
     in.payload[1] = 0xA1;
-    transfer_packet(&in, &out);
+    return transfer_packet(&in, &out);
 }
 
 void test(void)
@@ -200,15 +208,41 @@ void test(void)
     spi_master_stop();
 }
 
+#define MAX_CMD_LEN 16
+void get_cmd(char cmd[MAX_CMD_LEN])
+{
+    uint8_t ch, count;
+
+    for(count = 0; count < MAX_CMD_LEN - 1; count++)
+    {
+        ch = serial_rx();
+        serial_tx(ch);
+        if (ch == '\r')
+        {
+            serial_tx('\n');
+            break;
+        }
+
+        cmd[count] = (char)ch;
+    }
+    cmd[count] = 0;
+}
+
+#define OK                        0
+#define BAD_DISPENSER_INDEX_ERROR 1
+#define TRANSMISSION_ERROR        2
+
 int main (void)
 {
     uint8_t i;
+    char cmd[MAX_CMD_LEN];
 
 	setup();
     dprintf("master starting\n");
 
     // This loop is a hack. For some reason at some restarts SPI communication doesn't
     // work right and we get bad data back. Resetting the communication works wonders.
+    //for(;;)
     for(;;)
     {
         /* set SS hi, so that clients will stop what they are doing and reset */
@@ -236,8 +270,50 @@ int main (void)
             break;
     }
 
+    dprintf("\nHow may I do your bidding?\n");
     for(;;)
     {
+        dprintf(">");
+        get_cmd(cmd);
+
+        if (strcasecmp(cmd, "count") == 0)
+        {
+            dprintf("0 %d dispensers\n", g_num_dispensers);
+            continue;
+        }
+
+        // TODO: Add error checking and system check
+        if (strncasecmp(cmd, "on", 2) == 0)
+        {
+            int d = atoi(cmd + 3);
+            if (d < 1 || d > g_num_dispensers)
+            {
+                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+            if (turn_on(d))
+                dprintf("0 ok\n");
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+
+        if (strncasecmp(cmd, "off", 3) == 0)
+        {
+            int d = atoi(cmd + 4);
+            if (d < 1 || d > g_num_dispensers)
+            {
+                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+            if (turn_off(d))
+                dprintf("0 ok\n");
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            dprintf("0 OK\n");
+            continue;
+        }
+
         _delay_ms(500);
         turn_on(1);
         _delay_ms(500);
