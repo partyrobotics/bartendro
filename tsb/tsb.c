@@ -67,6 +67,11 @@ void run(uint8_t count, motor_cmd *cmds)
 
 static motor_cmd drinks[3][3] =
 {
+//    { // Test
+//        { 0, 400 },
+//        { 1, 2000 },
+//        { 2, 1333 }
+//    },
     { // Normal
         { 0, 3560 },
         { 1, 21360 },
@@ -87,7 +92,9 @@ int main(void)
 
     // Set PWM pins as outputs
     DDRB |= (1<<PB0)|(1<<PB1)|(1<<PB2);
+    DDRB |= (1<<PB4)|(1<<PB3);
 
+    /*
     for(i = 0; i < 3; i++)
     {
         sbi(PORTB, 0);
@@ -100,15 +107,26 @@ int main(void)
         cbi(PORTB, 2);
         _delay_ms(50);
     }
+    */
 
     dprintf("\nTequila Sunrise bot. What shall be your bidding?\n\n");
     for(;;)
     {
         if (!(PIND & (1<<PIND7)))
         {
+            sbi(PORTB, 3);
             dprintf("making normal drink\n");
             run(3, drinks[0]);
             dprintf("drink complete. bottoms up!\n");
+            cbi(PORTB, 3);
+        }
+        if (!(PIND & (1<<PIND6)))
+        {
+            sbi(PORTB, 4);
+            dprintf("making strong drink\n");
+            run(3, drinks[1]);
+            dprintf("drink complete. bottoms up!\n");
+            cbi(PORTB, 4);
         }
     }
 	return 0;
