@@ -89,16 +89,17 @@ void dprintf(const char *fmt, ...)
 void spi_slave_init(void)
 {
 	// Set MISO as output 
-	DDRB = (1<<PORTB4);
+	DDRB |= (1<<PB4);
 
 	//SPCR = [SPIE][SPE][DORD][MSTR][CPOL][CPHA][SPR1][SPR0]
 	//SPI Control Register = Interrupt Enable, Enable, Data Order, Master/Slave select, Clock Polarity, Clock Phase, Clock Rate
-	SPCR = (1<<SPE)|(1<<SPIE)|(1<<SPR0);	// Enable SPI, set clock rate fck/16 
+	SPCR = (1<<SPE)|(1<<SPIE);	// Enable SPI, set clock rate fck/16 
 }
 
 void spi_slave_stop(void)
 {
 	SPCR &= ~((1<<SPE)|(1<<SPIE));	// Disable SPI
+	DDRB &= ~(1<<PORTB4);
 }
 
 uint8_t spi_transfer(uint8_t tx)
@@ -156,23 +157,31 @@ uint8_t receive_packet(packet *rx)
 
         old = ch;
         ch = spi_transfer(ch);
-//        dprintf("%x\n", ch);
 
         // Look for the packet header
         if (prx == (uint8_t*)rx && ch != 0xFF)
             continue;
 
+
         *prx = ch;
         prx++;
         received++;
+
+        if (received == 5 && rx->type == PACKET_TYPE_RESPONSE)
+            ch = g_response_payload[0];
+        if (received == 6 && rx->type == PACKET_TYPE_RESPONSE)
+            ch = g_response_payload[1];
     }
     return 1;
 }
 
 void setup(void)
 {
-	DDRD |= (1<<PORTD7); //LED pin
-    DDRC |= (1<<PORTC0); //LED pin
+    // Set LED PWM pins as outputs
+    DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
+
+    // Set Motor PWM pin as outputs
+    DDRB |= (1<<PB1);
 
     PCMSK0 |= (1<<PCINT2);
     PCICR |= (1<<PCIE0);
@@ -181,6 +190,53 @@ void setup(void)
     PCICR |= (1<<PCIE1);
 
     serial_init();
+}
+
+void led_pwm_setup(void)
+{
+	/* Set to Phase correct PWM */
+	TCCR0A |= _BV(WGM00);
+	TCCR2A |= _BV(WGM20);
+
+	// Set the compare output mode
+	TCCR0A |= _BV(COM0A1);
+	TCCR0A |= _BV(COM0B1);
+	TCCR2A |= _BV(COM2B1);
+
+	// Reset timers and comparators
+	OCR0A = 0;
+	OCR0B = 0;
+	OCR2B = 0;
+	TCNT0 = 0;
+	TCNT2 = 0;
+
+    // Set the clock source
+	TCCR0B |= _BV(CS00) | _BV(CS01);
+	TCCR2B |= _BV(CS22);
+}
+
+void motor_pwm_setup(void)
+{
+	/* Set to Fast PWM */
+	TCCR1A |= _BV(WGM12) | _BV(WGM10) | _BV(COM1A1);
+    // Set the clock source
+	TCCR1B |= _BV(CS10) | _BV(CS11);
+
+	// Reset timers and comparators
+	OCR1A = 0;
+	TCNT1 = 0;
+}
+
+void set_motor_speed(uint8_t speed)
+{
+    OCR1A = speed;
+}
+
+void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
+{
+    OCR2B = red;
+    OCR0A = blue;
+    OCR0B = green;
 }
 
 void test(void)
@@ -196,9 +252,9 @@ void test(void)
 
 void wait_for_reset()
 {
-    uint8_t count = 0, reset;
+    uint8_t count = 0, reset, t = 1;
 
-    dprintf("Wait for reset signal\n");
+    dprintf("waiting for reset\n");
     for(;;)
     {
         cli();
@@ -213,10 +269,12 @@ void wait_for_reset()
             break;
         if (count == 100)
         {
-           tbi(PORTC, 0);
+           set_led_color(t * 255, 0, 0);
+           t = !t;
            count = 0;
         }
     }
+    set_led_color(0, 0, 0);
 }
 
 void address_assignment(void)
@@ -238,62 +296,6 @@ void address_assignment(void)
     dprintf("got address: %d\n", g_address);
 }
 
-void led_pwm_setup(void)
-{
-	/* Set to Fast PWM */
-	TCCR0A |= _BV(WGM01) | _BV(WGM00);
-	TCCR2A |= _BV(WGM21) | _BV(WGM20);
-
-	// Set the compare output mode
-	TCCR0A |= _BV(COM0A1);
-	TCCR0A |= _BV(COM0B1);
-	TCCR2A |= _BV(COM2B1);
-
-	// Reset timers and comparators
-	OCR0A = 0;
-	OCR0B = 0;
-	OCR2B = 0;
-	TCNT0 = 0;
-	TCNT2 = 0;
-
-    // Set the clock source
-	TCCR0B |= _BV(CS00);
-	TCCR2B |= _BV(CS20);
-
-    // Set PWM pins as outputs
-    DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
-}
-
-void motor_pwm_setup(void)
-{
-	/* Set to Fast PWM */
-	TCCR1A |= _BV(WGM11) | _BV(WGM10);
-
-	// Set the compare output mode
-	TCCR1A |= _BV(COM1A1);
-
-	// Reset timers and comparators
-	OCR1A = 0;
-	TCNT1 = 0;
-
-    // Set the clock source
-	TCCR1B |= _BV(CS10);
-
-    // Set PWM pins as outputs
-    DDRB |= (1<<PB1);
-}
-
-void set_motor_speed(uint8_t speed)
-{
-    OCR1A = speed;
-}
-
-void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
-{
-    OCR2B = 255 - red;
-    OCR0A = 255 - blue;
-    OCR0B = 255 - green;
-}
 
 void motor_test(void)
 {
@@ -323,10 +325,45 @@ void motor_test(void)
     }
 }
 
-int main (void)
+int main5(void)
+{
+    uint8_t i;
+
+	setup();
+    dprintf("led test\n");
+    led_pwm_setup();
+    motor_pwm_setup();
+
+    for(i = 0; i < 255;i++)
+    {
+         set_led_color(i, i, i);
+         set_motor_speed(i);
+         _delay_ms(20);
+    }
+
+	DDRB |= (1<<PB4);
+
+    for(i = 0; i < 255;i++)
+    {
+         set_led_color(i, i, i);
+         set_motor_speed(i);
+         _delay_ms(20);
+    }
+	DDRB &= ~(1<<PB4);
+    led_pwm_setup();
+    motor_pwm_setup();
+    for(i = 0; i < 255;i++)
+    {
+         set_led_color(i, i, i);
+         set_motor_speed(i);
+         _delay_ms(20);
+    }
+}
+
+int main(void)
 {
     packet  p;
-    uint8_t i, *ptr;
+    uint8_t i;
 
 	setup();
     led_pwm_setup();
@@ -367,16 +404,27 @@ int main (void)
                 continue;
             if (p.type == PACKET_TYPE_START)
             {
-                set_motor_speed(0);
-                sbi(PORTC, 0);
-                dprintf("turn off\n");
+                set_motor_speed(p.payload[0]);
+                set_led_color(255, 0, 0);
+                dprintf("turn on\n");
+            }
+            else
+            if (p.type == PACKET_TYPE_CHECK)
+            {
+                g_response_payload[0] = 0;
+                g_response_payload[1] = 0;
+            }
+            else
+            if (p.type == PACKET_TYPE_RESPONSE)
+            {
+                ;
             }
             else
             if (p.type == PACKET_TYPE_STOP)
             {
-                set_motor_speed(255);
-                cbi(PORTC, 0);
-                dprintf("turn on\n");
+                set_motor_speed(0);
+                set_led_color(0, 0, 0);
+                dprintf("turn off\n");
             }
             else
             {

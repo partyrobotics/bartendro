@@ -19,7 +19,7 @@
 #define cbi(a, b) ((a) &= ~(1 << (b)))    //clears bit B in variable A
 #define tbi(a, b) ((a) ^= 1 << (b))       //toggles bit B in variable A
 
-#define BAUD 38400
+#define BAUD 9600
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
 static uint8_t g_num_dispensers = 0;
@@ -136,12 +136,17 @@ uint8_t transfer_packet(packet *tx, packet *rx)
     // Compare all but the last byte of the packet. For some reason the last byte gets corrupted homehow. 
     for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet) - 1; i++, prx++, ptx++)
     {
+        //dprintf("%02x %02x\n", *ptx, *prx);
+        if (((i == 4) || (i == 5)) && tx->type == PACKET_TYPE_RESPONSE)
+            continue;
+
         if (*ptx != *prx)
         {
             dprintf("Data transmission error!\n");
             return 0;
         }
     }
+    //dprintf("\n");
     return 1;
 }
 
@@ -161,17 +166,19 @@ void address_assignment(void)
     // Now all clients should be in address assignment mode
     ch = spi_transfer(1);
     for(i = 0; ch == 0 || ch == 0xFF; i++)
+    {
         ch = spi_transfer(0);
+    }
 
     g_num_dispensers = ch - 1;
 }
 
-uint8_t turn_on(uint8_t disp)
+uint8_t turn_on(uint8_t disp, uint8_t speed)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_START);
-    in.payload[0] = 0xA0;
-    in.payload[1] = 0xA1;
+    in.payload[0] = speed;
+    in.payload[1] = 0;
     return transfer_packet(&in, &out);
 }
 
@@ -179,8 +186,8 @@ uint8_t turn_off(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_STOP);
-    in.payload[0] = 0xA0;
-    in.payload[1] = 0xA1;
+    in.payload[0] = 0;
+    in.payload[1] = 0;
     return transfer_packet(&in, &out);
 }
 
@@ -208,6 +215,36 @@ void test(void)
     spi_master_stop();
 }
 
+uint8_t check(uint8_t *disp, uint8_t *err)
+{
+    uint8_t i, ret;
+    packet in, out;
+
+    *disp = 0;
+    *err = 0;
+    for(i = 1; i <= g_num_dispensers; i++)
+    {
+        make_packet(&in, i, PACKET_TYPE_CHECK);
+        ret = transfer_packet(&in, &out);
+        if (!ret)
+            return ret;
+
+        make_packet(&in, i, PACKET_TYPE_RESPONSE);
+        ret = transfer_packet(&in, &out);
+        if (!ret)
+            return ret;
+
+        if (out.payload[0] != 0)
+        {
+            dprintf("dispenser %d: %d\n", i, out.payload[0]);
+            *disp = i;
+            *err = out.payload[0];
+            return 1;
+        }
+    }
+    return 1;
+}
+
 #define MAX_CMD_LEN 16
 void get_cmd(char cmd[MAX_CMD_LEN])
 {
@@ -231,6 +268,8 @@ void get_cmd(char cmd[MAX_CMD_LEN])
 #define OK                        0
 #define BAD_DISPENSER_INDEX_ERROR 1
 #define TRANSMISSION_ERROR        2
+#define DISPENSER_FAULT_ERROR     3
+#define INVALID_COMMAND_ERROR      4
 
 int main (void)
 {
@@ -282,17 +321,42 @@ int main (void)
             continue;
         }
 
-        // TODO: Add error checking and system check
+        if (strcasecmp(cmd, "check") == 0)
+        {
+            uint8_t disp, err;
+
+            if (check(&disp, &err))
+            {
+                if (disp == 0)
+                    dprintf("0 ok\n");
+                else
+                    dprintf("%d %d dispenser fault: %d\n", DISPENSER_FAULT_ERROR, disp, err);
+            }
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+
         if (strncasecmp(cmd, "on", 2) == 0)
         {
-            int d = atoi(cmd + 3);
-            if (d < 1 || d > g_num_dispensers)
+            int disp, speed;
+            uint8_t s = 255, ret;
+
+            ret = sscanf(cmd, "on %d %d", &disp, &speed);
+            dprintf("r: %d d: %d s: %d\n", ret, disp, speed);
+            if (ret < 1 || ret > 2)
+            {
+                dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
+                continue;
+            }
+            if (disp < 1 || disp > (int)g_num_dispensers)
             {
                 dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
                 continue;
             }
-            if (turn_on(d))
-                dprintf("0 ok\n");
+
+            if (turn_on((uint8_t)disp, (uint8_t)speed))
+                dprintf("0 ok, speed %d\n", speed);
             else
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
             continue;
@@ -310,19 +374,8 @@ int main (void)
                 dprintf("0 ok\n");
             else
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            dprintf("0 OK\n");
             continue;
         }
-
-        _delay_ms(500);
-        turn_on(1);
-        _delay_ms(500);
-        turn_on(2);
-
-        _delay_ms(500);
-        turn_off(1);
-        _delay_ms(500);
-        turn_off(2);
     }
 
     return 0;

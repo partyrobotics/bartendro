@@ -5,6 +5,7 @@
 #define PACKET_TYPE_START    1
 #define PACKET_TYPE_STOP     2
 #define PACKET_TYPE_READ_POS 3
+#define PACKET_TYPE_CHECK    4
 
 typedef struct
 {
