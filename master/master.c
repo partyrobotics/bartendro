@@ -19,7 +19,7 @@
 #define cbi(a, b) ((a) &= ~(1 << (b)))    //clears bit B in variable A
 #define tbi(a, b) ((a) ^= 1 << (b))       //toggles bit B in variable A
 
-#define BAUD 9600
+#define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
 static uint8_t g_num_dispensers = 0;
@@ -250,6 +250,7 @@ void get_cmd(char cmd[MAX_CMD_LEN])
 {
     uint8_t ch, count;
 
+    cmd[0] = 0;
     for(count = 0; count < MAX_CMD_LEN - 1; count++)
     {
         ch = serial_rx();
@@ -269,7 +270,9 @@ void get_cmd(char cmd[MAX_CMD_LEN])
 #define BAD_DISPENSER_INDEX_ERROR 1
 #define TRANSMISSION_ERROR        2
 #define DISPENSER_FAULT_ERROR     3
-#define INVALID_COMMAND_ERROR      4
+#define INVALID_COMMAND_ERROR     4
+#define INVALID_SPEED_ERROR       5
+#define UNKNOWN_COMMAND_ERROR     6
 
 int main (void)
 {
@@ -277,6 +280,13 @@ int main (void)
     char cmd[MAX_CMD_LEN];
 
 	setup();
+    for(i = 0; i < 3; i++)
+    {
+        sbi(PORTC, 0);
+        _delay_ms(100);
+        cbi(PORTC, 0);
+        _delay_ms(100);
+    }
     dprintf("master starting\n");
 
     // This loop is a hack. For some reason at some restarts SPI communication doesn't
@@ -312,8 +322,10 @@ int main (void)
     dprintf("\nHow may I do your bidding?\n");
     for(;;)
     {
-        dprintf(">");
+        dprintf(">\n");
         get_cmd(cmd);
+        if (strlen(cmd) == 0)
+            continue;
 
         if (strcasecmp(cmd, "count") == 0)
         {
@@ -339,11 +351,10 @@ int main (void)
 
         if (strncasecmp(cmd, "on", 2) == 0)
         {
-            int disp, speed;
-            uint8_t s = 255, ret;
+            int     disp, speed = 255;
+            uint8_t ret;
 
             ret = sscanf(cmd, "on %d %d", &disp, &speed);
-            dprintf("r: %d d: %d s: %d\n", ret, disp, speed);
             if (ret < 1 || ret > 2)
             {
                 dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
@@ -352,6 +363,11 @@ int main (void)
             if (disp < 1 || disp > (int)g_num_dispensers)
             {
                 dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+            if (speed < 0 || speed > 255)
+            {
+                dprintf("%d invalid speed %d\n", INVALID_SPEED_ERROR, speed);
                 continue;
             }
 
@@ -376,6 +392,7 @@ int main (void)
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
             continue;
         }
+        dprintf("%d unknown command\n", UNKNOWN_COMMAND_ERROR);
     }
 
     return 0;
