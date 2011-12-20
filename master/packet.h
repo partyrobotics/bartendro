@@ -13,7 +13,7 @@ typedef struct
     uint8_t type;
     uint8_t addr;
     uint8_t payload[2];
-    uint8_t pad; // do not use. sometimes the last byte gets corrupted in the daisy chain!
+//    uint8_t pad; // do not use. sometimes the last byte gets corrupted in the daisy chain!
 } packet;
 
 void make_packet(packet *p, uint8_t addr, uint8_t type);

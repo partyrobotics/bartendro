@@ -23,6 +23,7 @@
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
 static uint8_t g_num_dispensers = 0;
+static uint8_t g_debug = 0;
 
 void serial_init(void)
 {
@@ -67,9 +68,7 @@ void dprintf(const char *fmt, ...)
 
 void spi_master_init(void)
 {
-	//SPCR = [SPIE][SPE][DORD][MSTR][CPOL][CPHA][SPR1][SPR0]
-	//SPI Control Register = Interrupt Enable, Enable, Data Order, Master/Slave select, Clock Polarity, Clock Phase, Clock Rate
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);	// Enable SPI, Master, set clock rate fck/16 
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1);
 }
 
 void spi_master_stop(void)
@@ -95,6 +94,8 @@ void make_packet(packet *p, uint8_t addr, uint8_t type)
     p->header[1] = 0xFF;
     p->addr = addr;
     p->type = type;
+    p->payload[0] = 0xA0;
+    p->payload[1] = 0xA1;
 }
 
 uint8_t transfer_packet(packet *tx, packet *rx)
@@ -104,20 +105,28 @@ uint8_t transfer_packet(packet *tx, packet *rx)
     uint8_t i, ch, received = 0;
 
     memset(prx, 0, sizeof(packet));
-    dprintf("transfer packet: %d\n", tx->type);
+    if (g_debug)
+        dprintf("# transfer packet %d\n", tx->type);
     // send the packet and possibly start receiving data back
     for(i = 0; i < sizeof(packet); i++)
     {
         ch = spi_transfer(*ptx);
+
+        if (g_debug > 1)
+            dprintf("# %02x %02x\n", *ptx, ch);
         ptx++;
 
-        // Look for the packet header
-        if (prx == (uint8_t*)rx && ch != 0xFF)
-            continue;
+        // ignore the first character since its not part of our communication
+        if (i > 0)
+        {
+            // Look for the packet header
+            if (received == 0 && ch != 0xFF)
+                continue;
 
-        *prx = ch;
-        prx++;
-        received++;
+            *prx = ch;
+            prx++;
+            received++;
+        }
     }
 
     // if we haven't received a packet worth of data,
@@ -125,6 +134,8 @@ uint8_t transfer_packet(packet *tx, packet *rx)
     for(; received < sizeof(packet);)
     {
         ch = spi_transfer(0x00);
+        if (g_debug > 1)
+            dprintf("# %02x %02x\n", 0, ch);
         if (prx == (uint8_t*)rx && ch != 0xFF)
             continue;
 
@@ -133,20 +144,27 @@ uint8_t transfer_packet(packet *tx, packet *rx)
         received++;
     }
 
+    if (g_debug > 1)
+        dprintf("verify:\n");
     // Compare all but the last byte of the packet. For some reason the last byte gets corrupted homehow. 
-    for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet) - 1; i++, prx++, ptx++)
+    for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet); i++, prx++, ptx++)
     {
-        //dprintf("%02x %02x\n", *ptx, *prx);
+        if (g_debug > 1)
+            dprintf("# %02x %02x\n", *ptx, *prx);
         if (((i == 4) || (i == 5)) && tx->type == PACKET_TYPE_RESPONSE)
             continue;
 
         if (*ptx != *prx)
         {
-            dprintf("Data transmission error!\n");
+            if (g_debug > 1)
+                dprintf("\n");
+            if (g_debug)
+                dprintf("# data transmission error!\n");
             return 0;
         }
     }
-    //dprintf("\n");
+    if (g_debug > 1)
+        dprintf("\n");
     return 1;
 }
 
@@ -178,7 +196,6 @@ uint8_t turn_on(uint8_t disp, uint8_t speed)
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_START);
     in.payload[0] = speed;
-    in.payload[1] = 0;
     return transfer_packet(&in, &out);
 }
 
@@ -186,8 +203,6 @@ uint8_t turn_off(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_STOP);
-    in.payload[0] = 0;
-    in.payload[1] = 0;
     return transfer_packet(&in, &out);
 }
 
@@ -236,7 +251,7 @@ uint8_t check(uint8_t *disp, uint8_t *err)
 
         if (out.payload[0] != 0)
         {
-            dprintf("dispenser %d: %d\n", i, out.payload[0]);
+            //dprintf("dispenser %d: %d\n", i, out.payload[0]);
             *disp = i;
             *err = out.payload[0];
             return 1;
@@ -254,10 +269,12 @@ void get_cmd(char cmd[MAX_CMD_LEN])
     for(count = 0; count < MAX_CMD_LEN - 1; count++)
     {
         ch = serial_rx();
-        serial_tx(ch);
+        if (g_debug)
+            serial_tx(ch);
         if (ch == '\r')
         {
-            serial_tx('\n');
+            if (g_debug)
+                serial_tx('\n');
             break;
         }
 
@@ -267,12 +284,13 @@ void get_cmd(char cmd[MAX_CMD_LEN])
 }
 
 #define OK                        0
-#define BAD_DISPENSER_INDEX_ERROR 1
+#define MASTER_REBOOTED           1
 #define TRANSMISSION_ERROR        2
 #define DISPENSER_FAULT_ERROR     3
 #define INVALID_COMMAND_ERROR     4
 #define INVALID_SPEED_ERROR       5
 #define UNKNOWN_COMMAND_ERROR     6
+#define BAD_DISPENSER_INDEX_ERROR 7
 
 int main (void)
 {
@@ -280,14 +298,13 @@ int main (void)
     char cmd[MAX_CMD_LEN];
 
 	setup();
-    for(i = 0; i < 3; i++)
-    {
-        sbi(PORTC, 0);
-        _delay_ms(100);
-        cbi(PORTC, 0);
-        _delay_ms(100);
-    }
-    dprintf("master starting\n");
+
+    // Flash the LED to let us know we rebooted
+    sbi(PORTC, 0);
+    _delay_ms(200);
+    cbi(PORTC, 0);
+
+    dprintf("%d master booted\n", MASTER_REBOOTED);
 
     // This loop is a hack. For some reason at some restarts SPI communication doesn't
     // work right and we get bad data back. Resetting the communication works wonders.
@@ -310,19 +327,26 @@ int main (void)
             spi_transfer(0);
 
         address_assignment();
-        dprintf("num dispensers found: %d\n", g_num_dispensers);
         _delay_ms(100);
 
         /* This is a hack. Sometimes when the master reboots it gets the wrong
-           answer from a slave. If we know the answer is bed, repeat the startup. */
+           answer from a slave. If we know the answer is bad, repeat the startup. */
         if (g_num_dispensers <= 32)
             break;
     }
+    for(;0;)
+    {
+        turn_on(1, 128);
+        _delay_ms(500);
+        turn_off(1);
+        _delay_ms(500);
+    }
 
-    dprintf("\nHow may I do your bidding?\n");
     for(;;)
     {
-        dprintf(">\n");
+        if (g_debug)
+            dprintf(">");
+
         get_cmd(cmd);
         if (strlen(cmd) == 0)
             continue;
@@ -351,7 +375,7 @@ int main (void)
 
         if (strncasecmp(cmd, "on", 2) == 0)
         {
-            int     disp, speed = 255;
+            int     disp, speed = 254;
             uint8_t ret;
 
             ret = sscanf(cmd, "on %d %d", &disp, &speed);
@@ -365,7 +389,7 @@ int main (void)
                 dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
                 continue;
             }
-            if (speed < 0 || speed > 255)
+            if (speed < 0 || speed > 254)
             {
                 dprintf("%d invalid speed %d\n", INVALID_SPEED_ERROR, speed);
                 continue;
@@ -390,6 +414,25 @@ int main (void)
                 dprintf("0 ok\n");
             else
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+        if (strcasecmp(cmd, "debug") == 0)
+        {
+            if (g_debug == 0)
+                dprintf("how may I do your bidding?\n");
+            g_debug = 1;
+            continue;
+        }
+        if (strcasecmp(cmd, "vdebug") == 0)
+        {
+            dprintf("# verbose debugging\n");
+            g_debug = 2;
+            continue;
+        }
+        if (strcasecmp(cmd, "nodebug") == 0)
+        {
+            dprintf("# no more debugging. Silence!\n");
+            g_debug = 0;
             continue;
         }
         dprintf("%d unknown command\n", UNKNOWN_COMMAND_ERROR);

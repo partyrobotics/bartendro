@@ -90,10 +90,7 @@ void spi_slave_init(void)
 {
 	// Set MISO as output 
 	DDRB |= (1<<PB4);
-
-	//SPCR = [SPIE][SPE][DORD][MSTR][CPOL][CPHA][SPR1][SPR0]
-	//SPI Control Register = Interrupt Enable, Enable, Data Order, Master/Slave select, Clock Polarity, Clock Phase, Clock Rate
-	SPCR = (1<<SPE)|(1<<SPIE);	// Enable SPI, set clock rate fck/16 
+	SPCR = (1<<SPE);//|(1<<SPIE);	// Enable SPI
 }
 
 void spi_slave_stop(void)
@@ -102,7 +99,7 @@ void spi_slave_stop(void)
 	DDRB &= ~(1<<PORTB4);
 }
 
-uint8_t spi_transfer(uint8_t tx)
+uint8_t spi_transfer_int(uint8_t tx)
 {
     uint8_t rec, reset, ch;
 
@@ -131,12 +128,18 @@ uint8_t spi_transfer(uint8_t tx)
     return ch;
 }
 
-uint8_t spi_transfer_poll(uint8_t tx)
+uint8_t spi_transfer(uint8_t tx)
 {
+    uint8_t reset = 0;
+
     SPDR = tx;
 	/* Wait for reception complete */
-	while(!(SPSR & (1<<SPIF)))
-		;
+	while(!(SPSR & (1<<SPIF)) && !reset)
+    {
+        cli();
+        reset = g_ss_reset;
+        sei();
+    }
 	/* Return Data Register */
 	return SPDR;
 }
