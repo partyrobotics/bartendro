@@ -34,7 +34,8 @@ class MasterDriver(object):
         self.device = device
         self.logfile = logfile
         self.ser = None
-        self._get_line_saved = ""
+        self.msg = ""
+        self.ret = 0
 
     def open(self):
         '''Open the serial connection to the master'''
@@ -59,63 +60,66 @@ class MasterDriver(object):
         self.ser.close()
         self.ser = None
 
-    def get_line(self):
-        while True:
-            line = self.ser.readline()
-            if not line: continue
-            if line: line = line.strip()
-            print "r: '%s'" % line
-            if not line.startswith("#"): return line
+    def get_error(self):
+        return self.msg
 
     def send_command(self, cmd):
 
         self.ser.write("%s\r" % cmd)
-        print "w: '%s'" % cmd
-#        line = self.get_line()
-#        if line[0] == '!':
-#            print "== Master rebooted!"
+#        print "w: '%s'" % cmd
 
         while True:
             line = self.ser.readline()
-            if not line: continue
+            if not line: 
+                return (-1, "Communication timeout")
             if line: line = line.strip()
-            print "r: '%s'" % line
+#            print "r: '%s'" % line
             if not line.startswith("#"): break
 
-        print "result: '%s'" % line
+        try:
+            ret, msg = line.split(" ", 1)
+        except ValueError:
+            return (-1, "Invalid response: '%s'" % line)
 
-#code, msg = line.split(' ')
-#print "%s %s\n" % (code, msg)
-        return line
+        return int(ret), msg
 
     def check(self):
-        self.send_command("check")
+        self.ret, self.msg = self.send_command("check")
+        return not self.ret
 
     def count(self):
-        self.send_command("count")
+        self.ret, self.msg = self.send_command("count")
+        if self.ret: return -1
+        try:
+            num, rest = self.msg.split(" ", 1)
+        except ValueError:
+            return -1
+        return num
 
     def start(self, dispenser, speed):
-        self.send_command("on %d %d" % (dispenser, speed))
+        self.ret, self.msg = self.send_command("on %d %d" % (dispenser, speed))
+        return not self.ret
 
     def stop(self, dispenser):
-        self.send_command("off %d" % dispenser)
+        self.ret, self.msg = self.send_command("off %d" % dispenser)
+        return not self.ret
 
-
-md = MasterDriver("/dev/ttyACM0", "log");
-md.open()
-#md.start(1, 128)
-#sleep(1)
-#md.stop(1);
-#sleep(1)
-
-while True:
-    md.start(1, 128);
+if __name__ == "__main__":
+    md = MasterDriver("/dev/ttyACM0", "log");
+    md.open()
+    print "Check: ", md.check()
+    print "Count: ", md.count()
+    while True:
+        r = md.start(1, 128)
+        if r: 
+            print "motor on"
+        else:
+            print md.get_error()
+        sleep(1)
+        r = md.stop(1);
+        if r: 
+            print "motor off"
+        else:
+            print md.get_error()
+        sleep(1)
     sleep(1)
-#    md.start(2, 128);
-#    sleep(1)
-#    md.stop(1);
-#    sleep(1)
-    md.stop(1);
-    sleep(1)
-d.check()
-d.count()
