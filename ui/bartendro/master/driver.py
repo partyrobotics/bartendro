@@ -116,7 +116,22 @@ if __name__ == "__main__":
         else:
             print md.get_error()
         sleep(1)
+
+        r = md.start(2, 128)
+        if r: 
+            print "motor on"
+        else:
+            print md.get_error()
+        sleep(1)
+
         r = md.stop(1);
+        if r: 
+            print "motor off"
+        else:
+            print md.get_error()
+        sleep(1)
+
+        r = md.stop(2);
         if r: 
             print "motor off"
         else:
