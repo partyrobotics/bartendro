@@ -36,5 +36,9 @@ class DrinkBooze(Base):
                }
 
     def __repr__(self):
-        return "<DrinkBooze(%d,%d,%d,%d,%d)>" % (self.id or 0, self.drink_id or 0, self.booze_id or 0, self.value or 0, self.unit or 0)
+        return "<DrinkBooze(%d,<Drink>(%d),<Booze>(%d),%d,%d)>" % (self.id or 0, 
+                                                 self.drink.id,
+                                                 self.booze.id,
+                                                 self.value, 
+                                                 self.unit)
 

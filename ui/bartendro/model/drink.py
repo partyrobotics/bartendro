@@ -31,10 +31,6 @@ class Drink(Base):
                  'desc' : self.desc,
                }
 
-    def update(self, data):
-        self.name.name = data['drink_name']
-        self.desc = data['desc']
-
     def __repr__(self):
-        return "<Drink>(%d,'%s',%d)>" % (self.id, self.name.name, self.name_id)
+        return "<Drink>(%d,%s,%s,%s)>" % (self.id, self.name.name, self.desc, " ".join(["<DrinkBooze>(%d)" % db.id for db in self.drink_boozes]))
 
