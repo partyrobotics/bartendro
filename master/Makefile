@@ -1,7 +1,7 @@
 CC=avr-gcc
 CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega328
 OBJ2HEX=avr-objcopy 
-TARGET=dispenser
+TARGET=master
 
 program: $(TARGET).hex 
 	sudo avrdude -p m328p -P usb -c avrispmkII -Uflash:w:$(TARGET).hex -B 1.0
