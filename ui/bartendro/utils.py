@@ -40,9 +40,16 @@ def render_template(template, **context):
     return Response(jinja_env.get_template(template).render(**context),
                     mimetype='text/html')
 
+def render_error(code, err):
+    return Response(err, mimetype='text/plain')
+
 def render_json(data):
     return Response(dumps(data), 
                     mimetype='application/json')
+
+def render_text(data):
+    return Response(data,
+                    mimetype='text/plain')
 
 def validate_url(url):
     return urlparse(url)[0] in ALLOWED_SCHEMES

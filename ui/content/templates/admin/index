@@ -7,6 +7,7 @@
         <ul>
             <li><a class="admin" href="admin/booze">Edit Booze list</a></li>
             <li><a class="admin" href="admin/drink">Edit Drink list</a></li>
+            <li><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
             <li><a class="admin" href="http://www.youtube.com/watch?v=oHg5SJYRHA0">Rickroll</a></li>
         </ul>
     

@@ -22,7 +22,7 @@
     </div>
     <div id="make_drink_buttons">
         <button type="button" id="changed_mind" onclick="changed_mind()">I changed my mind</button>
-        <button type="button" id="make_drink" onclick="make_drink()">Make my drink already!</button>
+        <button type="button" id="make_drink" onclick="make_drink({{ drink.id }})">Make my drink already!</button>
     </div>
 </div>
 <div>
@@ -81,9 +81,16 @@ function changed_mind()
     window.location = "/";
 }
 
-function make_drink()
+function make_drink(drink)
 {
     lightbox('<div class="content"><div class="heading">Making a {{ drink.name.name}}!</div><img src="/static/images/spinner.png"></div>');
+    $.ajax({
+            url: "/ws/drink/" + drink + "/" + drink_size + "/" + (100 + (drink_strength * 10)),
+            success: function(html)
+            {
+                window.location = "/";
+            }
+    });
 }
 
 </script>

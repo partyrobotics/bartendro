@@ -6,13 +6,8 @@ from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
 
-@expose('/ws/dispenser/<disp>/on')
+@expose('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(request, disp):
-    try:
-        disp = int(disp)
-    except ValueError:
-        raise BadRequest("Invalid dispenser id specified")
-
     driver = local.application.driver
     count = driver.count()
     if disp < 1 or disp > count: raise BadRequest("Invalid dispenser %d selected. We've got %d." % (disp, count))
@@ -23,13 +18,8 @@ def ws_dispenser_on(request, disp):
     else:
         raise ServiceUnavailable("Error: %s (%d)" % (driver.get_error(), ret))
 
-@expose('/ws/dispenser/<disp>/off')
+@expose('/ws/dispenser/<int:disp>/off')
 def ws_dispenser_off(request, disp):
-    try:
-        disp = int(disp)
-    except ValueError:
-        raise BadRequest("Invalid dispenser id specified")
-
     driver = local.application.driver
     count = driver.count()
     if disp < 1 or disp > count: raise BadRequest("Invalid dispenser %d selected. We've got %d." % (disp, count))

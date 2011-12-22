@@ -41,7 +41,7 @@ class MasterDriver(object):
         '''Open the serial connection to the master'''
 
         print "open serial port, waiting for arduino reset.\n"
-        call(["stty", "-F", self.device, "ispeed", "%d" % BAUD_RATE, "ospeed", "%d" % BAUD_RATE, "cs8", "-parenb"])
+        #call(["stty", "-F", self.device, "ispeed", "%d" % BAUD_RATE, "ospeed", "%d" % BAUD_RATE, "cs8", "-parenb"])
         try:
             self.ser = serial.Serial(self.device, 
                                      BAUD_RATE, 
@@ -85,7 +85,7 @@ class MasterDriver(object):
 
     def check(self):
         self.ret, self.msg = self.send_command("check")
-        return not self.ret
+        return self.ret
 
     def count(self):
         self.ret, self.msg = self.send_command("count")
@@ -94,18 +94,18 @@ class MasterDriver(object):
             num, rest = self.msg.split(" ", 1)
         except ValueError:
             return -1
-        return num
+        return int(num)
 
     def start(self, dispenser, speed):
         self.ret, self.msg = self.send_command("on %d %d" % (dispenser, speed))
-        return not self.ret
+        return self.ret
 
     def stop(self, dispenser):
         self.ret, self.msg = self.send_command("off %d" % dispenser)
-        return not self.ret
+        return self.ret
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyACM0", "log");
+    md = MasterDriver("/dev/tty.usbmodemfa131", "log");
     md.open()
     print "Check: ", md.check()
     print "Count: ", md.count()
