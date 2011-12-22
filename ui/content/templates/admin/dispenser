@@ -1,0 +1,58 @@
+{% extends 'admin/layout' %}
+{% block body %}
+    <div class="main">
+    <div class="content">	
+        <div class="heading">Dispensers</div>
+        {% if saved %}
+           <p>Your changes have been saved.</p>
+        {% endif %}
+        <p>There are {{ count }} dispensers available.</p>
+        <div class="forms">
+		<form method="POST" action="/admin/dispenser/save">
+
+                    {% for i in range(1, count + 1) %}
+	                <div class="forminput">
+                              {{ form["dispenser%s" % i].label }}: 
+                              {{ form["dispenser%s" % i](class="form") }}
+                              <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
+                        </div>
+                    {% endfor %}
+
+	            <div class="button">
+                        {{ form.cancel(class="buttons") }}
+                        {{ form.save(class="buttons") }}
+                    </div>
+	        </form>
+	</div>
+    </div>
+
+    <div class="bottom_bar">
+       <a class="home" href="/admin">ADMIN</a>
+    </div>
+    </div>
+
+<script type="text/javascript">
+
+var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
+function toggle(disp)
+{
+    if (disp < 1 || disp > 16)
+        return;
+
+    //$("#size_text").text(drink_size + " fluid ounces");
+
+    dispensers[disp-1] = !dispensers[disp-1];
+    $.ajax({
+            url: "/ws/dispenser/" + disp + "/" + (dispensers[disp-1] ? "on" : "off") ,
+            success: function(html)
+            {
+                if (dispensers[disp-1] == true)
+                    $("#disp" + disp).text('turn off');
+                else
+                    $("#disp" + disp).text('turn on');
+            }
+    });
+}
+</script>
+{% endblock %}
