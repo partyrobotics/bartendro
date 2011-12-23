@@ -94,8 +94,8 @@ void make_packet(packet *p, uint8_t addr, uint8_t type)
     p->header[1] = 0xFF;
     p->addr = addr;
     p->type = type;
-    p->payload[0] = 0xA0;
-    p->payload[1] = 0xA1;
+    p->payload.ch[0] = 0xA0;
+    p->payload.ch[1] = 0xA1;
 }
 
 uint8_t transfer_packet(packet *tx, packet *rx)
@@ -191,11 +191,10 @@ void address_assignment(void)
     g_num_dispensers = ch - 1;
 }
 
-uint8_t turn_on(uint8_t disp, uint8_t speed)
+uint8_t turn_on(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_START);
-    in.payload[0] = speed;
     return transfer_packet(&in, &out);
 }
 
@@ -203,6 +202,14 @@ uint8_t turn_off(uint8_t disp)
 {
     packet in, out;
     make_packet(&in, disp, PACKET_TYPE_STOP);
+    return transfer_packet(&in, &out);
+}
+
+uint8_t dispense(uint8_t disp, uint16_t dur)
+{
+    packet in, out;
+    make_packet(&in, disp, PACKET_TYPE_DISPENSE);
+    in.payload.word = dur;
     return transfer_packet(&in, &out);
 }
 
@@ -249,14 +256,34 @@ uint8_t check(uint8_t *disp, uint8_t *err)
         if (!ret)
             return ret;
 
-        if (out.payload[0] != 0)
+        if (out.payload.ch[0] != 0)
         {
             //dprintf("dispenser %d: %d\n", i, out.payload[0]);
             *disp = i;
-            *err = out.payload[0];
+            *err = out.payload.ch[0];
             return 1;
         }
     }
+    return 1;
+}
+
+uint8_t get_state(uint8_t disp, uint8_t *state)
+{
+    uint8_t ret;
+    packet in, out;
+
+    *state = 0;
+    make_packet(&in, disp, PACKET_TYPE_GETSTATE);
+    ret = transfer_packet(&in, &out);
+    if (!ret)
+        return ret;
+
+    make_packet(&in, disp, PACKET_TYPE_RESPONSE);
+    ret = transfer_packet(&in, &out);
+    if (!ret)
+        return ret;
+
+    *state = out.payload.ch[0];
     return 1;
 }
 
@@ -336,7 +363,7 @@ int main (void)
     }
     for(;0;)
     {
-        turn_on(1, 128);
+        turn_on(1);
         _delay_ms(500);
         turn_off(1);
         _delay_ms(500);
@@ -375,11 +402,11 @@ int main (void)
 
         if (strncasecmp(cmd, "on", 2) == 0)
         {
-            int     disp, speed = 254;
+            int     disp;
             uint8_t ret;
 
-            ret = sscanf(cmd, "on %d %d", &disp, &speed);
-            if (ret < 1 || ret > 2)
+            ret = sscanf(cmd, "on %d", &disp);
+            if (ret != 1)
             {
                 dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
                 continue;
@@ -389,14 +416,9 @@ int main (void)
                 dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
                 continue;
             }
-            if (speed < 0 || speed > 254)
-            {
-                dprintf("%d invalid speed %d\n", INVALID_SPEED_ERROR, speed);
-                continue;
-            }
 
-            if (turn_on((uint8_t)disp, (uint8_t)speed))
-                dprintf("0 ok, speed %d\n", speed);
+            if (turn_on((uint8_t)disp))
+                dprintf("0 ok\n");
             else
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
             continue;
@@ -416,6 +438,46 @@ int main (void)
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);
             continue;
         }
+
+        if (strncasecmp(cmd, "disp", 4) == 0)
+        {
+            uint16_t dur, disp;
+            uint8_t  ret;
+
+            ret = sscanf(cmd, "disp %d %d", &disp, &dur);
+            if (ret != 2)
+            {
+                dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
+                continue;
+            }
+            if (disp < 1 || disp > (int)g_num_dispensers)
+            {
+                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+
+            if (dispense((uint8_t)disp, dur))
+                dprintf("0 ok\n");
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+
+        if (strncasecmp(cmd, "state", 5) == 0)
+        {
+            uint8_t d = atoi(cmd + 6), state;
+            if (d < 1 || d > g_num_dispensers)
+            {
+                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+            if (get_state(d, &state))
+                dprintf("0 %d ok\n", state);
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+
         if (strcasecmp(cmd, "debug") == 0)
         {
             if (g_debug == 0)

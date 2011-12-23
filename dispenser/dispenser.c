@@ -21,9 +21,11 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
+#define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
 
 static uint8_t g_address = 0xFF;
-static uint8_t g_response_payload[2] = { 0, 0 };
+static uint8_t g_response_payload[2] = { 0, 0};
+static uint8_t g_motor_state = 0;
 
 static volatile uint8_t g_spi_ch_in = 0;
 static volatile uint8_t g_spi_ch_out = 0;
@@ -31,6 +33,8 @@ static volatile uint8_t g_spi_char_received = 0;
 static volatile uint8_t g_ss_reset = 0;
 static volatile uint8_t g_hall_sensor_1 = 0;
 static volatile uint8_t g_hall_sensor_2 = 0;
+
+uint8_t set_motor_state(uint8_t state);
 
 ISR(SPI_STC_vect)
 {
@@ -53,6 +57,22 @@ ISR(PCINT1_vect)
         g_hall_sensor_1++;
     if (PINC & (1<<PINC1))
         g_hall_sensor_2++;
+}
+
+// clock globals
+volatile uint32_t ticks = 0;
+
+ISR (TIMER1_OVF_vect)
+{
+    if (ticks == 0)
+    {
+        set_motor_state(0);
+        TIMSK1 &= ~(1<<TOIE1);
+        return;
+    }
+
+    ticks--;
+    TCNT1 = TIMER1_INIT;
 }
 
 void serial_init(void)
@@ -96,7 +116,6 @@ void spi_slave_init(void)
 void spi_slave_stop(void)
 {
 	SPCR &= ~((1<<SPE)|(1<<SPIE));	// Disable SPI
-	DDRB &= ~(1<<PORTB4);
 }
 
 uint8_t spi_transfer_int(uint8_t tx)
@@ -183,14 +202,19 @@ void setup(void)
     // Set LED PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
 
-    // Set Motor PWM pin as outputs
+    // Set Motor pin as output
     DDRB |= (1<<PB1);
 
+    // External interrupts for the reset line
     PCMSK0 |= (1<<PCINT2);
     PCICR |= (1<<PCIE0);
 
+    // External interrupts for the hall sensors on the motor`
     PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
     PCICR |= (1<<PCIE1);
+
+    // Timer setup for dispense timing
+    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
 
     serial_init();
 }
@@ -218,28 +242,41 @@ void led_pwm_setup(void)
 	TCCR2B |= _BV(CS22);
 }
 
-void motor_pwm_setup(void)
-{
-	/* Set to Fast PWM */
-	TCCR1A |= _BV(WGM12) | _BV(WGM10) | _BV(COM1A1);
-    // Set the clock source
-	TCCR1B |= _BV(CS10) | _BV(CS11);
-
-	// Reset timers and comparators
-	OCR1A = 0;
-	TCNT1 = 0;
-}
-
-void set_motor_speed(uint8_t speed)
-{
-    OCR1A = speed;
-}
-
 void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
 {
     OCR2B = red;
     OCR0A = blue;
     OCR0B = green;
+}
+
+uint8_t set_motor_state(uint8_t state)
+{
+    uint8_t cur;
+
+    cli();
+    cur = g_motor_state;
+    sei();
+
+    if (cur == state)
+        return 0;
+
+    if (state)
+    {
+        cli();
+        g_motor_state = 1;
+        sei();
+        set_led_color(255, 0, 0);
+        sbi(PORTB, 1);
+    }
+    else
+    {
+        cli();
+        g_motor_state = 0;
+        sei();
+        set_led_color(0, 0, 0);
+        cbi(PORTB, 1);
+    }
+    return 1;
 }
 
 void test(void)
@@ -299,70 +336,6 @@ void address_assignment(void)
     dprintf("got address: %d\n", g_address);
 }
 
-
-void motor_test(void)
-{
-    uint8_t i = 0, h1 = 0, h2 = 0, last_h1 = 0, last_h2 = 0;
-
-	while (1)
-    {
-        cli();
-        h1 = g_hall_sensor_1;
-        h2 = g_hall_sensor_2;
-        sei();
-
-        if (h1 != last_h1 || h2 != last_h2)
-        {
-            dprintf("speed: %d h1: %d h2: %d\n", i, h1, h2);
-            cli();
-            g_hall_sensor_1 = 0;
-            g_hall_sensor_2 = 0;
-            sei();
-        }
-
-        set_motor_speed(i++);
-        _delay_ms(20); 
-
-        last_h1 = h1;
-        last_h2 = h2;
-    }
-}
-
-int main5(void)
-{
-    uint8_t i;
-
-	setup();
-    dprintf("led test\n");
-    led_pwm_setup();
-    motor_pwm_setup();
-
-    for(i = 0; i < 255;i++)
-    {
-         set_led_color(i, i, i);
-         set_motor_speed(i);
-         _delay_ms(20);
-    }
-
-	DDRB |= (1<<PB4);
-
-    for(i = 0; i < 255;i++)
-    {
-         set_led_color(i, i, i);
-         set_motor_speed(i);
-         _delay_ms(20);
-    }
-	DDRB &= ~(1<<PB4);
-    led_pwm_setup();
-    motor_pwm_setup();
-    for(i = 0; i < 255;i++)
-    {
-         set_led_color(i, i, i);
-         set_motor_speed(i);
-         _delay_ms(20);
-    }
-}
-
 int main(void)
 {
     packet  p;
@@ -370,7 +343,6 @@ int main(void)
 
 	setup();
     led_pwm_setup();
-    motor_pwm_setup();
 
     dprintf("slave starting\n");
     sei();
@@ -381,63 +353,81 @@ int main(void)
 
     for(;;)
     {
-        for(;;)
+        if (!receive_packet(&p))
         {
-            if (!receive_packet(&p))
-            {
-                dprintf("got reset notice!\n");
-                // If SS went high, reset and start over
-                spi_slave_stop();
-                set_motor_speed(0);
-                g_address = 0;
-                wait_for_reset();
-                spi_slave_init();
-                address_assignment();
-                continue;
-            }
+            dprintf("got reset notice!\n");
+            // If SS went high, reset and start over
+            spi_slave_stop();
+            set_motor_state(0);
+            g_address = 0;
+            wait_for_reset();
+            spi_slave_init();
+            address_assignment();
+            continue;
+        }
 
-            // If we have no address yet, ignore all packets
-            if (g_address == 0)
-            {
-                dprintf("ignore packet\n");
-                continue;
-            }
+        // If we have no address yet, ignore all packets
+        if (g_address == 0)
+        {
+            dprintf("ignore packet\n");
+            continue;
+        }
 
-            if (p.addr != g_address)
-                continue;
-            if (p.type == PACKET_TYPE_START)
-            {
-                set_motor_speed(p.payload[0]);
-                set_led_color(255, 0, 0);
+        if (p.addr != g_address)
+            continue;
+        if (p.type == PACKET_TYPE_START)
+        {
+            if (set_motor_state(1))
                 dprintf("turn on\n");
-            }
             else
-            if (p.type == PACKET_TYPE_CHECK)
-            {
-                g_response_payload[0] = 0;
-                g_response_payload[1] = 0;
-            }
-            else
-            if (p.type == PACKET_TYPE_RESPONSE)
-            {
-                ;
-            }
-            else
-            if (p.type == PACKET_TYPE_STOP)
-            {
-                set_motor_speed(0);
-                set_led_color(0, 0, 0);
+                dprintf("already on!\n");
+        }
+        else
+        if (p.type == PACKET_TYPE_CHECK)
+        {
+            g_response_payload[0] = 0;
+            g_response_payload[1] = 0;
+        }
+        else
+        if (p.type == PACKET_TYPE_GETSTATE)
+        {
+            cli();
+            g_response_payload[0] = g_motor_state;
+            sei();
+            g_response_payload[1] = 0;
+        }
+        else
+        if (p.type == PACKET_TYPE_RESPONSE)
+        {
+            ;
+        }
+        else
+        if (p.type == PACKET_TYPE_STOP)
+        {
+            if (set_motor_state(0))
                 dprintf("turn off\n");
-            }
             else
-            {
-                uint8_t *pp = (uint8_t *)&p;
+                dprintf("already off!\n");
+        }
+        else
+        if (p.type == PACKET_TYPE_DISPENSE)
+        {
+            cli();
+            ticks = p.payload.word;
+            sei();
+            TCNT1 = TIMER1_INIT;
+            set_motor_state(1);
+            TIMSK1 |= (1<<TOIE1);
+            dprintf("turn on for %d ms\n", p.payload.word);
+        }
+        else
+        {
+            uint8_t *pp = (uint8_t *)&p;
 
-                dprintf("bad packet: ");
-                for(i = 0; i < sizeof(packet); i++, pp++)
-                    dprintf("%02x ", *pp);
-                dprintf("\n");
-            }
+            dprintf("bad packet: ");
+            for(i = 0; i < sizeof(packet); i++, pp++)
+                dprintf("%02x ", *pp);
+            dprintf("\n");
         }
     }
 }
