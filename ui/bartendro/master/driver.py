@@ -96,13 +96,26 @@ class MasterDriver(object):
             return -1
         return num
 
-    def start(self, dispenser, speed):
-        self.ret, self.msg = self.send_command("on %d %d" % (dispenser, speed))
+    def start(self, dispenser):
+        self.ret, self.msg = self.send_command("on %d" % dispenser)
         return not self.ret
 
     def stop(self, dispenser):
         self.ret, self.msg = self.send_command("off %d" % dispenser)
         return not self.ret
+
+    def dispense(self, dispenser, duration):
+        self.ret, self.msg = self.send_command("disp %d %d" % (dispenser, duration))
+        return not self.ret
+
+    def state(self, dispenser):
+        self.ret, self.msg = self.send_command("state %d" % dispenser)
+        try:
+            num, rest = self.msg.split(" ", 1)
+            num = int(num)
+        except ValueError:
+            return -1
+        return (not self.ret, num)
 
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyACM0", "log");
@@ -110,14 +123,35 @@ if __name__ == "__main__":
     print "Check: ", md.check()
     print "Count: ", md.count()
     while True:
-        r = md.start(1, 128)
+        r = md.dispense(1, 1000)
+        if r: 
+            print "dispense 1s"
+        else:
+            print md.get_error()
+        sleep(.25)
+
+        (r, state) = md.state(1)
+        if r: 
+            print "check %d" % (state)
+        else:
+            print md.get_error()
+        sleep(1)
+
+        (r, state) = md.state(1)
+        if r: 
+            print "check %d" % (state)
+        else:
+            print md.get_error()
+        sleep(1)
+
+        r = md.start(1)
         if r: 
             print "motor on"
         else:
             print md.get_error()
         sleep(1)
 
-        r = md.start(2, 128)
+        r = md.start(2)
         if r: 
             print "motor on"
         else:
