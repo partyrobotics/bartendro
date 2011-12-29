@@ -106,7 +106,7 @@ class MasterDriver(object):
 
     def dispense(self, dispenser, duration):
         self.ret, self.msg = self.send_command("disp %d %d" % (dispenser, duration))
-        return not self.ret
+        return self.ret
 
     def state(self, dispenser):
         self.ret, self.msg = self.send_command("state %d" % dispenser)
