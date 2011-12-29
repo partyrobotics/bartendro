@@ -216,7 +216,7 @@ void setup(void)
     // Timer setup for dispense timing
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
 
-    serial_init();
+    //serial_init();
 }
 
 void led_pwm_setup(void)
@@ -294,7 +294,7 @@ void wait_for_reset()
 {
     uint8_t count = 0, reset, t = 1;
 
-    dprintf("waiting for reset\n");
+    //dprintf("waiting for reset\n");
     for(;;)
     {
         cli();
@@ -333,7 +333,7 @@ void address_assignment(void)
         }
     }
 
-    dprintf("got address: %d\n", g_address);
+    //dprintf("got address: %d\n", g_address);
 }
 
 int main(void)
@@ -344,7 +344,7 @@ int main(void)
 	setup();
     led_pwm_setup();
 
-    dprintf("slave starting\n");
+    //dprintf("slave starting\n");
     sei();
 
     wait_for_reset();
@@ -355,7 +355,7 @@ int main(void)
     {
         if (!receive_packet(&p))
         {
-            dprintf("got reset notice!\n");
+            //dprintf("got reset notice!\n");
             // If SS went high, reset and start over
             spi_slave_stop();
             set_motor_state(0);
@@ -369,7 +369,7 @@ int main(void)
         // If we have no address yet, ignore all packets
         if (g_address == 0)
         {
-            dprintf("ignore packet\n");
+            //dprintf("ignore packet\n");
             continue;
         }
 
@@ -404,10 +404,7 @@ int main(void)
         else
         if (p.type == PACKET_TYPE_STOP)
         {
-            if (set_motor_state(0))
-                dprintf("turn off\n");
-            else
-                dprintf("already off!\n");
+            set_motor_state(0);
         }
         else
         if (p.type == PACKET_TYPE_DISPENSE)
@@ -418,9 +415,9 @@ int main(void)
             TCNT1 = TIMER1_INIT;
             set_motor_state(1);
             TIMSK1 |= (1<<TOIE1);
-            dprintf("turn on for %d ms\n", p.payload.word);
+            //dprintf("turn on for %d ms\n", p.payload.word);
         }
-        else
+#if 0        
         {
             uint8_t *pp = (uint8_t *)&p;
 
@@ -429,5 +426,6 @@ int main(void)
                 dprintf("%02x ", *pp);
             dprintf("\n");
         }
+#endif
     }
 }

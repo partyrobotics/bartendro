@@ -8,6 +8,7 @@ from werkzeug import SharedDataMiddleware
 from bartendro.utils import session, metadata, local, local_manager, url_map
 from bartendro.views import view_map
 from bartendro.master import driver
+from bartendro import mixer
 import bartendro.models
 
 class BartendroUIServer(object):
@@ -18,8 +19,9 @@ class BartendroUIServer(object):
         self.dispatch = SharedDataMiddleware(self.dispatch, {
                     '/static':  bartendro.utils.STATIC_PATH
                     })
-        self.driver = driver.MasterDriver("/dev/tty.usbmodemfa131", "/tmp/log");
+        self.driver = driver.MasterDriver("/dev/ttyACM0", "/tmp/log");
         self.driver.open()
+        self.mixer = mixer.Mixer(self.driver)
 
     def init_database(self):
         metadata.create_all(self.database_engine)

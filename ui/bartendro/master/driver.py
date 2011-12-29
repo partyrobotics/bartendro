@@ -98,7 +98,7 @@ class MasterDriver(object):
 
     def start(self, dispenser):
         self.ret, self.msg = self.send_command("on %d" % dispenser)
-        return not self.ret
+        return self.ret
 
     def stop(self, dispenser):
         self.ret, self.msg = self.send_command("off %d" % dispenser)

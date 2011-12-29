@@ -9,12 +9,11 @@ from bartendro.form.booze import BoozeForm
 
 @expose('/ws/drink/<int:drink>/<int:size>/<int:strength>')
 def ws_drink(request, drink, size, strength):
-    driver = local.application.driver
+    mixer = local.application.mixer
 
     print "Make drink! drink: %d size: %d strength: %d" % (drink, size, strength)
-    sleep(3)
-    ret = driver.check()
+    ret = mixer.make_drink(drink, size, strength)
     if ret == 0:
         return render_text("ok\n")
     else:
-        raise ServiceUnavailable("Error: %s (%d)" % (driver.get_error(), ret))
+        raise ServiceUnavailable("Error: %s (%d)" % (mixer.get_error(), ret))

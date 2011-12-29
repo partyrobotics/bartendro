@@ -12,7 +12,8 @@ def ws_dispenser_on(request, disp):
     count = driver.count()
     if disp < 1 or disp > count: raise BadRequest("Invalid dispenser %d selected. We've got %d." % (disp, count))
 
-    ret = driver.start(disp, 254)
+    ret = driver.start(disp)
+    print "ret: %d\n" % ret
     if ret == 0:
         return render_text("ok\n")
     else:
