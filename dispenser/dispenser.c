@@ -200,10 +200,18 @@ uint8_t receive_packet(packet *rx)
 void setup(void)
 {
     // Set LED PWM pins as outputs
-    DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
+    DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3)|(1<<PD4)|(1<<PD7);
 
     // Set Motor pin as output
-    DDRB |= (1<<PB1);
+    DDRB |= (1<<PB1) | (1<<PB0);
+
+    // Motor driver pins
+    // pin 4 high
+    // pin 7 low
+    // pin 8 high
+    sbi(PORTD, 4);
+    cbi(PORTD, 7);
+    sbi(PORTB, 0);
 
     // External interrupts for the reset line
     PCMSK0 |= (1<<PCINT2);
