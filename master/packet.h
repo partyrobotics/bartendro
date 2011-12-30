@@ -8,6 +8,7 @@
 #define PACKET_TYPE_CHECK    4
 #define PACKET_TYPE_DISPENSE 5
 #define PACKET_TYPE_GETSTATE 6
+#define PACKET_TYPE_SETLED   7
 
 typedef struct
 {

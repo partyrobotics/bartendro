@@ -23,7 +23,7 @@
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
 static uint8_t g_num_dispensers = 0;
-static uint8_t g_debug = 0;
+static uint8_t g_debug = 1;
 
 void serial_init(void)
 {
@@ -213,6 +213,15 @@ uint8_t dispense(uint8_t disp, uint16_t dur)
     return transfer_packet(&in, &out);
 }
 
+uint8_t setled(uint8_t disp, uint8_t led, uint8_t color)
+{
+    packet in, out;
+    make_packet(&in, disp, PACKET_TYPE_SETLED);
+    in.payload.ch[0] = led;
+    in.payload.ch[1] = color;
+    return transfer_packet(&in, &out);
+}
+
 void test(void)
 {
     uint8_t ch, i;
@@ -318,6 +327,7 @@ void get_cmd(char cmd[MAX_CMD_LEN])
 #define INVALID_SPEED_ERROR       5
 #define UNKNOWN_COMMAND_ERROR     6
 #define BAD_DISPENSER_INDEX_ERROR 7
+#define BAD_LED_INDEX_ERROR       8
 
 int main (void)
 {
@@ -457,6 +467,35 @@ int main (void)
             }
 
             if (dispense((uint8_t)disp, dur))
+                dprintf("0 ok\n");
+            else
+                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            continue;
+        }
+
+        if (strncasecmp(cmd, "led", 3) == 0)
+        {
+            uint16_t color, disp, led;
+            uint8_t  ret;
+
+            ret = sscanf(cmd, "led %d %d %d", &disp, &led, &color);
+            if (ret != 3)
+            {
+                dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
+                continue;
+            }
+            if (disp < 1 || disp > (int)g_num_dispensers)
+            {
+                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
+                continue;
+            }
+            if (led > 2)
+            {
+                dprintf("%d invalid led\n", BAD_LED_INDEX_ERROR);
+                continue;
+            }
+
+            if (setled((uint8_t)disp, (uint8_t)led, (uint8_t)color))
                 dprintf("0 ok\n");
             else
                 dprintf("%d transmission error\n", TRANSMISSION_ERROR);

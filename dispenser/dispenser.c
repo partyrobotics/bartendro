@@ -36,6 +36,8 @@ static volatile uint8_t g_hall_sensor_2 = 0;
 
 uint8_t set_motor_state(uint8_t state);
 
+#define DEBUG 0
+
 ISR(SPI_STC_vect)
 {
     g_spi_ch_in = SPDR;
@@ -206,12 +208,12 @@ void setup(void)
     DDRB |= (1<<PB1) | (1<<PB0);
 
     // Motor driver pins
-    // pin 4 high
-    // pin 7 low
-    // pin 8 high
+    // pin 4 high = /STANDBY
+    // pin 7 high = IN1
+    // pin 8 low = IN2
     sbi(PORTD, 4);
-    cbi(PORTD, 7);
-    sbi(PORTB, 0);
+    sbi(PORTD, 7);
+    cbi(PORTB, 0);
 
     // External interrupts for the reset line
     PCMSK0 |= (1<<PCINT2);
@@ -224,7 +226,9 @@ void setup(void)
     // Timer setup for dispense timing
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
 
-    //serial_init();
+#if DEBUG
+    serial_init();
+#endif
 }
 
 void led_pwm_setup(void)
@@ -252,9 +256,24 @@ void led_pwm_setup(void)
 
 void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
 {
-    OCR2B = red;
-    OCR0A = blue;
-    OCR0B = green;
+    OCR2B = 255 - red;
+    OCR0A = 255 - blue;
+    OCR0B = 255 - green;
+}
+
+void set_led_red(uint8_t v)
+{
+    OCR2B = 255 - v;
+}
+
+void set_led_green(uint8_t v)
+{
+    OCR0B = 255 - v;
+}
+
+void set_led_blue(uint8_t v)
+{
+    OCR0A = 255 - v;
 }
 
 uint8_t set_motor_state(uint8_t state)
@@ -273,7 +292,6 @@ uint8_t set_motor_state(uint8_t state)
         cli();
         g_motor_state = 1;
         sei();
-        set_led_color(255, 0, 0);
         sbi(PORTB, 1);
     }
     else
@@ -281,7 +299,6 @@ uint8_t set_motor_state(uint8_t state)
         cli();
         g_motor_state = 0;
         sei();
-        set_led_color(0, 0, 0);
         cbi(PORTB, 1);
     }
     return 1;
@@ -302,7 +319,9 @@ void wait_for_reset()
 {
     uint8_t count = 0, reset, t = 1;
 
-    //dprintf("waiting for reset\n");
+#if DEBUG
+    dprintf("waiting for reset\n");
+#endif
     for(;;)
     {
         cli();
@@ -341,7 +360,9 @@ void address_assignment(void)
         }
     }
 
-    //dprintf("got address: %d\n", g_address);
+#if DEBUG
+    dprintf("got address: %d\n", g_address);
+#endif
 }
 
 int main(void)
@@ -350,9 +371,14 @@ int main(void)
     uint8_t i;
 
 	setup();
+    // turn the motor off, just in case
+    cbi(PORTB, 1);
+
     led_pwm_setup();
 
-    //dprintf("slave starting\n");
+#if DEBUG
+    dprintf("slave starting\n");
+#endif
     sei();
 
     wait_for_reset();
@@ -363,7 +389,9 @@ int main(void)
     {
         if (!receive_packet(&p))
         {
-            //dprintf("got reset notice!\n");
+#if DEBUG
+            dprintf("got reset notice!\n");
+#endif
             // If SS went high, reset and start over
             spi_slave_stop();
             set_motor_state(0);
@@ -377,7 +405,9 @@ int main(void)
         // If we have no address yet, ignore all packets
         if (g_address == 0)
         {
-            //dprintf("ignore packet\n");
+#if DEBUG
+            dprintf("ignore packet\n");
+#endif
             continue;
         }
 
@@ -385,10 +415,15 @@ int main(void)
             continue;
         if (p.type == PACKET_TYPE_START)
         {
-            if (set_motor_state(1))
+            uint8_t r;
+
+            r = set_motor_state(1);
+#if DEBUG
+            if (r)
                 dprintf("turn on\n");
             else
                 dprintf("already on!\n");
+#endif
         }
         else
         if (p.type == PACKET_TYPE_CHECK)
@@ -403,6 +438,16 @@ int main(void)
             g_response_payload[0] = g_motor_state;
             sei();
             g_response_payload[1] = 0;
+        }
+        else
+        if (p.type == PACKET_TYPE_SETLED)
+        {
+            if (p.payload.ch[0] == 0)
+                set_led_red(p.payload.ch[1]);
+            if (p.payload.ch[0] == 1)
+                set_led_green(p.payload.ch[1]);
+            if (p.payload.ch[0] == 2)
+                set_led_blue(p.payload.ch[1]);
         }
         else
         if (p.type == PACKET_TYPE_RESPONSE)
@@ -423,9 +468,11 @@ int main(void)
             TCNT1 = TIMER1_INIT;
             set_motor_state(1);
             TIMSK1 |= (1<<TOIE1);
-            //dprintf("turn on for %d ms\n", p.payload.word);
+#if DEBUG
+            dprintf("turn on for %d ms\n", p.payload.word);
+#endif
         }
-#if 0        
+#if DEBUG
         {
             uint8_t *pp = (uint8_t *)&p;
 
