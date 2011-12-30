@@ -32,5 +32,5 @@ class Drink(Base):
                }
 
     def __repr__(self):
-        return "<Drink>(%d,%s,%s,%s)>" % (self.id, self.name.name, self.desc, " ".join(["<DrinkBooze>(%d)" % db.id for db in self.drink_boozes]))
+        return "<Drink>(%d,%s,%s,%s)>" % (self.id or -1, self.name.name, self.desc, " ".join(["<DrinkBooze>(%d)" % (db.id or -1) for db in self.drink_boozes]))
 

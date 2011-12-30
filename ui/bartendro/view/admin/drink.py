@@ -10,6 +10,8 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.form.booze import BoozeForm
 from bartendro.form.drink import DrinkForm
 
+MAX_BOOZES_PER_DRINK = 8
+
 @expose('/admin/drink')
 def view(request):
     form = DrinkForm(request.form)
@@ -30,7 +32,15 @@ def edit(request, id):
     drink = Drink.query.filter_by(id=int(id)).first()
     kwargs = {}
     fields = []
-    for i, booze in enumerate(drink.drink_boozes):
+    null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
+    for i in xrange(MAX_BOOZES_PER_DRINK):
+        if i < len(drink.drink_boozes):
+            booze = drink.drink_boozes[i]
+            show = 1
+        else:
+            booze = null_drink_booze
+            show = 0
+
         bf = "booze_name_%d" % i
         bp = "booze_parts_%d" % i
         dbi = "drink_booze_id_%d" % i
@@ -40,7 +50,7 @@ def edit(request, id):
         kwargs[bf] = booze.booze.name
         kwargs[bp] = booze.value
         kwargs[dbi] = booze.id
-        fields.append((bf, bp, dbi))
+        fields.append((bf, bp, dbi, show))
 
     form = F(obj=drink, drink_name=drink.name.name, **kwargs)
     for i, booze in enumerate(drink.drink_boozes):
@@ -58,6 +68,7 @@ def save(request):
     if cancel: return redirect('/admin/drink')
 
     form = DrinkForm(request.form)
+    print request.form
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
         if id:
@@ -65,23 +76,39 @@ def save(request):
             drink.name.name = form.data['drink_name']
             drink.desc = form.data['desc']
             for db in drink.drink_boozes:
-                for i in xrange(100):
-                    try:
-                        if int(request.form['drink_booze_id_%d' % i]) == db.id:
-                            db.value = int(request.form['booze_parts_%d' % i])
-                            newid = int(request.form['booze_name_%d' % i])
-                            if (newid != db.booze_id):
-                                db.booze = Booze.query.filter_by(id=newid).first()
-                    except KeyError:
-                        break;
+                if db.id < 0: break
+                print db
+                for i in xrange(MAX_BOOZES_PER_DRINK):
+                    # FIXME: THis will not delete drink boozes from the DB
+                    if request.form['booze_parts_%d' % i] == '0': 
+                        if request.form['drink_booze_id_%d' % i] != '': 
+                            dbi = int(request.form['drink_booze_id_%d' % i])
+                        
+                        print "skip %d" % i
+                        continue
+
+                    if request.form['drink_booze_id_%d' % i] == '':
+                        booze = Booze.query.filter_by(id=int(request.form["booze_name_%d" % i])).first()
+                        DrinkBooze(drink, booze, int(request.form['booze_parts_%d' % i]), 0)
+                        print "add new"
+                    else:
+                        try:
+                            if int(request.form['drink_booze_id_%d' % i]) == db.id:
+                                db.value = int(request.form['booze_parts_%d' % i])
+                                newid = int(request.form['booze_name_%d' % i])
+                                if (newid != db.booze_id):
+                                    db.booze = Booze.query.filter_by(id=newid).first()
+                            print "booze updated"
+                        except KeyError:
+                            break
         else:
             drink_boozes = []
-            for i in xrange(100):
+            for i in xrange(MAX_BOOZES_PER_DRINK):
                 try:
                     print form.data
-                    booze = Booze.query.filter_by(id=int(request.form.get("booze_name_%d" % i))).first()
-                    drink_boozes.append(DrinkBooze(drink, booze, int(request.form.get("booze_parts_%d" % i)), 0))
-                except TypeError:
+                    booze = booze.query.filter_by(id=int(request.form.get("booze_name_%d" % i))).first()
+                    drink_boozes.append(drinkbooze(drink, booze, int(request.form.get("booze_parts_%d" % i)), 0))
+                except typeerror:
                     break
             print "-------------"
             print drink_boozes
@@ -90,6 +117,7 @@ def save(request):
             drink.drink_boozes = drink_boozes
             session.add(drink)
 
+        print "session commit!"
         session.commit()
         return redirect('/admin/drink')
 

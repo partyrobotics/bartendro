@@ -262,3 +262,6 @@ table.home_table a{
 	z-index: 1000;
 	display: none;
 }
+div.booze_line_hidden {
+        visibility:hidden;
+}
