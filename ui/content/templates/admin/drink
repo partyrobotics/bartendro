@@ -3,6 +3,9 @@
     <div class="main">
     <div class="content">	
         <div class="heading">{{ title }}</div>
+        {% if saved %}
+           <p>Your changes have been saved.</p>
+        {% endif %}
         <div class="forms">
 		<form method="POST" action="/admin/drink/save">
 	            <div class="forminput">

@@ -15,10 +15,11 @@ def view(request):
 @expose('/admin/booze/edit/<id>')
 def edit(request, id):
 
+    saved = int(request.args.get('saved', "0"))
     booze = Booze.query.filter_by(id=int(id)).first()
     form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="Edit booze")
+    return render_template("admin/booze", boozes=boozes, form=form, title="Edit booze", saved=saved)
 
 @expose('/admin/booze/save')
 def save(request):
@@ -40,7 +41,7 @@ def save(request):
             session.add(booze)
 
         session.commit()
-        return redirect('/admin/booze')
+        return redirect('/admin/booze/edit/%d?saved=1' % booze.id)
 
     boozes = Booze.query.order_by(Booze.name)
     return render_template("admin/booze", boozes=boozes, form=form, title="")
