@@ -10,6 +10,8 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.form.booze import BoozeForm
 from bartendro.form.drink import DrinkForm
 
+MAX_BOOZES_PER_DRINK = 8
+
 @expose('/admin/drink')
 def view(request):
     form = DrinkForm(request.form)
@@ -20,6 +22,7 @@ def view(request):
 @expose('/admin/drink/edit/<id>')
 def edit(request, id):
 
+    saved = int(request.args.get('saved', "0"))
     class F(DrinkForm):
         pass
 
@@ -30,7 +33,15 @@ def edit(request, id):
     drink = Drink.query.filter_by(id=int(id)).first()
     kwargs = {}
     fields = []
-    for i, booze in enumerate(drink.drink_boozes):
+    null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
+    for i in xrange(MAX_BOOZES_PER_DRINK):
+        if i < len(drink.drink_boozes):
+            booze = drink.drink_boozes[i]
+            show = 1
+        else:
+            booze = null_drink_booze
+            show = 0
+
         bf = "booze_name_%d" % i
         bp = "booze_parts_%d" % i
         dbi = "drink_booze_id_%d" % i
@@ -40,14 +51,16 @@ def edit(request, id):
         kwargs[bf] = booze.booze.name
         kwargs[bp] = booze.value
         kwargs[dbi] = booze.id
-        fields.append((bf, bp, dbi))
+        fields.append((bf, bp, dbi, show))
 
     form = F(obj=drink, drink_name=drink.name.name, **kwargs)
     for i, booze in enumerate(drink.drink_boozes):
         form["booze_name_%d" % i].data = "%d" % booze_list[booze.booze_id - 1][0]
     drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
-    return render_template("admin/drink", drinks=drinks, form=form, fields=fields, title="Edit drink")
+    return render_template("admin/drink", drinks=drinks, form=form, fields=fields, 
+                           title="Edit drink", saved=saved)
+
 
 @expose('/admin/drink/save')
 def save(request):
@@ -58,40 +71,65 @@ def save(request):
     if cancel: return redirect('/admin/drink')
 
     form = DrinkForm(request.form)
+    print request.form
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
         if id:
             drink = Drink.query.filter_by(id=int(id)).first()
-            drink.name.name = form.data['drink_name']
-            drink.desc = form.data['desc']
-            for db in drink.drink_boozes:
-                for i in xrange(100):
-                    try:
-                        if int(request.form['drink_booze_id_%d' % i]) == db.id:
-                            db.value = int(request.form['booze_parts_%d' % i])
-                            newid = int(request.form['booze_name_%d' % i])
-                            if (newid != db.booze_id):
-                                db.booze = Booze.query.filter_by(id=newid).first()
-                    except KeyError:
-                        break;
         else:
-            drink_boozes = []
-            for i in xrange(100):
-                try:
-                    print form.data
-                    booze = Booze.query.filter_by(id=int(request.form.get("booze_name_%d" % i))).first()
-                    drink_boozes.append(DrinkBooze(drink, booze, int(request.form.get("booze_parts_%d" % i)), 0))
-                except TypeError:
-                    break
-            print "-------------"
-            print drink_boozes
-            print "-------------"
-            drink = Drink(data=form.data)
-            drink.drink_boozes = drink_boozes
+            drink = Drink()
             session.add(drink)
 
+        drink.name.name = form.data['drink_name']
+        drink.desc = form.data['desc']
+
+        for i in xrange(MAX_BOOZES_PER_DRINK):
+            try:
+                parts = request.form['booze_parts_%d' % i]
+                parts = int(parts)
+            except KeyError:
+                parts = -1
+
+            try:
+                dbi = int(request.form['drink_booze_id_%d' % i] or "-1")
+                dbi = int(dbi)
+            except KeyError:
+                dbi = -1
+
+            try:
+                dbn = int(request.form['booze_name_%d' % i] or "-1")
+                dbn = int(dbn)
+            except KeyError:
+                dbn = -1
+
+            print "dbi: %d dbn: %d: parts: %d" % (dbi, dbn, parts)
+
+            if parts == 0:
+                if dbi != 0:
+                    for i, db in enumerate(drink.drink_boozes):
+                        if db.id == dbi:
+                            print drink
+                            session.delete(drink.drink_boozes[i])
+                            print drink
+                            break
+                continue
+
+            if dbi > 0:
+                for db in drink.drink_boozes:
+                    if dbi == db.id:
+                        db.value = parts
+                        newid = dbn
+                        if (newid != db.booze_id):
+                            db.booze = Booze.query.filter_by(id=newid).first()
+                        break
+
+            else:
+                booze = Booze.query.filter_by(id=dbn).first()
+                DrinkBooze(drink, booze, parts, 0)
+
+        print "session commit!"
         session.commit()
-        return redirect('/admin/drink')
+        return redirect('/admin/drink/edit/%d?saved=1' % drink.id)
 
     drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()

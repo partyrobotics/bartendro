@@ -3,6 +3,9 @@
     <div class="main">
     <div class="content">	
         <div class="heading">{{ title }}</div>
+        {% if saved %}
+           <p>Your changes have been saved.</p>
+        {% endif %}
         <div class="forms">
 		<form method="POST" action="/admin/booze/save">
 	            <div class="forminput">{{ form.name.label }}:<br/> {{ form.name(class="form") }}</div>
@@ -32,6 +35,7 @@
 
     <div class="side_bar">
         <div class="boozeheading">Booze List</div>
+        <a href="/admin/booze">add new</a>
 	<div class="boozelist">
 	<ul class="booze">
             {% for booze in boozes %}
