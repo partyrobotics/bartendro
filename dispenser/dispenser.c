@@ -1,4 +1,10 @@
-#define F_CPU 16000000UL 
+#define PRO_MINI_5V
+#ifdef PRO_MINI_5V
+   #define F_CPU 16000000UL 
+#else 
+   #define F_CPU  8000000UL 
+#endif
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -21,7 +27,12 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
+
+#ifdef PRO_MINI_5V
 #define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
+#else 
+#define TIMER1_INIT 0xFF06 // 8mhz / 8 cs / 1000 = 1ms per 'tick'
+#endif
 
 static uint8_t g_address = 0xFF;
 static uint8_t g_response_payload[2] = { 0, 0};
@@ -36,7 +47,7 @@ static volatile uint8_t g_hall_sensor_2 = 0;
 
 uint8_t set_motor_state(uint8_t state);
 
-#define DEBUG 0
+#define DEBUG 1
 
 ISR(SPI_STC_vect)
 {
@@ -63,18 +74,68 @@ ISR(PCINT1_vect)
 
 // clock globals
 volatile uint32_t ticks = 0;
+volatile uint8_t  motor_state = 0;
+volatile uint16_t dispense_ticks = 0;
+volatile uint8_t  dispense_chunks = 0;
+
+#define DISPENSE_TICKS  700
+#define DISPENSE_DELAY 1000
 
 ISR (TIMER1_OVF_vect)
 {
     if (ticks == 0)
     {
-        set_motor_state(0);
-        TIMSK1 &= ~(1<<TOIE1);
+        if (motor_state)
+            set_motor_state(0);
+
+        if (dispense_chunks == 0)
+        {
+            TIMSK1 &= ~(1<<TOIE1);
+            return;
+        }
+
+        if (motor_state)
+        {
+            ticks = DISPENSE_DELAY;
+            motor_state = 0;
+        }
+        else
+        {
+            ticks = dispense_ticks;
+            dispense_chunks--;
+            
+            set_motor_state(1);
+            motor_state = 1;
+        }
+        TCNT1 = TIMER1_INIT;
         return;
     }
 
     ticks--;
     TCNT1 = TIMER1_INIT;
+}
+
+void set_timer(uint16_t dur)
+{
+    dispense_chunks = (dur + DISPENSE_TICKS - 1) / DISPENSE_TICKS;
+    dispense_ticks = (dur + dispense_chunks - 1) / dispense_chunks;
+
+    dispense_chunks--;
+
+    ticks = dispense_ticks;
+    TCNT1 = TIMER1_INIT;
+    set_motor_state(1);
+    motor_state = 1;
+    TIMSK1 |= (1<<TOIE1);
+}
+
+void stop_timer(void)
+{
+    cli();
+    TIMSK1 &= ~(1<<TOIE1);
+    ticks = 0;
+    dispense_chunks = 0;
+    sei();
 }
 
 void serial_init(void)
@@ -365,6 +426,15 @@ void address_assignment(void)
 #endif
 }
 
+void print_packet(packet *p)
+{
+    uint8_t *pp = (uint8_t *)p, i;
+
+    for(i = 0; i < sizeof(packet); i++, pp++)
+        dprintf("%02x ", *pp);
+    dprintf("\n");
+}
+
 int main(void)
 {
     packet  p;
@@ -385,6 +455,8 @@ int main(void)
 	spi_slave_init();
     address_assignment();
 
+    set_led_color(0, 0, 0);
+
     for(;;)
     {
         if (!receive_packet(&p))
@@ -393,6 +465,7 @@ int main(void)
             dprintf("got reset notice!\n");
 #endif
             // If SS went high, reset and start over
+            stop_timer();
             spi_slave_stop();
             set_motor_state(0);
             g_address = 0;
@@ -401,6 +474,7 @@ int main(void)
             address_assignment();
             continue;
         }
+        print_packet(&p);
 
         // If we have no address yet, ignore all packets
         if (g_address == 0)
@@ -462,17 +536,17 @@ int main(void)
         else
         if (p.type == PACKET_TYPE_DISPENSE)
         {
+            uint16_t temp;
             cli();
-            ticks = p.payload.word;
+            temp = p.payload.word;
             sei();
-            TCNT1 = TIMER1_INIT;
-            set_motor_state(1);
-            TIMSK1 |= (1<<TOIE1);
+            set_timer(temp);
 #if DEBUG
             dprintf("turn on for %d ms\n", p.payload.word);
 #endif
         }
 #if DEBUG
+        else
         {
             uint8_t *pp = (uint8_t *)&p;
 
