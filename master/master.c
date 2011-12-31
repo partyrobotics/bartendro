@@ -22,8 +22,16 @@
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
-static uint8_t g_num_dispensers = 0;
+#define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
+
 static uint8_t g_debug = 1;
+static volatile uint32_t g_ticks = 0;
+
+ISR (TIMER1_OVF_vect)
+{
+    g_ticks++;
+    TCNT1 = TIMER1_INIT;
+}
 
 void serial_init(void)
 {
@@ -66,234 +74,13 @@ void dprintf(const char *fmt, ...)
     }
 }
 
-void spi_master_init(void)
-{
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1);
-}
-
-void spi_master_stop(void)
-{
-    // Disable SPI
-	SPCR &= ~(1<<SPE);
-}
-
-char spi_transfer(char cData)
-{
-	SPDR = cData;
-
-	/* Wait for transmission complete */
-	while(!(SPSR & (1<<SPIF)))
-	    ;
-
-    return SPDR;
-}
-
-void make_packet(packet *p, uint8_t addr, uint8_t type)
-{
-    p->header[0] = 0xFF;
-    p->header[1] = 0xFF;
-    p->addr = addr;
-    p->type = type;
-    p->payload.ch[0] = 0xA0;
-    p->payload.ch[1] = 0xA1;
-}
-
-uint8_t transfer_packet(packet *tx, packet *rx)
-{
-    uint8_t *ptx = (uint8_t*)tx;
-    uint8_t *prx = (uint8_t*)rx;
-    uint8_t i, ch, received = 0;
-
-    memset(prx, 0, sizeof(packet));
-    if (g_debug)
-        dprintf("# transfer packet %d\n", tx->type);
-    // send the packet and possibly start receiving data back
-    for(i = 0; i < sizeof(packet); i++)
-    {
-        ch = spi_transfer(*ptx);
-
-        if (g_debug > 1)
-            dprintf("# %02x %02x\n", *ptx, ch);
-        ptx++;
-
-        // ignore the first character since its not part of our communication
-        if (i > 0)
-        {
-            // Look for the packet header
-            if (received == 0 && ch != 0xFF)
-                continue;
-
-            *prx = ch;
-            prx++;
-            received++;
-        }
-    }
-
-    // if we haven't received a packet worth of data,
-    // transmit more zeros until a packet is read
-    for(; received < sizeof(packet);)
-    {
-        ch = spi_transfer(0x00);
-        if (g_debug > 1)
-            dprintf("# %02x %02x\n", 0, ch);
-        if (prx == (uint8_t*)rx && ch != 0xFF)
-            continue;
-
-        *prx = ch;
-        prx++;
-        received++;
-    }
-
-    if (g_debug > 1)
-        dprintf("verify:\n");
-    // Compare all but the last byte of the packet. For some reason the last byte gets corrupted homehow. 
-    for(i = 0, prx = (uint8_t*)rx, ptx = (uint8_t*)tx; i < sizeof(packet); i++, prx++, ptx++)
-    {
-        if (g_debug > 1)
-            dprintf("# %02x %02x\n", *ptx, *prx);
-        if (((i == 4) || (i == 5)) && tx->type == PACKET_TYPE_RESPONSE)
-            continue;
-
-        if (*ptx != *prx)
-        {
-            if (g_debug > 1)
-                dprintf("\n");
-            if (g_debug)
-                dprintf("# data transmission error!\n");
-            return 0;
-        }
-    }
-    if (g_debug > 1)
-        dprintf("\n");
-    return 1;
-}
-
 void setup(void)
 {
-	DDRD |= (1<<PORTD7); //LED pin
-	DDRC |= (1<<PORTC0); //LED pin
-	// Set SS, MOSI and SCK as outputs [MISO is PB4]
-	DDRB = (1<<PORTB2)|(1<<PORTB3)|(1<<PORTB5); 
+    DDRB |= (1<<PINB1)|(1<<PINB0)|(1<<PINB2);
+    DDRD |= (1<<PIND2)|(1<<PIND3)|(1<<PIND4)|(1<<PIND5)|(1<<PIND6)|(1<<PIND7);
+    TCCR1B |= _BV(CS11)|(1<<CS10);
+    TIMSK1 |= (1<<TOIE1);
     serial_init();
-}
-
-void address_assignment(void)
-{
-    uint8_t i, ch = 0;
-
-    // Now all clients should be in address assignment mode
-    ch = spi_transfer(1);
-    for(i = 0; ch == 0 || ch == 0xFF; i++)
-    {
-        ch = spi_transfer(0);
-    }
-
-    g_num_dispensers = ch - 1;
-}
-
-uint8_t turn_on(uint8_t disp)
-{
-    packet in, out;
-    make_packet(&in, disp, PACKET_TYPE_START);
-    return transfer_packet(&in, &out);
-}
-
-uint8_t turn_off(uint8_t disp)
-{
-    packet in, out;
-    make_packet(&in, disp, PACKET_TYPE_STOP);
-    return transfer_packet(&in, &out);
-}
-
-uint8_t dispense(uint8_t disp, uint16_t dur)
-{
-    packet in, out;
-    make_packet(&in, disp, PACKET_TYPE_DISPENSE);
-    in.payload.word = dur;
-    return transfer_packet(&in, &out);
-}
-
-uint8_t setled(uint8_t disp, uint8_t led, uint8_t color)
-{
-    packet in, out;
-    make_packet(&in, disp, PACKET_TYPE_SETLED);
-    in.payload.ch[0] = led;
-    in.payload.ch[1] = color;
-    return transfer_packet(&in, &out);
-}
-
-void test(void)
-{
-    uint8_t ch, i;
-
-    spi_master_init();
-    cbi(PORTB, 2);
-
-    for(i = 0; i < 10; i++)
-        spi_transfer(0xFF);
-
-    for(i = 0; ; i++)
-    {
-        ch = spi_transfer(i);
-        dprintf("%x %x\n", ch, i);
-        _delay_ms(250);
-        _delay_ms(250);
-        _delay_ms(250);
-        _delay_ms(250);
-    }
-
-    sbi(PORTB, 2);
-    spi_master_stop();
-}
-
-uint8_t check(uint8_t *disp, uint8_t *err)
-{
-    uint8_t i, ret;
-    packet in, out;
-
-    *disp = 0;
-    *err = 0;
-    for(i = 1; i <= g_num_dispensers; i++)
-    {
-        make_packet(&in, i, PACKET_TYPE_CHECK);
-        ret = transfer_packet(&in, &out);
-        if (!ret)
-            return ret;
-
-        make_packet(&in, i, PACKET_TYPE_RESPONSE);
-        ret = transfer_packet(&in, &out);
-        if (!ret)
-            return ret;
-
-        if (out.payload.ch[0] != 0)
-        {
-            //dprintf("dispenser %d: %d\n", i, out.payload[0]);
-            *disp = i;
-            *err = out.payload.ch[0];
-            return 1;
-        }
-    }
-    return 1;
-}
-
-uint8_t get_state(uint8_t disp, uint8_t *state)
-{
-    uint8_t ret;
-    packet in, out;
-
-    *state = 0;
-    make_packet(&in, disp, PACKET_TYPE_GETSTATE);
-    ret = transfer_packet(&in, &out);
-    if (!ret)
-        return ret;
-
-    make_packet(&in, disp, PACKET_TYPE_RESPONSE);
-    ret = transfer_packet(&in, &out);
-    if (!ret)
-        return ret;
-
-    *state = out.payload.ch[0];
-    return 1;
 }
 
 #define MAX_CMD_LEN 16
@@ -319,66 +106,160 @@ void get_cmd(char cmd[MAX_CMD_LEN])
     cmd[count] = 0;
 }
 
-#define OK                        0
-#define MASTER_REBOOTED           1
-#define TRANSMISSION_ERROR        2
-#define DISPENSER_FAULT_ERROR     3
-#define INVALID_COMMAND_ERROR     4
-#define INVALID_SPEED_ERROR       5
-#define UNKNOWN_COMMAND_ERROR     6
-#define BAD_DISPENSER_INDEX_ERROR 7
-#define BAD_LED_INDEX_ERROR       8
+void motor_state(uint8_t m, uint8_t s)
+{
+    switch(m)
+    {
+        case 0:
+            if (s)
+                cbi(PORTD, 2);
+            else
+                sbi(PORTD, 2);
+            break;
+        case 1:
+            if (s)
+                cbi(PORTD, 3);
+            else
+                sbi(PORTD, 3);
+            break;
+        case 2:
+            if (s)
+                cbi(PORTD, 4);
+            else
+                sbi(PORTD, 4);
+            break;
+        case 3:
+            if (s)
+                cbi(PORTD, 5);
+            else
+                sbi(PORTD, 5);
+            break;
+        case 4:
+            if (s)
+                cbi(PORTD, 6);
+            else
+                sbi(PORTD, 6);
+            break;
+        case 5:
+            if (s)
+                cbi(PORTD, 7);
+            else
+                sbi(PORTD, 7);
+            break;
+        case 6:
+            if (s)
+                cbi(PORTB, 0);
+            else
+                sbi(PORTB, 0);
+            break;
+        case 7:
+            if (s)
+                cbi(PORTB, 1);
+            else
+                sbi(PORTB, 1);
+            break;
+    }
+}
+
+typedef struct
+{
+    uint8_t disp;
+    uint8_t state;
+    uint16_t ticks;
+} timing_info;
+
+#define DISPENSE_TICKS  700
+#define DISPENSE_DELAY 1000
+
+uint8_t convert_timing(timing_info *info, uint8_t info_index, uint8_t disp, uint16_t dur)
+{
+    uint8_t dispense_chunks, i;
+    uint16_t dispense_ticks, ticks = 0;
+
+    dispense_chunks = (dur + DISPENSE_TICKS - 1) / DISPENSE_TICKS;
+    dispense_ticks = (dur + dispense_chunks - 1) / dispense_chunks;
+    //dprintf("chunks: %d ticks: %d\n", dispense_chunks, dispense_ticks);
+
+    for(i = 0; i < dispense_chunks; i++)
+    {
+        info[info_index].disp = disp;
+        info[info_index].state = 1;
+        info[info_index].ticks = ticks;
+        info_index++;
+
+        ticks += dispense_ticks;
+
+        info[info_index].disp = disp;
+        info[info_index].state = 0;
+        info[info_index].ticks = ticks;
+        info_index++;
+
+        ticks += DISPENSE_DELAY;
+    }
+    return info_index;
+}
+
+int compare(const void *a, const void *b)
+{
+    timing_info *ta = (timing_info *)a;
+    timing_info *tb = (timing_info *)b;
+
+    return ta->ticks - tb->ticks;
+}
+
+#define MASTER_REBOOTED 1
+#define BAD_DISPENSER_INDEX_ERROR 2
+#define INVALID_COMMAND_ERROR 3
+#define g_num_dispensers 8
 
 int main (void)
 {
     uint8_t i;
     char cmd[MAX_CMD_LEN];
+    uint16_t durs[8];
+    timing_info info[64];
+    uint8_t info_count = 0;
 
 	setup();
-
-    // Flash the LED to let us know we rebooted
-    sbi(PORTC, 0);
-    _delay_ms(200);
-    cbi(PORTC, 0);
+    for(i = 0; i < 8; i++)
+        motor_state(i, 0);
 
     dprintf("%d master booted\n", MASTER_REBOOTED);
-
-    // This loop is a hack. For some reason at some restarts SPI communication doesn't
-    // work right and we get bad data back. Resetting the communication works wonders.
-    //for(;;)
-    for(;;)
+    // Flash the LED to let us know we rebooted
+    for(i = 0; i< 3; i++)
     {
-        /* set SS hi, so that clients will stop what they are doing and reset */
         sbi(PORTB, 2);
         _delay_ms(100);
-
-        spi_master_init();
-
-        _delay_ms(5);
-
-        /* select device */
         cbi(PORTB, 2);
-        _delay_ms(5);
-
-        for(i = 0; i < sizeof(packet); i++)
-            spi_transfer(0);
-
-        address_assignment();
         _delay_ms(100);
-
-        /* This is a hack. Sometimes when the master reboots it gets the wrong
-           answer from a slave. If we know the answer is bad, repeat the startup. */
-        if (g_num_dispensers <= 32)
-            break;
     }
+
     for(;0;)
     {
-        turn_on(1);
-        _delay_ms(500);
-        turn_off(1);
-        _delay_ms(500);
+        uint32_t t;
+
+        cli();
+        t = g_ticks;
+        sei();
+
+        if ((t % 1000) == 0)
+            dprintf("%ld\n", t);
     }
 
+    for(;0;)
+    {
+        for(i = 0; i < 8; i++)
+        {
+            dprintf("turn on %d\n", i);
+            motor_state(i, 1);
+            _delay_ms(1000);
+            dprintf("turn off %d\n", i);
+            motor_state(i, 0);
+            _delay_ms(1000);
+        }
+    }
+
+    memset(durs, 0, sizeof(durs));
     for(;;)
     {
         if (g_debug)
@@ -388,65 +269,40 @@ int main (void)
         if (strlen(cmd) == 0)
             continue;
 
-        if (strcasecmp(cmd, "count") == 0)
+        if (strncasecmp(cmd, "go", 2) == 0)
         {
-            dprintf("0 %d dispensers\n", g_num_dispensers);
-            continue;
-        }
+            uint32_t t0, t;
+            qsort(info, info_count, sizeof(timing_info), compare);
+//            for(i = 0; i < 8; i++)
+//            {
+//                if (durs[i] > 0)
+//                    dprintf("durs %d: %d\n", i, durs[i]);
+//            }
 
-        if (strcasecmp(cmd, "check") == 0)
-        {
-            uint8_t disp, err;
-
-            if (check(&disp, &err))
+            cli();
+            t0 = g_ticks;
+            sei();
+            for(i = 0; i < info_count;)
             {
-                if (disp == 0)
-                    dprintf("0 ok\n");
-                else
-                    dprintf("%d %d dispenser fault: %d\n", DISPENSER_FAULT_ERROR, disp, err);
-            }
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            continue;
-        }
+                cli();
+                t = g_ticks;
+                sei();
+                t -= t0;
 
-        if (strncasecmp(cmd, "on", 2) == 0)
-        {
-            int     disp;
-            uint8_t ret;
-
-            ret = sscanf(cmd, "on %d", &disp);
-            if (ret != 1)
-            {
-                dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
-                continue;
+                //dprintf("%ld\n", t);
+                for(;i < info_count; i++)
+                {
+                    if (t >= info[i].ticks)
+                    {
+//                        dprintf("[%ld] info %d: %d %d\n", t, info[i].disp, info[i].ticks, info[i].state);
+                        motor_state(info[i].disp, info[i].state);
+                    }
+                    else 
+                        break;
+                }
             }
-            if (disp < 1 || disp > (int)g_num_dispensers)
-            {
-                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
-                continue;
-            }
-
-            if (turn_on((uint8_t)disp))
-                dprintf("0 ok\n");
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            continue;
-        }
-
-        if (strncasecmp(cmd, "off", 3) == 0)
-        {
-            int d = atoi(cmd + 4);
-            if (d < 1 || d > g_num_dispensers)
-            {
-                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
-                continue;
-            }
-            if (turn_off(d))
-                dprintf("0 ok\n");
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            continue;
+            info_count = 0;
+            memset(durs, 0, sizeof(durs));
         }
 
         if (strncasecmp(cmd, "disp", 4) == 0)
@@ -460,83 +316,16 @@ int main (void)
                 dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
                 continue;
             }
-            if (disp < 1 || disp > (int)g_num_dispensers)
+            if (disp < 0 || disp > g_num_dispensers)
             {
                 dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
                 continue;
             }
-
-            if (dispense((uint8_t)disp, dur))
-                dprintf("0 ok\n");
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
+            durs[(uint8_t)disp] = dur;
+            info_count = convert_timing(info, info_count, disp, dur);
+            dprintf("0 ok\n");
             continue;
         }
-
-        if (strncasecmp(cmd, "led", 3) == 0)
-        {
-            uint16_t color, disp, led;
-            uint8_t  ret;
-
-            ret = sscanf(cmd, "led %d %d %d", &disp, &led, &color);
-            if (ret != 3)
-            {
-                dprintf("%d invalid command\n", INVALID_COMMAND_ERROR);
-                continue;
-            }
-            if (disp < 1 || disp > (int)g_num_dispensers)
-            {
-                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
-                continue;
-            }
-            if (led > 2)
-            {
-                dprintf("%d invalid led\n", BAD_LED_INDEX_ERROR);
-                continue;
-            }
-
-            if (setled((uint8_t)disp, (uint8_t)led, (uint8_t)color))
-                dprintf("0 ok\n");
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            continue;
-        }
-
-        if (strncasecmp(cmd, "state", 5) == 0)
-        {
-            uint8_t d = atoi(cmd + 6), state;
-            if (d < 1 || d > g_num_dispensers)
-            {
-                dprintf("%d invalid dispenser\n", BAD_DISPENSER_INDEX_ERROR);
-                continue;
-            }
-            if (get_state(d, &state))
-                dprintf("0 %d ok\n", state);
-            else
-                dprintf("%d transmission error\n", TRANSMISSION_ERROR);
-            continue;
-        }
-
-        if (strcasecmp(cmd, "debug") == 0)
-        {
-            if (g_debug == 0)
-                dprintf("how may I do your bidding?\n");
-            g_debug = 1;
-            continue;
-        }
-        if (strcasecmp(cmd, "vdebug") == 0)
-        {
-            dprintf("# verbose debugging\n");
-            g_debug = 2;
-            continue;
-        }
-        if (strcasecmp(cmd, "nodebug") == 0)
-        {
-            dprintf("# no more debugging. Silence!\n");
-            g_debug = 0;
-            continue;
-        }
-        dprintf("%d unknown command\n", UNKNOWN_COMMAND_ERROR);
     }
 
     return 0;
