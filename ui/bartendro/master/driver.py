@@ -40,8 +40,8 @@ class MasterDriver(object):
     def open(self):
         '''Open the serial connection to the master'''
 
-        print "The driver to the master is DISABLED!"
-        return
+#        print "The driver to the master is DISABLED!"
+#        return
 
         print "open serial port, waiting for arduino reset.\n"
         #call(["stty", "-F", self.device, "ispeed", "%d" % BAUD_RATE, "ospeed", "%d" % BAUD_RATE, "cs8", "-parenb"])
@@ -65,6 +65,10 @@ class MasterDriver(object):
 
     def get_error(self):
         return self.msg
+
+    def send(self, cmd):
+        self.ser.write("%s\r" % cmd)
+        self.ser.read(self.ser.inWaiting())
 
     def send_command(self, cmd):
 

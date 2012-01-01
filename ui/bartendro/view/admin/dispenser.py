@@ -11,7 +11,7 @@ from bartendro.form.dispenser import DispenserForm
 @expose('/admin/dispenser')
 def view(request):
     driver = local.application.driver
-    count = driver.count()
+    count = 8 #driver.count()
 
     saved = int(request.args.get('saved', "0"))
 

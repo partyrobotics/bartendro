@@ -14,15 +14,14 @@
 	                <div class="forminput">
                               {{ form["dispenser%s" % i].label }}: 
                               {{ form["dispenser%s" % i](class="form") }}
-                              <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
                         </div>
                     {% endfor %}
 
 	            <div class="button">
                         {{ form.cancel(class="buttons") }}
                         {{ form.save(class="buttons") }}
-                    </div>
-	        </form>
+                </div>
+ `       </form>
 	</div>
     </div>
 
