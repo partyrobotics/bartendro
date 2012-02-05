@@ -363,46 +363,52 @@ void handle_cmd(char *line)
 {
     uint8_t ret;
     int addr, arg1, arg2, arg3;
-    char cmd[16];
+    char cmd[32];
+    char resp[32], *r;
+
+    // ignore responses from other dispensers
+    if (line[0] == '!')
+       return;
 
     ret = sscanf(line, "%d %s %d %d %d", &addr, cmd, &arg1, &arg2, &arg3);
     if (ret < 2)
         return;
    
-    if (addr != g_address)
+    if (addr != 255 && addr != g_address)
         return;
 
     if (strcmp(cmd, "on") == 0)
     {
         set_motor_state(1);
-        return;
     }
+    else
     if (strcmp(cmd, "off") == 0)
     {
         set_motor_state(0);
-        return;
     }
+    else
     if (strcmp(cmd, "disp") == 0 && ret == 3)
     {
         set_timer(arg1);
-        return;
     }
+    else
     if (strcmp(cmd, "led") == 0 && ret == 5)
     {
         set_led_color(arg1, arg2, arg3);
-        return;
     }
+    else
     if (strcmp(cmd, "isdisp") == 0)
     {
-        char ret[10], *p;
-
         uint8_t state = is_dispensing();
-        sprintf(ret, "!%d isdisp %d\n", addr, state);
-        for(p = ret; *p; p++)
-            serial_tx(*p);
-
-        return;
+        sprintf(resp, "!%d isdisp %d\n", addr, state);
     }
+    else
+    if (strcmp(cmd, "ping") == 0)
+    {
+        sprintf(resp, "!%d pong\n", addr);
+    }
+    for(r = resp; *r; r++)
+        serial_tx(*r);
 }
 
 #define MAX_CMD_LEN 80
