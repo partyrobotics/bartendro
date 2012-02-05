@@ -340,25 +340,6 @@ void address_assignment(void)
     g_address = ch;
 }
 
-void test(void)
-{
-    uint8_t ch;
-  
-    for(ch = 0; ch < 3; ch++)
-    {
-        sbi(PORTC, 0);
-        _delay_ms(100);
-        cbi(PORTC, 0);
-        _delay_ms(100);
-    }
-    for(;;)
-    {
-        while(!serial_rx(&ch));
-        //ch = serial_rx_block();
-        serial_tx(ch);
-    }
-}
-
 void handle_cmd(char *line)
 {
     uint8_t ret;
