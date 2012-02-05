@@ -330,14 +330,26 @@ void wait_for_reset()
     set_led_color(0, 0, 0);
 }
 
+#define MAX_ADDR_CMD_LEN 40
 void address_assignment(void)
 {
-    uint8_t ch;
-    
-    while(!serial_rx(&ch));
-    while(!serial_tx(ch + 1));
+    char    cmd[MAX_ADDR_CMD_LEN], *p;
+    uint8_t ch, i;
+   
+    cmd[0] = 0;
+    for(i = 0; i < MAX_ADDR_CMD_LEN - 1; i++)
+    {
+        while(!serial_rx(&ch));
+        if (ch == '\n')
+            break;
+        cmd[i] = (char)ch;
+        cmd[i + 1] = 0;
+    }
+    g_address = atoi(cmd);
 
-    g_address = ch;
+    sprintf(cmd, "%d\n", g_address + 1);
+    for(p = cmd; *p; p++)
+        while(!serial_tx((uint8_t)*p));
 }
 
 void handle_cmd(char *line)
