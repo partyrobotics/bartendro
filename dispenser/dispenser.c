@@ -38,20 +38,24 @@ static uint8_t g_address = 0xFF;
 static uint8_t g_response_payload[2] = { 0, 0};
 static uint8_t g_motor_state = 0;
 
-static volatile uint8_t g_ss_reset = 0;
+static volatile uint8_t g_rx = 0;
+static volatile uint8_t g_reset = 0;
 static volatile uint8_t g_hall_sensor_1 = 0;
 static volatile uint8_t g_hall_sensor_2 = 0;
 
 uint8_t set_motor_state(uint8_t state);
 
-#define DEBUG 1
+ISR (USART_RX_vect)
+{
+    g_rx = 1;
+}
 
 ISR(PCINT0_vect)
 {
     if (PINB & (1<<PINB2))
-        g_ss_reset = 1;
+        g_reset = 1;
     else
-        g_ss_reset = 0;
+        g_reset = 0;
 }
 
 ISR(PCINT1_vect)
@@ -134,63 +138,49 @@ void serial_init(void)
     UBRR0H = (unsigned char)(UBBR>>8); 
     UBRR0L = (unsigned char)UBBR; 
     /* Enable transmitter */ 
-    UCSR0B = (1<<TXEN0); 
+    UCSR0B = (1<<TXEN0) | (1<<RXEN0) | (1<<RXCIE0);
     /* Set frame format: 8data, 1stop bit */ 
     UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
 }
-void serial_tx(unsigned char ch)
+uint8_t serial_tx(uint8_t ch)
 {
-    while ( !( UCSR0A & (1<<UDRE0)) );
-    UDR0 = ch;
-}
-unsigned char serial_rx(void)
-{
-    while ( !(UCSR0A & (1<<RXC0))) 
-        ;
+    uint8_t reset;
 
-    return UDR0;
-}
-uint8_t serial_transfer(uint8_t tx)
-{
-    uint8_t in;
-
-    in = serial_rx();
-    serial_tx(tx);
-
-    return in;
-}
-
-uint8_t receive_packet(packet *rx)
-{
-    static uint8_t ch = 0;
-    uint8_t *prx = (uint8_t*)rx;
-    uint8_t received = 0, old, reset = 0;
-
-    for(; received < sizeof(packet);)
+    while ( !( UCSR0A & (1<<UDRE0)) )
     {
         cli();
-        reset = g_ss_reset;
+        reset = g_reset;
         sei();
         if (reset)
             return 0;
-
-        old = ch;
-        ch = serial_transfer(ch);
-
-        // Look for the packet header
-        if (prx == (uint8_t*)rx && ch != 0xFF)
-            continue;
-
-
-        *prx = ch;
-        prx++;
-        received++;
-
-        if (received == 5 && rx->type == PACKET_TYPE_RESPONSE)
-            ch = g_response_payload[0];
-        if (received == 6 && rx->type == PACKET_TYPE_RESPONSE)
-            ch = g_response_payload[1];
     }
+    UDR0 = ch;
+    return 1;
+}
+uint8_t serial_rx_block(void)
+{
+    while ( !(UCSR0A & (1<<RXC0))) 
+          ;
+        
+    return UDR0;
+}
+uint8_t serial_rx(uint8_t *ch)
+{
+    uint8_t rx;
+
+    cli();
+    rx = g_rx;
+    sei();
+
+    if (!rx)
+        return 0;
+
+    *ch = UDR0;
+
+    cli();
+    g_rx = 0;
+    sei();
+
     return 1;
 }
 
@@ -198,6 +188,7 @@ void setup(void)
 {
     // Set LED PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3)|(1<<PD4)|(1<<PD7);
+DDRC |= (1<<PC0);
 
     // Set Motor pin as output
     DDRB |= (1<<PB1) | (1<<PB0);
@@ -221,9 +212,7 @@ void setup(void)
     // Timer setup for dispense timing
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
 
-#if DEBUG
     serial_init();
-#endif
 }
 
 void led_pwm_setup(void)
@@ -252,8 +241,8 @@ void led_pwm_setup(void)
 void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
 {
     OCR2B = 255 - red;
-    OCR0A = 255 - blue;
-    OCR0B = 255 - green;
+    OCR0A = 255 - green;
+    OCR0B = 255 - blue;
 }
 
 void set_led_red(uint8_t v)
@@ -263,12 +252,12 @@ void set_led_red(uint8_t v)
 
 void set_led_green(uint8_t v)
 {
-    OCR0B = 255 - v;
+    OCR0A = 255 - v;
 }
 
 void set_led_blue(uint8_t v)
 {
-    OCR0A = 255 - v;
+    OCR0B = 255 - v;
 }
 
 uint8_t set_motor_state(uint8_t state)
@@ -288,6 +277,7 @@ uint8_t set_motor_state(uint8_t state)
         g_motor_state = 1;
         sei();
         sbi(PORTB, 1);
+        set_led_color(255, 0, 0);
     }
     else
     {
@@ -295,6 +285,7 @@ uint8_t set_motor_state(uint8_t state)
         g_motor_state = 0;
         sei();
         cbi(PORTB, 1);
+        set_led_color(0, 0, 0);
     }
     return 1;
 }
@@ -306,7 +297,7 @@ void wait_for_reset()
     for(;;)
     {
         cli();
-        reset = g_ss_reset;
+        reset = g_reset;
         sei();
         if (!reset)
         {
@@ -327,65 +318,67 @@ void wait_for_reset()
 
 void address_assignment(void)
 {
-    uint8_t ch = 0;
+    uint8_t ch;
+    
+    while(!serial_rx(&ch));
+    while(!serial_tx(ch + 1));
 
+    g_address = ch;
+}
+
+void test(void)
+{
+    uint8_t ch;
+  
+    for(ch = 0; ch < 3; ch++)
+    {
+        sbi(PORTC, 0);
+        _delay_ms(100);
+        cbi(PORTC, 0);
+        _delay_ms(100);
+    }
     for(;;)
     {
-        ch = serial_transfer(ch);
-        if (ch > 0 && ch < 0xff)
-        {
-            g_address = ch;
-            ch++;
-            serial_transfer(ch);
-            break;
-        }
+        while(!serial_rx(&ch));
+        //ch = serial_rx_block();
+        serial_tx(ch);
     }
 }
 
-int main(void)
+void handle_cmd(char *line)
 {
-    packet  p;
-    uint8_t i;
+    uint8_t ret;
+    int addr, arg1, arg2;
+    char cmd[16];
 
-	setup();
-    // turn the motor off, just in case
-    cbi(PORTB, 1);
+    ret = sscanf(line, "%d %s %d %d", &addr, cmd, &arg1, &arg2);
+    if (ret < 2)
+        return;
+   
+    if (addr != g_address)
+        return;
 
-    led_pwm_setup();
-
-    sei();
-
-    wait_for_reset();
-    address_assignment();
-
-    set_led_color(0, 0, 0);
-
-    for(;;)
+    if (strcmp(cmd, "on") == 0)
     {
-        if (!receive_packet(&p))
-        {
-            // If SS went high, reset and start over
-            stop_timer();
-            set_motor_state(0);
-            g_address = 0;
-            wait_for_reset();
-            address_assignment();
-            continue;
-        }
+        set_motor_state(1);
+        return;
+    }
+    if (strcmp(cmd, "off") == 0)
+    {
+        set_motor_state(0);
+        return;
+    }
+    if (strcmp(cmd, "disp") == 0 && ret == 3)
+    {
+        set_timer(arg1);
+        return;
+    }
 
-        // If we have no address yet, ignore all packets
-        if (g_address == 0)
-        {
-            continue;
-        }
-
-        if (p.addr != g_address)
-            continue;
+#if 0
         if (p.type == PACKET_TYPE_START)
         {
             uint8_t r;
 
-            r = set_motor_state(1);
         }
         else
         if (p.type == PACKET_TYPE_CHECK)
@@ -429,6 +422,68 @@ int main(void)
             temp = p.payload.word;
             sei();
             set_timer(temp);
+        }
+#endif
+}
+
+#define MAX_CMD_LEN 40
+int main(void)
+{
+    uint8_t reset = 0, ch;
+    char    cmd[MAX_CMD_LEN], *ptr;
+
+	setup();
+    // turn the motor off, just in case
+    cbi(PORTB, 1);
+
+    led_pwm_setup();
+    sei();
+
+    wait_for_reset();
+    for(;;)
+    {
+        reset = 0;
+        set_led_color(0, 0, 255);
+        address_assignment();
+        set_led_color(0, 255, 0);
+        _delay_ms(500);
+        set_led_color(0, 0, 0);
+
+        for(;!reset;)
+        {
+            ptr = cmd;
+            *ptr = 0;
+            for(;;)
+            {
+                cli();
+                reset = g_reset;
+                sei();
+                if (reset)
+                    break;
+                if (!serial_rx(&ch))
+                    continue;
+                if (!serial_tx(ch))
+                {
+                    reset = 1;
+                    break;
+                }
+
+                *ptr = ch;
+                ptr++;
+                *ptr = 0;
+                if (ch == '\n')
+                {
+                    handle_cmd(cmd);
+                    break;
+                }
+            }
+            if (reset)
+            {
+                // If we get a reset, turn off timer, turn off motor
+                TIMSK1 &= ~(1<<TOIE1);
+                set_motor_state(0);
+            }
+
         }
     }
 }
