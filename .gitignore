@@ -3,3 +3,7 @@
 *.swp
 *.db
 .DS_Store
+*.obj
+*.o
+*.map
+*.hex
