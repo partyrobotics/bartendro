@@ -1,15 +1,33 @@
 body{
-	background-color: #7081fd;
 	margin:	0px;
 	font-family:"Arial";
 	color: white;
 }
 div.heading{
+	margin: auto;
+	float: center;
+	text-align: center;
 	line-height:200%;
 	font-weight:bold;
-	font-size:50px;
-	text-shadow: 3px 3px 2px gray;
-}
+	float: center;
+	font-family:Corbel,sans-serif;
+	text-transform:capitalize;
+	font-weight: bold;
+   font-size:3em;
+   color: chocolate;
+   text-decoration:none;
+   font-variant:small-caps;
+ -webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), color-stop(50%, rgba(0,0,0,.5)), to(rgba(0,0,0,1)));  
+text-shadow: 0 1px 0 black;
+text-shadow: 1px -1px 0 lightgrey;
+} 
+div.size_text{
+	font-size: 1.25em;	
+	margin: auto;
+	float: center;
+	text-align: center;	
+	border 1px solid white;
+	}
 div.subheading{
 	font-family:"Arial";
 	font-weight:bold;
@@ -59,22 +77,8 @@ div.main{
 	top: 0px;
 	left: 0px;}
 div.content{
-	background-color: #448ec7;
-        margin: 1em;
-	vertical-align:top;
-	padding-left: 20px;
-	padding-right: 10px;
-	border-style:solid;	
-	border-color: white;
-	border-width:3px;
-	float: left;
-	position: absolute;
-	line-height;200%;
-	top: 0px;
-	left: 0px;
-	height: 550px;
-	width: 691px;
-	color:white;}
+   margin: auto;
+}
 div.forms{
 	float:left;
 	background-color:#3f9ab8;
@@ -196,42 +200,169 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
         color:white;
         text-decoration:none;
 }
+div.top_bar{
+	padding-left: 4px;
+	height: 40px;
+	width: 100%;
+	text-align: left;	
+	background-color: dimgray;
+	color: white;
+	font-weight: bold;
+	font-size: 2em;	
+	}
+img.logo{
+	float: right;
+	width: 106px;
+	height: 40px;	
+
+	}
 table.home_table{
-        width: 100%;
-        text-align: center;
+   width: 100%;
+   text-align: center;
+   margin: auto;
+  	}
+table.home_table a{
+	text-decoration: none;
 }
 table.home_table td{
-        padding: 1em;
-        margin: 1em;
+   /*padding-top:10px;padding-bottom:10px;*/
+	vertical-align: top;
+	text-align: left;
+	}
+div.sub{
+	margin: auto;
+	margin-bottom: 30px;
+	margin-left: 30px;
+	width: 380px;
+	float: left;
+	height: 80px;
+   text-align: left;
+	border: 1px hidden whitesmoke;
+	border-top-style: solid;
+	vertical-align:top;
+	text-overflow:ellipsis;
+	display: block;
+	}
+div.drink_name{
+   height: 20px;
+	float: left;
+	margin-top: 5px;
+	/*border: 1px solid white;*/
+	text-align: left;	
+	vertical-align: top;
+	font-family:Corbel,sans-serif;
+	text-transform:capitalize;
+	font-size: 1.5em;	
+	font-weight: normal;
+   color: #0088cc;
+   font-variant:small-caps;
+	/*text-shadow:0 -1px 0 midnightblue;*/
 }
-table.home_table a{
-        font-family:Arial;
-        font-size:18pt;
-        color: white;
-        text-decoration:none;
-}
+div.ingredients{
+   height: 1em;	
+	margin:auto;
+	margin-top: 10px;
+	margin-left: 15px;
+	text-align: left;
+	/*border: 1px solid white;*/
+	font-size: .8em;	
+	text-align: left;
+	text-transform:lowercase;
+	text-transform: capitalize;
+	font-variant:normal;
+	color: dimgrey;
+	}
+div.drink_desc{
+	text-align: left;	
+	margin-left: 7px;
+	margin-top: 7px;
+	vertical-align: top;
+	font-family:Corbel,sans-serif;
+	font-size: .85em;	
+	font-weight: normal;
+	text-transform: capitalize;
+   color: grey;
+   line-height: 80%
+	text-shadow:0 -1px 0 lightgray;	
+}	
 .adjust_drink_button{
-        font-family:Arial;
-        font-size:18pt;
+   font-family:Arial;
+   font-size:18pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+   color: dimgray;
+	border-radius:5px;
+	margin: 5px;
+	padding-top:20px;padding-bottom: 20px;
+	padding-left: 25px;padding-right: 25px;
+	-moz-box-shadow: 5px 5px 10px black;
+	-webkit-box-shadow: 5px 5px 10px black;
+	box-shadow: 5px 5px 10px black;
+        
 }
 .drink_size{
-        margin-right: 10em;
-        margin-left: 10em;
-        float: left;
+	margin-left:auto;
+	margin-right: auto;
+	margin-top: 50px;
+   text-align:center;
+   color: dimgray;
 }
-#make_drink_buttons{
-        clear: both;
-        margin-top: 5em;
+.make_drink_buttons{
+   clear: both;
+   margin-top: 5em;
+   margin-top: 100px;
+   text-align: center;  
 }
-#changed_mind{
-        font-family:Arial;
-        font-size:14pt;
-        margin-left: 3em;
+.changed_mind{
+   font-family:Arial;
+   font-size:14pt;
+	background: #eeeeee;
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+	color: dimgray;
+	border-radius:5px;
+	margin-left: 100px;
+	margin-top: -20px;
+	padding-top:20px;padding-bottom: 20px;
+	padding-left: 25px;padding-right: 25px;
+	float: left;
+	-moz-box-shadow: 5px 5px 10px black;
+	-webkit-box-shadow: 5px 5px 10px black;
+	box-shadow: 5px 5px 10px black;
 }
-#make_drink{
-        font-family:Arial;
-        font-size:20pt;
-        margin-left: 4em;
+.make_drink{
+       font-family:Arial;
+        font-size:34pt;
+	background: #eeeeee;
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+	color: chocolate;
+	border-radius:20px;
+	text-transform: uppercase;
+	margin-right: 50px;
+	margin-top: -50px;
+	padding:40px;
+	float: right;
+	-moz-box-shadow: 2px 2px 3px dimgrey;
+	-webkit-box-shadow: 2px 2px 3px dimgrey;
+	box-shadow: 2px 2px 3px dimgrey;
 }
 .text{
         color:white;
@@ -245,7 +376,7 @@ table.home_table a{
 	left: 50%;
 	width: 500px;
 	margin-left: -250px;
-	background: #fff;
+	background: #39407c;
 	z-index: 1001;
 	display: none;
 }

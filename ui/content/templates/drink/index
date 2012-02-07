@@ -1,20 +1,21 @@
 {% extends 'layout' %}
 {% block body %}
-<div id="content">
+<div class="content">
     <div class="heading">Make a {{ drink.name.name }}</div>
-    <p class="size_text">&nbsp;&nbsp;&nbsp;&nbsp;Ingredients: {{ drink.desc }}</p>
+    <div class="size_text">&nbsp;&nbsp;&nbsp;&nbsp;Ingredients: {{ drink.desc }}</div>
     <div class="drink_size">
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
        </p>
-       <p class="text" id="size_text">4 fluid ounces</p>
+       <p class="text" class="size_text">4 fluid ounces</p>
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
        </p>
     </div>
-    <div id="make_drink_buttons">
-        <button type="button" id="changed_mind" onclick="changed_mind()">I changed my mind</button>
-        <button type="button" id="make_drink" onclick="make_drink({{ drink.id }})">Make my drink already!</button>
+    <div class="make_drink_buttons">
+		  <button type="button" class="changed_mind" onclick="changed_mind()">Taster (0.5 0z)</button>
+        <button type="button" class="changed_mind" onclick="changed_mind()">Go Back</button>
+        <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour It!</button>
     </div>
 </div>
 <div>

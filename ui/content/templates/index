@@ -1,13 +1,25 @@
 {% extends 'layout' %}
 {% block body %}
-<div id="content">
+<div class="content">
+	 <div class="top_bar">Bartendro<img class="logo" src="/static/images/logo"/></div>
+	 
     <table class="home_table">
     {% for drink in drinks %}
-      {% if (loop.index0 % 4) == 0 %}
+      {% if (loop.index0 % 2) == 0 %}
          <tr> 
       {% endif %}
-      <td><a href="/drink/{{ drink.id }}">{{ drink.name.name }}</a></td>
-      {% if (loop.index0 % 4) == 3 %}
+      <td class="drink" >
+      	<a href="/drink/{{ drink.id }}">
+      		<div class="sub">
+      			<div class="drink_name">{{ drink.name.name }}</div>
+      			</br> 
+	     			<div class="ingredients">{{ drink.desc }}</div>
+	     			<div class="drink_desc">here is some fancy bullshit explaination of why you want this drink</div>
+      		</div>
+      	<a>
+      </td>
+     
+      {% if (loop.index0 % 2) == 1 %}
          </tr> 
       {% endif %}
     {% endfor %}
