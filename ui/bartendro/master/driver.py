@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from subprocess import call
 from gpio import GPIO
 from time import sleep
@@ -39,9 +40,19 @@ class MasterDriver(object):
         self.ret = 0
         self.ss = GPIO(135)
         self.ss.setup()
+        self.num_dispensers = 0
 
     def open(self):
         '''Open the serial connection to the master'''
+
+        try: 
+            self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
+        except KeyError:
+            self.software_only = 0
+
+        if self.software_only:
+            print "Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!"
+            return
 
         try:
             self.ser = serial.Serial(self.device, 
@@ -56,58 +67,67 @@ class MasterDriver(object):
 
         print "Opened %s for %d baud N81" % (self.device, BAUD_RATE)
 
-    def send_test(self):
-        while True:
-            self.ser.write('A\r\n')
+    def chain_init(self):
 
-    def receive_test(self):
-        while True:
-            print self.ser.read()
-
-    def chain_test(self):
+        if self.software_only: return
 
         # reset the chain
-        print "set SS low"
+        print "send reset"
         self.ss.low()
         sleep(1)
 
-        print "set SS high"
         self.ss.high()
         sleep(.2)
-        print "set SS low"
         self.ss.low()
         sleep(.2)
 
-        print "Transmit address character"
+        print "address assignment"
         while True:
             self.ser.write(chr(0))
-	    r = self.ser.read(1)
+            r = self.ser.read(1)
             if len(r) == 0:
                 continue
             break
 
-	print "received %d chars:" % len(r)
-	for ch in r:
-	    print "  %d" % ord(r),
-        print
-        print
-
-    def addr_test(self):
-        self.ser.write(0);
+        if len(r) > 0:
+            self.num_dispensers = ord(r)
+        else
+            print "Cannot communicate with dispenser chain!"
 
     def close(self):
+        if self.software_only: return
         self.ser.close()
         self.ser = None
 
     def send(self, cmd):
+        if self.software_only: return
         self.ser.write(cmd)
-        ret = self.ser.readline()
-        print ret
+        return self.ser.readline()
+
+    def count(self):
+        return self.num_dispensers
+
+    def start(self, dispenser):
+        self.ret, self.msg = self.send("%d on\n" % dispenser)
+        return self.ret
+
+    def stop(self, dispenser):
+        self.ret, self.msg = self.send("%d off\n" % dispenser)
+        return self.ret
+
+    def dispense(self, dispenser, duration):
+        self.ret, self.msg = self.send("%d disp %d" % (dispenser, duration))
+        return self.ret
+
+    def led(self, dispenser, r, g, b):
+        self.ret, self.msg = self.send("%d led %d %d %d" % (dispenser, r, g, b))
+        return self.ret
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyS1", "log");
+    md = MasterDriver("/dev/ttyACM0", "log");
+#    md = MasterDriver("/dev/ttyS1", "log");
     md.open()
-    md.chain_test()
+    md.chain_init()
     sleep(2)
     while True:
         md.send("7 disp 3000\n")

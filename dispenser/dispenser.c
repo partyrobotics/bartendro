@@ -348,10 +348,10 @@ void test(void)
 void handle_cmd(char *line)
 {
     uint8_t ret;
-    int addr, arg1, arg2;
+    int addr, arg1, arg2, arg3;
     char cmd[16];
 
-    ret = sscanf(line, "%d %s %d %d", &addr, cmd, &arg1, &arg2);
+    ret = sscanf(line, "%d %s %d %d %d", &addr, cmd, &arg1, &arg2, &arg3);
     if (ret < 2)
         return;
    
@@ -371,6 +371,11 @@ void handle_cmd(char *line)
     if (strcmp(cmd, "disp") == 0 && ret == 3)
     {
         set_timer(arg1);
+        return;
+    }
+    if (strcmp(cmd, "led") == 0 && ret == 5)
+    {
+        set_led_color(arg1, arg2, arg3);
         return;
     }
 
