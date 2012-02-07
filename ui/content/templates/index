@@ -13,8 +13,8 @@
       		<div class="sub">
       			<div class="drink_name">{{ drink.name.name }}</div>
       			</br> 
-	     			<div class="ingredients">{{ drink.desc }}</div>
-	     			<div class="drink_desc">here is some fancy bullshit explaination of why you want this drink</div>
+	     			<div class="ingredients">{{ drink.ingredients }}</div>
+	     			<div class="drink_desc">{{ drink.desc }}</div>
       		</div>
       	<a>
       </td>
