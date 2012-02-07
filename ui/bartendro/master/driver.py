@@ -91,7 +91,7 @@ class MasterDriver(object):
 
         if len(r) > 0:
             self.num_dispensers = ord(r)
-        else
+        else:
             print "Cannot communicate with dispenser chain!"
 
     def close(self):
