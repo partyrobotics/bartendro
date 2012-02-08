@@ -19,7 +19,7 @@ class BartendroUIServer(object):
         self.dispatch = SharedDataMiddleware(self.dispatch, {
                     '/static':  bartendro.utils.STATIC_PATH
                     })
-        self.driver = driver.MasterDriver("/dev/ttyACM0", "/tmp/log");
+        self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
         self.driver.open()
         self.mixer = mixer.Mixer(self.driver)
 
