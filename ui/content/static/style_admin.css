@@ -5,6 +5,7 @@ body{
 }
 div.heading{
 	margin: auto;
+	height:75px; 
 	float: center;
 	text-align: center;
 	line-height:200%;
@@ -12,27 +13,31 @@ div.heading{
 	float: center;
 	font-family:Corbel,sans-serif;
 	text-transform:capitalize;
-	font-weight: bold;
+	font-weight: normal;
    font-size:3em;
-   color: chocolate;
+   color: #0088cc;
    text-decoration:none;
    font-variant:small-caps;
- -webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), color-stop(50%, rgba(0,0,0,.5)), to(rgba(0,0,0,1)));  
-text-shadow: 0 1px 0 black;
-text-shadow: 1px -1px 0 lightgrey;
+  	border: 1px hidden whitesmoke;
+	border-bottom-style: solid;
 } 
 div.size_text{
 	font-size: 1.25em;	
 	margin: auto;
+	margin-top: 10px;
 	float: center;
 	text-align: center;	
+	color: black;
 	border 1px solid white;
+	}
+div.size_text p{
+	color: black;	
 	}
 div.subheading{
 	font-family:"Arial";
 	font-weight:bold;
 	font-size:18pt;
-	color: white;
+	color: dimgray;;
 }
 div.boozeheading{
         line-height:250%;
@@ -201,19 +206,22 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
         text-decoration:none;
 }
 div.top_bar{
-	padding-left: 4px;
-	height: 40px;
+	text-indent:8px; 
+	height: 50px;
 	width: 100%;
 	text-align: left;	
 	background-color: dimgray;
 	color: white;
 	font-weight: bold;
-	font-size: 2em;	
+	font-size: 2.625em;
 	}
-img.logo{
+div.logo{
 	float: right;
-	width: 106px;
-	height: 40px;	
+	margin-top: 30px;
+	margin-right: 25px;
+	color: white;	
+	font-size: .4em;
+	vertical-align: bottom;
 
 	}
 table.home_table{
@@ -286,31 +294,41 @@ div.drink_desc{
 	text-shadow:0 -1px 0 lightgray;	
 }	
 .adjust_drink_button{
+	float: center;
    font-family:Arial;
    font-size:18pt;
    text-transform: capitalize;
 	background: #eeeeee;
-	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
-	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
    color: dimgray;
-	border-radius:5px;
+	border: 1px solid lightgray;	
+	border-radius:15px;
 	margin: 5px;
-	padding-top:20px;padding-bottom: 20px;
+	padding-top:25px;padding-bottom: 25px;
 	padding-left: 25px;padding-right: 25px;
-	-moz-box-shadow: 5px 5px 10px black;
-	-webkit-box-shadow: 5px 5px 10px black;
-	box-shadow: 5px 5px 10px black;
-        
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
+}
+.taster{
+	float: center;
+	vertical-align: middle;
+   font-family:Arial;
+   font-size:16pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+   color: dimgray;
+	border: 1px solid lightgray;	
+	border-radius:15px;
+	margin: -25px;
+	padding:20px;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
 }
 .drink_size{
 	margin-left:auto;
 	margin-right: auto;
-	margin-top: 50px;
+	margin-top: 30px;
    text-align:center;
    color: dimgray;
 }
@@ -322,42 +340,30 @@ div.drink_desc{
 }
 .changed_mind{
    font-family:Arial;
-   font-size:14pt;
+   font-size:34pt;
 	background: #eeeeee;
-	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
-	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
 	color: dimgray;
-	border-radius:5px;
-	margin-left: 100px;
-	margin-top: -20px;
-	padding-top:20px;padding-bottom: 20px;
-	padding-left: 25px;padding-right: 25px;
+	border: 1px solid lightgray;	
+		text-transform: uppercase;
+	border-radius:15px;
+	margin-left: 40px;
+	margin-top: -70px;
+	padding:40px;
 	float: left;
-	-moz-box-shadow: 5px 5px 10px black;
-	-webkit-box-shadow: 5px 5px 10px black;
-	box-shadow: 5px 5px 10px black;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey;
 }
 .make_drink{
-       font-family:Arial;
-        font-size:34pt;
+   font-family:Arial;
+   font-size:34pt;
 	background: #eeeeee;
-	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
-	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
-	color: chocolate;
+	color: dimgrey;
+	border: 1px solid lightgray;	
 	border-radius:20px;
 	text-transform: uppercase;
-	margin-right: 50px;
-	margin-top: -50px;
+	margin-right: 40px;
+	margin-top: -70px;
 	padding:40px;
 	float: right;
 	-moz-box-shadow: 2px 2px 3px dimgrey;
@@ -365,8 +371,7 @@ div.drink_desc{
 	box-shadow: 2px 2px 3px dimgrey;
 }
 .text{
-        color:white;
-        text-color:white;
+        color:dimgray;
         font-size:20pt;
         font-family:"Arial";
 }

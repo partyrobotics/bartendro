@@ -1,5 +1,6 @@
 {% extends 'layout' %}
 {% block body %}
+<div class="top_bar">Bartendro<div class="logo">by Party Robotics</div></div>
 <div class="content">
     <div class="heading">Make a {{ drink.name.name }}</div>
     <div class="size_text">&nbsp;&nbsp;&nbsp;&nbsp;Ingredients: {{ drink.desc }}</div>
@@ -13,9 +14,9 @@
        </p>
     </div>
     <div class="make_drink_buttons">
-		  <button type="button" class="changed_mind" onclick="changed_mind()">Taster (0.5 0z)</button>
-        <button type="button" class="changed_mind" onclick="changed_mind()">Go Back</button>
-        <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour It!</button>
+		  <button type="button" class="taster" onclick="changed_mind()">1/2 oz Taster</button>
+        <button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
+        <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button>
     </div>
 </div>
 <div>
