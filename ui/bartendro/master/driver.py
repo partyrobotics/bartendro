@@ -90,6 +90,7 @@ class MasterDriver(object):
             break
 
         if len(r) > 0:
+            print "found %d dispensers" % ord(r)
             self.num_dispensers = ord(r)
         else:
             print "Cannot communicate with dispenser chain!"
@@ -101,6 +102,7 @@ class MasterDriver(object):
 
     def send(self, cmd):
         if self.software_only: return
+        print cmd
         self.ser.write(cmd)
         return self.ser.readline()
 
@@ -108,28 +110,22 @@ class MasterDriver(object):
         return self.num_dispensers
 
     def start(self, dispenser):
-        self.ret, self.msg = self.send("%d on\n" % dispenser)
-        return self.ret
+        return self.send("%d on\n" % dispenser)
 
     def stop(self, dispenser):
-        self.ret, self.msg = self.send("%d off\n" % dispenser)
-        return self.ret
+        return self.send("%d off\n" % dispenser)
 
     def dispense(self, dispenser, duration):
-        self.ret, self.msg = self.send("%d disp %d" % (dispenser, duration))
-        return self.ret
+        return self.send("%d disp %d\n" % (dispenser, duration))
 
     def led(self, dispenser, r, g, b):
-        self.ret, self.msg = self.send("%d led %d %d %d" % (dispenser, r, g, b))
-        return self.ret
+        return self.send("%d led %d %d %d\n" % (dispenser, r, g, b))
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyACM0", "log");
-#    md = MasterDriver("/dev/ttyS1", "log");
+    md = MasterDriver("/dev/ttyS1", "log");
     md.open()
     md.chain_init()
     sleep(2)
     while True:
-        md.send("7 disp 3000\n")
-        md.send("6 disp 3000\n")
-        sleep(15)
+        md.dispense(0, 3000);
+        sleep(5)

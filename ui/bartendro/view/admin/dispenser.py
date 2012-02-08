@@ -11,7 +11,7 @@ from bartendro.form.dispenser import DispenserForm
 @expose('/admin/dispenser')
 def view(request):
     driver = local.application.driver
-    count = 8 #driver.count()
+    count = driver.count()
 
     saved = int(request.args.get('saved', "0"))
 
@@ -39,8 +39,6 @@ def view(request):
 
 @expose('/admin/dispenser/save')
 def save(request):
-
-    print "request.form", request.form
 
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/dispenser')

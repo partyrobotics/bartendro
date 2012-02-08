@@ -26,7 +26,7 @@ class Mixer(object):
         print "make ", drink
         print "dispensers ", dispensers
 
-        disp_count = 8
+        disp_count = self.driver.count()
         recipe = []
         for db in drink.drink_boozes:
             r = None
@@ -50,18 +50,20 @@ class Mixer(object):
         for r in recipe:
             total_parts += r['part']
 
+        print "start making drink!"
         dur = 0
         for r in recipe:
             r['ml'] = r['part'] * size * ML_PER_FL_OZ / total_parts
             r['ms'] = r['ml'] * MS_PER_ML
-            print "disp %d %d" % (r['dispenser'] - 1, int(r['ms']))
-            self.driver.send("disp %d %d" % (r['dispenser'] - 1, int(r['ms'])))
+            self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
             sleep(.01)
 
             if r['ms'] > dur: dur = r['ms']
 
-        self.driver.send("go");
+        print "commands sent"
+
         dur = dur * 2
         sleep(dur / 1000)
+        print "drink kinda done"
 
         return 0 

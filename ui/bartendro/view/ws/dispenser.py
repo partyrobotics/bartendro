@@ -9,11 +9,11 @@ from bartendro.form.booze import BoozeForm
 @expose('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(request, disp):
     driver = local.application.driver
-    driver.send("on %d" % (disp - 1))
+    driver.start(disp - 1)
     return render_text("ok\n")
 
 @expose('/ws/dispenser/<int:disp>/off')
 def ws_dispenser_off(request, disp):
     driver = local.application.driver
-    driver.send("off %d" % (disp - 1))
+    driver.stop(disp - 1)
     return render_text("ok\n")
