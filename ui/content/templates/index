@@ -1,7 +1,7 @@
 {% extends 'layout' %}
 {% block body %}
 <div class="content">
-	 <div class="top_bar">Bartendro<img class="logo" src="/static/images/logo"/></div>
+	 <div class="top_bar">Bartendro<div class="logo">by Party Robotics</div></div>
 	 
     <table class="home_table">
     {% for drink in drinks %}
