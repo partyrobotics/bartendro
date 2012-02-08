@@ -3,18 +3,19 @@
 <div class="top_bar">Bartendro<div class="logo">by Party Robotics</div></div>
 <div class="content">
     <div class="heading">Make a {{ drink.name.name }}</div>
-    <div class="size_text">&nbsp;&nbsp;&nbsp;&nbsp;Ingredients: {{ drink.desc }}</div>
+    <div class="drink_ing">{{ drink.ingredients }}</div>
+    <div class="drink_desc">{{ drink.desc }}</div>
     <div class="drink_size">
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
        </p>
-       <p class="text" class="size_text">4 fluid ounces</p>
+       <p class="text" id="size_text">4 fluid ounces</p>
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
        </p>
     </div>
     <div class="make_drink_buttons">
-		  <button type="button" class="taster" onclick="changed_mind()">1/2 oz Taster</button>
+	    <button type="button" class="taster" onclick="make_taster({{ drink.id }})">1/2 oz Taster</button>
         <button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
         <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button>
     </div>
@@ -22,6 +23,7 @@
 <div>
 <script type="text/javascript">
 
+var taster_size = .5;
 var drink_size = 4;
 var drink_strength = 0;
 
@@ -33,6 +35,7 @@ function size_bigger()
     drink_size += 1;
     $("#size_text").text(drink_size + " fluid ounces");
 }
+
 function size_smaller()
 {
     if (drink_size <= 2)
@@ -41,6 +44,7 @@ function size_smaller()
     drink_size -= 1;
     $("#size_text").text(drink_size + " fluid ounces");
 }
+
 function set_strength_text()
 {
     t = "";
@@ -77,9 +81,19 @@ function changed_mind()
 
 function make_drink(drink)
 {
+    dispense_drink(drink, drink_size);
+}
+
+function make_taster(drink)
+{
+    dispense_drink(drink, taster_size);
+}
+
+function dispense_drink(drink, size)
+{
     lightbox('<div class="make_drink"><div class="heading">Making a {{ drink.name.name}}!</div></div>');
     $.ajax({
-            url: "/ws/drink/" + drink + "/" + drink_size + "/" + (100 + (drink_strength * 10)),
+            url: "/ws/drink/" + drink + "/" + size + "/" + (100 + (drink_strength * 10)),
             success: function(html)
             {
                 window.location = "/";

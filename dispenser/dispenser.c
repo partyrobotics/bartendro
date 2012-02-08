@@ -277,7 +277,6 @@ uint8_t set_motor_state(uint8_t state)
         g_motor_state = 1;
         sei();
         sbi(PORTB, 1);
-        set_led_color(255, 0, 0);
     }
     else
     {
@@ -285,7 +284,6 @@ uint8_t set_motor_state(uint8_t state)
         g_motor_state = 0;
         sei();
         cbi(PORTB, 1);
-        set_led_color(0, 0, 0);
     }
     return 1;
 }
@@ -378,57 +376,6 @@ void handle_cmd(char *line)
         set_led_color(arg1, arg2, arg3);
         return;
     }
-
-#if 0
-        if (p.type == PACKET_TYPE_START)
-        {
-            uint8_t r;
-
-        }
-        else
-        if (p.type == PACKET_TYPE_CHECK)
-        {
-            g_response_payload[0] = 0;
-            g_response_payload[1] = 0;
-        }
-        else
-        if (p.type == PACKET_TYPE_GETSTATE)
-        {
-            cli();
-            g_response_payload[0] = g_motor_state;
-            sei();
-            g_response_payload[1] = 0;
-        }
-        else
-        if (p.type == PACKET_TYPE_SETLED)
-        {
-            if (p.payload.ch[0] == 0)
-                set_led_red(p.payload.ch[1]);
-            if (p.payload.ch[0] == 1)
-                set_led_green(p.payload.ch[1]);
-            if (p.payload.ch[0] == 2)
-                set_led_blue(p.payload.ch[1]);
-        }
-        else
-        if (p.type == PACKET_TYPE_RESPONSE)
-        {
-            ;
-        }
-        else
-        if (p.type == PACKET_TYPE_STOP)
-        {
-            set_motor_state(0);
-        }
-        else
-        if (p.type == PACKET_TYPE_DISPENSE)
-        {
-            uint16_t temp;
-            cli();
-            temp = p.payload.word;
-            sei();
-            set_timer(temp);
-        }
-#endif
 }
 
 #define MAX_CMD_LEN 40
@@ -488,7 +435,6 @@ int main(void)
                 TIMSK1 &= ~(1<<TOIE1);
                 set_motor_state(0);
             }
-
         }
     }
 }
