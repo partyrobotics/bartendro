@@ -6,6 +6,7 @@ body{
 div.heading{
 	margin: auto;
 	height:75px; 
+	width: 750px;
 	float: center;
 	text-align: center;
 	line-height:200%;
@@ -83,7 +84,31 @@ div.main{
 	left: 0px;}
 div.content{
    margin: auto;
+
 }
+div.top_bar{
+	position: fixed;
+	float: left;
+	width: 70px;
+	height: 100%;
+	margin: auto;
+	z-index: -1;
+/*	border:1px solid red;*/
+	}
+div.top_bar p{
+		transform: rotate(270deg);
+-ms-transform: rotate(270deg); /* IE 9 */
+-webkit-transform: rotate(270deg); /* Safari and Chrome */
+-o-transform: rotate(270deg); /* Opera */
+-moz-transform: rotate(270deg); /* Firefox */
+	text-align: left;
+	vertical-align: bottom;
+	font-weight: bold;
+	font-size: 4.5em;
+	color: whitesmoke;
+	letter-spacing: 6px;
+	margin-top: 320px;
+	}
 div.forms{
 	float:left;
 	background-color:#3f9ab8;
@@ -205,16 +230,7 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
         color:white;
         text-decoration:none;
 }
-div.top_bar{
-	text-indent:8px; 
-	height: 50px;
-	width: 100%;
-	text-align: left;	
-	background-color: dimgray;
-	color: white;
-	font-weight: bold;
-	font-size: 2.625em;
-	}
+
 div.logo{
 	float: right;
 	margin-top: 30px;
@@ -222,7 +238,6 @@ div.logo{
 	color: white;	
 	font-size: .4em;
 	vertical-align: bottom;
-
 	}
 table.home_table{
    width: 100%;
@@ -238,10 +253,11 @@ table.home_table td{
 	text-align: left;
 	}
 div.sub{
-	margin: auto;
-	margin-bottom: 30px;
-	margin-left: 30px;
-	width: 380px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 120px;
+	margin-right: -50px;
+	width: 350px;
 	float: left;
 	height: 80px;
    text-align: left;
@@ -266,13 +282,13 @@ div.drink_name{
    font-variant:small-caps;
 	/*text-shadow:0 -1px 0 midnightblue;*/
 }
-div.ingredients{
+div.main_ingredients{
    height: 1em;	
 	margin:auto;
 	margin-top: 10px;
 	margin-left: 15px;
 	text-align: left;
-	/*border: 1px solid white;*/
+	/*border: 1px solid green;*/
 	font-size: .8em;	
 	text-align: left;
 	text-transform:lowercase;
@@ -280,10 +296,36 @@ div.ingredients{
 	font-variant:normal;
 	color: dimgrey;
 	}
-div.drink_desc{
-	text-align: left;	
+div.main_drink_desc{
+	float: left;
 	margin-left: 7px;
 	margin-top: 7px;
+	vertical-align: top;
+	font-family:Corbel,sans-serif;
+	font-size: .85em;	
+	font-weight: normal;
+	text-transform: capitalize;
+   color: grey;
+   line-height: 80%
+	text-shadow:0 -1px 0 lightgray;	
+}	
+div.drink_ing{
+   height: 1em;	
+	margin:auto;
+	text-align: center;
+/*	margin-top: 10px;
+	margin-left: 15px;*/
+	z-index: 1;
+	/*border: 1px solid green;*/
+	font-size: .8em;	
+	text-transform:lowercase;
+	text-transform: capitalize;
+	font-variant:normal;
+	color: dimgrey;
+	}
+div.drink_desc{
+	text-align: center;	
+	margin:auto;
 	vertical-align: top;
 	font-family:Corbel,sans-serif;
 	font-size: .85em;	

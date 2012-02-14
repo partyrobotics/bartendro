@@ -1,6 +1,6 @@
 {% extends 'layout' %}
 {% block body %}
-<div class="top_bar">Bartendro<div class="logo">by Party Robotics</div></div>
+<div class="top_bar"><p>Bartendro</p></div>	
 <div class="content">
     <div class="heading">Make a {{ drink.name.name }}</div>
     <div class="drink_ing">{{ drink.ingredients }}</div>

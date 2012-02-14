@@ -1,8 +1,7 @@
 {% extends 'layout' %}
 {% block body %}
+<div class="top_bar"><p>Bartendro</p></div>	 
 <div class="content">
-	 <div class="top_bar">Bartendro<div class="logo">by Party Robotics</div></div>
-	 
     <table class="home_table">
     {% for drink in drinks %}
       {% if (loop.index0 % 2) == 0 %}
@@ -13,8 +12,8 @@
       		<div class="sub">
       			<div class="drink_name">{{ drink.name.name }}</div>
       			</br> 
-	     			<div class="ingredients">{{ drink.ingredients }}</div>
-	     			<div class="drink_desc">{{ drink.desc }}</div>
+	     			<div class="main_ingredients">{{ drink.ingredients }}</div>
+	     			<div class="main_drink_desc">{{ drink.desc }}</div>
       		</div>
       	<a>
       </td>
@@ -25,5 +24,5 @@
     {% endfor %}
     </table>
 </div>
-<div>
+  
 {% endblock %}
