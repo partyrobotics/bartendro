@@ -6,15 +6,6 @@ from gpio import GPIO
 from time import sleep
 import serial
 
-# stty -F /dev/ttyACM0 ispeed 9600 ospeed 9600 cs8 -parenb
-
-#define OK                        0
-#define BAD_DISPENSER_INDEX_ERROR 1
-#define TRANSMISSION_ERROR        2
-#define DISPENSER_FAULT_ERROR     3
-#define INVALID_COMMAND_ERROR     4
-#define INVALID_SPEED_ERROR       5
-
 BAUD_RATE = 38400
 
 class SttyNotFoundException:
@@ -102,7 +93,6 @@ class MasterDriver(object):
 
     def send(self, cmd):
         if self.software_only: return
-        print cmd
         self.ser.write(cmd)
         return self.ser.readline()
 
