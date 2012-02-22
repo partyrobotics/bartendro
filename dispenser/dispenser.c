@@ -35,9 +35,9 @@
 #endif
 
 static uint8_t g_address = 0xFF;
-static uint8_t g_response_payload[2] = { 0, 0};
 static uint8_t g_motor_state = 0;
 
+static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_rx = 0;
 static volatile uint8_t g_reset = 0;
 static volatile uint8_t g_hall_sensor_1 = 0;
@@ -85,6 +85,7 @@ ISR (TIMER1_OVF_vect)
         if (dispense_chunks == 0)
         {
             TIMSK1 &= ~(1<<TOIE1);
+            g_is_dispensing = 0;
             return;
         }
 
@@ -119,13 +120,17 @@ void set_timer(uint16_t dur)
     ticks = dispense_ticks;
     TCNT1 = TIMER1_INIT;
     set_motor_state(1);
+    cli();
     motor_state = 1;
+    g_is_dispensing = 1;
+    sei();
     TIMSK1 |= (1<<TOIE1);
 }
 
 void stop_timer(void)
 {
     cli();
+    g_is_dispensing = 0;
     TIMSK1 &= ~(1<<TOIE1);
     ticks = 0;
     dispense_chunks = 0;
@@ -260,6 +265,17 @@ void set_led_blue(uint8_t v)
     OCR0B = 255 - v;
 }
 
+uint8_t is_dispensing()
+{
+    uint8_t cur;
+
+    cli();
+    cur = g_is_dispensing;
+    sei();
+
+    return cur;
+}
+
 uint8_t set_motor_state(uint8_t state)
 {
     uint8_t cur;
@@ -374,6 +390,17 @@ void handle_cmd(char *line)
     if (strcmp(cmd, "led") == 0 && ret == 5)
     {
         set_led_color(arg1, arg2, arg3);
+        return;
+    }
+    if (strcmp(cmd, "isdisp") == 0)
+    {
+        char ret[10], *p;
+
+        uint8_t state = is_dispensing();
+        sprintf(ret, "!%d isdisp %d\n", addr, state);
+        for(p = ret; *p; p++)
+            serial_tx(*p);
+
         return;
     }
 }
