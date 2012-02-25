@@ -9,7 +9,7 @@
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
        </p>
-       <p class="text" id="size_text">4 fluid ounces</p>
+       <p class="text" id="size_text">&nbsp;</p>
        <p>
           <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
        </p>
@@ -24,12 +24,18 @@
 <script type="text/javascript">
 
 var taster_size = .5;
-var drink_size = 4;
+var max_drink_size_multiplier = 3;
+var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
+
+$(document).ready(function() 
+{
+    $("#size_text").text(drink_size + " fluid ounces");
+});
 
 function size_bigger()
 {
-    if (drink_size >= 8)
+    if (drink_size >= {{ drink.sugg_size }} * max_drink_size_multiplier)
         return;
 
     drink_size += 1;
@@ -38,7 +44,7 @@ function size_bigger()
 
 function size_smaller()
 {
-    if (drink_size <= 2)
+    if (drink_size <= 1)
         return;
 
     drink_size -= 1;

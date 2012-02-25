@@ -6,6 +6,8 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 
+# We have a more accurate version here in the mixer. The UI doesn't need to be so accurate, but
+# while dispensing, its better to be accurate.
 ML_PER_FL_OZ = 29.57
 MS_PER_ML = 86 
 

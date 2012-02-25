@@ -9,9 +9,9 @@ from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.drink_name import DrinkName
 from bartendro.form.booze import BoozeForm
 from bartendro.form.drink import DrinkForm
+from bartendro import constant
 
 MAX_BOOZES_PER_DRINK = 8
-ML_PER_FL_OZ = 30 # ml per fl oz
 
 @expose('/admin/drink')
 def view(request):
@@ -34,7 +34,7 @@ def edit(request, id):
     drink = Drink.query.filter_by(id=int(id)).first()
 
     # convert size to fl oz
-    drink.sugg_size = drink.sugg_size / ML_PER_FL_OZ
+    drink.sugg_size = drink.sugg_size / constant.ML_PER_FL_OZ
 
     kwargs = {}
     fields = []
@@ -84,7 +84,7 @@ def save(request):
 
         drink.name.name = form.data['drink_name']
         drink.desc = form.data['desc']
-        drink.sugg_size = int(form.data['sugg_size'] * ML_PER_FL_OZ);
+        drink.sugg_size = int(form.data['sugg_size'] * constant.ML_PER_FL_OZ);
 
         for i in xrange(MAX_BOOZES_PER_DRINK):
             try:
