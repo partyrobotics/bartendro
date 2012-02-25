@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import sleep
+from time import sleep, localtime
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
 from bartendro.utils import session, local
@@ -123,6 +123,15 @@ class Mixer(object):
             if done: break
 
         self.leds_color(0, 255, 0)
+
+        try:
+            t = localtime()
+            log = open("drinks.log", "a")
+            log.write("%d-%d-%d %d:%02d,%s,%d ml\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, drink.name.name, size))
+            log.close()
+        except IOError:
+            pass
+
         sleep(1)
 #        for i in xrange(10):
 #            self.leds_color(0, 255, 0)
@@ -131,5 +140,6 @@ class Mixer(object):
 #            sleep(.25)
 
         self.leds_color(0, 0, 255)
+
 
         return 0 
