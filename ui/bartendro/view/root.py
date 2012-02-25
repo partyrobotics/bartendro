@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from operator import attrgetter
 import memcache
 from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
 from bartendro.model.drink import Drink
@@ -7,12 +6,7 @@ from bartendro.model.drink_name import DrinkName
 
 def process_ingredients(drinks):
     for drink in drinks:
-        ing = []
-
-        drink.drink_boozes = sorted(drink.drink_boozes, key=attrgetter('booze.abv', 'booze.name'), reverse=True)
-        for db in drink.drink_boozes:
-            ing.append(db.booze.name)
-        drink.ingredients = ing
+        drink.process_ingredients()
 
 def filter_drink_list(can_make_dict, drinks):
     filtered = []

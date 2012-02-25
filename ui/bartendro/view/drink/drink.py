@@ -9,6 +9,7 @@ from bartendro import constant
 @expose('/drink/<id>')
 def view(request, id):
     drink = session.query(Drink).join(DrinkName).filter(Drink.id == id).first()
+    drink.process_ingredients()
     # convert size to fl oz
     drink.sugg_size = drink.sugg_size / constant.ML_PER_FL_OZ
     return render_template("drink/index", drink=drink, title="Make a %s" % drink.name)

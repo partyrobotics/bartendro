@@ -2,10 +2,10 @@
 {% block body %}
 <div class="top_bar"><p>Bartendro</p></div>	
 <div class="drink_content">
-    <div class="drink_heading">Make a {{ drink.name.name }}</div></br>
+    <div class="drink_heading">Make: {{ drink.name.name }}</div></br>
 
 	 <div class="pour">    
-	   		<div class="image"><img src="/static/images/shooter.png" width="180" height="180" /></div>
+   		<div class="image"><img src="/static/images/shooter.png" width="180" height="180" /></div>
 		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
 		<p class="recommendation">Suggested drink size is 4 oz</p> 
 	 		<div class="size">
@@ -17,7 +17,11 @@
 	</div>
 	<div class="drink_left">
     	<div class="drink_desc">{{ drink.desc }}</div>
-   	<div class="drink_ing">{{ drink.ingredients }}</div></br>  
+   	<div class="drink_ing">
+                {% for ing in drink.ingredients %}
+                    {{ ing }}</br>
+                {% endfor %}
+        </div>
     </div>
     	<div class="back_button"> 
         	<button type="button" class="changed_mind" onclick="changed_mind()">Back</button>

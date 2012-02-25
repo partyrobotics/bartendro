@@ -55,7 +55,7 @@ div.sub{
 	float: left;
 	height: 80px;
    text-align: left;
-	border: 1px hidden whitesmoke;
+	border: 1px hidden #ccc;
 	border-top-style: solid;
 	vertical-align:top;
 	text-overflow:ellipsis;
@@ -142,7 +142,6 @@ div.drink_ing{
 	margin-top:20px;
 	font-size: .8em;	
 	text-transform:lowercase;
-	text-transform: capitalize;
 	font-variant:normal;
 	color: grey;
 	}
@@ -154,8 +153,7 @@ div.drink_desc{
 	font-family:Corbel,sans-serif;
 	font-size: .85em;	
 	font-weight: normal;
-	text-transform: capitalize;
-   color: grey;
+   color: black;
    line-height: 80%
 }
 .changed_mind{
@@ -268,6 +266,12 @@ div.subheading{
 	font-size:18pt;
 	color: dimgray;;
 }
+div.section{
+        color: #000;
+        margin: 20px 0px 20px 120px;
+        text-align: center;
+	letter-spacing: 12px;
+}
 div.main p {
 	margin-left: 20px;
 	color: blue;
@@ -356,11 +360,11 @@ div.forms{
 	padding-right:15px;
 	padding-bottom:10px;
 }
-ul.errors{
+div.errors{
 	list-style-type:none;
 	margin-top:-5px;
 	margin-left:20px;
-	line-height:00%;
+        color: red;
 }
 div.bottom_bar{
 	float: bottom;
