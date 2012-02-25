@@ -4,10 +4,7 @@ from bartendro.utils import session, render_template, render_json, expose, valid
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 
-@expose('/')
-def index(request):
-    drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
-                                 .order_by(DrinkName.name).all()
+def process_ingredients(drinks):
     for drink in drinks:
         ing = []
 
@@ -15,5 +12,20 @@ def index(request):
         for db in drink.drink_boozes:
             ing.append(db.booze.name)
         drink.ingredients = ', '.join(ing)
+
+@expose('/')
+def index(request):
+    top_drinks = session.query(Drink) \
+                        .join(DrinkName) \
+                        .filter(Drink.name_id == DrinkName.id)  \
+                        .filter(Drink.popular == 1)  \
+                        .order_by(DrinkName.name).all() 
+    process_ingredients(top_drinks)
+    other_drinks = session.query(Drink) \
+                        .join(DrinkName) \
+                        .filter(Drink.name_id == DrinkName.id)  \
+                        .filter(Drink.popular == 0)  \
+                        .order_by(DrinkName.name).all() 
+    process_ingredients(other_drinks)
             
-    return render_template("index", drinks=drinks)
+    return render_template("index", top_drinks=top_drinks, other_drinks=other_drinks)

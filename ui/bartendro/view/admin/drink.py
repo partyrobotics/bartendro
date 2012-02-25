@@ -85,6 +85,7 @@ def save(request):
         drink.name.name = form.data['drink_name']
         drink.desc = form.data['desc']
         drink.sugg_size = int(form.data['sugg_size'] * constant.ML_PER_FL_OZ);
+        drink.popular = form.data['popular']
 
         for i in xrange(MAX_BOOZES_PER_DRINK):
             try:

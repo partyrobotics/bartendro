@@ -30,6 +30,14 @@
 	            {% if form.sugg_size.errors %}
 	                <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
+
+	            <div class="forminput">
+                        {{ form.popular.label }}:<br/> 
+                        {{ form.popular(class="form") }}
+                    </div>
+	            {% if form.popular.errors %}
+	                <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
+	            {% endif %}
     
                     {% for name, parts, id, show in fields %}
                         {% if show %}
