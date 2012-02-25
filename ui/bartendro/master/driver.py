@@ -40,7 +40,7 @@ class MasterDriver(object):
 
         try: 
             self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
-            self.num_dispensers = 3 #15
+            self.num_dispensers = 6 #15
         except KeyError:
             self.software_only = 0
 

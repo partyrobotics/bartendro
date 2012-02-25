@@ -2,7 +2,7 @@
 from operator import itemgetter
 from werkzeug.utils import redirect
 from wtforms import Form, TextField, SelectField, DecimalField, validators, HiddenField
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for
+from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
@@ -152,6 +152,10 @@ def save(request):
                 DrinkBooze(drink, booze, parts, 0)
 
         session.commit()
+        mc = local.application.mc
+        mc.delete("top_drinks")
+        mc.delete("other_drinks")
+        mc.delete("available_drink_list")
         return redirect('/admin/drink/edit/%d?saved=1' % drink.id)
 
     drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from werkzeug.utils import redirect
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for
+from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
@@ -30,7 +30,6 @@ def save(request):
     form = BoozeForm(request.form)
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
-        print "save to id: %d" % id
         if id:
             print "save existing entry"
             booze = Booze.query.filter_by(id=int(id)).first()
@@ -41,6 +40,10 @@ def save(request):
             session.add(booze)
 
         session.commit()
+        mc = local.application.mc
+        mc.delete("top_drinks")
+        mc.delete("other_drinks")
+        mc.delete("available_drink_list")
         return redirect('/admin/booze/edit/%d?saved=1' % booze.id)
 
     boozes = Booze.query.order_by(Booze.name)

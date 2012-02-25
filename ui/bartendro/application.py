@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from os import path
+import memcache
 from sqlalchemy import create_engine
 from werkzeug import Request, ClosingIterator
 from werkzeug.exceptions import HTTPException
@@ -20,6 +21,7 @@ class BartendroUIServer(object):
                     '/static':  bartendro.utils.STATIC_PATH
                     })
 
+        self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
         self.driver.open()
         self.driver.chain_init();

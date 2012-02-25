@@ -3,7 +3,6 @@ from werkzeug import script
 
 def make_app():
     from bartendro.application import BartendroUIServer
-    print "make_app!"
     return BartendroUIServer('sqlite:///bartendro.db')
 
 def make_shell():

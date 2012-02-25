@@ -2,7 +2,7 @@
 from time import sleep
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
-from bartendro.utils import session
+from bartendro.utils import session, local
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -18,7 +18,7 @@ class Mixer(object):
         self.err = ""
         self.disp_count = self.driver.count()
         self.leds_color(0, 0, 255)
-        self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+        self.mc = local.application.mc
 
     def get_error(self):
         #self.driver.get_error()
@@ -34,7 +34,7 @@ class Mixer(object):
             return can_make
 
         boozes = session.query("booze_id") \
-                        .from_statement("SELECT DISTINCT(booze_id) FROM dispenser ORDER BY id LIMIT :d") \
+                        .from_statement("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d") \
                         .params(d=self.disp_count).all()
 
         booze_dict = {}
@@ -56,6 +56,10 @@ class Mixer(object):
                         foo = booze_dict[booze]
                     except KeyError:
                         ok = False
+
+#                print "%d: " % last_drink,
+#                print boozes,
+#                print ok
 
                 if ok: can_make.append(last_drink)
                 boozes = []
