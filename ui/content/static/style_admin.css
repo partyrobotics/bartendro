@@ -1,86 +1,12 @@
+/*------Common---------------------------------------------------*/
 body{
 	margin:	0px;
 	font-family:"Arial";
 	color: white;
 }
-div.heading{
-	margin: auto;
-	height:75px; 
-	width: 750px;
-	float: center;
-	text-align: center;
-	line-height:200%;
-	font-weight:bold;
-	float: center;
-	font-family:Corbel,sans-serif;
-	text-transform:capitalize;
-	font-weight: normal;
-   font-size:3em;
-   color: #0088cc;
-   text-decoration:none;
-   font-variant:small-caps;
-  	border: 1px hidden whitesmoke;
-	border-bottom-style: solid;
-} 
-div.size_text{
-	font-size: 1.25em;	
-	margin: auto;
-	margin-top: 10px;
-	float: center;
-	text-align: center;	
-	color: black;
-	border 1px solid white;
-	}
-div.size_text p{
-	color: black;	
-	}
-div.subheading{
-	font-family:"Arial";
-	font-weight:bold;
-	font-size:18pt;
-	color: dimgray;;
-}
-div.boozeheading{
-        line-height:250%;
-        font-family:"Arial";
-        font-weight:bold;
-        font-size:28px;
-        color: green;
-	text-shadow: 3px 3px 2px gray;
-}
-div.forminput{
-	color:white;
-	text-color:white;
-	font-size:20pt;
-	font-family:"Arial";
-	font-weight:bold;
-	text-align:left;
-	line-height:70%;
-	background-color:#3f9ab8;
-	margin:20px;
-	margin-left:50px;
-}
-textarea.desc{
-	height:50px;
-	width:300px;
-	font-family:Arial;
-}
-input.form{
-	
-	height:20px;
-	width:300px;
-		
-}
-div.main{
-	background-color: white;
-	border-style:solid;	
-	margin:0px;
-	position; absolute;
-	top: 0px;
-	left: 0px;}
 div.content{
    margin: auto;
-
+   display: block;
 }
 div.top_bar{
 	position: fixed;
@@ -92,11 +18,11 @@ div.top_bar{
 /*	border:1px solid red;*/
 	}
 div.top_bar p{
-		transform: rotate(270deg);
--ms-transform: rotate(270deg); /* IE 9 */
--webkit-transform: rotate(270deg); /* Safari and Chrome */
--o-transform: rotate(270deg); /* Opera */
--moz-transform: rotate(270deg); /* Firefox */
+	transform: rotate(270deg);
+	-ms-transform: rotate(270deg); /* IE 9 */
+	-webkit-transform: rotate(270deg); /* Safari and Chrome */
+	-o-transform: rotate(270deg); /* Opera */
+	-moz-transform: rotate(270deg); /* Firefox */
 	text-align: left;
 	vertical-align: bottom;
 	font-weight: bold;
@@ -104,134 +30,9 @@ div.top_bar p{
 	color: #ccc;
 	letter-spacing: 6px;
 	margin-top: 320px;
-	}
-div.forms{
-	float:left;
-	background-color:#3f9ab8;
-	border-style:solid;
-	border-color:white;
-	border-width:3px;
-	margin-left:-23px;
-	padding-right:10px;
-	padding-bottom:10px;
 }
-ul.errors{
-	list-style-type:none;
-	margin-top:-5px;
-	margin-left:20px;
-	line-height:00%;
-}
-div.button{
-	margin-left:150px;
-	margin-top:25px;
-}
-input.buttons{
-        font-family:Arial;
-	font-size:12pt;
-	font-weight:bold;
-	text-align:center;
-	vertical-align:center;
-	background-color: #285374;
-	color:white;
-	margin-left:20px;
-	padding-left:15px;
-	padding-right:15px;
-	padding-top:10px;
-	padding-bottom:10px;
-	border-radius:5px;
-	border-color:white;
-}
-div.side_bar{
-	padding-left: 10px;
-	background-color: #3f9ab8;
-	padding-right: 10px;
-	border-style:solid;	
-	border-color: white;
-	border-width:3px;
-	position: fixed;
-	top: 0px;
-	left: 724px;
-	height:600px;
-	width:280px;
-	float: right;
-	display: block;}
-div.boozelist{
-	background-color: #327c94;
-	border-width:2px;
-	border-style:solid;	
-	color:white;
-	height:515px;
-	border-radius:8px;
-	text-alignment:left;
-	overflow:auto;	
-}
-ul.booze{
-	margin-top:5px;
-}
-li.booze{
-	margin-left:-40px;
-	list-style-type:none;
-	font-size:14pt;
-	line-height:200%;	
-	overflow:hidden;
-	border-style:solid;
-	border-width:0px;
-	padding-left:10px;
-	margin-top:3px;
-	background-color:#2c6680;
-}
-div.bottom_bar{
-	float: left;
-	vertical-align: bottom;
-	text-align:left;	
-	margin-top:17px;}
-div.main p {
-	margin-left: 20px;
-	color: blue;
-}
-a.home:link,a.home:visited{
-	margin-left:20px;
-	font-family:Arial;
-	font-size:16pt;
-	font-weight:bold;
-	color: lightgrey;
-	text-decoration:none;
-	text-align:bottom;
-}
-a.home:hover,a.home:active{
-	font-family:Arial;	
-	font-size:16pt;
-	color:#0088cc;
-	text-decoration:none;
-}
-a.admin:link,a.admin:visited{
-        margin-left:20px;
-        font-family:Arial;
-        font-size:18pt;
-        color: #0088cc;
-        text-decoration:none;
-}
-a.admin:hover,a.admin:active{
-        font-family:Arial;
-        font-size:18pt;
-        color:lightgrey;
-        text-decoration:none;
-}
-a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
-        font-family:Arial;
-        font-size:16pt;
-        color:white;
-        text-decoration:none;
-}
+/*------Main Page-------------------------------------------------*/
 
-div.logo{
-	float: right;
-	margin-top: 30px;
-	margin-right: 25px;
-	color: white;	
-	font-size: .4em;
-	vertical-align: bottom;
-	}
 table.home_table{
    width: 100%;
    text-align: center;
@@ -260,7 +61,7 @@ div.sub{
 	text-overflow:ellipsis;
 	display: block;
 	}
-div.drink_name{
+div.main_name{
    height: 20px;
 	float: left;
 	margin-top: 5px;
@@ -302,76 +103,60 @@ div.main_drink_desc{
    line-height: 80%
 	text-shadow:0 -1px 0 lightgray;	
 }	
+/*-------Drink Page------------------------------------------------*/
+div.drink_content{
+   float: left;
+   display: inline;
+}
+div.drink_heading{
+	margin-left: 100px;
+	height:75px; 
+	width: 750px;
+	text-align: left;
+	line-height:200%;
+	font-weight:bold;
+	float: left;
+	font-family:Corbel,sans-serif;
+	text-transform:capitalize;
+	font-weight: normal;
+   font-size:3em;
+   color: #0088cc;
+   text-decoration:none;
+   font-variant:small-caps;
+  	border: 1px hidden whitesmoke;
+	border-bottom-style: solid;
+}
+div.drink_left{
+	height:400px;
+	width:420px;
+	margin-left: 100px;
+	margin-top: 60px;
+
+}
 div.drink_ing{
-   height: 1em;	
-	margin:auto;
-	text-align: center;
-/*	margin-top: 10px;
-	margin-left: 15px;*/
-	z-index: 1;
-	/*border: 1px solid green;*/
+   height: 30px;
+   width: 200px;	
+	float: left;
+	text-align: left;
+	margin-left:20px; 
+	margin-top:20px;
 	font-size: .8em;	
 	text-transform:lowercase;
 	text-transform: capitalize;
 	font-variant:normal;
-	color: dimgrey;
+	color: grey;
 	}
 div.drink_desc{
-	text-align: center;	
-	margin:auto;
-	vertical-align: top;
+	float: left;	
+	text-align: left;	
+	margin-left:20px; 
+	margin-top:15px;
 	font-family:Corbel,sans-serif;
 	font-size: .85em;	
 	font-weight: normal;
 	text-transform: capitalize;
    color: grey;
    line-height: 80%
-	text-shadow:0 -1px 0 lightgray;	
-}	
-.adjust_drink_button{
-	float: center;
-   font-family:Arial;
-   font-size:18pt;
-   text-transform: capitalize;
-	background: #eeeeee;
-   color: dimgray;
-	border: 1px solid lightgray;	
-	border-radius:15px;
-	margin: 5px;
-	padding-top:25px;padding-bottom: 25px;
-	padding-left: 25px;padding-right: 25px;
-	-moz-box-shadow: 1px 1px 1px dimgrey;
-	-webkit-box-shadow: 1px 1px 1px dimgrey;
-	box-shadow: 1px 1px 1px dimgrey; 
-}
-.taster{
-	float: center;
-	vertical-align: middle;
-   font-family:Arial;
-   font-size:16pt;
-   text-transform: capitalize;
-	background: #eeeeee;
-   color: dimgray;
-	border: 1px solid lightgray;	
-	border-radius:15px;
-	margin: -25px;
-	padding:20px;
-	-moz-box-shadow: 1px 1px 1px dimgrey;
-	-webkit-box-shadow: 1px 1px 1px dimgrey;
-	box-shadow: 1px 1px 1px dimgrey; 
-}
-.drink_size{
-	margin-left:auto;
-	margin-right: auto;
-	margin-top: 30px;
-   text-align:center;
-   color: dimgray;
-}
-.make_drink_buttons{
-   clear: both;
-   margin-top: 5em;
-   margin-top: 100px;
-   text-align: center;  
 }
 .changed_mind{
    font-family:Arial;
@@ -379,17 +164,88 @@ div.drink_desc{
 	background: #eeeeee;
 	color: dimgray;
 	border: 1px solid lightgray;	
-		text-transform: uppercase;
+	text-transform: uppercase;
 	border-radius:15px;
-	margin-left: 40px;
-	margin-top: -70px;
 	padding:40px;
 	float: left;
+	margin-left: 20px;	
+	vertical-align: bottom;
 	-moz-box-shadow: 1px 1px 1px dimgrey;
 	-webkit-box-shadow: 1px 1px 1px dimgrey;
 	box-shadow: 1px 1px 1px dimgrey;
 }
+div.pour{
+	float: right;
+	margin-right: -100px;
+	height:550px;
+	width:420px;
+	background-color: white;
+	display: block;
+}
+div.size{
+	width: 180px;
+	height: 300px;
+	margin-left: 10px;
+	margin-top: 15px;
+}
+div.size_text{
+	float: left;
+	font-size: 1.25em;	
+	width: 150px;
+	color: black;
+	line-height: 100%;
+}
+p.recommendation{
+	color:dimgrey;
+	text-align: center;	   
+	margin-left: -15px;
+  	border: 1px hidden whitesmoke;
+	border-bottom-style: solid;
+}
+p.text{
+	text-align: center;	
+   font-size:20pt;
+   font-family:"Arial";
+	font-size: 1.25em;	
+	color: grey;
+}
+.adjust_drink_button{
+	width: 150px;	
+	height: 70px;
+	float: left;
+   font-family:Arial;
+   font-size:18pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+   color: dimgray;
+	border: 1px solid lightgray;	
+	border-radius:10px;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
+}
+.taster{
+	width: 320px;
+	height: 80px;
+	margin-left: 35px;
+	float: center;
+   font-family:Arial;
+   font-size:18pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+   color: dimgray;
+	border: 1px solid lightgray;	
+	border-radius:10px;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
+}
+
 .make_drink{
+	width: 200px;
+	height: 230px;
+	margin-top: -300px; 
+	margin-right: 40px;
    font-family:Arial;
    font-size:34pt;
 	background: #eeeeee;
@@ -397,18 +253,187 @@ div.drink_desc{
 	border: 1px solid lightgray;	
 	border-radius:20px;
 	text-transform: uppercase;
-	margin-right: 40px;
-	margin-top: -70px;
-	padding:40px;
 	float: right;
+	text-align: center;
 	-moz-box-shadow: 2px 2px 3px dimgrey;
 	-webkit-box-shadow: 2px 2px 3px dimgrey;
 	box-shadow: 2px 2px 3px dimgrey;
 }
-.text{
-        color:dimgray;
-        font-size:20pt;
-        font-family:"Arial";
+div.back_button{
+	float: left;	
+}
+div.subheading{
+	font-family:"Arial";
+	font-weight:bold;
+	font-size:18pt;
+	color: dimgray;;
+}
+div.main p {
+	margin-left: 20px;
+	color: blue;
+}
+div.image{
+	margin-left: 110px;
+	float: center;
+	}
+/*------Admin Booze-------------------------------------------------*/
+div.main{
+	display: block;
+}
+div.admin_content{
+	margin-top: 0px;	   
+   margin-left: 100px;
+   display: block;
+}
+div.side_bar{
+	padding-left: 10px;
+	background-color: whitesmoke;
+	padding-right: 10px;
+	border: 1px solid grey;
+	border-radius:2px;	
+	width:280px;
+	float: right;
+	display: block;}
+div.boozeheading{
+	margin-top: 0px;
+   line-height:180%;
+   font-family:#0088cc;
+   font-weight:bold;
+   font-size:28px;
+   color: #0088cc;
+}
+div.boozelist{
+	background-color: grey;
+	border: 2px solid grey;	
+	height:515px;
+	border-radius:2px;
+	text-alignment:left;
+	overflow:auto;	
+}
+ul.booze{
+	margin-top:5px;
+}
+li.booze{
+	margin-left:-40px;
+	list-style-type:none;
+	line-height:250%;	
+	overflow:hidden;
+	border-style:solid;
+	border-width:0px;
+	padding-left:10px;
+	margin-top:2px;
+	background-color:white;
+}
+a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
+   font-family:Arial;
+   font-size:14pt;
+   color:#0088cc;
+   text-decoration:none;
+}
+div.forminput{
+	color:#0088cc;
+	font-size:18pt;
+	font-family:"Arial";
+	font-weight:normal;
+	text-align:left;
+	line-height:90%;
+	background-color:whitesmoke;
+	margin:20px;
+	margin-left:30px;
+}
+textarea.desc{
+	height:50px;width:300px;
+	font-family:Arial;
+}
+input.form{
+	height:20px;width:300px;		
+}
+div.forms{
+	float:left;
+	background-color:whitesmoke;
+	border: 1px solid grey;	
+	margin-left:80px;
+	padding-right:15px;
+	padding-bottom:10px;
+}
+ul.errors{
+	list-style-type:none;
+	margin-top:-5px;
+	margin-left:20px;
+	line-height:00%;
+}
+div.bottom_bar{
+	float: bottom;
+	vertical-align: bottom;
+	text-align:left;	
+	margin-top:40px;
+	margin-left: 80px;
+}
+a.home:link,a.home:visited{
+	margin-left:20px;
+	font-family:Arial;
+	font-size:20pt;
+	font-weight:bold;
+	color: grey;
+	text-decoration:none;
+	text-align:bottom;
+}
+h1{
+	color: #0088cc;
+	font-family:Corbel;
+	font-size:2em;
+	font-weight:bold;
+}
+a.new:hover,a.new:active,a.new:link,a.new:visited{
+	margin-bottom: 20px;	
+	margin-left:80px;
+   float:center;
+   font-family:Arial;
+   font-size:18pt;
+   color: grey;
+   text-decoration:underline;
+}
+a.home:hover,a.home:active{
+	font-family:Arial;	
+	font-size:20pt;
+	color:#0088cc;
+	text-decoration:none;
+}
+a.admin:link,a.admin:visited{
+   margin-left:20px;
+   font-family:Arial;
+   font-size:18pt;
+   color: #0088cc;
+   text-decoration:none;
+}
+a.admin:hover,a.admin:active{
+   font-family:Arial;
+   font-size:18pt;
+   color:lightgrey;
+   text-decoration:none;
+}
+ul.menu{
+	margin-left: -20px;		
+}
+div.button{
+	margin-left:10px;
+	margin-top:25px;
+}
+.buttons{
+   font-family:Arial;
+	font-size:12pt;
+	font-weight:normal;
+	text-align:center;
+	vertical-align:center;
+	background-color: #285374;
+	color:white;
+	margin-left:20px;
+	padding-left:15px;
+	padding-right:15px;
+	padding-top:10px;
+	padding-bottom:10px;
+	border-radius:5px;
+	border-color:white;
 }
 #lightbox {
 	position: absolute;

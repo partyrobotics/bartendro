@@ -1,7 +1,8 @@
 {% extends 'admin/layout' %}
 {% block body %}
+<div class="top_bar"><p>Bartendro</p></div>
     <div class="main">
-    <div class="content">	
+    <div class="admin_content">	
         <div class="heading">Dispensers</div>
         {% if saved %}
            <p>Your changes have been saved.</p>
