@@ -13,14 +13,22 @@
                         {{ form.drink_name(class="form") }}
                     </div>
 	            {% if form.drink_name.errors %}
-	                <ul class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	                <div class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
 	            <div class="forminput">
                         {{ form.desc.label }}:<br/> 
-                        {{ form.desc(class="desc") }}
+                        {{ form.desc(class="form") }}
                     </div>
 	            {% if form.desc.errors %}
-	                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	                <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
+	            {% endif %}
+
+	            <div class="forminput">
+                        {{ form.sugg_size.label }}:<br/> 
+                        {{ form.sugg_size(class="form") }}
+                    </div>
+	            {% if form.sugg_size.errors %}
+	                <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
     
                     {% for name, parts, id, show in fields %}
@@ -34,7 +42,7 @@
                                 {{ form[name](class="desc") }}
                                 {{ form[parts](class="desc") }}
                                 {% if form[parts].errors %}
-                                    <ul class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                    <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
                                 {% endif %}
                             </div>
                         </div>

@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, metadata
 from bartendro.model.drink_name import DrinkName
 
+DEFAULT_SUGGESTED_DRINK_SIZE = 118 #ml (4 oz)
+
 Base = declarative_base(metadata=metadata)
 class Drink(Base):
     """
@@ -15,20 +17,23 @@ class Drink(Base):
     id = Column(Integer, primary_key=True)
     desc = Column(UnicodeText, nullable=False)
     name_id = Column(Integer, ForeignKey('drink_name.id'), nullable=False)
+    sugg_size = Column(Integer)
 
     query = session.query_property()
 
-    def __init__(self, desc = u'', data = None):
+    def __init__(self, desc = u'', data = None, size = DEFAULT_SUGGESTED_DRINK_SIZE):
         self.name = DrinkName()
         if data: 
             self.update(data)
             return
         self.desc = desc
+        self.size = size
         session.add(self)
 
     def json(self):
         return { 
                  'desc' : self.desc,
+                 'sugg_size' : self.sugg_size,
                }
 
     def __repr__(self):

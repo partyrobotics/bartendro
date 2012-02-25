@@ -11,6 +11,7 @@ from bartendro.form.booze import BoozeForm
 from bartendro.form.drink import DrinkForm
 
 MAX_BOOZES_PER_DRINK = 8
+ML_PER_FL_OZ = 30 # ml per fl oz
 
 @expose('/admin/drink')
 def view(request):
@@ -31,6 +32,10 @@ def edit(request, id):
 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
     drink = Drink.query.filter_by(id=int(id)).first()
+
+    # convert size to fl oz
+    drink.sugg_size = drink.sugg_size / ML_PER_FL_OZ
+
     kwargs = {}
     fields = []
     null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
@@ -65,13 +70,10 @@ def edit(request, id):
 @expose('/admin/drink/save')
 def save(request):
 
-    #print "request.form", request.form
-
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/drink')
 
     form = DrinkForm(request.form)
-    print request.form
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
         if id:
@@ -82,6 +84,7 @@ def save(request):
 
         drink.name.name = form.data['drink_name']
         drink.desc = form.data['desc']
+        drink.sugg_size = int(form.data['sugg_size'] * ML_PER_FL_OZ);
 
         for i in xrange(MAX_BOOZES_PER_DRINK):
             try:
@@ -102,15 +105,11 @@ def save(request):
             except KeyError:
                 dbn = -1
 
-            print "dbi: %d dbn: %d: parts: %d" % (dbi, dbn, parts)
-
             if parts == 0:
                 if dbi != 0:
                     for i, db in enumerate(drink.drink_boozes):
                         if db.id == dbi:
-                            print drink
                             session.delete(drink.drink_boozes[i])
-                            print drink
                             break
                 continue
 
@@ -127,7 +126,6 @@ def save(request):
                 booze = Booze.query.filter_by(id=dbn).first()
                 DrinkBooze(drink, booze, parts, 0)
 
-        print "session commit!"
         session.commit()
         return redirect('/admin/drink/edit/%d?saved=1' % drink.id)
 
