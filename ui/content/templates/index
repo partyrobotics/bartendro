@@ -9,18 +9,19 @@
       {% endif %}
       <td class="drink" >
       	<a href="/drink/{{ drink.id }}">
-      		<div class="sub">
-      			<div class="drink_name">{{ drink.name.name }}</div>
-      			</br> 
-	     			<div class="main_ingredients">{{ drink.ingredients }}</div>
-	     			<div class="main_drink_desc">{{ drink.desc }}</div>
-      		</div>
+            <div class="sub">
+                <div class="drink_name">{{ drink.name.name }}</div>
+                </br> 
+                <div class="main_ingredients">{{ drink.ingredients }}</div>
+                <div class="main_drink_desc">{{ drink.desc }}</div>
+            </div>
       	<a>
       </td>
      
       {% if (loop.index0 % 2) == 1 %}
          </tr> 
       {% endif %}
+
     {% endfor %}
     </table>
 </div>
