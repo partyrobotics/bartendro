@@ -59,7 +59,7 @@
 
                     {{ form.id() }}
 	            <div class="button">
-                        <button class="buttons" onclick="add_booze()">add booze</button>
+                        <button type="button" class="buttons" onclick="add_booze()">add booze</button>
                         {{ form.cancel(class="buttons") }}
                         {{ form.save(class="buttons") }}
                     </div>
@@ -69,6 +69,7 @@
 
     <div class="side_bar">
         <div class="boozeheading">Drink List</div>
+        <a class="new" href="/admin/drink">add new</a>
 	<div class="boozelist">
 	<ul class="booze">
             {% for drink in drinks %}
@@ -84,11 +85,12 @@
     </div>
 
 <script type="text/javascript">
+var max_boozes = 20;
 function add_booze()
 {
     var i = 0;
 
-    for(i = 0;; i++)
+    for(i = 0; i < max_boozes; i++)
     {
         if ( $("#bl_" + i).attr("class") == "booze_line_hidden" )
         {
@@ -97,6 +99,8 @@ function add_booze()
             return;
         }
     }
+    if (i == max_boozes)
+        alert("DOM problem. Don't know where to add booze div.");
 }
 </script>
 {% endblock %}

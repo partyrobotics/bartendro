@@ -28,6 +28,15 @@ class Mixer(object):
         for i in xrange(self.disp_count):
             self.driver.led(i, r, g, b)
 
+    def can_make_drink(self, boozes, booze_dict):
+        ok = True
+        for booze in boozes:
+            try:
+                foo = booze_dict[booze]
+            except KeyError:
+                ok = False
+        return ok
+
     def get_available_drink_list(self):
         can_make = self.mc.get("available_drink_list")
         if can_make: 
@@ -44,27 +53,21 @@ class Mixer(object):
         drinks = session.query("drink_id", "booze_id") \
                         .from_statement("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id") \
                         .all()
+        print drinks
         last_drink = -1
         boozes = []
         can_make = []
         for drink_id, booze_id in drinks:
             if last_drink < 0: last_drink = drink_id
             if drink_id != last_drink:
-                ok = True
-                for booze in boozes:
-                    try:
-                        foo = booze_dict[booze]
-                    except KeyError:
-                        ok = False
-
-#                print "%d: " % last_drink,
-#                print boozes,
-#                print ok
-
-                if ok: can_make.append(last_drink)
+                if self.can_make_drink(boozes, booze_dict): 
+                    can_make.append(last_drink)
                 boozes = []
             boozes.append(booze_id)
             last_drink = drink_id
+
+        if self.can_make_drink(boozes, booze_dict): 
+            can_make.append(last_drink)
 
         self.mc.set("available_drink_list", can_make)
         return can_make
