@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from time import sleep
+import memcache
 from sqlalchemy.orm import mapper, relationship, backref
+from bartendro.utils import session
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -16,6 +18,7 @@ class Mixer(object):
         self.err = ""
         self.disp_count = self.driver.count()
         self.leds_color(0, 0, 255)
+        self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
     def get_error(self):
         #self.driver.get_error()
@@ -25,7 +28,46 @@ class Mixer(object):
         for i in xrange(self.disp_count):
             self.driver.led(i, r, g, b)
 
+    def get_available_drink_list(self):
+        can_make = self.mc.get("available_drink_list")
+        if can_make: 
+            return can_make
+
+        boozes = session.query("booze_id") \
+                        .from_statement("SELECT DISTINCT(booze_id) FROM dispenser ORDER BY id LIMIT :d") \
+                        .params(d=self.disp_count).all()
+
+        booze_dict = {}
+        for booze_id in boozes:
+            booze_dict[booze_id[0]] = 1
+
+        drinks = session.query("drink_id", "booze_id") \
+                        .from_statement("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id") \
+                        .all()
+        last_drink = -1
+        boozes = []
+        can_make = []
+        for drink_id, booze_id in drinks:
+            if last_drink < 0: last_drink = drink_id
+            if drink_id != last_drink:
+                ok = True
+                for booze in boozes:
+                    try:
+                        foo = booze_dict[booze]
+                    except KeyError:
+                        ok = False
+
+                if ok: can_make.append(last_drink)
+                boozes = []
+            boozes.append(booze_id)
+            last_drink = drink_id
+
+        self.mc.set("available_drink_list", can_make)
+        return can_make
+
     def make_drink(self, id, size, strength):
+        self.get_available_drink_list()
+
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 

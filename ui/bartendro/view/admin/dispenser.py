@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from operator import itemgetter
+import memcache
 from werkzeug.utils import redirect
 from bartendro.utils import session, render_template, local, render_json, expose, validate_url, url_for
 from wtforms import Form, SelectField
@@ -53,4 +54,6 @@ def save(request):
                 continue
         session.commit()
 
+    mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+    mc.delete("available_drink_list")
     return redirect('/admin/dispenser?saved=1')
