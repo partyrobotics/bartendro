@@ -6,9 +6,6 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 
-# We have a more accurate version here in the mixer. The UI doesn't need to be so accurate, but
-# while dispensing, its better to be accurate.
-ML_PER_FL_OZ = 29.57
 MS_PER_ML = 86 
 
 class Mixer(object):
@@ -45,8 +42,8 @@ class Mixer(object):
                     r['part'] = db.value
                     break
             if not r:
-                print "Fail to make drink"
                 self.err = "Cannot make drink. I don't have the required booze: %s" % db.booze.name
+                print self.err
                 return 1
             recipe.append(r)
 
@@ -58,7 +55,8 @@ class Mixer(object):
         dur = 0
         active_disp = []
         for r in recipe:
-            r['ml'] = r['part'] * size * ML_PER_FL_OZ / total_parts
+            r['ml'] = r['part'] * size / total_parts
+            print "%s: %d ml" % (r['dispenser']-1, r['ml'])
             r['ms'] = r['ml'] * MS_PER_ML
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
             active_disp.append(r['dispenser'])
