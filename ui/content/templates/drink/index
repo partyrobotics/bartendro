@@ -1,26 +1,29 @@
 {% extends 'layout' %}
 {% block body %}
 <div class="top_bar"><p>Bartendro</p></div>	
-<div class="content">
-    <div class="heading">Make a {{ drink.name.name }}</div>
-    <div class="drink_ing">{{ drink.ingredients }}</div>
-    <div class="drink_desc">{{ drink.desc }}</div>
-    <div class="drink_size">
-       <p>
-          <button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button>
-       </p>
-       <p class="text" id="size_text">&nbsp;</p>
-       <p>
-          <button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button>
-       </p>
+<div class="drink_content">
+    <div class="drink_heading">Make a {{ drink.name.name }}</div></br>
+
+	 <div class="pour">    
+	   		<div class="image"><img src="/static/images/shooter.png" width="180" height="180" /></div>
+		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
+		<p class="recommendation">Suggested drink size is 4 oz</p> 
+	 		<div class="size">
+	 			<div><button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button></div>
+    			<div class="size_text"><p class="text" id="size_text">4 fluid ounces</p></div>
+      		<div><button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button></div>
+      	</div>
+		<div><button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button></div>
+	</div>
+	<div class="drink_left">
+    	<div class="drink_desc">{{ drink.desc }}</div>
+   	<div class="drink_ing">{{ drink.ingredients }}</div></br>  
     </div>
-    <div class="make_drink_buttons">
-	    <button type="button" class="taster" onclick="make_taster({{ drink.id }})">1/2 oz Taster</button>
-        <button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
-        <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button>
-    </div>
+    	<div class="back_button"> 
+        	<button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
+    	</div>
 </div>
-<div>
+
 <script type="text/javascript">
 
 var taster_size = .5;

@@ -1,0 +1,468 @@
+/*------Common---------------------------------------------------*/
+body{
+	margin:	0px;
+	font-family:"Arial";
+	color: white;
+}
+div.content{
+   margin: auto;
+   display: block;
+}
+div.top_bar{
+	position: fixed;
+	float: left;
+	width: 70px;
+	height: 100%;
+	margin: auto;
+	z-index: -1;
+/*	border:1px solid red;*/
+	}
+div.top_bar p{
+	transform: rotate(270deg);
+	-ms-transform: rotate(270deg); /* IE 9 */
+	-webkit-transform: rotate(270deg); /* Safari and Chrome */
+	-o-transform: rotate(270deg); /* Opera */
+	-moz-transform: rotate(270deg); /* Firefox */
+	text-align: left;
+	vertical-align: bottom;
+	font-weight: bold;
+	font-size: 4.5em;
+	color: #ccc;
+	letter-spacing: 6px;
+	margin-top: 320px;
+}
+/*------Main Page-------------------------------------------------*/
+
+table.home_table{
+   width: 100%;
+   text-align: center;
+   margin: auto;
+  	}
+table.home_table a{
+	text-decoration: none;
+}
+table.home_table td{
+   /*padding-top:10px;padding-bottom:10px;*/
+	vertical-align: top;
+	text-align: left;
+	}
+div.sub{
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 120px;
+	margin-right: -50px;
+	width: 350px;
+	float: left;
+	height: 80px;
+   text-align: left;
+	border: 1px hidden whitesmoke;
+	border-top-style: solid;
+	vertical-align:top;
+	text-overflow:ellipsis;
+	display: block;
+	}
+div.main_name{
+   height: 20px;
+	float: left;
+	margin-top: 5px;
+	/*border: 1px solid white;*/
+	text-align: left;	
+	vertical-align: top;
+	font-family:Corbel,sans-serif;
+	text-transform:capitalize;
+	font-size: 1.5em;	
+	font-weight: normal;
+   color: #0088cc;
+   font-variant:small-caps;
+	/*text-shadow:0 -1px 0 midnightblue;*/
+}
+div.main_ingredients{
+   height: 1em;	
+	margin:auto;
+	margin-top: 10px;
+	margin-left: 15px;
+	text-align: left;
+	/*border: 1px solid green;*/
+	font-size: .8em;	
+	text-align: left;
+	text-transform:lowercase;
+	text-transform: capitalize;
+	font-variant:normal;
+	color: dimgrey;
+	}
+div.main_drink_desc{
+	float: left;
+	margin-left: 7px;
+	margin-top: 7px;
+	vertical-align: top;
+	font-family:Corbel,sans-serif;
+	font-size: .85em;	
+	font-weight: normal;
+	text-transform: capitalize;
+   color: grey;
+   line-height: 80%
+	text-shadow:0 -1px 0 lightgray;	
+}	
+/*-------Drink Page------------------------------------------------*/
+div.drink_content{
+   float: left;
+   display: inline;
+}
+div.drink_heading{
+	margin-left: 100px;
+	height:75px; 
+	width: 750px;
+	text-align: left;
+	line-height:200%;
+	font-weight:bold;
+	float: left;
+	font-family:Corbel,sans-serif;
+	text-transform:capitalize;
+	font-weight: normal;
+   font-size:3em;
+   color: #0088cc;
+   text-decoration:none;
+   font-variant:small-caps;
+  	border: 1px hidden whitesmoke;
+	border-bottom-style: solid;
+}
+div.drink_left{
+	height:400px;
+	width:420px;
+	margin-left: 100px;
+	margin-top: 60px;
+
+}
+div.drink_ing{
+   height: 30px;
+   width: 200px;	
+	float: left;
+	text-align: left;
+	margin-left:20px; 
+	margin-top:20px;
+	font-size: .8em;	
+	text-transform:lowercase;
+	text-transform: capitalize;
+	font-variant:normal;
+	color: grey;
+	}
+div.drink_desc{
+	float: left;	
+	text-align: left;	
+	margin-left:20px; 
+	margin-top:15px;
+	font-family:Corbel,sans-serif;
+	font-size: .85em;	
+	font-weight: normal;
+	text-transform: capitalize;
+   color: grey;
+   line-height: 80%
+}
+.changed_mind{
+   font-family:Arial;
+   font-size:34pt;
+	background: #eeeeee;
+	color: dimgray;
+	border: 1px solid lightgray;	
+	text-transform: uppercase;
+	border-radius:15px;
+	padding:40px;
+	float: left;
+	margin-left: 20px;	
+	vertical-align: bottom;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey;
+}
+div.pour{
+	float: right;
+	margin-right: -100px;
+	height:550px;
+	width:420px;
+	background-color: white;
+	display: block;
+}
+div.size{
+	width: 180px;
+	height: 300px;
+	margin-left: 10px;
+	margin-top: 15px;
+}
+div.size_text{
+	float: left;
+	font-size: 1.25em;	
+	width: 150px;
+	color: black;
+	line-height: 100%;
+}
+p.recommendation{
+	color:dimgrey;
+	text-align: center;	   
+	margin-left: -15px;
+  	border: 1px hidden whitesmoke;
+	border-bottom-style: solid;
+}
+p.text{
+	text-align: center;	
+   font-size:20pt;
+   font-family:"Arial";
+	font-size: 1.25em;	
+	color: grey;
+}
+.adjust_drink_button{
+	width: 150px;	
+	height: 70px;
+	float: left;
+   font-family:Arial;
+   font-size:18pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+   color: dimgray;
+	border: 1px solid lightgray;	
+	border-radius:10px;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
+}
+.taster{
+	width: 320px;
+	height: 80px;
+	margin-left: 35px;
+	float: center;
+   font-family:Arial;
+   font-size:18pt;
+   text-transform: capitalize;
+	background: #eeeeee;
+   color: dimgray;
+	border: 1px solid lightgray;	
+	border-radius:10px;
+	-moz-box-shadow: 1px 1px 1px dimgrey;
+	-webkit-box-shadow: 1px 1px 1px dimgrey;
+	box-shadow: 1px 1px 1px dimgrey; 
+}
+
+.make_drink{
+	width: 200px;
+	height: 230px;
+	margin-top: -300px; 
+	margin-right: 40px;
+   font-family:Arial;
+   font-size:34pt;
+	background: #eeeeee;
+	color: dimgrey;
+	border: 1px solid lightgray;	
+	border-radius:20px;
+	text-transform: uppercase;
+	float: right;
+	text-align: center;
+	-moz-box-shadow: 2px 2px 3px dimgrey;
+	-webkit-box-shadow: 2px 2px 3px dimgrey;
+	box-shadow: 2px 2px 3px dimgrey;
+}
+div.back_button{
+	float: left;	
+}
+div.subheading{
+	font-family:"Arial";
+	font-weight:bold;
+	font-size:18pt;
+	color: dimgray;;
+}
+div.main p {
+	margin-left: 20px;
+	color: blue;
+}
+div.image{
+	margin-left: 110px;
+	float: center;
+	}
+/*------Admin Booze-------------------------------------------------*/
+div.main{
+	display: block;
+}
+div.admin_content{
+	margin-top: 0px;	   
+   margin-left: 100px;
+   display: block;
+}
+div.side_bar{
+	padding-left: 10px;
+	background-color: whitesmoke;
+	padding-right: 10px;
+	border: 1px solid grey;
+	border-radius:2px;	
+	width:280px;
+	float: right;
+	display: block;}
+div.boozeheading{
+	margin-top: 0px;
+   line-height:180%;
+   font-family:#0088cc;
+   font-weight:bold;
+   font-size:28px;
+   color: #0088cc;
+}
+div.boozelist{
+	background-color: grey;
+	border: 2px solid grey;	
+	height:515px;
+	border-radius:2px;
+	text-alignment:left;
+	overflow:auto;	
+}
+ul.booze{
+	margin-top:5px;
+}
+li.booze{
+	margin-left:-40px;
+	list-style-type:none;
+	line-height:250%;	
+	overflow:hidden;
+	border-style:solid;
+	border-width:0px;
+	padding-left:10px;
+	margin-top:2px;
+	background-color:white;
+}
+a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
+   font-family:Arial;
+   font-size:14pt;
+   color:#0088cc;
+   text-decoration:none;
+}
+div.forminput{
+	color:#0088cc;
+	font-size:18pt;
+	font-family:"Arial";
+	font-weight:normal;
+	text-align:left;
+	line-height:90%;
+	background-color:whitesmoke;
+	margin:20px;
+	margin-left:30px;
+}
+textarea.desc{
+	height:50px;width:300px;
+	font-family:Arial;
+}
+input.form{
+	height:20px;width:300px;		
+}
+div.forms{
+	float:left;
+	background-color:whitesmoke;
+	border: 1px solid grey;	
+	margin-left:80px;
+	padding-right:15px;
+	padding-bottom:10px;
+}
+ul.errors{
+	list-style-type:none;
+	margin-top:-5px;
+	margin-left:20px;
+	line-height:00%;
+}
+div.bottom_bar{
+	float: bottom;
+	vertical-align: bottom;
+	text-align:left;	
+	margin-top:40px;
+	margin-left: 80px;
+}
+a.home:link,a.home:visited{
+	margin-left:20px;
+	font-family:Arial;
+	font-size:20pt;
+	font-weight:bold;
+	color: grey;
+	text-decoration:none;
+	text-align:bottom;
+}
+h1{
+	color: #0088cc;
+	font-family:Corbel;
+	font-size:2em;
+	font-weight:bold;
+}
+a.new:hover,a.new:active,a.new:link,a.new:visited{
+	margin-bottom: 20px;	
+	margin-left:80px;
+   float:center;
+   font-family:Arial;
+   font-size:18pt;
+   color: grey;
+   text-decoration:underline;
+}
+a.home:hover,a.home:active{
+	font-family:Arial;	
+	font-size:20pt;
+	color:#0088cc;
+	text-decoration:none;
+}
+a.admin:link,a.admin:visited{
+   margin-left:20px;
+   font-family:Arial;
+   font-size:18pt;
+   color: #0088cc;
+   text-decoration:none;
+}
+a.admin:hover,a.admin:active{
+   font-family:Arial;
+   font-size:18pt;
+   color:lightgrey;
+   text-decoration:none;
+}
+ul.menu{
+	margin-left: -20px;		
+}
+div.button{
+	margin-left:10px;
+	margin-top:25px;
+}
+.buttons{
+   font-family:Arial;
+	font-size:12pt;
+	font-weight:normal;
+	text-align:center;
+	vertical-align:center;
+	background-color: #285374;
+	color:white;
+	margin-left:20px;
+	padding-left:15px;
+	padding-right:15px;
+	padding-top:10px;
+	padding-bottom:10px;
+	border-radius:5px;
+	border-color:white;
+}
+#lightbox {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 500px;
+	margin-left: -250px;
+	background: #39407c;
+	z-index: 1001;
+	display: none;
+}
+#lightbox-shadow {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #000;
+	filter: alpha(opacity=75);
+	-moz-opacity: 0.75;
+	-khtml-opacity: 0.75;
+	opacity: 0.75;
+	z-index: 1000;
+	display: none;
+}
+div.booze_line_hidden {
+        visibility:hidden;
+}
+div.make_drink{
+	background-color: #7081fd;
+	padding:	2em;
+}

@@ -1,5 +1,6 @@
 {% extends 'admin/layout' %}
 {% block body %}
+<div class="top_bar"><p>Bartendro</p></div>
     <div class="main">
     <div class="content">	
         <div class="heading">{{ title }}</div>
@@ -58,7 +59,7 @@
 
                     {{ form.id() }}
 	            <div class="button">
-                        <button type="button" onclick="add_booze()">add booze</button>
+                        <button class="buttons" onclick="add_booze()">add booze</button>
                         {{ form.cancel(class="buttons") }}
                         {{ form.save(class="buttons") }}
                     </div>
