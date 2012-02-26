@@ -499,3 +499,26 @@ p.lb_drink{
 	font-size:35pt;	
 	color: dimgray;
 }
+div.pour_ing{
+   height: 30px;
+   width: 200px;	
+	float: left;
+	text-align: left;
+	margin-left:20px; 
+	margin-top:20px;
+	font-size: 1.2em;	
+	text-transform:lowercase;
+	font-variant:normal;
+	color: dimgray;
+	}
+div.pour_desc{
+	float: left;	
+	text-align: left;	
+	margin-left:20px; 
+	margin-top:15px;
+	font-family:Corbel,sans-serif;
+	font-size: 1.2em;	
+	font-weight: normal;
+   color: black;
+   line-height: 80%
+}
