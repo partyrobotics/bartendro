@@ -124,15 +124,14 @@ div.drink_heading{
    color: #0088cc;
    text-decoration:none;
    font-variant:small-caps;
-  	border: 1px hidden whitesmoke;
+  	border: 1px hidden lightgrey;
 	border-bottom-style: solid;
 }
 div.drink_left{
-	height:400px;
+	height:340px;
 	width:420px;
 	margin-left: 100px;
 	margin-top: 60px;
-
 }
 div.drink_ing{
    height: 30px;
@@ -155,7 +154,8 @@ div.drink_desc{
 	font-size: .85em;	
 	font-weight: normal;
    color: black;
-   line-height: 80%
+   line-height: 80%;
+	border:1px solid green;
 }
 .changed_mind{
    font-family:Arial;
@@ -175,6 +175,7 @@ div.drink_desc{
 }
 div.pour{
 	float: right;
+	margin-top: 50px;
 	margin-right: -100px;
 	height:550px;
 	width:420px;
@@ -198,7 +199,7 @@ p.recommendation{
 	color:dimgrey;
 	text-align: center;	   
 	margin-left: -15px;
-  	border: 1px hidden whitesmoke;
+  	border: 1px hidden lightgray;
 	border-bottom-style: solid;
 }
 p.text{
@@ -227,6 +228,7 @@ p.text{
 	width: 320px;
 	height: 80px;
 	margin-left: 35px;
+	margin-bottom: 60px;
 	float: center;
    font-family:Arial;
    font-size:18pt;
