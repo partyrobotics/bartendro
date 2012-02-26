@@ -5,7 +5,6 @@
     <div class="drink_heading">Make: {{ drink.name.name }}</div></br>
 
 	 <div class="pour">    
-   		<div class="image"><img src="/static/images/shooter.png" width="180" height="180" /></div>
 		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
 		<p class="recommendation">Suggested drink size is 4 oz</p> 
 	 		<div class="size">
@@ -104,7 +103,7 @@ function make_taster(drink)
 
 function dispense_drink(drink, size)
 {
-    lightbox('<div class="make_drink"><div class="heading">Making a {{ drink.name.name}}!</div></div>');
+    lightbox('<div class="lb_box"> <p class="lb_heading">Serving Your</p></br> <p class="lb_drink">{{ drink.name.name }}</p> </div>');
     $.ajax({
             url: "/ws/drink/" + drink + "/" + size + "/" + (100 + (drink_strength * 10)),
             success: function(html)

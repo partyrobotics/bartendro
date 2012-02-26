@@ -60,6 +60,7 @@ div.sub{
 	vertical-align:top;
 	text-overflow:ellipsis;
 	display: block;
+        overflow:hidden;
 	}
 div.main_name{
    height: 20px;
@@ -469,4 +470,32 @@ div.booze_line_hidden {
 div.make_drink{
 	background-color: #7081fd;
 	padding:	2em;
+}
+div.lb_box{
+	background-color: lightgrey;
+	float: center;
+	height:250px;	
+	width: 500px;
+	border:2px solid lightgray;
+	border-radius:10px;
+	color: #0088cc;
+	font-family:Arial;	
+	font-size:20pt;
+	text-align: center;
+}
+p.lb_heading{
+	margin: auto;
+	margin-top: 20px;
+	text-align: center;.
+	float: center;
+	width: 80%;
+	line-height: 180%;
+  	border: 1px hidden gray;
+	border-bottom-style: solid;
+}
+p.lb_drink{
+	margin-top: 35px;
+	font-family:Arial;	
+	font-size:35pt;	
+	color: dimgray;
 }

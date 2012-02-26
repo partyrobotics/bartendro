@@ -38,7 +38,7 @@ class Mixer(object):
         return ok
 
     def get_available_drink_list(self):
-        can_make = self.mc.get("available_drink_list")
+        can_make = None #self.mc.get("available_drink_list")
         if can_make: 
             return can_make
 
@@ -53,13 +53,15 @@ class Mixer(object):
         drinks = session.query("drink_id", "booze_id") \
                         .from_statement("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id") \
                         .all()
-        print drinks
         last_drink = -1
         boozes = []
         can_make = []
         for drink_id, booze_id in drinks:
             if last_drink < 0: last_drink = drink_id
             if drink_id != last_drink:
+# 		print "%d: " % last_drink,
+# 		print boozes,
+#		print self.can_make_drink(boozes, booze_dict) 
                 if self.can_make_drink(boozes, booze_dict): 
                     can_make.append(last_drink)
                 boozes = []
@@ -105,7 +107,6 @@ class Mixer(object):
         active_disp = []
         for r in recipe:
             r['ml'] = r['part'] * size / total_parts
-            print "%s: %d ml" % (r['dispenser']-1, r['ml'])
             r['ms'] = r['ml'] * MS_PER_ML
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
             active_disp.append(r['dispenser'])
