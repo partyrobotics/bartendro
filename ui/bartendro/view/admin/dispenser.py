@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from operator import itemgetter
+import memcache
 from werkzeug.utils import redirect
-from bartendro.utils import session, render_template, local, render_json, expose, validate_url, url_for
+from bartendro.utils import session, render_template, local, render_json, expose, validate_url, url_for, local
 from wtforms import Form, SelectField
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
@@ -53,4 +54,8 @@ def save(request):
                 continue
         session.commit()
 
+    mc = local.application.mc
+    mc.delete("top_drinks")
+    mc.delete("other_drinks")
+    mc.delete("available_drink_list")
     return redirect('/admin/dispenser?saved=1')

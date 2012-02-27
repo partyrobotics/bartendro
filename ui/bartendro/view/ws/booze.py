@@ -9,5 +9,4 @@ from bartendro.form.booze import BoozeForm
 def ws_booze(request, str):
     str = str + "%%"
     boozes = session.query("id", "name").from_statement("SELECT id, name FROM booze WHERE name LIKE :s").params(s=str).all()
-    print boozes
     return render_json(boozes)

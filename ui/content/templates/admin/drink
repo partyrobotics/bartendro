@@ -1,5 +1,6 @@
 {% extends 'admin/layout' %}
 {% block body %}
+<div class="top_bar"><p>Bartendro</p></div>
     <div class="main">
     <div class="content">	
         <div class="heading">{{ title }}</div>
@@ -13,14 +14,30 @@
                         {{ form.drink_name(class="form") }}
                     </div>
 	            {% if form.drink_name.errors %}
-	                <ul class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	                <div class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
 	            <div class="forminput">
                         {{ form.desc.label }}:<br/> 
-                        {{ form.desc(class="desc") }}
+                        {{ form.desc(class="form") }}
                     </div>
 	            {% if form.desc.errors %}
-	                <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+	                <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
+	            {% endif %}
+
+	            <div class="forminput">
+                        {{ form.sugg_size.label }}:<br/> 
+                        {{ form.sugg_size(class="form") }}
+                    </div>
+	            {% if form.sugg_size.errors %}
+	                <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
+	            {% endif %}
+
+	            <div class="forminput">
+                        {{ form.popular.label }}:<br/> 
+                        {{ form.popular(class="form") }}
+                    </div>
+	            {% if form.popular.errors %}
+	                <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
     
                     {% for name, parts, id, show in fields %}
@@ -34,7 +51,7 @@
                                 {{ form[name](class="desc") }}
                                 {{ form[parts](class="desc") }}
                                 {% if form[parts].errors %}
-                                    <ul class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                    <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -42,7 +59,7 @@
 
                     {{ form.id() }}
 	            <div class="button">
-                        <button type="button" onclick="add_booze()">add booze</button>
+                        <button type="button" class="buttons" onclick="add_booze()">add booze</button>
                         {{ form.cancel(class="buttons") }}
                         {{ form.save(class="buttons") }}
                     </div>
@@ -52,6 +69,7 @@
 
     <div class="side_bar">
         <div class="boozeheading">Drink List</div>
+        <a class="new" href="/admin/drink">add new</a>
 	<div class="boozelist">
 	<ul class="booze">
             {% for drink in drinks %}
@@ -67,11 +85,12 @@
     </div>
 
 <script type="text/javascript">
+var max_boozes = 20;
 function add_booze()
 {
     var i = 0;
 
-    for(i = 0;; i++)
+    for(i = 0; i < max_boozes; i++)
     {
         if ( $("#bl_" + i).attr("class") == "booze_line_hidden" )
         {
@@ -80,6 +99,8 @@ function add_booze()
             return;
         }
     }
+    if (i == max_boozes)
+        alert("DOM problem. Don't know where to add booze div.");
 }
 </script>
 {% endblock %}

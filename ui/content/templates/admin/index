@@ -1,18 +1,18 @@
 {% extends 'admin/layout' %}
 {% block body %}
-    <div class="main">
-    <div class="content">	
+<div class="top_bar"><p>Bartendro</p></div>
 
-        <h1>Admin menu</h1>
-        <ul>
-            <li><a class="admin" href="admin/booze">Edit Booze list</a></li>
-            <li><a class="admin" href="admin/drink">Edit Drink list</a></li>
-            <li><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
-            <li><a class="admin" href="http://www.youtube.com/watch?v=oHg5SJYRHA0">Rickroll</a></li>
-        </ul>
-    
-    <div class="bottom_bar">
-       <a class="home" href="/">HOME</a>
-    </div>
-    </div>
+<div class="admin_content">	
+    <h1>Admin menu</h1>
+    <ul class="menu">
+        <li><a class="admin" href="admin/booze">Edit Booze list</a></br></li></br>
+        <li><a class="admin" href="admin/drink">Edit Drink list</a></br></li></br>
+        <li><a class="admin" href="admin/dispenser">Manage Dispensers</a></br></li></br>
+        <li><a class="admin" href="http://www.youtube.com/watch?v=oHg5SJYRHA0">Rickroll</a></br></li>
+    </ul>
+</div>
+
+<div class="bottom_bar">
+       <a class="home" href="/">BARTENDRO</a>
+</div>
 {% endblock %}

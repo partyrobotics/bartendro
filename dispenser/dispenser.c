@@ -398,13 +398,13 @@ void handle_cmd(char *line)
     }
 }
 
-#define MAX_CMD_LEN 40
+#define MAX_CMD_LEN 80
 int main(void)
 {
     uint8_t reset = 0, ch;
     char    cmd[MAX_CMD_LEN], *ptr;
 
-	setup();
+    setup();
     // turn the motor off, just in case
     cbi(PORTB, 1);
 
@@ -447,6 +447,12 @@ int main(void)
                 {
                     handle_cmd(cmd);
                     break;
+                }
+                // Are we about to overflow our buffer? Shouldn't happen, but if it does, ditch it.
+                if (ptr - cmd == MAX_CMD_LEN - 1)
+                {
+                    ptr = cmd;
+                    *ptr = 0;
                 }
             }
             if (reset)
