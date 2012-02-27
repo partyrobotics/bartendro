@@ -408,13 +408,14 @@ a.home:hover,a.home:active{
 a.admin:link,a.admin:visited{
    margin-left:20px;
    font-family:Arial;
-   font-size:18pt;
+   font-size:22pt;
    color: #0088cc;
    text-decoration:none;
 }
 a.admin:hover,a.admin:active{
+   margin-left:20px;
    font-family:Arial;
-   font-size:18pt;
+   font-size:22pt;
    color:lightgrey;
    text-decoration:none;
 }
@@ -522,4 +523,10 @@ div.pour_desc{
 	font-weight: normal;
    color: black;
    line-height: 80%
+}
+div.log{
+        color: black;
+        margin-left: 80px;
+        font-family: courier, monospace;
+        font-size: 10pt;
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from bartendro.utils import log, error
 from subprocess import call
 from gpio import GPIO
 from time import sleep
@@ -40,12 +41,13 @@ class MasterDriver(object):
 
         try: 
             self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
-            self.num_dispensers = 6 #15
+            self.num_dispensers = 15
         except KeyError:
             self.software_only = 0
 
         if self.software_only:
             print "Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!"
+            log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
             return
 
         try:
@@ -64,6 +66,8 @@ class MasterDriver(object):
     def chain_init(self):
 
         if self.software_only: return
+
+        log("initialize communication chain")
 
         # reset the chain
         print "send reset"
@@ -87,13 +91,16 @@ class MasterDriver(object):
             num = int(r)
             if num < 1 or num > MAX_DISPENSERS:
 		print "Found an invalid number of dispensers. Communication chain busted!"
+		error("Found an invalid number of dispensers. Communication chain busted!")
                 self.num_dispensers = -1;
             else: 
 		print "found %d dispensers" % int(r)
+		log("found %d dispensers" % int(r))
 		self.num_dispensers = int(r)
                 sleep(1)
         else:
             print "Cannot communicate with dispenser chain!"
+            error("Cannot communicate with dispenser chain!")
 
     def close(self):
         if self.software_only: return
@@ -104,7 +111,8 @@ class MasterDriver(object):
         if self.software_only: return
         self.ser.write(cmd)
         ret = self.ser.readline()
-        if ret == "": print "Serial comms timeout after cmd '%s'." % cmd[0:len(cmd)-1]
+        if ret == "": 
+            error("Serial comms timeout after cmd '%s'." % cmd[0:len(cmd)-1])
         return ret
 
     def count(self):
@@ -123,6 +131,10 @@ class MasterDriver(object):
         return self.send("%d led %d %d %d\n" % (dispenser, r, g, b))
 
     def is_dispensing(self, dispenser):
+        '''expects "!3 isdisp 1" '''
+
+        if self.software_only: return False
+
         self.send("%d isdisp\n" % dispenser)
         ret = self.ser.readline()
         if not ret: 
@@ -130,6 +142,24 @@ class MasterDriver(object):
         try:
             disp, cmd, value = ret.split(" ")
 	    if value[0] == '1': 
+	        return True
+	    else:
+	        return False
+        except ValueError:
+	    return False
+
+    def ping(self, dispenser):
+        '''expects "!3 pong" '''
+        if self.software_only: return True
+
+        self.send("%d ping\n" % dispenser)
+        ret = self.ser.readline()
+        if not ret: 
+	    return False
+        try:
+            ret = ret[1:] # strip off the !
+            disp, cmd = ret.split(" ")
+	    if disp == dispenser: 
 	        return True
 	    else:
 	        return False

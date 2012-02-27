@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
 from os import path
 import memcache
+import logging
 from sqlalchemy import create_engine
 from werkzeug import Request, ClosingIterator
 from werkzeug.exceptions import HTTPException
 from werkzeug import SharedDataMiddleware
 
-from bartendro.utils import session, metadata, local, local_manager, url_map
+from bartendro.utils import session, metadata, local, local_manager, url_map, log, error
 from bartendro.views import view_map
 from bartendro.master import driver
 from bartendro import mixer
 import bartendro.models
 
+
 class BartendroUIServer(object):
 
     def __init__(self, db_uri):
         local.application = self
+        self.setup_logging()
+        log("Bartendro starting")
+
         self.database_engine = create_engine(db_uri, convert_unicode=True)
         self.dispatch = SharedDataMiddleware(self.dispatch, {
                     '/static':  bartendro.utils.STATIC_PATH
@@ -27,8 +32,20 @@ class BartendroUIServer(object):
         self.driver.chain_init();
         self.mixer = mixer.Mixer(self.driver)
 
+        self.debug_log_file = "logs/bartendro.log"
+        self.access_log_file = "logs/access.log"
+        self.drinks_log_file = "logs/drinks.log"
+
     def init_database(self):
         metadata.create_all(self.database_engine)
+  
+    def setup_logging(self):
+        self.log = logging.getLogger('bartendro')
+        hdlr = logging.FileHandler('logs/bartendro.log')
+        formatter = logging.Formatter('%(asctime)s %(message)s')
+        hdlr.setFormatter(formatter)
+        self.log.addHandler(hdlr) 
+        self.log.setLevel(logging.INFO)
 
     def __call__(self, environ, start_response):
         return self.dispatch(environ, start_response)

@@ -40,6 +40,11 @@ def render_template(template, **context):
     return Response(jinja_env.get_template(template).render(**context),
                     mimetype='text/html')
 
+def render_template_no_cache(template, **context):
+    return Response(jinja_env.get_template(template).render(**context),
+                    headers=[["Cache-Control", "no-store"]],
+                    mimetype='text/html')
+
 def render_error(code, err):
     return Response(err, mimetype='text/plain')
 
@@ -53,3 +58,12 @@ def render_text(data):
 
 def validate_url(url):
     return urlparse(url)[0] in ALLOWED_SCHEMES
+
+def log(msg):
+    application.log.info(msg)
+
+def error(msg):
+    application.log.error(msg)
+
+def warn(msg):
+    application.log.warn(msg)

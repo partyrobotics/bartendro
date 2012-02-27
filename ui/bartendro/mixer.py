@@ -2,7 +2,7 @@
 from time import sleep, localtime
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
-from bartendro.utils import session, local
+from bartendro.utils import session, local, log, error
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -21,7 +21,6 @@ class Mixer(object):
         self.mc = local.application.mc
 
     def get_error(self):
-        #self.driver.get_error()
         return self.err
 
     def leds_color(self, r, g, b):
@@ -38,7 +37,7 @@ class Mixer(object):
         return ok
 
     def get_available_drink_list(self):
-        can_make = None #self.mc.get("available_drink_list")
+        can_make = self.mc.get("available_drink_list")
         if can_make: 
             return can_make
 
@@ -94,14 +93,15 @@ class Mixer(object):
                     break
             if not r:
                 self.err = "Cannot make drink. I don't have the required booze: %s" % db.booze.name
-                print self.err
-                return 1
+                error(self.err)
+                return False
             recipe.append(r)
 
         total_parts = 0
         for r in recipe:
             total_parts += r['part']
 
+        log("Making drink: '%s' size %d ml" % (drink.name.name, size))
         self.leds_color(255, 0, 255)
         dur = 0
         active_disp = []
@@ -109,6 +109,7 @@ class Mixer(object):
             r['ml'] = r['part'] * size / total_parts
             r['ms'] = r['ml'] * MS_PER_ML
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
+            log("..dispense %d for %d ms" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
 
@@ -124,12 +125,13 @@ class Mixer(object):
             if done: break
 
         self.leds_color(0, 255, 0)
+        log("drink complete")
 
         try:
             t = localtime()
-            log = open("drinks.log", "a")
-            log.write("%d-%d-%d %d:%02d,%s,%d ml\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, drink.name.name, size))
-            log.close()
+            drinklog = open(local.application.drinks_log_file, "a")
+            drinklog.write("%d-%d-%d %d:%02d,%s,%d ml\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, drink.name.name, size))
+            drinklog.close()
         except IOError:
             pass
 
@@ -140,7 +142,16 @@ class Mixer(object):
 #            self.leds_color(0, 0, 0)
 #            sleep(.25)
 
+        trouble = False
+        for disp in xrange(self.disp_count):
+            if not self.driver.ping(disp):
+                error("dispenser %d failed to respond to ping" % disp)
+                trouble = True
+
+        if trouble:
+            log("dispenser's are pissed. better reset the chain!")
+            self.driver.chain_init()
+
         self.leds_color(0, 0, 255)
 
-
-        return 0 
+        return True 

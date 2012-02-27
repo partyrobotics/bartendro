@@ -13,9 +13,7 @@ def ws_drink(request, drink, size, strength):
     mixer = local.application.mixer
 
     size = int(float(size) * constant.ML_PER_FL_OZ)
-    print "Make drink! drink: %d size: %d strength: %d" % (drink, size, strength)
-    ret = mixer.make_drink(drink, size, strength)
-    if ret == 0:
+    if mixer.make_drink(drink, size, strength):
         return render_text("ok\n")
     else:
         raise ServiceUnavailable("Error: %s (%d)" % (mixer.get_error(), ret))
