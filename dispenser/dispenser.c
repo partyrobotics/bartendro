@@ -332,31 +332,24 @@ void wait_for_reset()
 
 void address_assignment(void)
 {
-    uint8_t ch;
-    
-    while(!serial_rx(&ch));
-    while(!serial_tx(ch + 1));
-
-    g_address = ch;
-}
-
-void test(void)
-{
-    uint8_t ch;
-  
-    for(ch = 0; ch < 3; ch++)
-    {
-        sbi(PORTC, 0);
-        _delay_ms(100);
-        cbi(PORTC, 0);
-        _delay_ms(100);
-    }
-    for(;;)
+    char    cmd[10], *p;
+    uint8_t ch, i;
+   
+    cmd[0] = 0;
+    for(i = 0; i < 9; i++)
     {
         while(!serial_rx(&ch));
-        //ch = serial_rx_block();
-        serial_tx(ch);
+        if (ch == '\n')
+            break;
+        cmd[i] = (char)ch;
+        cmd[i + 1] = 0;
     }
+
+    g_address = atoi(cmd);
+
+    sprintf(cmd, "%d\n", g_address + 1);
+    for(p = cmd; *p; p++)
+        while(!serial_tx((uint8_t)*p));
 }
 
 void handle_cmd(char *line)
