@@ -7,7 +7,10 @@
         {% if saved %}
            <p>Your changes have been saved.</p>
         {% endif %}
-        <p>There are {{ count }} dispensers available.</p>
+        <p>There are {{ count }} dispensers available.
+           <button type="button" onclick="reset()">reset chain</button>
+           <button type="button" id="test_chain" onclick="test_chain()">test chain</button>
+        </p>
         <div class="forms">
 		<form method="POST" action="/admin/dispenser/save">
 
@@ -16,6 +19,7 @@
                               {{ form["dispenser%s" % i].label }}: 
                               {{ form["dispenser%s" % i](class="form") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
+                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense 100ml</button>
                         </div>
                     {% endfor %}
 
@@ -38,7 +42,7 @@ var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 
 function toggle(disp)
 {
-    if (disp < 1 || disp > 16)
+    if (disp < 1 || disp > 15)
         return;
 
     //$("#size_text").text(drink_size + " fluid ounces");
@@ -52,6 +56,45 @@ function toggle(disp)
                     $("#disp" + disp).text('turn off');
                 else
                     $("#disp" + disp).text('turn on');
+            }
+    });
+}
+function test_dispense(disp)
+{
+    if (disp < 1 || disp > 15)
+        return;
+
+    $("#test" + disp).text('dispensing');
+    $("#test" + disp).attr('disabled', true);
+    $.ajax({
+            url: "/ws/dispenser/" + disp + "/test" ,
+            success: function(html)
+            {
+                $("#test" + disp).text('dispense 100ml');
+                $("#test" + disp).attr('disabled', false);
+            }
+    });
+}
+function reset()
+{
+    $.ajax({
+            url: "/ws/reset" ,
+            success: function(html)
+            {
+		alert("Bartendro chain is resetting. Please give it 10 seconds.");
+            }
+    });
+}
+function test_chain()
+{
+    $("#test_chain").text('testing...');
+    $("#test_chain").attr('disabled', true);
+    $.ajax({
+            url: "/ws/testchain" ,
+            success: function(html)
+            {
+                $("#test_chain").text('test chain');
+                $("#test_chain").attr('disabled', false);
             }
     });
 }

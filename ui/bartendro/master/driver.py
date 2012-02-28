@@ -87,6 +87,8 @@ class MasterDriver(object):
             break
 
         if len(r) > 0:
+            r= r[0:-1]
+	    print "received '%s'" % r
             num = int(r)
             if num < 1 or num > MAX_DISPENSERS:
 		error("Found an invalid number of dispensers. Communication chain busted!")
@@ -151,15 +153,21 @@ class MasterDriver(object):
         self.send("%d ping\n" % dispenser)
         ret = self.ser.readline()
         if not ret: 
+            error("ping response timeout")
 	    return False
+
+ 	ret = ret[:-1]
         try:
             ret = ret[1:] # strip off the !
             disp, cmd = ret.split(" ")
+ 	    disp = int(disp)
 	    if disp == dispenser: 
 	        return True
 	    else:
+                error("wrong dispenser number in pong")
 	        return False
         except ValueError:
+            error("error parsing pong data. response: '%s'" % ret)
 	    return False
 
 if __name__ == "__main__":
