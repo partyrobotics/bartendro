@@ -46,7 +46,6 @@ class MasterDriver(object):
             self.software_only = 0
 
         if self.software_only:
-            print "Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!"
             log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
             return
 
@@ -61,7 +60,7 @@ class MasterDriver(object):
         except serial.serialutil.SerialException:
             raise SerialIOError;
 
-        print "Opened %s for %d baud N81" % (self.device, BAUD_RATE)
+        log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
 
     def chain_init(self):
 
@@ -90,16 +89,13 @@ class MasterDriver(object):
         if len(r) > 0:
             num = int(r)
             if num < 1 or num > MAX_DISPENSERS:
-		print "Found an invalid number of dispensers. Communication chain busted!"
 		error("Found an invalid number of dispensers. Communication chain busted!")
                 self.num_dispensers = -1;
             else: 
-		print "found %d dispensers" % int(r)
 		log("found %d dispensers" % int(r))
 		self.num_dispensers = int(r)
                 sleep(1)
         else:
-            print "Cannot communicate with dispenser chain!"
             error("Cannot communicate with dispenser chain!")
 
     def close(self):

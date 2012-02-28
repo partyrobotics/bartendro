@@ -60,10 +60,13 @@ def validate_url(url):
     return urlparse(url)[0] in ALLOWED_SCHEMES
 
 def log(msg):
+    print msg
     application.log.info(msg)
 
 def error(msg):
+    print msg
     application.log.error(msg)
 
 def warn(msg):
+    print msg
     application.log.warn(msg)
