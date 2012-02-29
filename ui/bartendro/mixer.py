@@ -74,7 +74,6 @@ class Mixer(object):
         return can_make
 
     def make_drink(self, id, size, strength):
-        self.get_available_drink_list()
 
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
@@ -115,7 +114,7 @@ class Mixer(object):
 
             if r['ms'] > dur: dur = r['ms']
 
-        self.leds_color(255, 0, 0)
+        self.leds_color(255, 100, 0)
         while True:
             done = True
 	    for disp in active_disp:
@@ -148,9 +147,9 @@ class Mixer(object):
                 error("dispenser %d failed to respond to ping" % disp)
                 trouble = True
 
-        if trouble:
-            log("dispenser's are pissed. better reset the chain!")
-            self.driver.chain_init()
+#        if trouble:
+#            log("dispenser's are pissed. better reset the chain!")
+#            self.driver.chain_init()
 
         self.leds_color(0, 0, 255)
 

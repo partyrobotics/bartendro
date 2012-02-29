@@ -26,7 +26,10 @@ class BartendroUIServer(object):
                     '/static':  bartendro.utils.STATIC_PATH
                     })
 
+        # Create a memcache connection and flush everything
         self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+        self.mc.flush_all()
+
         self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
         self.driver.open()
         self.driver.chain_init();
