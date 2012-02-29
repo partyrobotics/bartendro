@@ -359,6 +359,8 @@ void handle_cmd(char *line)
     char cmd[32];
     char resp[32], *r;
 
+    resp[0] = 0;
+
     // ignore responses from other dispensers
     if (line[0] == '!')
        return;
