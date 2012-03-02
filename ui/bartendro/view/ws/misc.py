@@ -10,6 +10,7 @@ from bartendro.form.booze import BoozeForm
 def ws_reset(request):
     driver = local.application.driver
     driver.chain_init()
+    driver.led(255, 0, 0, 255)
     return render_text("ok\n")
 
 @expose('/ws/testchain')

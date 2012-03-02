@@ -13,11 +13,13 @@ class Dispenser(Base):
     __tablename__ = 'dispenser'
     id = Column(Integer, primary_key=True)
     booze_id = Column(Integer, ForeignKey('booze.id'), nullable=False)
+    actual = Column(Integer, default = 0)
 
     query = session.query_property()
-    def __init__(self, booze):
+    def __init__(self, booze, actual):
         self.booze = booze
         self.booze_id = booze.id
+        self.actual = actual
 
     def json(self):
         return { 
