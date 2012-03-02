@@ -27,6 +27,7 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
+#define DEBUG 0
 
 static uint8_t g_address = 0xFF;
 
@@ -38,7 +39,9 @@ static volatile uint32_t g_hall_sensor_2 = 0;
 static volatile uint32_t g_dispense_target = 0;
 
 uint8_t set_motor_state(uint8_t state);
+#if DEBUG
 void dprintf(const char *fmt, ...);
+#endif
 
 ISR (USART_RX_vect)
 {
@@ -68,6 +71,41 @@ ISR(PCINT1_vect)
     }
 }
 
+uint8_t is_dispensing()
+{
+    uint8_t cur;
+
+    cli();
+    cur = g_is_dispensing;
+    sei();
+
+    return cur;
+}
+
+uint8_t set_motor_state(uint8_t state)
+{
+    uint8_t cur;
+
+    cur = is_dispensing();
+    if (cur == state)
+        return 0;
+
+    if (state)
+    {
+        cli();
+        g_is_dispensing = 1;
+        sei();
+        sbi(PORTB, 1);
+    }
+    else
+    {
+        cli();
+        g_is_dispensing = 0;
+        sei();
+        cbi(PORTB, 1);
+    }
+    return 1;
+}
 void dispense(uint32_t ticks)
 {
     // Check to make sure we're not already dispensing
@@ -77,12 +115,15 @@ void dispense(uint32_t ticks)
     cli();
     g_dispense_target = g_hall_sensor_1 + ticks;
     sei();
+#if DEBUG
     dprintf("dispense target: %d\n", g_dispense_target);
+#endif
 
     // Turn the motor on and get moving!
     set_motor_state(1);
 } 
 
+#if DEBUG
 void test()
 {
     uint8_t disp;
@@ -101,8 +142,9 @@ void test()
         if (!g_is_dispensing)
             break;
     }
-    dprintf("Done dispensing: %d\n", tick_p);
+    dprintf("Done dispensing\n");
 }
+#endif
 
 void serial_init(void)
 {
@@ -130,7 +172,7 @@ uint8_t serial_tx(uint8_t ch)
     return 1;
 }
 
-#if 0
+#if DEBUG
 #define MAX 80 
 
 // debugging printf function. Max MAX characters per line!!
@@ -249,41 +291,6 @@ void set_led_blue(uint8_t v)
     OCR0B = 255 - v;
 }
 
-uint8_t is_dispensing()
-{
-    uint8_t cur;
-
-    cli();
-    cur = g_is_dispensing;
-    sei();
-
-    return cur;
-}
-
-uint8_t set_motor_state(uint8_t state)
-{
-    uint8_t cur;
-
-    cur = is_dispensing();
-    if (cur == state)
-        return 0;
-
-    if (state)
-    {
-        cli();
-        g_is_dispensing = 1;
-        sei();
-        sbi(PORTB, 1);
-    }
-    else
-    {
-        cli();
-        g_is_dispensing = 0;
-        sei();
-        cbi(PORTB, 1);
-    }
-    return 1;
-}
 
 void wait_for_reset()
 {
