@@ -19,7 +19,7 @@ def tail(f, n, offset=None):
             # to step back, go to the beginning instead
             f.seek(0)
         pos = f.tell()
-        lines = f.read().splitlines()
+        lines = f.read().decode('utf-8', 'ignore').splitlines()
         if len(lines) >= to_read or pos == 0:
             return reversed(lines[-to_read:offset and -offset or None])
         avg_line_length *= 1.3
