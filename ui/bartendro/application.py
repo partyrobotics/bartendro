@@ -30,7 +30,7 @@ class BartendroUIServer(object):
         self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         self.mc.flush_all()
 
-        self.driver = driver.MasterDriver("/dev/ttyS1", "/tmp/log");
+        self.driver = driver.MasterDriver("/dev/ttyS1");
         self.driver.open()
         self.driver.chain_init();
         self.mixer = mixer.Mixer(self.driver)
@@ -38,6 +38,7 @@ class BartendroUIServer(object):
         self.debug_log_file = "logs/bartendro.log"
         self.access_log_file = "logs/access.log"
         self.drinks_log_file = "logs/drinks.log"
+        self.comm_log_file = "logs/comm.log"
 
     def init_database(self):
         metadata.create_all(self.database_engine)

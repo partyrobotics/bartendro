@@ -26,7 +26,7 @@ class LogFileException:
 class MasterDriver(object):
     '''This object interacts with the bartendro master controller.'''
 
-    def __init__(self, device, logfile):
+    def __init__(self, device):
         self.device = device
         self.logfile = logfile
         self.ser = None
@@ -35,6 +35,14 @@ class MasterDriver(object):
         self.ss = GPIO(135)
         self.ss.setup()
         self.num_dispensers = 0
+        self.cl = open(local.application.comm_log_file, "a")
+
+    def log(self, msg):
+        try:
+            t = localtime()
+            self.cl.write("%d-%d-%d %d:%02d %s\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+        except IOError:
+            pass
 
     def open(self):
         '''Open the serial connection to the master'''
@@ -60,6 +68,7 @@ class MasterDriver(object):
         except serial.serialutil.SerialException:
             raise SerialIOError;
 
+        self.log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
         log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
 
     def chain_init(self):
@@ -67,6 +76,7 @@ class MasterDriver(object):
         if self.software_only: return
 
         log("initialize communication chain")
+        self.log("initialize communication chain")
 
         # reset the chain
         print "send reset"
@@ -91,14 +101,19 @@ class MasterDriver(object):
 	    print "received '%s'" % r
             num = int(r)
             if num < 1 or num > MAX_DISPENSERS:
-		error("Found an invalid number of dispensers. Communication chain busted!")
+		msg = "Found an invalid number of dispensers. Communication chain busted!"
+                self.log(msg)
+		error(msg)
                 self.num_dispensers = -1;
             else: 
-		log("found %d dispensers" % int(r))
+		msg = "found %d dispensers" % int(r)
+                self.log(msg)
+		error(msg)
 		self.num_dispensers = int(r)
                 sleep(1)
         else:
             error("Cannot communicate with dispenser chain!")
+            self.log("Cannot communicate with dispenser chain!")
 
     def close(self):
         if self.software_only: return
@@ -108,9 +123,14 @@ class MasterDriver(object):
     def send(self, cmd):
         if self.software_only: return
         self.ser.write(cmd)
+        self.log("w: '%s'\n" % cmd.replace("\n", ""))
         ret = self.ser.readline()
         if ret == "": 
-            error("Serial comms timeout after cmd '%s'." % cmd[0:len(cmd)-1])
+            msg = "Serial comms timeout after cmd '%s'." % cmd[0:len(cmd)-1]
+            error(msg)
+            self.log(msg)
+        else:
+            self.log("r: '%s'\n" % ret.replace("\n", ""))
         return ret
 
     def count(self):
@@ -136,14 +156,19 @@ class MasterDriver(object):
         self.send("%d isdisp\n" % dispenser)
         ret = self.ser.readline()
         if not ret: 
+            msg = "is_dispensing timeout!"
+            self.log(msg)
+            error(msg)
 	    return False
         try:
+            self.log("r: '%s'\n" % ret.replace("\n", ""))
             disp, cmd, value = ret.split(" ")
 	    if value[0] == '1': 
 	        return True
 	    else:
 	        return False
         except ValueError:
+            self.log("parse error")
 	    return False
 
     def ping(self, dispenser):
@@ -153,7 +178,9 @@ class MasterDriver(object):
         self.send("%d ping\n" % dispenser)
         ret = self.ser.readline()
         if not ret: 
-            error("ping response timeout")
+            msg = "ping response timeout"
+            self.log(msg)
+            error(msg)
 	    return False
 
  	ret = ret[:-1]
@@ -164,14 +191,18 @@ class MasterDriver(object):
 	    if disp == dispenser: 
 	        return True
 	    else:
-                error("wrong dispenser number in pong")
+                msg = "wrong dispenser number in pong"
+                self.log("wrong dispenser number in pong")
+                error(msg)
 	        return False
         except ValueError:
-            error("error parsing pong data. response: '%s'" % ret)
+            msg = "error parsing pong data. response: '%s'" % ret
+            self.log(msg)
+            error(msg)
 	    return False
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyS1", "log");
+    md = MasterDriver("/dev/ttyS1");
     md.open()
     md.chain_init()
     sleep(1)

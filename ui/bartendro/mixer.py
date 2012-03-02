@@ -116,6 +116,7 @@ class Mixer(object):
 
         self.leds_color(255, 100, 0)
         while True:
+            sleep(.1)
             done = True
 	    for disp in active_disp:
 		if self.driver.is_dispensing(disp - 1): 
