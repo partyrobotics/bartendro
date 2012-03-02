@@ -72,8 +72,8 @@ volatile uint8_t  motor_state = 0;
 volatile uint16_t dispense_ticks = 0;
 volatile uint8_t  dispense_chunks = 0;
 
-#define DISPENSE_TICKS 700
-#define DISPENSE_DELAY 700
+#define DISPENSE_TICKS  700
+#define DISPENSE_DELAY  700
 
 ISR (TIMER1_OVF_vect)
 {
