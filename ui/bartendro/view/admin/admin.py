@@ -48,3 +48,13 @@ def debug(request):
     except IOError:
         lines = ["[error] cannot open log file.\n"]
     return render_template_no_cache("admin/log", title="Debug log", lines=lines)
+
+@expose('/admin/log/comms')
+def comms(request):
+    try:
+        f = open(local.application.comm_log_file, "r")
+        lines = tail(f, MAX_NUM_LOG_LINES)
+        f.close()
+    except IOError:
+        lines = ["[error] cannot open log file.\n"]
+    return render_template_no_cache("admin/log", title="Comms log", lines=lines)

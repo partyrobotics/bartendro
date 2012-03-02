@@ -10,6 +10,7 @@
         <li style="margin-bottom: 20px"><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
         <li style="margin-bottom: 20px"><a class="admin" href="admin/log/dispensed">Drinks dispensed</a></li>
         <li style="margin-bottom: 20px"><a class="admin" href="admin/log/debug">Debug log</a></li>
+        <li style="margin-bottom: 20px"><a class="admin" href="admin/log/comms">Comms log</a></li>
     </ul>
 </div>
 {% endblock %}
