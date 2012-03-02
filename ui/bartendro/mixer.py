@@ -24,8 +24,8 @@ class Mixer(object):
         return self.err
 
     def leds_color(self, r, g, b):
-        for i in xrange(self.disp_count):
-            self.driver.led(i, r, g, b)
+        #for i in xrange(self.disp_count):
+        self.driver.led(255, r, g, b)
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -135,12 +135,11 @@ class Mixer(object):
         except IOError:
             pass
 
-        sleep(1)
-#        for i in xrange(10):
-#            self.leds_color(0, 255, 0)
-#            sleep(.25)
-#            self.leds_color(0, 0, 0)
-#            sleep(.25)
+        for i in xrange(10):
+            self.leds_color(0, 255, 0)
+            sleep(.25)
+            self.leds_color(0, 0, 0)
+            sleep(.25)
 
         trouble = False
         for disp in xrange(self.disp_count):
@@ -148,10 +147,7 @@ class Mixer(object):
                 error("dispenser %d failed to respond to ping" % disp)
                 trouble = True
 
-#        if trouble:
-#            log("dispenser's are pissed. better reset the chain!")
-#            self.driver.chain_init()
-
+        self.driver.chain_init()
         self.leds_color(0, 0, 255)
 
         return True 
