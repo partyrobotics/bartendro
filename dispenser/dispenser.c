@@ -28,24 +28,14 @@
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
-
-#ifdef PRO_MINI_5V
-#define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
-#else 
-#define TIMER1_INIT 0xFF06 // 8mhz / 8 cs / 1000 = 1ms per 'tick'
-#endif
-
 static uint8_t g_address = 0xFF;
-static uint8_t g_motor_state = 0;
 
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_rx = 0;
 static volatile uint8_t g_reset = 0;
 static volatile uint32_t g_hall_sensor_1 = 0;
 static volatile uint32_t g_hall_sensor_2 = 0;
-
-// clock globals
-static volatile uint32_t g_ticks = 0;
+static volatile uint32_t g_dispense_target = 0;
 
 uint8_t set_motor_state(uint8_t state);
 void dprintf(const char *fmt, ...);
@@ -63,13 +53,6 @@ ISR(PCINT0_vect)
         g_reset = 0;
 }
 
-#define DISPENSE_TICKS  700
-#define DISPENSE_DELAY 1000
-static volatile uint32_t g_dispense_target = 0;
-static volatile uint32_t g_time_target = 0;
-
-static volatile uint32_t tick_p = 0, timer_p = 0;
-
 // encoder ISR
 ISR(PCINT1_vect)
 {
@@ -80,68 +63,30 @@ ISR(PCINT1_vect)
 
     if (g_dispense_target > 0 && g_hall_sensor_1 >= g_dispense_target)
     {
-    tick_p++;
         g_dispense_target = 0;
-        g_time_target = 0;
         set_motor_state(0);
-        g_is_dispensing = 0;
-    }
-}
-
-// timer ISR
-ISR (TIMER1_OVF_vect)
-{
-    g_ticks++;
-    TCNT1 = TIMER1_INIT;
-
-    if (g_time_target > 0 && g_ticks >= g_time_target)
-    {
-        timer_p++;
-        if (g_motor_state)
-        {
-            set_motor_state(0);
-            g_time_target = g_ticks + DISPENSE_DELAY;
-        }
-        else
-        {
-            set_motor_state(1);
-            g_time_target = g_ticks + DISPENSE_TICKS;
-        }
     }
 }
 
 void dispense(uint32_t ticks)
 {
-    uint8_t cur_state;
-    uint32_t cur_dispense_ticks, cur_time;
-
     // Check to make sure we're not already dispensing
-    cli();
-    cur_state = g_is_dispensing;
-    cur_dispense_ticks = g_hall_sensor_1;
-    cur_time = g_ticks;
-    sei();
-    if (cur_state)
+    if (is_dispensing())
         return;
 
-    dprintf("ticks: %ld time: %ld\n", cur_dispense_ticks, cur_time);
-    // Set the targets for ticks and for durations
-    g_time_target = g_ticks + DISPENSE_TICKS;
-    g_dispense_target = cur_dispense_ticks + ticks;
-    dprintf("time target: %d\n", g_time_target);
+    cli();
+    g_dispense_target = g_hall_sensor_1 + ticks;
+    sei();
     dprintf("dispense target: %d\n", g_dispense_target);
 
     // Turn the motor on and get moving!
     set_motor_state(1);
-    cli();
-    g_is_dispensing = 1;
-    sei();
 } 
 
 void test()
 {
     uint8_t disp;
-    uint32_t cur, t;
+    uint32_t cur;
 
     dispense(30000);
     for(;;)
@@ -149,10 +94,9 @@ void test()
         cli();
         cur = g_hall_sensor_1;
         disp = g_is_dispensing;
-        t = g_ticks;
         sei();
 
-        dprintf("ticks: %ld time: %ld timer: %ld ticks: %ld\n", cur, t, timer_p, tick_p);
+        dprintf("ticks: %ld is_disp: %d\n", cur, disp);
 
         if (!g_is_dispensing)
             break;
@@ -186,7 +130,7 @@ uint8_t serial_tx(uint8_t ch)
     return 1;
 }
 
-#if 1
+#if 0
 #define MAX 80 
 
 // debugging printf function. Max MAX characters per line!!
@@ -257,11 +201,6 @@ void setup(void)
     PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
     PCICR |= (1<<PCIE1);
 
-    // Timer setup for dispense timing
-    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
-    TCNT1 = TIMER1_INIT;
-    TIMSK1 |= (1<<TOIE1);
-
     serial_init();
 }
 
@@ -325,24 +264,21 @@ uint8_t set_motor_state(uint8_t state)
 {
     uint8_t cur;
 
-    cli();
-    cur = g_motor_state;
-    sei();
-
+    cur = is_dispensing();
     if (cur == state)
         return 0;
 
     if (state)
     {
         cli();
-        g_motor_state = 1;
+        g_is_dispensing = 1;
         sei();
         sbi(PORTB, 1);
     }
     else
     {
         cli();
-        g_motor_state = 0;
+        g_is_dispensing = 0;
         sei();
         cbi(PORTB, 1);
     }
@@ -397,6 +333,8 @@ void address_assignment(void)
         while(!serial_tx((uint8_t)*p));
 }
 
+#define BROADCAST_ADDR 255
+
 void handle_cmd(char *line)
 {
     uint8_t ret;
@@ -414,7 +352,15 @@ void handle_cmd(char *line)
     ret = sscanf(line, "%d %s %ld %ld %ld", &addr, cmd, &arg1, &arg2, &arg3);
     if (ret < 2)
         return;
-   
+  
+    // We allow LED commands to be broadcast. Everything else needs to be done per address
+    if ((addr == g_address || addr == BROADCAST_ADDR) && strcmp(cmd, "led") == 0 && ret == 5)
+    {
+        set_led_color((uint8_t)arg1, (uint8_t)arg2, (uint8_t)arg3);
+        return;
+    }
+
+    // If this cmd isn't for us, skip it!
     if (addr != g_address)
         return;
 
@@ -431,11 +377,6 @@ void handle_cmd(char *line)
     if (strcmp(cmd, "disp") == 0 && ret == 3)
     {
         dispense(arg1);
-    }
-    else
-    if (strcmp(cmd, "led") == 0 && ret == 5)
-    {
-        set_led_color((uint8_t)arg1, (uint8_t)arg2, (uint8_t)arg3);
     }
     else
     if (strcmp(cmd, "isdisp") == 0)
