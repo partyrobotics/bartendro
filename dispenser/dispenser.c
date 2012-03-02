@@ -27,7 +27,8 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
-#define DEBUG 0
+#define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
+#define DEBUG 1
 
 static uint8_t g_address = 0xFF;
 
@@ -37,6 +38,7 @@ static volatile uint8_t g_reset = 0;
 static volatile uint32_t g_hall_sensor_1 = 0;
 static volatile uint32_t g_hall_sensor_2 = 0;
 static volatile uint32_t g_dispense_target = 0;
+static volatile uint32_t g_ticks = 0;
 
 uint8_t set_motor_state(uint8_t state);
 #if DEBUG
@@ -54,6 +56,12 @@ ISR(PCINT0_vect)
         g_reset = 1;
     else
         g_reset = 0;
+}
+
+ISR (TIMER1_OVF_vect)
+{
+    g_ticks++;
+    TCNT1 = TIMER1_INIT;
 }
 
 // encoder ISR
@@ -126,23 +134,24 @@ void dispense(uint32_t ticks)
 #if DEBUG
 void test()
 {
-    uint8_t disp;
-    uint32_t cur;
+    uint32_t cur1, cur2, t;
 
-    dispense(30000);
+    //dispense(30000);
+    set_motor_state(1);
     for(;;)
     {
         cli();
-        cur = g_hall_sensor_1;
-        disp = g_is_dispensing;
+        t = g_ticks;
+        cur1 = g_hall_sensor_1;
+        cur2 = g_hall_sensor_2;
         sei();
 
-        dprintf("ticks: %ld is_disp: %d\n", cur, disp);
-
-        if (!g_is_dispensing)
+        dprintf("time: %ld h1: %ld h2: %ld\n", g_ticks, cur1, cur2);
+        if (t > 10000)
             break;
+        _delay_ms(100);
     }
-    dprintf("Done dispensing\n");
+    set_motor_state(0);
 }
 #endif
 
@@ -224,6 +233,10 @@ void setup(void)
     // Set LED PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3)|(1<<PD4)|(1<<PD7);
 
+    // set the pull ups for the hall sensors
+    sbi(PORTC, 0);
+    sbi(PORTC, 1);
+
     // Set Motor pin as output
     DDRB |= (1<<PB1) | (1<<PB0);
 
@@ -242,6 +255,11 @@ void setup(void)
     // External interrupts for the hall sensors on the motor`
     PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
     PCICR |= (1<<PCIE1);
+
+    // Timer setup for dispense timing
+    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
 
     serial_init();
 }
@@ -412,7 +430,9 @@ int main(void)
 
     led_pwm_setup();
     sei();
-//    test();
+#if DEBUG
+    test();
+#endif
 
     wait_for_reset();
     for(;;)
