@@ -19,8 +19,8 @@
    	<div class="pour_ing">
                 ingredients:</br>
                 <ul>
-                {% for ing in drink.ingredients %}
-                    <li>{{ ing }}</li>
+                {% for ing, parts in drink.ingredients %}
+                    <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
                 {% endfor %}
                 </ul>
         </div>
