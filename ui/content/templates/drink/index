@@ -3,18 +3,7 @@
 <div class="top_bar"><p>Bartendro</p></div>	
 <div class="drink_content">
     <div class="drink_heading">Make: {{ drink.name.name }}</div></br>
-
-	 <div class="pour">    
-		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
-		<p class="recommendation">Suggested drink size is {{ drink.sugg_size }} oz</p> 
-	 		<div class="size">
-	 			<div><button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button></div>
-    			<div class="size_text"><p class="text" id="size_text">4 fluid ounces</p></div>
-      		<div><button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button></div>
-      	</div>
-		<div><button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button></div>
-	</div>
-	<div class="drink_left">
+    <div class="drink_left">
     	<div class="pour_desc">{{ drink.desc }}</div>
    	<div class="pour_ing">
                 ingredients:</br>
@@ -25,9 +14,14 @@
                 </ul>
         </div>
     </div>
+    <div>
     	<div class="back_button"> 
-        	<button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
-    	</div>
+       	    <button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
+        </div>
+    	<div class="pour_button"> 
+            <button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

@@ -48,12 +48,12 @@ table.home_table td{
 	}
 div.sub{
 	margin-top: 10px;
-	margin-bottom: 10px;
+	margin-bottom: 1px;
 	margin-left: 120px;
 	margin-right: -50px;
 	width: 350px;
 	float: left;
-	height: 80px;
+	height: 100px;
    text-align: left;
 	border: 1px hidden #ccc;
 	border-top-style: solid;
@@ -154,7 +154,6 @@ div.drink_desc{
 	font-size: .85em;	
 	font-weight: normal;
    color: black;
-   line-height: 80%;
 }
 .changed_mind{
    font-family:Arial;
@@ -261,6 +260,9 @@ p.text{
 }
 div.back_button{
 	float: left;	
+}
+div.drink_button{
+	float: right;	
 }
 div.subheading{
 	font-family:"Arial";
