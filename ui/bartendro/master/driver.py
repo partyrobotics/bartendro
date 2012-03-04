@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import os
-from bartendro.utils import log, error
+from bartendro.utils import log, error, local
 from subprocess import call
 from gpio import GPIO
-from time import sleep
+from time import sleep, localtime
 import serial
 
 BAUD_RATE = 38400
@@ -28,19 +28,19 @@ class MasterDriver(object):
 
     def __init__(self, device):
         self.device = device
-        self.logfile = logfile
         self.ser = None
         self.msg = ""
         self.ret = 0
         self.ss = GPIO(135)
         self.ss.setup()
         self.num_dispensers = 0
-        self.cl = open(local.application.comm_log_file, "a")
+        self.cl = open("logs/comm.log", "a")
 
     def log(self, msg):
         try:
             t = localtime()
-            self.cl.write("%d-%d-%d %d:%02d %s\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+            self.cl.flush()
         except IOError:
             pass
 
@@ -64,7 +64,6 @@ class MasterDriver(object):
                                      parity=serial.PARITY_NONE, 
                                      stopbits=serial.STOPBITS_ONE, 
                                      timeout=2)
-            self.l = open(self.logfile, "a")
         except serial.serialutil.SerialException:
             raise SerialIOError;
 

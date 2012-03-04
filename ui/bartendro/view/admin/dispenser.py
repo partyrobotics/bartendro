@@ -3,7 +3,7 @@ from operator import itemgetter
 import memcache
 from werkzeug.utils import redirect
 from bartendro.utils import session, render_template, local, render_json, expose, validate_url, url_for, local
-from wtforms import Form, SelectField
+from wtforms import Form, SelectField, IntegerField, validators
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.dispenser import Dispenser
@@ -28,13 +28,16 @@ def view(request):
     fields = []
     for i in xrange(1, 17):
         dis = "dispenser%d" % i
+        actual = "actual%d" % i
         setattr(F, dis, SelectField("dispenser %d" % i, choices=sorted_booze_list)) 
+        setattr(F, actual, IntegerField(actual, [validators.NumberRange(min=1, max=100)]))
         kwargs[dis] = "1" # string of selected booze
-        fields.append((dis))
+        fields.append((dis, actual))
 
     form = F(**kwargs)
     for i, dispenser in enumerate(dispensers):
         form["dispenser%d" % (i + 1)].data = "%d" % booze_list[dispenser.booze_id - 1][0]
+        form["actual%d" % (i + 1)].data = dispenser.actual
 
     return render_template("admin/dispenser", form=form, count=count, fields=fields, saved=saved)
 
@@ -50,6 +53,7 @@ def save(request):
         for dispenser in dispensers:
             try:
                 dispenser.booze_id = request.form['dispenser%d' % dispenser.id]
+                dispenser.actual = request.form['actual%d' % dispenser.id]
             except KeyError:
                 continue
         session.commit()

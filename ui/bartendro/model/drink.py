@@ -38,7 +38,7 @@ class Drink(Base):
 
         self.drink_boozes = sorted(self.drink_boozes, key=attrgetter('booze.abv', 'booze.name'), reverse=True)
         for db in self.drink_boozes:
-            ing.append(db.booze.name)
+            ing.append((db.booze.name, db.value))
         self.ingredients = ing
 
     def json(self):

@@ -24,8 +24,7 @@ class Mixer(object):
         return self.err
 
     def leds_color(self, r, g, b):
-        for i in xrange(self.disp_count):
-            self.driver.led(i, r, g, b)
+        self.driver.led(255, r, g, b)
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -86,6 +85,7 @@ class Mixer(object):
                 if db.booze_id == disp.booze_id:
                     r = {}
                     r['dispenser'] = disp.id
+                    r['dispenser_actual'] = disp.actual
                     r['booze'] = db.booze_id
                     r['booze_name'] = db.booze.name
                     r['part'] = db.value
@@ -106,7 +106,11 @@ class Mixer(object):
         active_disp = []
         for r in recipe:
             r['ml'] = r['part'] * size / total_parts
-            r['ms'] = r['ml'] * MS_PER_ML
+            # FIXME 90
+            if r['dispenser_actual'] == 0:
+                r['ms'] = int(r['ml'] * MS_PER_ML)
+            else:
+                r['ms'] = int(r['ml'] * MS_PER_ML * (90.0 / float(r['dispenser_actual'])))
             self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
             log("..dispense %d for %d ms" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
@@ -135,12 +139,11 @@ class Mixer(object):
         except IOError:
             pass
 
-        sleep(1)
-#        for i in xrange(10):
-#            self.leds_color(0, 255, 0)
-#            sleep(.25)
-#            self.leds_color(0, 0, 0)
-#            sleep(.25)
+        for i in xrange(10):
+            self.leds_color(0, 255, 0)
+            sleep(.25)
+            self.leds_color(0, 0, 0)
+            sleep(.25)
 
         trouble = False
         for disp in xrange(self.disp_count):
@@ -148,10 +151,7 @@ class Mixer(object):
                 error("dispenser %d failed to respond to ping" % disp)
                 trouble = True
 
-#        if trouble:
-#            log("dispenser's are pissed. better reset the chain!")
-#            self.driver.chain_init()
-
+        self.driver.chain_init()
         self.leds_color(0, 0, 255)
 
         return True 

@@ -19,7 +19,8 @@
                               {{ form["dispenser%s" % i].label }}: 
                               {{ form["dispenser%s" % i](class="form") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
-                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense 100ml</button>
+                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense 90ml</button>
+                              {{ form["actual%s" % i](size="3") }}
                         </div>
                     {% endfor %}
 
@@ -70,7 +71,7 @@ function test_dispense(disp)
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
-                $("#test" + disp).text('dispense 100ml');
+                $("#test" + disp).text('dispense 90ml');
                 $("#test" + disp).attr('disabled', false);
             }
     });

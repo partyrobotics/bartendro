@@ -6,7 +6,7 @@
 
 	 <div class="pour">    
 		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
-		<p class="recommendation">Suggested drink size is 4 oz</p> 
+		<p class="recommendation">Suggested drink size is {{ drink.sugg_size }} oz</p> 
 	 		<div class="size">
 	 			<div><button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button></div>
     			<div class="size_text"><p class="text" id="size_text">4 fluid ounces</p></div>
@@ -19,8 +19,8 @@
    	<div class="pour_ing">
                 ingredients:</br>
                 <ul>
-                {% for ing in drink.ingredients %}
-                    <li>{{ ing }}</li>
+                {% for ing, parts in drink.ingredients %}
+                    <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
                 {% endfor %}
                 </ul>
         </div>

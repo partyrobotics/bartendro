@@ -19,7 +19,7 @@ def tail(f, n, offset=None):
             # to step back, go to the beginning instead
             f.seek(0)
         pos = f.tell()
-        lines = f.read().splitlines()
+        lines = f.read().decode('utf-8', 'ignore').splitlines()
         if len(lines) >= to_read or pos == 0:
             return reversed(lines[-to_read:offset and -offset or None])
         avg_line_length *= 1.3
@@ -48,3 +48,13 @@ def debug(request):
     except IOError:
         lines = ["[error] cannot open log file.\n"]
     return render_template_no_cache("admin/log", title="Debug log", lines=lines)
+
+@expose('/admin/log/comms')
+def comms(request):
+    try:
+        f = open(local.application.comm_log_file, "r")
+        lines = tail(f, MAX_NUM_LOG_LINES)
+        f.close()
+    except IOError:
+        lines = ["[error] cannot open log file.\n"]
+    return render_template_no_cache("admin/log", title="Comms log", lines=lines)

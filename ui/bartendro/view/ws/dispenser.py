@@ -23,7 +23,7 @@ def ws_dispenser_off(request, disp):
 @expose('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(request, disp):
     driver = local.application.driver
-    driver.dispense(disp - 1, 100 * MS_PER_ML)
+    driver.dispense(disp - 1, 90 * MS_PER_ML)
     while driver.is_dispensing(disp - 1):
 	sleep(.1)
     return render_text("ok\n")
