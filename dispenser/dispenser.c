@@ -32,14 +32,22 @@
 
 static uint8_t g_address = 0xFF;
 
+// General globals
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_rx = 0;
+
+// Reset related
 static volatile uint8_t g_reset = 0;
+static volatile uint32_t g_falling_edge_time = 0;
+
+// Tick based dispensing
 static volatile uint32_t g_hall_sensor_1 = 0;
 static volatile uint32_t g_hall_sensor_2 = 0;
-static volatile uint32_t g_dispense_target = 0;
-static volatile int32_t g_ticks = 0;
-static volatile int32_t g_falling_edge_ticks = 0;
+static volatile uint32_t g_dispense_target_ticks = 0;
+
+// Time based dispensing
+static volatile uint32_t g_dispense_target_time = 0;
+static volatile uint32_t g_time = 0;
 
 uint8_t set_motor_state(uint8_t state);
 #if DEBUG
@@ -56,34 +64,31 @@ ISR(PCINT0_vect)
 {
     if (PINB & (1<<PINB2))
     {
-        set_led_color(255, 255, 0);
-        g_falling_edge_ticks = g_ticks + RESET_DURATION;
+        g_falling_edge_time = g_time + RESET_DURATION;
     }
     else
     {
-        if (g_falling_edge_ticks > 0 && g_ticks >= g_falling_edge_ticks)
-        {
-            set_led_color(255, 0, 255);
+        if (g_falling_edge_time > 0 && g_time >= g_falling_edge_time)
             g_reset = 1;
-        }
-        g_falling_edge_ticks = 0;
+        g_falling_edge_time = 0;
     }
 }
 
+// timer interrupt. Used for clock and time based dispensing
 ISR (TIMER1_OVF_vect)
 {
-    g_ticks++;
+    g_time++;
     TCNT1 = TIMER1_INIT;
 
-    if (g_dispense_target > 0 && g_ticks >= g_dispense_target)
+    if (g_dispense_target_time > 0 && g_time >= g_dispense_target_time)
     {
-        g_dispense_target = 0;
+        g_dispense_target_time = 0;
         g_is_dispensing = 0;
         cbi(PORTB, 1);
     }
 }
 
-// encoder ISR
+// encoder interrupt. Used for tick based dispensing
 ISR(PCINT1_vect)
 {
     if (PINC & (1<<PINC0))
@@ -91,10 +96,11 @@ ISR(PCINT1_vect)
     if (PINC & (1<<PINC1))
         g_hall_sensor_2++;
 
-    if (g_dispense_target > 0 && g_hall_sensor_1 >= g_dispense_target)
+    if (g_dispense_target_ticks > 0 && g_hall_sensor_1 >= g_dispense_target_ticks)
     {
-        g_dispense_target = 0;
-        set_motor_state(0);
+        g_dispense_target_ticks = 0;
+        g_is_dispensing = 0;
+        cbi(PORTB, 1);
     }
 }
 
@@ -153,6 +159,23 @@ uint8_t set_motor_state(uint8_t state)
     return 1;
 }
 
+void dispense_time(uint32_t time)
+{
+    // Check to make sure we're not already dispensing
+    if (is_dispensing())
+        return;
+
+    cli();
+    g_dispense_target_time = g_time + time;
+    sei();
+#if DEBUG
+    dprintf("dispense target: %d\n", g_dispense_target_time);
+#endif
+
+    // Turn the motor on and get moving!
+    set_motor_state(1);
+} 
+
 void dispense(uint32_t ticks)
 {
     // Check to make sure we're not already dispensing
@@ -160,10 +183,11 @@ void dispense(uint32_t ticks)
         return;
 
     cli();
-    g_dispense_target = g_ticks + ticks;
+    g_hall_sensor_1 = 0;
+    g_dispense_target_ticks = ticks;
     sei();
 #if DEBUG
-    dprintf("dispense target: %d\n", g_dispense_target);
+    dprintf("dispense target: %d\n", g_dispense_target_ticks);
 #endif
 
     // Turn the motor on and get moving!
@@ -171,7 +195,26 @@ void dispense(uint32_t ticks)
 } 
 
 #if DEBUG
-void dispense_test()
+void dispense_test_ticks()
+{
+    uint32_t ticks;
+
+    dispense(4000);
+    for(;;)
+    {
+        cli();
+        ticks = g_hall_sensor_1;
+        sei();
+
+        dprintf("ticks: %ld target: %ld\n", ticks, g_dispense_target_ticks);
+
+        if (!is_dispensing())
+            break;
+        _delay_ms(100);
+    }
+    dprintf("Done dispensing\n");
+}
+void dispense_test_time()
 {
     uint8_t disp;
     uint32_t cur;
@@ -180,10 +223,10 @@ void dispense_test()
     for(;;)
     {
         cli();
-        cur = g_ticks;
+        cur = g_time;
         sei();
 
-        dprintf("ticks: %ld\n", cur, disp);
+        dprintf("time: %ld\n", cur, disp);
 
         if (!is_dispensing())
             break;
@@ -192,19 +235,19 @@ void dispense_test()
 }
 void reset_test()
 {
-    uint32_t edge, ticks;
+    uint32_t edge, time;
 
     dprintf("reset test\n");
     for(;;)
     {
         cli();
-        edge = g_falling_edge_ticks;
-        ticks = g_ticks;
+        edge = g_falling_edge_time;
+        time = g_time;
         sei();
         if (is_reset())
             break;
 
-        //dprintf("ticks: %ld edge: %ld reset: %d\n", ticks, edge, reset);
+        //dprintf("time: %ld edge: %ld reset: %d\n", time, edge, reset);
         // _delay_ms(50);
     }
     dprintf("reset detected!\n");
@@ -295,13 +338,17 @@ void setup(void)
     sbi(PORTD, 7);
     cbi(PORTB, 0);
 
+    // Activate the pull ups for the hall sensors
+    sbi(PORTC, 0);
+    sbi(PORTC, 1);
+
     // External interrupts for the reset line
     PCMSK0 |= (1<<PCINT2);
     PCICR |= (1<<PCIE0);
 
     // External interrupts for the hall sensors on the motor`
-    //PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
-    //PCICR |= (1<<PCIE1);
+    PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
+    PCICR |= (1<<PCIE1);
 
     // Timer setup for dispense timing
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
@@ -474,7 +521,7 @@ int main(void)
     led_pwm_setup();
     sei();
 #if DEBUG
-    dispense_test();
+    dispense_test_ticks();
 #endif
 
     wait_for_reset();
