@@ -27,115 +27,189 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
-
-#ifdef PRO_MINI_5V
 #define TIMER1_INIT 0xFF06 // 16mhz / 64 cs / 250 = 1ms per 'tick'
-#else 
-#define TIMER1_INIT 0xFF06 // 8mhz / 8 cs / 1000 = 1ms per 'tick'
-#endif
+#define DEBUG 0
 
 static uint8_t g_address = 0xFF;
-static uint8_t g_motor_state = 0;
 
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_rx = 0;
 static volatile uint8_t g_reset = 0;
-static volatile uint8_t g_hall_sensor_1 = 0;
-static volatile uint8_t g_hall_sensor_2 = 0;
+static volatile uint32_t g_hall_sensor_1 = 0;
+static volatile uint32_t g_hall_sensor_2 = 0;
+static volatile uint32_t g_dispense_target = 0;
+static volatile int32_t g_ticks = 0;
+static volatile int32_t g_falling_edge_ticks = 0;
 
 uint8_t set_motor_state(uint8_t state);
+#if DEBUG
+void dprintf(const char *fmt, ...);
+#endif
 
 ISR (USART_RX_vect)
 {
     g_rx = 1;
 }
 
+#define RESET_DURATION 50 // in ms
 ISR(PCINT0_vect)
 {
     if (PINB & (1<<PINB2))
-        g_reset = 1;
+    {
+        set_led_color(255, 255, 0);
+        g_falling_edge_ticks = g_ticks + RESET_DURATION;
+    }
     else
-        g_reset = 0;
+    {
+        if (g_falling_edge_ticks > 0 && g_ticks >= g_falling_edge_ticks)
+        {
+            set_led_color(255, 0, 255);
+            g_reset = 1;
+        }
+        g_falling_edge_ticks = 0;
+    }
 }
 
+ISR (TIMER1_OVF_vect)
+{
+    g_ticks++;
+    TCNT1 = TIMER1_INIT;
+
+    if (g_dispense_target > 0 && g_ticks >= g_dispense_target)
+    {
+        g_dispense_target = 0;
+        g_is_dispensing = 0;
+        cbi(PORTB, 1);
+    }
+}
+
+// encoder ISR
 ISR(PCINT1_vect)
 {
     if (PINC & (1<<PINC0))
         g_hall_sensor_1++;
     if (PINC & (1<<PINC1))
         g_hall_sensor_2++;
-}
 
-// clock globals
-volatile uint32_t ticks = 0;
-volatile uint8_t  motor_state = 0;
-volatile uint16_t dispense_ticks = 0;
-volatile uint8_t  dispense_chunks = 0;
-
-#define DISPENSE_TICKS  700
-#define DISPENSE_DELAY  700
-
-ISR (TIMER1_OVF_vect)
-{
-    if (ticks == 0)
+    if (g_dispense_target > 0 && g_hall_sensor_1 >= g_dispense_target)
     {
-        if (motor_state)
-            set_motor_state(0);
-
-        if (dispense_chunks == 0)
-        {
-            TIMSK1 &= ~(1<<TOIE1);
-            g_is_dispensing = 0;
-            return;
-        }
-
-        if (motor_state)
-        {
-            ticks = DISPENSE_DELAY;
-            motor_state = 0;
-        }
-        else
-        {
-            ticks = dispense_ticks;
-            dispense_chunks--;
-            
-            set_motor_state(1);
-            motor_state = 1;
-        }
-        TCNT1 = TIMER1_INIT;
-        return;
+        g_dispense_target = 0;
+        set_motor_state(0);
     }
-
-    ticks--;
-    TCNT1 = TIMER1_INIT;
 }
 
-void set_timer(uint16_t dur)
+uint8_t is_dispensing()
 {
-    dispense_chunks = (dur + DISPENSE_TICKS - 1) / DISPENSE_TICKS;
-    dispense_ticks = (dur + dispense_chunks - 1) / dispense_chunks;
+    uint8_t cur;
 
-    dispense_chunks--;
+    cli();
+    cur = g_is_dispensing;
+    sei();
 
-    ticks = dispense_ticks;
-    TCNT1 = TIMER1_INIT;
+    return cur;
+}
+
+void clear_reset()
+{
+    cli();
+    g_reset = 0;
+    sei();
+}
+
+uint8_t is_reset()
+{
+    uint8_t r;
+
+    cli();
+    r = g_reset;
+    sei();
+
+
+    return r;
+}
+
+uint8_t set_motor_state(uint8_t state)
+{
+    uint8_t cur;
+
+    cur = is_dispensing();
+    if (cur == state)
+        return 0;
+
+    if (state)
+    {
+        cli();
+        g_is_dispensing = 1;
+        sei();
+        sbi(PORTB, 1);
+    }
+    else
+    {
+        cli();
+        g_is_dispensing = 0;
+        sei();
+        cbi(PORTB, 1);
+    }
+    return 1;
+}
+
+void dispense(uint32_t ticks)
+{
+    // Check to make sure we're not already dispensing
+    if (is_dispensing())
+        return;
+
+    cli();
+    g_dispense_target = g_ticks + ticks;
+    sei();
+#if DEBUG
+    dprintf("dispense target: %d\n", g_dispense_target);
+#endif
+
+    // Turn the motor on and get moving!
     set_motor_state(1);
-    cli();
-    motor_state = 1;
-    g_is_dispensing = 1;
-    sei();
-    TIMSK1 |= (1<<TOIE1);
-}
+} 
 
-void stop_timer(void)
+#if DEBUG
+void dispense_test()
 {
-    cli();
-    g_is_dispensing = 0;
-    TIMSK1 &= ~(1<<TOIE1);
-    ticks = 0;
-    dispense_chunks = 0;
-    sei();
+    uint8_t disp;
+    uint32_t cur;
+
+    dispense(4000);
+    for(;;)
+    {
+        cli();
+        cur = g_ticks;
+        sei();
+
+        dprintf("ticks: %ld\n", cur, disp);
+
+        if (!is_dispensing())
+            break;
+    }
+    dprintf("Done dispensing\n");
 }
+void reset_test()
+{
+    uint32_t edge, ticks;
+
+    dprintf("reset test\n");
+    for(;;)
+    {
+        cli();
+        edge = g_falling_edge_ticks;
+        ticks = g_ticks;
+        sei();
+        if (is_reset())
+            break;
+
+        //dprintf("ticks: %ld edge: %ld reset: %d\n", ticks, edge, reset);
+        // _delay_ms(50);
+    }
+    dprintf("reset detected!\n");
+}
+#endif
 
 void serial_init(void)
 {
@@ -149,19 +223,35 @@ void serial_init(void)
 }
 uint8_t serial_tx(uint8_t ch)
 {
-    uint8_t reset;
-
     while ( !( UCSR0A & (1<<UDRE0)) )
     {
-        cli();
-        reset = g_reset;
-        sei();
-        if (reset)
+        if (is_reset())
             return 0;
     }
     UDR0 = ch;
     return 1;
 }
+
+#if DEBUG
+#define MAX 80 
+
+// debugging printf function. Max MAX characters per line!!
+void dprintf(const char *fmt, ...)
+{
+    va_list va;
+    va_start (va, fmt);
+    char buffer[MAX];
+    char *ptr = buffer;
+    vsnprintf(buffer, MAX, fmt, va);
+    va_end (va);
+    for(ptr = buffer; *ptr; ptr++)
+    {
+        if (*ptr == '\n') serial_tx('\r');
+        serial_tx(*ptr);
+    }
+}
+#endif
+
 uint8_t serial_rx_block(void)
 {
     while ( !(UCSR0A & (1<<RXC0))) 
@@ -193,7 +283,6 @@ void setup(void)
 {
     // Set LED PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3)|(1<<PD4)|(1<<PD7);
-DDRC |= (1<<PC0);
 
     // Set Motor pin as output
     DDRB |= (1<<PB1) | (1<<PB0);
@@ -211,11 +300,13 @@ DDRC |= (1<<PC0);
     PCICR |= (1<<PCIE0);
 
     // External interrupts for the hall sensors on the motor`
-    PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
-    PCICR |= (1<<PCIE1);
+    //PCMSK1 |= (1<<PCINT8)|(1<<PCINT9);
+    //PCICR |= (1<<PCIE1);
 
     // Timer setup for dispense timing
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 256 = 244Hz = .001024 per tick
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
 
     serial_init();
 }
@@ -265,55 +356,14 @@ void set_led_blue(uint8_t v)
     OCR0B = 255 - v;
 }
 
-uint8_t is_dispensing()
-{
-    uint8_t cur;
-
-    cli();
-    cur = g_is_dispensing;
-    sei();
-
-    return cur;
-}
-
-uint8_t set_motor_state(uint8_t state)
-{
-    uint8_t cur;
-
-    cli();
-    cur = g_motor_state;
-    sei();
-
-    if (cur == state)
-        return 0;
-
-    if (state)
-    {
-        cli();
-        g_motor_state = 1;
-        sei();
-        sbi(PORTB, 1);
-    }
-    else
-    {
-        cli();
-        g_motor_state = 0;
-        sei();
-        cbi(PORTB, 1);
-    }
-    return 1;
-}
 
 void wait_for_reset()
 {
-    uint8_t count = 0, reset, t = 1;
+    uint8_t count = 0, t = 1;
 
     for(;;)
     {
-        cli();
-        reset = g_reset;
-        sei();
-        if (!reset)
+        if (!is_reset())
         {
             _delay_ms(1);
             count++;
@@ -352,10 +402,12 @@ void address_assignment(void)
         while(!serial_tx((uint8_t)*p));
 }
 
+#define BROADCAST_ADDR 255
+
 void handle_cmd(char *line)
 {
     uint8_t ret;
-    int addr, arg1, arg2, arg3;
+    int32_t addr, arg1, arg2, arg3;
     char cmd[32];
     char resp[32], *r;
 
@@ -365,11 +417,19 @@ void handle_cmd(char *line)
     if (line[0] == '!')
        return;
 
-    ret = sscanf(line, "%d %s %d %d %d", &addr, cmd, &arg1, &arg2, &arg3);
+    ret = sscanf(line, "%ld %s %ld %ld %ld", &addr, cmd, &arg1, &arg2, &arg3);
     if (ret < 2)
         return;
-   
-    if (addr != 255 && addr != g_address)
+  
+    // We allow LED commands to be broadcast. Everything else needs to be done per address
+    if ((addr == g_address || addr == BROADCAST_ADDR) && strcmp(cmd, "led") == 0 && ret == 5)
+    {
+        set_led_color((uint8_t)arg1, (uint8_t)arg2, (uint8_t)arg3);
+        return;
+    }
+
+    // If this cmd isn't for us, skip it!
+    if (addr != g_address)
         return;
 
     if (strcmp(cmd, "on") == 0)
@@ -384,23 +444,18 @@ void handle_cmd(char *line)
     else
     if (strcmp(cmd, "disp") == 0 && ret == 3)
     {
-        set_timer(arg1);
-    }
-    else
-    if (strcmp(cmd, "led") == 0 && ret == 5)
-    {
-        set_led_color(arg1, arg2, arg3);
+        dispense(arg1);
     }
     else
     if (strcmp(cmd, "isdisp") == 0)
     {
         uint8_t state = is_dispensing();
-        sprintf(resp, "!%d isdisp %d\n", addr, state);
+        sprintf(resp, "!%ld isdisp %d\n", addr, state);
     }
     else
     if (strcmp(cmd, "ping") == 0)
     {
-        sprintf(resp, "!%d pong\n", addr);
+        sprintf(resp, "!%ld pong\n", addr);
     }
     for(r = resp; *r; r++)
         serial_tx(*r);
@@ -418,10 +473,14 @@ int main(void)
 
     led_pwm_setup();
     sei();
+#if DEBUG
+    dispense_test();
+#endif
 
     wait_for_reset();
     for(;;)
     {
+        clear_reset();
         reset = 0;
         set_led_color(0, 0, 255);
         address_assignment();
@@ -435,9 +494,7 @@ int main(void)
             *ptr = 0;
             for(;;)
             {
-                cli();
-                reset = g_reset;
-                sei();
+                reset = is_reset();
                 if (reset)
                     break;
                 if (!serial_rx(&ch))
@@ -465,8 +522,7 @@ int main(void)
             }
             if (reset)
             {
-                // If we get a reset, turn off timer, turn off motor
-                TIMSK1 &= ~(1<<TOIE1);
+                // If we get a reset, turn off motor
                 set_motor_state(0);
             }
         }
