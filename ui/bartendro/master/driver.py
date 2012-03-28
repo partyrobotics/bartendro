@@ -141,8 +141,11 @@ class MasterDriver(object):
     def stop(self, dispenser):
         return self.send("%d off\n" % dispenser)
 
-    def dispense(self, dispenser, duration):
-        return self.send("%d disp %d\n" % (dispenser, duration))
+    def dispense_time(self, dispenser, duration):
+        return self.send("%d disptime %d\n" % (dispenser, duration))
+
+    def dispense_ticks(self, dispenser, ticks):
+        return self.send("%d dispticks %d\n" % (dispenser, ticks))
 
     def led(self, dispenser, r, g, b):
         return self.send("%d led %d %d %d\n" % (dispenser, r, g, b))
@@ -199,6 +202,39 @@ class MasterDriver(object):
             self.log(msg)
             error(msg)
 	    return False
+
+    def get_dispense_stats(self, dispenser):
+        '''expects "!3 dispstats <time> <ticks>" '''
+        if self.software_only: return True
+
+        self.send("%d dispstat\n" % dispenser)
+        ret = self.ser.readline()
+        if not ret: 
+            msg = "dispstat response timeout"
+            self.log(msg)
+            error(msg)
+            return (-1, -1)
+
+ 	ret = ret[:-1]
+        try:
+            ret = ret[1:] # strip off the !
+            disp, cmd, t, ticks = ret.split(" ")
+ 	    disp = int(disp)
+	    if disp == dispenser: 
+	        return (-1, -1)
+	    else:
+                msg = "wrong dispenser number in pong"
+                self.log("wrong dispenser number in pong")
+                error(msg)
+	        return False
+            t = int(t)
+            ticks = int(ticks)
+            return (t, ticks)
+        except ValueError:
+            msg = "error parsing pong data. response: '%s'" % ret
+            self.log(msg)
+            error(msg)
+	    return (-1, -1)
 
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyS1");

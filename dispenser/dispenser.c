@@ -512,7 +512,7 @@ void handle_cmd(char *line)
     else
     if (strcmp(cmd, "tickdisp") == 0 && ret == 3)
     {
-        dispense_tick(arg1);
+        dispense_ticks(arg1);
     }
     else
     if (strcmp(cmd, "isdisp") == 0)
