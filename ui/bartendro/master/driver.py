@@ -31,7 +31,7 @@ class MasterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
-        self.ss = GPIO(135)
+        self.ss = GPIO(134)
         self.ss.setup()
         self.num_dispensers = 0
         self.cl = open("logs/comm.log", "a")
@@ -83,9 +83,9 @@ class MasterDriver(object):
         sleep(1)
 
         self.ss.high()
-        sleep(.2)
+        sleep(.1)
         self.ss.low()
-        sleep(.2)
+        sleep(.1)
 
         print "address assignment"
         while True:

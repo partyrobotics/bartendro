@@ -9,6 +9,7 @@ from bartendro.model import drink_booze
 from bartendro.model import booze
 
 MS_PER_ML = 86 
+CALIBRATION_TICKS = 30000
 
 class Mixer(object):
     '''This is where the magic happens!'''
@@ -151,7 +152,7 @@ class Mixer(object):
                 error("dispenser %d failed to respond to ping" % disp)
                 trouble = True
 
-        self.driver.chain_init()
+        #self.driver.chain_init()
         self.leds_color(0, 0, 255)
 
         return True 
