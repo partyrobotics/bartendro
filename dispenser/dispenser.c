@@ -46,8 +46,13 @@ static volatile uint32_t g_hall_sensor_2 = 0;
 static volatile uint32_t g_dispense_target_ticks = 0;
 
 // Time based dispensing
+static volatile uint32_t g_dispense_start_time = 0;
 static volatile uint32_t g_dispense_target_time = 0;
 static volatile uint32_t g_time = 0;
+
+// Dispense statistics
+static volatile uint32_t g_last_dispense_duration = 0;
+static volatile uint32_t g_last_dispense_ticks = 0;
 
 uint8_t set_motor_state(uint8_t state);
 #if DEBUG
@@ -85,6 +90,10 @@ ISR (TIMER1_OVF_vect)
         g_dispense_target_time = 0;
         g_is_dispensing = 0;
         cbi(PORTB, 1);
+
+        // collect statistics
+        g_last_dispense_duration = g_time - g_dispense_start_time;
+        g_last_dispense_ticks = g_hall_sensor_1;
     }
 }
 
@@ -101,6 +110,10 @@ ISR(PCINT1_vect)
         g_dispense_target_ticks = 0;
         g_is_dispensing = 0;
         cbi(PORTB, 1);
+
+        // collect statistics
+        g_last_dispense_duration = g_time - g_dispense_start_time;
+        g_last_dispense_ticks = g_hall_sensor_1;
     }
 }
 
@@ -166,7 +179,9 @@ void dispense_time(uint32_t time)
         return;
 
     cli();
+    g_dispense_start_time = g_time;
     g_dispense_target_time = g_time + time;
+    g_hall_sensor_1 = 0;
     sei();
 #if DEBUG
     dprintf("dispense target: %d\n", g_dispense_target_time);
@@ -176,7 +191,7 @@ void dispense_time(uint32_t time)
     set_motor_state(1);
 } 
 
-void dispense(uint32_t ticks)
+void dispense_ticks(uint32_t ticks)
 {
     // Check to make sure we're not already dispensing
     if (is_dispensing())
@@ -184,6 +199,7 @@ void dispense(uint32_t ticks)
 
     cli();
     g_hall_sensor_1 = 0;
+    g_dispense_start_time = g_time;
     g_dispense_target_ticks = ticks;
     sei();
 #if DEBUG
@@ -489,15 +505,25 @@ void handle_cmd(char *line)
         set_motor_state(0);
     }
     else
-    if (strcmp(cmd, "disp") == 0 && ret == 3)
+    if (strcmp(cmd, "timedisp") == 0 && ret == 3)
     {
-        dispense(arg1);
+        dispense_time(arg1);
+    }
+    else
+    if (strcmp(cmd, "tickdisp") == 0 && ret == 3)
+    {
+        dispense_tick(arg1);
     }
     else
     if (strcmp(cmd, "isdisp") == 0)
     {
         uint8_t state = is_dispensing();
         sprintf(resp, "!%ld isdisp %d\n", addr, state);
+    }
+    else
+    if (strcmp(cmd, "dispstat") == 0)
+    {
+        sprintf(resp, "!%ld dispstat %ld %ld\n", addr, g_last_dispense_duration, g_last_dispense_ticks);
     }
     else
     if (strcmp(cmd, "ping") == 0)
