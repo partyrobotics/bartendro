@@ -8,8 +8,11 @@
   <script type="text/javascript" src="{{ url_for('static', file='js/jquery.tmpl.min.js') }}"></script>
 </head>
 <body>
-  <div class="body">
-      {% block body %}{% endblock %}
-  </div>
+<div class="top_bar"><p>Bartendro</p></div>
+<div class="body">
+{% block body %}{% endblock %}
+<div class="body_push"></div>
+</div>
+{% block footer %}{% endblock %}
 </body>
 </html>

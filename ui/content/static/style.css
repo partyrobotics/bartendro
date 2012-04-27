@@ -11,6 +11,15 @@ body{
     font-family:"Arial";
     color: dimgray;
 }
+div.body_push{
+    height: 110px;
+}
+div.body{
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -110px 40px;
+}
 div.top_bar{
     position: fixed;
     width: 70px;
@@ -102,7 +111,6 @@ div.main_drink_desc{
     font-weight: normal;
     text-transform: capitalize;
    color: grey;
-   line-height: 80%
     text-shadow:0 -1px 0 lightgray; 
 }   
 div.drink_heading{
@@ -124,12 +132,12 @@ div.dispense_drink_detail{
 div.dispense_stack{
     float: right;
     width: 58%;
+    margin-top: 20px;
 }
 div.dispense_stack_element{
     padding: .3em;
     margin-top: 1px;
-    background-color: #EEE;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
     border-top-style: solid;
     border-top-width: 2px;
     border-top-color: #ccc;
@@ -142,20 +150,9 @@ div.dispense_stack_element{
     font-size: 18pt;
 }
 
-div.drink_content{
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-    margin: 0 auto -4em;
-}
-
-div.drink_content_push{
-    height: 4em;
-}
-
 div.dispense_bottom_row{
-    background-color: #cFF;
-    height: 4em;
+    height: 110px;
+    margin: auto 10px auto 40px;
 }
 
 .small_button{
@@ -277,9 +274,9 @@ div.subheading{
     color: dimgray;;
 }
 div.section{
-        color: #000;
-        margin: 20px 0px 20px 120px;
-        text-align: center;
+    color: #000;
+    margin: 20px 0px 20px 120px;
+    text-align: center;
     letter-spacing: 12px;
 }
 div.main p {

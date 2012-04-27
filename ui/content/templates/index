@@ -1,13 +1,11 @@
 {% extends 'layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div>	 
 <div class="content">
     <div class="section">THE ESSENTIALS</div>
     {{ drink_table(top_drinks) }}
     <div class="section">THE WILD SIDE</div>
     {{ drink_table(other_drinks) }}
 </div>
-  
 {% endblock %}
 
 {% macro drink_table(drinks) -%}

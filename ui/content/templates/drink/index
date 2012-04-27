@@ -1,7 +1,5 @@
 {% extends 'layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div> 
-
 <div class="drink_content">
   <div class="drink_heading">Make: {{ drink.name.name }}</div>
   <div>
@@ -10,7 +8,8 @@
             <p>{{ drink.desc }}</p>
          </div>
          <div class="pour_ing">
-            ingredients:</br>
+            <br/>
+            ingredients:
             <ul>
               {% for ing, parts in drink.ingredients %}
                   <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
@@ -42,10 +41,6 @@
 
       </div>
   </div>
-</div>
-<div class="dispense_bottom_row"> 
-     <button type="button" class="back_button large_button" onclick="back()">Back</button>
-     <button type="button" class="pour_button large_button" onclick="make_drink({{ drink.id }})">pour!</button>
 </div>
 <script type="text/javascript">
 
@@ -135,4 +130,10 @@ function dispense_drink(drink, size)
 </script>
 <script type="text/javascript" src="{{ url_for('static', file='js/lightbox.js') }}"></script>
 
+{% endblock %}
+{% block footer %}
+<div class="dispense_bottom_row"> 
+     <button type="button" class="back_button large_button" onclick="back()">Back</button>
+     <button type="button" class="pour_button large_button" onclick="make_drink({{ drink.id }})">pour!</button>
+</div>
 {% endblock %}
