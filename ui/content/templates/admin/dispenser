@@ -1,9 +1,8 @@
 {% extends 'admin/layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div>
-    <div class="main">
+<div class="main">
     <div class="admin_content">	
-        <div class="heading">Dispensers</div>
+        <h2>Dispensers</h2>
         {% if saved %}
            <p>Your changes have been saved.</p>
         {% endif %}
@@ -31,12 +30,7 @@
  `       </form>
 	</div>
     </div>
-
-    <div class="bottom_bar">
-       <a class="home" href="/admin">ADMIN</a>
-    </div>
-    </div>
-
+</div>
 <script type="text/javascript">
 
 var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];

@@ -1,17 +1,15 @@
 {% extends 'admin/layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div>
 <div class="section">
-{{ title }}
-<button type="button" class="buttons" onclick="reload()">reload</button>
-<a href="/admin" class="buttons">admin</a>
+    {{ title }}
+    <button type="button" class="buttons" onclick="reload()">reload</button>
+    <a href="/admin" class="buttons">admin</a>
 </div>
 <div class="log">
-{% for line in lines %}
-{{ line }}<br/>
-{% endfor %}
+    {% for line in lines %}
+    {{ line }}<br/>
+    {% endfor %}
 </div>
-
 <script type="text/javascript">
 function reload()
 {

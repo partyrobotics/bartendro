@@ -132,7 +132,7 @@ function dispense_drink(drink, size)
 
 {% endblock %}
 {% block footer %}
-<div class="dispense_bottom_row"> 
+<div class="bottom_row"> 
      <button type="button" class="back_button large_button" onclick="back()">Back</button>
      <button type="button" class="pour_button large_button" onclick="make_drink({{ drink.id }})">pour!</button>
 </div>

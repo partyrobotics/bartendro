@@ -1,52 +1,48 @@
 {% extends 'admin/layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div>
 <div class="main">
-    <div class="content">	
-        <div class="heading">{{ title }}</div>
-       	 {% if saved %}
-           	<p>Your changes have been saved.</p>
-        	{% endif %}
-        	<div class="forms">
-				<form method="POST" action="/admin/booze/save">
-	            	<div class="forminput">{{ form.name.label }}:<br/> {{ form.name(class="form") }}</div>
-	            	{% if form.name.errors %}
-	                	<ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-	            	{% endif %}
-	            	<div class="forminput">{{ form.brand.label }}:<br/> {{ form.brand(class="form") }}</div>
-	            	{% if form.brand.errors %}
-	                	<ul class="errors">{% for error in form.brand.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-	            	{% endif %}
-	            	<div class="forminput">{{ form.desc.label }}:<br/> {{ form.desc(class="desc") }}</div>
-	            	{% if form.desc.errors %}
-	                	<ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-	            	{% endif %}
-	            	<div class="forminput">{{ form.abv.label }}:<br/> {{ form.abv(class="form") }}</div>
-	            	{% if form.abv.errors %}
-	                	<ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-	            	{% endif %}
-                	{{ form.id() }}
-	            	<div class="button">
-                    	{{ form.cancel(class="buttons") }}
-                    	{{ form.save(class="buttons") }}
-                	</div>
-	        	</form>
-			</div>
+   <div class="content">   
+       <h2>{{ title }}</h2>
+       {% if saved %}
+          <p>Your changes have been saved.</p>
+       {% endif %}
+       <div class="forms">
+          <form method="POST" action="/admin/booze/save">
+             <div class="forminput">{{ form.name.label }}:<br/> {{ form.name(class="form") }}</div>
+             {% if form.name.errors %}
+                 <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+             {% endif %}
+             <div class="forminput">{{ form.brand.label }}:<br/> {{ form.brand(class="form") }}</div>
+             {% if form.brand.errors %}
+                 <ul class="errors">{% for error in form.brand.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+             {% endif %}
+             <div class="forminput">{{ form.desc.label }}:<br/> {{ form.desc(class="desc") }}</div>
+             {% if form.desc.errors %}
+                 <ul class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+             {% endif %}
+             <div class="forminput">{{ form.abv.label }}:<br/> {{ form.abv(class="form") }}</div>
+             {% if form.abv.errors %}
+                 <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+             {% endif %}
+             {{ form.id() }}
+             <div class="button">
+                 {{ form.cancel(class="buttons") }}
+                 {{ form.save(class="buttons") }}
+             </div>
+          </form>
+       </div>
     </div>
 
     <div class="side_bar">
         <div class="boozeheading">Booze List</div>
         <a class="new" href="/admin/booze">add new</a>
-	<div class="boozelist">
-		<ul class="booze">
-            	{% for booze in boozes %}
-              	<li class="booze"><a class="booze" href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
-            	{% endfor %}
-        	</ul>
-		</div>
+        <div class="boozelist">
+           <ul class="booze">
+                {% for booze in boozes %}
+                <li class="booze"><a class="booze" href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
+                {% endfor %}
+           </ul>
+        </div>
    </div>
-</div>
-<div class="bottom_bar">
-    <a class="home" href="/admin">ADMIN</a>
 </div>
 {% endblock %}

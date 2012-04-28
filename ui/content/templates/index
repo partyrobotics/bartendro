@@ -1,13 +1,12 @@
 {% extends 'layout' %}
 {% block body %}
-<div class="content">
-    <div class="section">THE ESSENTIALS</div>
+<div>
+    <div class="home_section_header">THE ESSENTIALS</div>
     {{ drink_table(top_drinks) }}
-    <div class="section">THE WILD SIDE</div>
+    <div class="home_section_header">THE WILD SIDE</div>
     {{ drink_table(other_drinks) }}
 </div>
 {% endblock %}
-
 {% macro drink_table(drinks) -%}
     <table class="home_table">
     {% for drink in drinks %}
@@ -17,14 +16,14 @@
       <td class="drink" >
       	<a href="/drink/{{ drink.id }}">
             <div class="sub">
-                <div class="main_name">{{ drink.name.name }}</div>
+                <div class="home_drink_name">{{ drink.name.name }}</div>
                 </br> 
-                <div class="main_ingredients">
+                <div class="home_drink_ingredients">
                 {% for ing, parts in drink.ingredients %}
                    {{ ing }}
                 {% endfor %}
                 </div>
-                <div class="drink_desc">{{ drink.desc }}</div>
+                <div class="home_drink_desc">{{ drink.desc }}</div>
             </div>
       	<a>
       </td>
