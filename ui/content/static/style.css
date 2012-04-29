@@ -76,6 +76,9 @@ div.label{
 table.home_table{
     width: 100%;
 }
+table.home_table td{
+    width: 50%;
+}
 table.home_table a{
     text-decoration: none;
     font-family:Tahoma,sans-serif;
