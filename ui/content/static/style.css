@@ -20,6 +20,12 @@ div.body{
     height: 100%;
     margin: 0 auto -80px 40px;
 }
+div.admin_body{
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 10px auto -110px 40px;
+}
 div.top_bar{
     position: fixed;
     width: 70px;
@@ -346,11 +352,6 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
 }
 div.forminput{
     color:#0088cc;
-    font-size:18pt;
-    font-family:"Arial";
-    font-weight:normal;
-    text-align:left;
-    line-height:90%;
     background-color:whitesmoke;
     margin-left:30px;
 }
@@ -366,8 +367,7 @@ div.forms{
     background-color:whitesmoke;
     border: 1px solid grey; 
     margin-top: 20px;
-    padding-right:15px;
-    padding-bottom:10px;
+    padding:20px;
 }
 div.errors{
     list-style-type:none;
@@ -433,22 +433,6 @@ div.button{
     margin-left:10px;
     margin-top:25px;
 }
-.buttons{
-   font-family:Arial;
-    font-size:12pt;
-    font-weight:normal;
-    text-align:center;
-    vertical-align:center;
-    background-color: #285374;
-    color:white;
-    margin-left:20px;
-    padding-left:15px;
-    padding-right:15px;
-    padding-top:10px;
-    padding-bottom:10px;
-    border-radius:5px;
-    border-color:white;
-}
 #lightbox {
     position: absolute;
     top: 0;
@@ -513,8 +497,14 @@ div.pour_ing{
 div.pour_desc{
 }
 div.log{
-        color: black;
-        margin-left: 80px;
-        font-family: courier, monospace;
-        font-size: 10pt;
+    margin: 10px 10px 0 0;
+    padding: 10px;
+    color: black;
+    font-family: courier, monospace;
+    font-size: 10pt;
+    max-height: 300px;
+    overflow: scroll;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #AAA;
 }

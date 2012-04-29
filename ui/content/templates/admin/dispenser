@@ -7,8 +7,8 @@
            <p>Your changes have been saved.</p>
         {% endif %}
         <p>There are {{ count }} dispensers available.
-           <button type="button" onclick="reset()">reset chain</button>
-           <button type="button" id="test_chain" onclick="test_chain()">test chain</button>
+           <button type="button" class="small_button" onclick="reset()">reset chain</button>
+           <button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button>
         </p>
         <div class="forms">
 		<form method="POST" action="/admin/dispenser/save">
@@ -18,14 +18,14 @@
                               {{ form["dispenser%s" % i].label }}: 
                               {{ form["dispenser%s" % i](class="form") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
-                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense 90ml</button>
+                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</button>
                               {{ form["actual%s" % i](size="3") }}
                         </div>
                     {% endfor %}
 
 	            <div class="button">
-                        {{ form.cancel(class="buttons") }}
-                        {{ form.save(class="buttons") }}
+                        {{ form.cancel(class="small_button") }}
+                        {{ form.save(class="small_button") }}
                 </div>
  `       </form>
 	</div>
@@ -65,7 +65,7 @@ function test_dispense(disp)
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
-                $("#test" + disp).text('dispense 90ml');
+                $("#test" + disp).text('dispense {{ calibrate_ml }}ml');
                 $("#test" + disp).attr('disabled', false);
             }
     });

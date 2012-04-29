@@ -26,8 +26,8 @@
              {% endif %}
              {{ form.id() }}
              <div class="button">
-                 {{ form.cancel(class="buttons") }}
-                 {{ form.save(class="buttons") }}
+                 {{ form.cancel(class="small_button") }}
+                 {{ form.save(class="small_button") }}
              </div>
           </form>
        </div>

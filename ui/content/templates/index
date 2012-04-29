@@ -6,6 +6,36 @@
     <div class="home_section_header">THE WILD SIDE</div>
     {{ drink_table(other_drinks) }}
 </div>
+<script type="text/javascript">
+// defining flags
+var isCtrl = false;
+var isShift = false;
+ 
+$(document).ready(function() {
+    // action on key up
+    $(document).keyup(function(e) {
+        if(e.which == 17) {
+            isCtrl = false;
+        }
+        if(e.which == 16) {
+            isShift = false;
+        }
+    });
+    // action on key down
+    $(document).keydown(function(e) {
+        if(e.which == 17) {
+            isCtrl = true; 
+        }
+        if(e.which == 16) {
+            isShift = true; 
+        }
+        if(e.which == 65 && isCtrl && isShift) { 
+            window.location = "/admin";
+        } 
+    });
+     
+});
+</script>
 {% endblock %}
 {% macro drink_table(drinks) -%}
     <table class="home_table">
