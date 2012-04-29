@@ -12,13 +12,13 @@ body{
     color: dimgray;
 }
 div.body_push{
-    height: 110px;
+    height: 80px;
 }
 div.body{
     min-height: 100%;
     height: auto !important;
     height: 100%;
-    margin: 0 auto -110px 40px;
+    margin: 0 auto -80px 40px;
 }
 div.top_bar{
     position: fixed;
@@ -136,26 +136,39 @@ div.dispense_drink_detail{
 div.dispense_stack{
     float: right;
     width: 58%;
-    margin-top: 20px;
 }
 div.dispense_stack_element{
-    padding: .3em;
-    margin-top: 1px;
-    margin-bottom: 30px;
-    border-top-style: solid;
-    border-top-width: 2px;
-    border-top-color: #ccc;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    margin: 10px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: #ccc;
+    font-size: 12pt;
+}
+table.dispense_stack_table{
+    width: 100%;
+    margin: 20px 10px 0px 10px;
 }
 #dispense_stack_make_drink{
     text-align: right;
 }
-#dispense_stack_taster{
-    text-align: right;
-    font-size: 18pt;
+div.dispense_stack_size{
+}
+div.dispense_stack_booze{
+}
+select.dispense_stack_booze_select{
+    margin: 20px 0 0 20px;
+    width: 300px;
 }
 
-div.bottom_row{
-    height: 110px;
+#dispense_stack_strength_text{
+    margin-left: 50px;
+}
+
+table.bottom_row{
+    width: 100%;
+    height: 80px;
     margin: auto 10px auto 40px;
 }
 
@@ -171,7 +184,11 @@ div.bottom_row{
     box-shadow: 1px 1px 1px dimgrey;
 }
 
-.large_button{
+button.bottom_row_button{
+    width: 200px;
+    height: 70px;
+    font-size:34pt;
+    vertical-align: bottom;
     background: #eeeeee;
     color: dimgrey;
     border: 1px solid lightgray;    
@@ -183,32 +200,12 @@ div.bottom_row{
     box-shadow: 2px 2px 3px dimgrey;
 }
 
-button.pour_button{
-    width: 200px;
-    height: 100px;
-    font-size:34pt;
-    float: right;
-}
-
-button.back_button{
-    width: 200px;
-    height: 100px;
-    float: left;
-    font-size:34pt;
-    vertical-align: bottom;
-}
-
 button.biggersmaller{
-    width: 200px;
-    height: 50px;
-    font-size:24pt;
-}
-
-button.taster_button{
-    width: 290px;   
-    height: 60px;
+    width: 180px;
+    height: 30px;
     font-size:18pt;
 }
+
 
 button.admin_button{
     margin-left: 10px;

@@ -19,22 +19,45 @@
       </div>
 
       <div class="dispense_stack">
-        <div class="dispense_stack_element" id="dispense_stack_taster">
-          <table style="width: 100%">
+        <div class="dispense_stack_element dispense_stack_booze">
+          <p>Select the tequila you'd like in your margarita:</p>
+          <select class="dispense_stack_booze_select">
+            <option value="cazadores">Cazadores reposado</option>
+            <option value="josecuervo">Jose Cuervo garbage</option>
+            <option value="sauza">Sauza</option>
+            <option value="Jimador">El Jimador Reposado</option>
+          </select>
+        </div>
+
+        <div class="dispense_stack_element dispense_stack_size">
+          <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
+          <table class="dispense_stack_table">
           <tr>
-             <td style="text-align: right">Not sure yet?</td>
-             <td style="text-align: right"><button type="button" class="taster_button small_button" onclick="make_taster({{ drink.id }})">pour me a taster</button></td>
+             <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
+             <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
+             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
           </tr>
           </table>
         </div>
 
-        <div class="dispense_stack_element" id="dispense_stack_size">
-          <div class="recommendation">Suggested drink size is {{ drink.sugg_size }} fluid ounces.</div>
-          <table style="width: 100%">
+        <div class="dispense_stack_element dispense_stack_strength">
+          <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
+          <table class="dispense_stack_table">
           <tr>
-             <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
-             <td style="text-align: center;"><p class="text" id="size_text">4 fluid ounces</p></td>
-             <td style="text-align: right;"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+             <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
+             <td style="text-align: center"><p id="strength_text">normal</p></td>
+             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
+          </tr>
+          </table>
+        </div>
+
+        <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
+          <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
+          <table class="dispense_stack_table">
+          <tr>
+             <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">smaller</button></td>
+             <td style="text-align: center"><p id="tartness_text">normal</p></td>
+             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">bigger</button></td>
           </tr>
           </table>
         </div>
@@ -48,6 +71,7 @@ var taster_size = 1;
 var max_drink_size_multiplier = 3;
 var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
+var drink_tartness = 0;
 $(document).ready(function() 
 {
     $("#size_text").text(drink_size + " fluid ounces");
@@ -76,11 +100,11 @@ function set_strength_text()
     t = "";
     switch(drink_strength)
     {
-        case -2: t = "really weak. wimp!"; break;
+        case -2: t = "really weak!"; break;
         case -1: t = "weak"; break;
         case 0: t = "normal"; break;
         case 1: t = "stronger"; break;
-        case 2: t = "really strong"; break;
+        case 2: t = "really strong!"; break;
     }
     $("#strength_text").text(t);
 }
@@ -99,6 +123,35 @@ function strength_weaker()
 
     drink_strength--;
     set_strength_text();
+}
+function set_tartness_text()
+{
+    t = "";
+    switch(drink_tartness)
+    {
+        case -2: t = "really sweet!"; break;
+        case -1: t = "sweeter"; break;
+        case 0: t = "normal"; break;
+        case 1: t = "tarter"; break;
+        case 2: t = "really tart!"; break;
+    }
+    $("#tartness_text").text(t);
+}
+function tartness_tarter()
+{
+    if (drink_tartness >= 2)
+        return;
+
+    drink_tartness++;
+    set_tartness_text();
+}
+function tartness_sweeter()
+{
+    if (drink_tartness <= -2)
+        return;
+
+    drink_tartness--;
+    set_tartness_text();
 }
 function back()
 {
@@ -132,8 +185,11 @@ function dispense_drink(drink, size)
 
 {% endblock %}
 {% block footer %}
-<div class="bottom_row"> 
-     <button type="button" class="back_button large_button" onclick="back()">Back</button>
-     <button type="button" class="pour_button large_button" onclick="make_drink({{ drink.id }})">pour!</button>
-</div>
+<table class="bottom_row"> 
+<tr>
+   <td><button type="button" class="bottom_row_button" onclick="back()">back</button></td>
+   <td><button type="button" class="bottom_row_button" onclick="back()">taster</button></td>
+   <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }})">pour!</button></td>
+</tr>
+</table>
 {% endblock %}
