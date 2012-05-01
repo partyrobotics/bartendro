@@ -104,7 +104,7 @@ ISR(PCINT1_vect)
     if (PINC & (1<<PINC1))
         g_hall_sensor_2++;
 
-    if (g_dispense_target_ticks > 0 && g_hall_sensor_2 >= g_dispense_target_ticks)
+    if (g_dispense_target_ticks > 0 && g_hall_sensor_1 >= g_dispense_target_ticks)
     {
         g_dispense_target_ticks = 0;
         g_is_dispensing = 0;
@@ -112,7 +112,7 @@ ISR(PCINT1_vect)
 
         // collect statistics
         g_last_dispense_duration = g_time - g_dispense_start_time;
-        g_last_dispense_ticks = g_hall_sensor_2;
+        g_last_dispense_ticks = g_hall_sensor_1;
     }
 }
 
