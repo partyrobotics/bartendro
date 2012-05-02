@@ -8,9 +8,8 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 
-MS_PER_ML = 86 
-TICKS_PER_ML = 1075
-CALIBRATE_ML = 10 
+TICKS_PER_ML = 671
+CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
 class Mixer(object):
@@ -113,8 +112,8 @@ class Mixer(object):
                 r['ms'] = int(r['ml'] * TICKS_PER_ML)
             else:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
-            self.driver.dispense_time(r['dispenser'] - 1, int(r['ms']))
-            log("..dispense %d for %d ms" % (r['dispenser'] - 1, int(r['ms'])))
+            self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms']))
+            log("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
 
