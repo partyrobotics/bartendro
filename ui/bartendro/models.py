@@ -24,7 +24,7 @@ DrinkBooze.booze = relationship(Booze, backref=backref("drink_booze"))
 
 Dispenser.booze = relationship(Booze, backref=backref("dispenser"))
 BoozeGroup.abstract_booze = relationship(Booze, backref=backref("booze_group"))
-BoozeGroupBooze.booze_group = relationship(BoozeGroup, backref=backref("booze_group_booze"))
+BoozeGroupBooze.booze_group = relationship(BoozeGroup, backref=backref("booze_group_boozes"))
 BoozeGroupBooze.booze = relationship(Booze, backref=backref("booze_group_booze"))
 CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
 CustomDrinkBooze.booze = relationship(Booze, backref=backref("custom_drink_booze"))

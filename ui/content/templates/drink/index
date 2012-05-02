@@ -19,15 +19,16 @@
       </div>
 
       <div class="dispense_stack">
-        <div class="dispense_stack_element dispense_stack_booze">
-          <p>Select the tequila you'd like in your margarita:</p>
-          <select class="dispense_stack_booze_select">
-            <option value="cazadores">Cazadores reposado</option>
-            <option value="josecuervo">Jose Cuervo garbage</option>
-            <option value="sauza">Sauza</option>
-            <option value="Jimador">El Jimador Reposado</option>
-          </select>
-        </div>
+        {% if is_custom %}
+            <div class="dispense_stack_element dispense_stack_booze">
+              <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink_name }}:</p>
+              <select class="dispense_stack_booze_select">
+              {% for bgb in booze_group.booze_group_boozes %}
+                <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
+              {% endfor %}
+              </select>
+            </div>
+        {% endif %}
 
         <div class="dispense_stack_element dispense_stack_size">
           <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>

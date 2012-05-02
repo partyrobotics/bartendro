@@ -28,6 +28,7 @@ class BoozeGroup(Base):
                }
 
     def __repr__(self):
-        return "<BoozeGroup(%d,<Booze>(%d),'%s')>" % (self.id or -1, 
+        return "<BoozeGroup(%d,<Booze>(%d),'%s',%s)>" % (self.id or -1, 
                                                       self.abstract_booze_id,
-                                                      self.name)
+                                                      self.name,
+                                                      " ".join(["<BoozeGroupBooze>(%d)" % (bgb.id or -1) for bgb in self.booze_group_boozes]))
