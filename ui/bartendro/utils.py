@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import MetaData
 from sqlalchemy.orm import create_session, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
 from werkzeug import Local, LocalManager
 from werkzeug.routing import Map, Rule
 from os import path
@@ -14,6 +15,8 @@ local_manager = LocalManager([local])
 application = local('application')
 
 metadata = MetaData()
+Base = declarative_base(metadata=metadata)
+
 session = scoped_session(lambda: create_session(application.database_engine,
                          autocommit=False, autoflush=False),
                          local_manager.get_ident)
