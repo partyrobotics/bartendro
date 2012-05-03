@@ -32,7 +32,8 @@ def view(request, id):
                           .filter(Drink.id == id) \
                           .first()
 
-    #TODO: Sort the boozes in the right order
+    booze_group.booze_group_boozes = sorted(booze_group.booze_group_boozes, 
+                                            key=lambda booze: booze.sequence )
 
     return render_template("drink/index", 
                            drink=drink, 
