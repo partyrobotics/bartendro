@@ -49,7 +49,7 @@ $(document).ready(function() {
                 <div class="home_drink_name">{{ drink.name.name }}</div>
                 </br> 
                 <div class="home_drink_ingredients">
-                {% for ing, parts in drink.ingredients %}
+                {% for ing, id, parts in drink.ingredients %}
                    {{ ing }}{% if not loop.last %}, {% endif %}
                    
                 {% endfor %}

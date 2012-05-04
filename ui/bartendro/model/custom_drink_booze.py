@@ -7,6 +7,7 @@ from bartendro.utils import session, Base
 BOOZE_ATTRIBUTE_NOT_USED = 0
 BOOZE_ATTRIBUTE_SWEET    = 1
 BOOZE_ATTRIBUTE_TANGY    = 2
+BOOZE_ATTRIBUTE_ALCOHOL  = 3
 
 class CustomDrinkBooze(Base):
     """

@@ -28,6 +28,4 @@ BoozeGroupBooze.booze_group = relationship(BoozeGroup, backref=backref("booze_gr
 BoozeGroupBooze.booze = relationship(Booze, backref=backref("booze_group_booze"))
 CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
 CustomDrinkBooze.booze = relationship(Booze, backref=backref("custom_drink_booze"))
-CustomDrinkBooze.custom_drink = relationship(Drink, backref=backref("custom_drink_booze"),
-                                      primaryjoin="CustomDrinkBooze.custom_drink_id==Drink.id",
-                                      foreign_keys=[CustomDrinkBooze.custom_drink_id])
+CustomDrinkBooze.custom_drink = relationship(CustomDrink, backref=backref("custom_drink_booze"))

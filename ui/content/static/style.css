@@ -145,6 +145,8 @@ div.dispense_drink_detail{
 div.dispense_stack{
     float: right;
     width: 58%;
+    border-left: 1px solid #ccc;
+    margin-right: 10px;
 }
 div.dispense_stack_element{
     padding-top: 5px;
@@ -153,7 +155,7 @@ div.dispense_stack_element{
     border-bottom-style: solid;
     border-bottom-width: 1px;
     border-bottom-color: #ccc;
-    font-size: 12pt;
+    font-size: 13pt;
 }
 table.dispense_stack_table{
     width: 100%;
@@ -496,7 +498,12 @@ p.lb_drink{
     color: dimgray;
 }
 div.pour_ing{
-    }
+    font-size:16pt; 
+}
+table.ing_table{
+    width: 100%;
+    margin-left: 10px;
+}
 div.pour_desc{
 }
 div.log{

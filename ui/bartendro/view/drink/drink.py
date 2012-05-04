@@ -35,9 +35,14 @@ def view(request, id):
     booze_group.booze_group_boozes = sorted(booze_group.booze_group_boozes, 
                                             key=lambda booze: booze.sequence )
 
+    for cust_booze in custom_drink.custom_drink_booze:
+        for drink_booze in drink.drink_boozes:
+            if drink_booze.id == cust_booze.booze_id:
+                drink_booze.type = cust_booze.type
+
     return render_template("drink/index", 
                            drink=drink, 
                            title="Make a %s" % drink.name,
                            is_custom=1,
-                           custom_drink_name=drink.custom_drink[0].name,
+                           custom_drink=drink.custom_drink[0],
                            booze_group=booze_group)
