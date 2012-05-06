@@ -2,9 +2,8 @@
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, metadata
+from bartendro.utils import session, Base
 
-Base = declarative_base(metadata=metadata)
 class Dispenser(Base):
     """
     Information about a dispenser

@@ -10,24 +10,29 @@
          <div class="pour_ing">
             <br/>
             ingredients:
-            <ul>
-              {% for ing, parts in drink.ingredients %}
-                  <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
+            <table class="ing_table">
+              {% for ing in drink.ingredients %}
+                  <tr>
+                     <td>{{ ing.name }}</td>
+                     <td id="booze{{ ing.id }}" style="text-align: right"></td>
+                     <td>fl oz</td>
+                  </tr>
               {% endfor %}
-            </ul>
+            </table>
          </div>
       </div>
 
       <div class="dispense_stack">
-        <div class="dispense_stack_element dispense_stack_booze">
-          <p>Select the tequila you'd like in your margarita:</p>
-          <select class="dispense_stack_booze_select">
-            <option value="cazadores">Cazadores reposado</option>
-            <option value="josecuervo">Jose Cuervo garbage</option>
-            <option value="sauza">Sauza</option>
-            <option value="Jimador">El Jimador Reposado</option>
-          </select>
-        </div>
+        {% if is_custom %}
+            <div class="dispense_stack_element dispense_stack_booze">
+              <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
+              <select class="dispense_stack_booze_select">
+              {% for bgb in booze_group.booze_group_boozes %}
+                <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
+              {% endfor %}
+              </select>
+            </div>
+        {% endif %}
 
         <div class="dispense_stack_element dispense_stack_size">
           <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
@@ -72,10 +77,38 @@ var max_drink_size_multiplier = 3;
 var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
 var drink_tartness = 0;
+var ing = [ 
+   {% for ing in drink.ingredients %}
+      { 
+        'name'   : '{{ ing.name }}', 
+        'id'     : {{ ing.id }}, 
+        'parts'  : {{ ing.parts}}, 
+        'amount' : 0,
+        'type'   : {{ ing.type }}
+      },
+   {% endfor %}
+];
+var parts_total = 0;
+
 $(document).ready(function() 
 {
     $("#size_text").text(drink_size + " fluid ounces");
+    update_amounts();
 });
+
+function update_amounts()
+{
+    if (!parts_total)
+        for(i = 0; i < ing.length; i++)
+            parts_total += ing[i].parts;
+
+    for(i = 0; i < ing.length; i++)
+    {
+        ing[i].amount = drink_size * ing[i].parts / parts_total;
+        $("#booze" + ing[i].id).text(ing[i].amount.toFixed(1));
+        $("#booze_type" + ing[i].id).text(ing[i].type);
+    } 
+}
 
 function size_bigger()
 {
@@ -84,6 +117,7 @@ function size_bigger()
 
     drink_size += 1;
     $("#size_text").text(drink_size + " fluid ounces");
+    update_amounts();
 }
 
 function size_smaller()
@@ -93,6 +127,7 @@ function size_smaller()
 
     drink_size -= 1;
     $("#size_text").text(drink_size + " fluid ounces");
+    update_amounts();
 }
 
 function set_strength_text()
@@ -107,6 +142,7 @@ function set_strength_text()
         case 2: t = "really strong!"; break;
     }
     $("#strength_text").text(t);
+    update_amounts();
 }
 function strength_stronger()
 {
@@ -115,6 +151,7 @@ function strength_stronger()
 
     drink_strength++;
     set_strength_text();
+    update_amounts();
 }
 function strength_weaker()
 {
@@ -123,6 +160,7 @@ function strength_weaker()
 
     drink_strength--;
     set_strength_text();
+    update_amounts();
 }
 function set_tartness_text()
 {
@@ -144,6 +182,7 @@ function tartness_tarter()
 
     drink_tartness++;
     set_tartness_text();
+    update_amounts();
 }
 function tartness_sweeter()
 {
@@ -152,6 +191,7 @@ function tartness_sweeter()
 
     drink_tartness--;
     set_tartness_text();
+    update_amounts();
 }
 function back()
 {

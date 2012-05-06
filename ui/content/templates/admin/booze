@@ -24,6 +24,10 @@
              {% if form.abv.errors %}
                  <ul class="errors">{% for error in form.abv.errors %}<li>{{ error }}</li>{% endfor %}</ul>
              {% endif %}
+             <div class="forminput">{{ form.type.label }}:<br/> {{ form.type(class="form") }}</div>
+             {% if form.type.errors %}
+                 <ul class="errors">{% for error in form.type.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+             {% endif %}
              {{ form.id() }}
              <div class="button">
                  {{ form.cancel(class="small_button") }}
