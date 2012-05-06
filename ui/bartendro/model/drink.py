@@ -39,14 +39,12 @@ class Drink(Base):
 
         self.drink_boozes = sorted(self.drink_boozes, key=attrgetter('booze.abv', 'booze.name'), reverse=True)
         for db in self.drink_boozes:
-            ing.append((db.booze.name, db.booze.id, db.value))
+            ing.append({ 'name' : db.booze.name, 
+                         'id' : db.booze.id, 
+                         'parts' : db.value, 
+                         'type' : db.booze.type 
+                       })
         self.ingredients = ing
-
-    def json(self):
-        return { 
-                 'desc' : self.desc,
-                 'sugg_size' : self.sugg_size,
-               }
 
     def __repr__(self):
         return "<Drink>(%d,%s,%s,%s)>" % (self.id or -1, self.name.name, self.desc, " ".join(["<DrinkBooze>(%d)" % (db.id or -1) for db in self.drink_boozes]))

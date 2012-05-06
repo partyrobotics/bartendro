@@ -3,7 +3,6 @@ from sqlalchemy.orm import mapper, relationship, backref
 
 from bartendro.model.drink import Drink
 from bartendro.model.custom_drink import CustomDrink
-from bartendro.model.custom_drink_booze import CustomDrinkBooze
 from bartendro.model.drink_name import DrinkName
 from bartendro.model.drink_booze import DrinkBooze
 
@@ -27,5 +26,3 @@ BoozeGroup.abstract_booze = relationship(Booze, backref=backref("booze_group"))
 BoozeGroupBooze.booze_group = relationship(BoozeGroup, backref=backref("booze_group_boozes"))
 BoozeGroupBooze.booze = relationship(Booze, backref=backref("booze_group_booze"))
 CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
-CustomDrinkBooze.booze = relationship(Booze, backref=backref("custom_drink_booze"))
-CustomDrinkBooze.custom_drink = relationship(CustomDrink, backref=backref("custom_drink_booze"))

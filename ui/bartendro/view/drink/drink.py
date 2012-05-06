@@ -4,7 +4,6 @@ from bartendro.utils import session, render_template, render_json, expose, valid
 from bartendro.model.drink import Drink
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.custom_drink import CustomDrink
-from bartendro.model.custom_drink_booze import CustomDrinkBooze
 from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.model.booze_group_booze import BoozeGroupBooze
@@ -14,14 +13,13 @@ from bartendro import constant
 @expose('/drink/<id>')
 def view(request, id):
     drink = session.query(Drink).join(DrinkName).filter(Drink.id == id).first()
+
+    custom_drink = session.query(CustomDrink) \
+                          .filter(drink.id == CustomDrink.drink_id) \
+                          .first()
     drink.process_ingredients()
     # convert size to fl oz
     drink.sugg_size = drink.sugg_size / constant.ML_PER_FL_OZ
-
-    custom_drink = session.query(CustomDrink) \
-                          .join(CustomDrinkBooze) \
-                          .filter(drink.id == CustomDrink.drink_id) \
-                          .first()
 
     if not custom_drink:
         return render_template("drink/index", drink=drink, title="Make a %s" % drink.name, is_custom=0)
@@ -34,11 +32,6 @@ def view(request, id):
 
     booze_group.booze_group_boozes = sorted(booze_group.booze_group_boozes, 
                                             key=lambda booze: booze.sequence )
-
-    for cust_booze in custom_drink.custom_drink_booze:
-        for drink_booze in drink.drink_boozes:
-            if drink_booze.id == cust_booze.booze_id:
-                drink_booze.type = cust_booze.type
 
     return render_template("drink/index", 
                            drink=drink, 

@@ -11,10 +11,10 @@
             <br/>
             ingredients:
             <table class="ing_table">
-              {% for booze_name, booze_id, parts in drink.ingredients %}
+              {% for ing in drink.ingredients %}
                   <tr>
-                     <td>{{ booze_name }}</td>
-                     <td id="booze{{ booze_id }}" style="text-align: right"></td>
+                     <td>{{ ing.name }}</td>
+                     <td id="booze{{ ing.id }}" style="text-align: right"></td>
                      <td>fl oz</td>
                   </tr>
               {% endfor %}
@@ -78,13 +78,13 @@ var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
 var drink_tartness = 0;
 var ing = [ 
-   {% for booze_name, booze_id, parts, type in drink.ingredients %}
+   {% for ing in drink.ingredients %}
       { 
-        'name'   : '{{ booze_name }}', 
-        'id'     : '{{booze_id}}', 
-        'parts'  : {{parts}}, 
+        'name'   : '{{ ing.name }}', 
+        'id'     : {{ ing.id }}, 
+        'parts'  : {{ ing.parts}}, 
         'amount' : 0,
-        'type'   : {{type}}
+        'type'   : {{ ing.type }}
       },
    {% endfor %}
 ];

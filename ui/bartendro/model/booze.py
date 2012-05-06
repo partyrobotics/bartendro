@@ -4,6 +4,13 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, Unicod
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, Base
 
+booze_types = [
+               (0, "Unknown"),
+               (1, "Alcohol"),
+               (2, "Tart"),
+               (3, "Sweet")
+              ]
+
 class Booze(Base):
     """
     Information about a booze. e.g. water, vodka, grandine, bailies, oj 
@@ -15,12 +22,13 @@ class Booze(Base):
     brand = Column(UnicodeText, nullable=True)
     desc = Column(UnicodeText, nullable=False)
     abv = Column(Integer, default=0)
+    type = Column(Integer, default=0)
 
     # add unique constraint for name
     UniqueConstraint('name', name='booze_name_undx')
  
     query = session.query_property()
-    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, data = None):
+    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, data = None):
         if data: 
             self.update(data)
             return
@@ -28,21 +36,14 @@ class Booze(Base):
         self.brand = brand
         self.desc = desc
         self.abv = abv
+        self.type = type
 
     def update(self, data):
         self.name = data['name']
         self.desc = data['desc']
         self.brand = data['brand']
         self.abv = int(data['abv'])
-
-    def json(self):
-        return { 
-                 'id' : self.id, 
-                 'name' : self.name,
-                 'desc' : self.desc,
-                 'brand' : self.brand,
-                 'abv' : self.abv,
-               }
+        self.type = int(data['type'])
 
     def __repr__(self):
         return "<Booze('%s','%s')>" % (self.id, self.name)
