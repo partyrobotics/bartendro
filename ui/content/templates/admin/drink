@@ -38,6 +38,14 @@
 	            {% if form.popular.errors %}
 	                <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
 	            {% endif %}
+
+	            <div class="forminput">
+                        {{ form.available.label }}:<br/> 
+                        {{ form.available(class="form") }}
+                    </div>
+	            {% if form.available.errors %}
+	                <div class="errors">{% for error in form.available.errors %}<li>{{ error }}</li>{% endfor %}</div>
+	            {% endif %}
     
                     {% for name, parts, id, show in fields %}
                         {% if show %}
@@ -68,7 +76,10 @@
 
     <div class="side_bar">
         <div class="boozeheading">Drink List</div>
-        <a class="new" href="/admin/drink">add new</a>
+        <a href="/admin/drink">add new</a>
+        drinks avail:
+        <button onclick="available(1)">all</button>
+        <button onclick="available(0)">none</button>
 	<div class="boozelist">
 	<ul class="booze">
             {% for drink in drinks %}
@@ -95,6 +106,10 @@ function add_booze()
     }
     if (i == max_boozes)
         alert("DOM problem. Don't know where to add booze div.");
+}
+function available(state)
+{
+    $.ajax({ url: "/ws/drink/0/available/" + state });
 }
 </script>
 {% endblock %}

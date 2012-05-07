@@ -20,3 +20,14 @@ def ws_drink(request, drink):
         return render_text("ok\n")
     else:
         raise ServiceUnavailable("Error: %s (%d)" % (mixer.get_error(), ret))
+
+@expose('/ws/drink/<int:drink>/available/<int:state>')
+def ws_drink_available(request, drink, state):
+
+    if not drink:
+        session.query(Drink).update({'available' : state})
+    else:
+        session.query(Drink).filter(Drink.id==drink).update({'available' : state})
+    session.flush()
+    session.commit()
+    return render_text("ok\n")
