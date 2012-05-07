@@ -13,7 +13,8 @@
             <table class="ing_table">
               {% for ing in drink.ingredients %}
                   <tr>
-                     <td>{{ ing.name }}</td>
+                     <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
+                     <td id="booze_newparts{{ ing.id }}" style="text-align: right; color: #ddd"></td>
                      <td id="booze{{ ing.id }}" style="text-align: right"></td>
                      <td>fl oz</td>
                   </tr>
@@ -26,7 +27,7 @@
         {% if is_custom %}
             <div class="dispense_stack_element dispense_stack_booze">
               <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
-              <select class="dispense_stack_booze_select">
+              <select class="dispense_stack_booze_select" id="booze_select" onchange="change_alcohol()">
               {% for bgb in booze_group.booze_group_boozes %}
                 <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
               {% endfor %}
@@ -60,9 +61,9 @@
           <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
           <table class="dispense_stack_table">
           <tr>
-             <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">smaller</button></td>
+             <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
              <td style="text-align: center"><p id="tartness_text">normal</p></td>
-             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">bigger</button></td>
+             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
           </tr>
           </table>
         </div>
@@ -73,41 +74,73 @@
 <script type="text/javascript">
 
 var taster_size = 1;
-var max_drink_size_multiplier = 3;
+var max_drink_size_multiplier = 2;
 var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
 var drink_tartness = 0;
 var ing = [ 
    {% for ing in drink.ingredients %}
       { 
-        'name'   : '{{ ing.name }}', 
-        'id'     : {{ ing.id }}, 
-        'parts'  : {{ ing.parts}}, 
-        'amount' : 0,
-        'type'   : {{ ing.type }}
+        'name'     : '{{ ing.name }}', 
+        'id'       : {{ ing.id }}, 
+        'parts'    : {{ ing.parts}}, 
+        'newparts' : 0,
+        'amount'   : 0,
+        'type'     : {{ ing.type }}
       },
    {% endfor %}
 ];
-var parts_total = 0;
 
 $(document).ready(function() 
 {
     $("#size_text").text(drink_size + " fluid ounces");
+    change_alcohol();
     update_amounts();
 });
 
 function update_amounts()
 {
-    if (!parts_total)
-        for(i = 0; i < ing.length; i++)
-            parts_total += ing[i].parts;
-
+    total = 0;
     for(i = 0; i < ing.length; i++)
     {
-        ing[i].amount = drink_size * ing[i].parts / parts_total;
+        if (ing[i].type == 1) // Alcohol
+            ing[i].newparts = ing[i].parts + (ing[i].parts * .25 * drink_strength);
+        else
+        if (ing[i].type == 2) // tart
+            ing[i].newparts = ing[i].parts + (ing[i].parts * .25 * drink_tartness);
+        else
+        if (ing[i].type == 3) // sweet
+            ing[i].newparts = ing[i].parts + (ing[i].parts * .25 * -drink_tartness);
+        else
+            ing[i].newparts = ing[i].parts;
+
+        total += ing[i].newparts;
+    } 
+    for(i = 0; i < ing.length; i++)
+    {
+        ing[i].amount = drink_size * ing[i].newparts / total;
         $("#booze" + ing[i].id).text(ing[i].amount.toFixed(1));
         $("#booze_type" + ing[i].id).text(ing[i].type);
+        $("#booze_newparts" + ing[i].id).text(ing[i].newparts + " parts");
     } 
+}
+
+function change_alcohol()
+{
+    id = $("#booze_select").val();
+    name = $("#booze_select option:selected").text();
+
+    for(i = 0; i < ing.length; i++)
+        if (ing[i].type == 1) // Alcohol
+        {
+            $("#booze_name" + ing[i].id).attr("id", "booze_name" + id);
+            $("#booze" + ing[i].id).attr("id", "booze" + id);
+            $("#booze_newparts" + ing[i].id).attr("id", "booze_newparts" + id);
+            $("#booze_name" + id).text(name);
+            ing[i].name = name;
+            ing[i].id = id;
+            break;
+        }
 }
 
 function size_bigger()
@@ -142,7 +175,6 @@ function set_strength_text()
         case 2: t = "really strong!"; break;
     }
     $("#strength_text").text(t);
-    update_amounts();
 }
 function strength_stronger()
 {
