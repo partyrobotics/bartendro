@@ -94,7 +94,9 @@ var ing = [
 $(document).ready(function() 
 {
     $("#size_text").text(drink_size + " fluid ounces");
-    change_alcohol();
+    {% if is_custom %}
+        change_alcohol();
+    {% endif %}
     update_amounts();
 });
 
@@ -242,9 +244,17 @@ function make_taster(drink)
 
 function dispense_drink(drink, size)
 {
+    for(i = 0; i < ing.length; i++)
+    {
+        if (i == 0)
+            args = "?";
+        else 
+            args += "&";
+        args += "booze" + ing[i].id + "=" + ing[i].amount.toFixed(2);
+    }
     lightbox('<div class="lb_box"> <p class="lb_heading">Serving Your</p></br> <p class="lb_drink">{{ drink.name.name }}</p> </div>');
     $.ajax({
-            url: "/ws/drink/" + drink + "/" + size + "/" + (100 + (drink_strength * 10)),
+            url: "/ws/drink/" + drink + args,
             success: function(html)
             {
                 window.location = "/";

@@ -74,11 +74,12 @@ class Mixer(object):
         self.mc.set("available_drink_list", can_make)
         return can_make
 
-    def make_drink(self, id, size, strength):
+    def make_drink(self, id, recipe):
 
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
+        # TODO: use newly passed in recipe
         recipe = []
         for db in drink.drink_boozes:
             r = None
