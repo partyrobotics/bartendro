@@ -35,38 +35,44 @@
             </div>
         {% endif %}
 
-        <div class="dispense_stack_element dispense_stack_size">
-          <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
-          <table class="dispense_stack_table">
-          <tr>
-             <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
-             <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
-             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
-          </tr>
-          </table>
-        </div>
+        {% if show_size %}
+            <div class="dispense_stack_element dispense_stack_size">
+              <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
+              <table class="dispense_stack_table">
+              <tr>
+                 <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
+                 <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
+                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+              </tr>
+              </table>
+            </div>
+        {% endif %}
 
-        <div class="dispense_stack_element dispense_stack_strength">
-          <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
-          <table class="dispense_stack_table">
-          <tr>
-             <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
-             <td style="text-align: center"><p id="strength_text">normal</p></td>
-             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
-          </tr>
-          </table>
-        </div>
+        {% if show_strength %}
+            <div class="dispense_stack_element dispense_stack_strength">
+              <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
+              <table class="dispense_stack_table">
+              <tr>
+                 <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
+                 <td style="text-align: center"><p id="strength_text">normal</p></td>
+                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
+              </tr>
+              </table>
+            </div>
+        {% endif %}
 
-        <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
-          <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
-          <table class="dispense_stack_table">
-          <tr>
-             <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
-             <td style="text-align: center"><p id="tartness_text">normal</p></td>
-             <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
-          </tr>
-          </table>
-        </div>
+        {% if show_sweet_tart %}
+            <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
+              <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
+              <table class="dispense_stack_table">
+              <tr>
+                 <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
+                 <td style="text-align: center"><p id="tartness_text">normal</p></td>
+                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
+              </tr>
+              </table>
+            </div>
+        {% endif %}
 
       </div>
   </div>
@@ -270,7 +276,9 @@ function dispense_drink(drink, size)
 <table class="bottom_row"> 
 <tr>
    <td><button type="button" class="bottom_row_button" onclick="back()">back</button></td>
-   <td><button type="button" class="bottom_row_button" onclick="back()">taster</button></td>
+   {% if show_taster %}
+      <td><button type="button" class="bottom_row_button" onclick="back()">taster</button></td>
+   {% endif %}
    <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }})">pour!</button></td>
 </tr>
 </table>

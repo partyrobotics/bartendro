@@ -4,6 +4,10 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, Unicod
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, Base
 
+BOOZE_TYPE_UNKNOWN = 0
+BOOZE_TYPE_ALCOHOL = 1
+BOOZE_TYPE_TART = 2
+BOOZE_TYPE_SWEET = 3
 booze_types = [
                (0, "Unknown"),
                (1, "Alcohol"),
