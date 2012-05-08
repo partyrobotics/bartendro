@@ -6,8 +6,15 @@
        {% if saved %}
           <p>Your changes have been saved.</p>
        {% endif %}
-       <div class="forms">
+       {% if booze and booze.is_abstract() %}
+           <div class="attention">
+       {% else %}
+           <div class="forms">
+       {% endif %}
           <form method="POST" action="/admin/booze/save">
+             {% if booze and booze.is_abstract() %}
+                 <p>NOTE: This is the placeholder booze for a booze group!</p></br>
+             {% endif %}
              <div class="forminput">{{ form.name.label }}:<br/> {{ form.name(class="form") }}</div>
              {% if form.name.errors %}
                  <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
@@ -43,7 +50,11 @@
         <div class="boozelist">
            <ul class="booze">
                 {% for booze in boozes %}
-                <li class="booze"><a class="booze" href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a></li>
+                <li class="booze"><a class="booze" href="/admin/booze/edit/{{booze.id}}">{{ booze.name }}</a>
+                {% if booze.is_abstract() %}
+                    (abstract)
+                {% endif %}
+                </li>
                 {% endfor %}
            </ul>
         </div>

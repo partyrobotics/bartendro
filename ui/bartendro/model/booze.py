@@ -45,6 +45,9 @@ class Booze(Base):
         self.abv = int(data['abv'])
         self.type = int(data['type'])
 
+    def is_abstract(self):
+        return len(self.booze_group)
+
     def __repr__(self):
         return "<Booze('%s','%s')>" % (self.id, self.name)
 

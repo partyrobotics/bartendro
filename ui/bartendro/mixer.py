@@ -42,9 +42,18 @@ class Mixer(object):
         if can_make: 
             return can_make
 
+        add_boozes = session.query("abstract_booze_id") \
+                            .from_statement("""SELECT bg.abstract_booze_id 
+                                                 FROM booze_group bg 
+                                                WHERE id 
+                                                   IN (SELECT distinct(bgb.booze_group_id) 
+                                                         FROM booze_group_booze bgb, dispenser 
+                                                        WHERE bgb.booze_id = dispenser.booze_id)""")
+
         boozes = session.query("booze_id") \
                         .from_statement("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d") \
                         .params(d=self.disp_count).all()
+        boozes.extend(add_boozes)
 
         booze_dict = {}
         for booze_id in boozes:

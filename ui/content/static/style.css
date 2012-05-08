@@ -356,7 +356,6 @@ a.booze:hover,a.booze:active,a.booze:link,a.booze:visited{
 }
 div.forminput{
     color:#0088cc;
-    background-color:whitesmoke;
     margin-left:30px;
 }
 textarea.desc{
@@ -369,6 +368,13 @@ input.form{
 div.forms{
     float:left;
     background-color:whitesmoke;
+    border: 1px solid grey; 
+    margin-top: 20px;
+    padding:20px;
+}
+div.attention{
+    float:left;
+    background-color:#fcc;
     border: 1px solid grey; 
     margin-top: 20px;
     padding:20px;
