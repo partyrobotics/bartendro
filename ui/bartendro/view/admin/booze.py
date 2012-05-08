@@ -3,11 +3,11 @@ from werkzeug.utils import redirect
 from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
+from bartendro.model.booze_group import BoozeGroup
 from bartendro.form.booze import BoozeForm
 
 @expose('/admin/booze')
 def view(request):
-    # TODO: Show saved text
     form = BoozeForm(request.form)
     boozes = Booze.query.order_by(Booze.name)
     return render_template("admin/booze", boozes=boozes, form=form, title="Enter new booze")
@@ -19,7 +19,7 @@ def edit(request, id):
     booze = Booze.query.filter_by(id=int(id)).first()
     form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="Edit booze", saved=saved)
+    return render_template("admin/booze", booze=booze, boozes=boozes, form=form, title="Edit booze", saved=saved)
 
 @expose('/admin/booze/save')
 def save(request):
@@ -31,11 +31,9 @@ def save(request):
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
         if id:
-            print "save existing entry"
             booze = Booze.query.filter_by(id=int(id)).first()
             booze.update(form.data)
         else:
-            print "save new entry"
             booze = Booze(data=form.data)
             session.add(booze)
 

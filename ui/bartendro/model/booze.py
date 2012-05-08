@@ -4,6 +4,10 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, Unicod
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, Base
 
+BOOZE_TYPE_UNKNOWN = 0
+BOOZE_TYPE_ALCOHOL = 1
+BOOZE_TYPE_TART = 2
+BOOZE_TYPE_SWEET = 3
 booze_types = [
                (0, "Unknown"),
                (1, "Alcohol"),
@@ -44,6 +48,9 @@ class Booze(Base):
         self.brand = data['brand']
         self.abv = int(data['abv'])
         self.type = int(data['type'])
+
+    def is_abstract(self):
+        return len(self.booze_group)
 
     def __repr__(self):
         return "<Booze('%s','%s')>" % (self.id, self.name)

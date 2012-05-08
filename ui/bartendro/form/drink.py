@@ -9,6 +9,7 @@ class DrinkForm(Form):
     desc = TextAreaField(u"Description", [validators.Length(min=3, max=1024)])
     sugg_size = DecimalField(u"Suggested size (fl oz)", [validators.NumberRange(min=1, max=MAX_SUGGESTED_DRINK_SIZE)])
     popular = BooleanField(u"This drink is popular")
+    available = BooleanField(u"List this drink in the main menu")
     save = SubmitField(u"save")
     cancel = SubmitField(u"cancel")
 

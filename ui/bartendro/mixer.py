@@ -42,9 +42,18 @@ class Mixer(object):
         if can_make: 
             return can_make
 
+        add_boozes = session.query("abstract_booze_id") \
+                            .from_statement("""SELECT bg.abstract_booze_id 
+                                                 FROM booze_group bg 
+                                                WHERE id 
+                                                   IN (SELECT distinct(bgb.booze_group_id) 
+                                                         FROM booze_group_booze bgb, dispenser 
+                                                        WHERE bgb.booze_id = dispenser.booze_id)""")
+
         boozes = session.query("booze_id") \
                         .from_statement("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d") \
                         .params(d=self.disp_count).all()
+        boozes.extend(add_boozes)
 
         booze_dict = {}
         for booze_id in boozes:
@@ -74,40 +83,38 @@ class Mixer(object):
         self.mc.set("available_drink_list", can_make)
         return can_make
 
-    def make_drink(self, id, size, strength):
+    def make_drink(self, id, recipe_arg):
 
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
         recipe = []
-        for db in drink.drink_boozes:
+        size = 0
+        for booze in recipe_arg:
             r = None
+            booze_id = int(booze[5:])
+            print booze_id
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
-                if db.booze_id == disp.booze_id:
+                if booze_id == disp.booze_id:
                     r = {}
                     r['dispenser'] = disp.id
                     r['dispenser_actual'] = disp.actual
-                    r['booze'] = db.booze_id
-                    r['booze_name'] = db.booze.name
-                    r['part'] = db.value
+                    r['booze'] = booze_id
+                    r['ml'] = int(recipe_arg[booze])
+                    size += r['ml']
                     break
             if not r:
-                self.err = "Cannot make drink. I don't have the required booze: %s" % db.booze.name
+                self.err = "Cannot make drink. I don't have the required booze: %d" % booze_id
                 error(self.err)
                 return False
             recipe.append(r)
-
-        total_parts = 0
-        for r in recipe:
-            total_parts += r['part']
 
         log("Making drink: '%s' size %d ml" % (drink.name.name, size))
         self.leds_color(255, 0, 255)
         dur = 0
         active_disp = []
         for r in recipe:
-            r['ml'] = r['part'] * size / total_parts
             if r['dispenser_actual'] == 0:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML)
             else:
