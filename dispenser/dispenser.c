@@ -174,7 +174,7 @@ uint8_t set_motor_state(uint8_t state)
 void dispense_time(uint32_t time)
 {
     // Check to make sure we're not already dispensing
-    if (is_dispensing())
+    if (is_dispensing() || time == 00)
         return;
 
     cli();
@@ -194,7 +194,7 @@ void dispense_time(uint32_t time)
 void dispense_ticks(uint32_t ticks)
 {
     // Check to make sure we're not already dispensing
-    if (is_dispensing())
+    if (is_dispensing() || ticks == 0)
         return;
 
     cli();

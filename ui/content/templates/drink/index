@@ -87,12 +87,13 @@ var drink_tartness = 0;
 var ing = [ 
    {% for ing in drink.ingredients %}
       { 
-        'name'     : '{{ ing.name }}', 
-        'id'       : {{ ing.id }}, 
-        'parts'    : {{ ing.parts}}, 
-        'newparts' : 0,
-        'amount'   : 0,
-        'type'     : {{ ing.type }}
+        'name'           : '{{ ing.name }}', 
+        'id'             : {{ ing.id }}, 
+        'parts'          : {{ ing.parts}}, 
+        'newparts'       : 0,
+        'volume'         : 0,
+        'taster_volume'  : 0,
+        'type'           : {{ ing.type }}
       },
    {% endfor %}
 ];
@@ -103,10 +104,10 @@ $(document).ready(function()
     {% if is_custom %}
         change_alcohol();
     {% endif %}
-    update_amounts();
+    update_volumes();
 });
 
-function update_amounts()
+function update_volumes()
 {
     total = 0;
     for(i = 0; i < ing.length; i++)
@@ -126,8 +127,9 @@ function update_amounts()
     } 
     for(i = 0; i < ing.length; i++)
     {
-        ing[i].amount = drink_size * ing[i].newparts / total;
-        $("#booze" + ing[i].id).text(ing[i].amount.toFixed(1));
+        ing[i].volume = drink_size * ing[i].newparts / total;
+        ing[i].taster_volume = taster_size * ing[i].newparts / total;
+        $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
         $("#booze_type" + ing[i].id).text(ing[i].type);
         $("#booze_newparts" + ing[i].id).text(ing[i].newparts + " parts");
     } 
@@ -158,7 +160,7 @@ function size_bigger()
 
     drink_size += 1;
     $("#size_text").text(drink_size + " fluid ounces");
-    update_amounts();
+    update_volumes();
 }
 
 function size_smaller()
@@ -168,7 +170,7 @@ function size_smaller()
 
     drink_size -= 1;
     $("#size_text").text(drink_size + " fluid ounces");
-    update_amounts();
+    update_volumes();
 }
 
 function set_strength_text()
@@ -191,7 +193,7 @@ function strength_stronger()
 
     drink_strength++;
     set_strength_text();
-    update_amounts();
+    update_volumes();
 }
 function strength_weaker()
 {
@@ -200,7 +202,7 @@ function strength_weaker()
 
     drink_strength--;
     set_strength_text();
-    update_amounts();
+    update_volumes();
 }
 function set_tartness_text()
 {
@@ -222,7 +224,7 @@ function tartness_tarter()
 
     drink_tartness++;
     set_tartness_text();
-    update_amounts();
+    update_volumes();
 }
 function tartness_sweeter()
 {
@@ -231,24 +233,14 @@ function tartness_sweeter()
 
     drink_tartness--;
     set_tartness_text();
-    update_amounts();
+    update_volumes();
 }
 function back()
 {
     window.location = "/";
 }
 
-function make_drink(drink)
-{
-    dispense_drink(drink, drink_size);
-}
-
-function make_taster(drink)
-{
-    dispense_drink(drink, taster_size);
-}
-
-function dispense_drink(drink, size)
+function make_drink(drink, is_taster)
 {
     for(i = 0; i < ing.length; i++)
     {
@@ -256,14 +248,25 @@ function dispense_drink(drink, size)
             args = "?";
         else 
             args += "&";
-        args += "booze" + ing[i].id + "=" + ing[i].amount.toFixed(2);
+        args += "booze" + ing[i].id + "=";
+        args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
     }
-    lightbox('<div class="lb_box"> <p class="lb_heading">Serving Your</p></br> <p class="lb_drink">{{ drink.name.name }}</p> </div>');
+    lb = '<div class="lb_box"> <p class="lb_heading">';
+    if (is_taster)
+        lb += 'Serving a taste of'
+    else
+        lb += 'Serving Your'
+    lb += '</p></br><p class="lb_drink">{{ drink.name.name }}</p>';
+    lb += "</p></div>";
+    lightbox(lb);
     $.ajax({
             url: "/ws/drink/" + drink + args,
             success: function(html)
             {
-                window.location = "/";
+                if (is_taster)
+                    closeLightbox();
+                else
+                    window.location = "/";
             }
     });
 }
@@ -277,9 +280,9 @@ function dispense_drink(drink, size)
 <tr>
    <td><button type="button" class="bottom_row_button" onclick="back()">back</button></td>
    {% if show_taster %}
-      <td><button type="button" class="bottom_row_button" onclick="back()">taster</button></td>
+      <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id}}, 1)">taster</button></td>
    {% endif %}
-   <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }})">pour!</button></td>
+   <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }}, 0)">pour!</button></td>
 </tr>
 </table>
 {% endblock %}
