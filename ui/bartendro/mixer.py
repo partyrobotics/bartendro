@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import sleep, localtime
+from threading import Thread
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
 from bartendro.utils import session, local, log, error
@@ -143,19 +144,30 @@ class Mixer(object):
         except IOError:
             pass
 
-        for i in xrange(10):
-            self.leds_color(0, 255, 0)
-            sleep(.25)
-            self.leds_color(0, 0, 0)
-            sleep(.25)
+#        trouble = False
+#        for disp in xrange(self.disp_count):
+#            if not self.driver.ping(disp):
+#                error("dispenser %d failed to respond to ping" % disp)
+#                trouble = True
+#
+#        if trouble:
+#            self.driver.chain_init()
+#            log("resetting the chain!")
 
-        trouble = False
-        for disp in xrange(self.disp_count):
-            if not self.driver.ping(disp):
-                error("dispenser %d failed to respond to ping" % disp)
-                trouble = True
-
-        #self.driver.chain_init()
-        self.leds_color(0, 0, 255)
+        FlashGreenLeds(self).start()
 
         return True 
+
+class FlashGreenLeds(Thread):
+    def __init__(self, mixer):
+        Thread.__init__(self)
+        self.mixer = mixer
+
+    def run(self):
+        for i in xrange(5):
+            self.mixer.leds_color(0, 255, 0)
+            sleep(.15)
+            self.mixer.leds_color(0, 0, 0)
+            sleep(.15)
+        self.mixer.leds_color(0, 0, 255)
+        print "done flashing"
