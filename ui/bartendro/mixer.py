@@ -68,9 +68,6 @@ class Mixer(object):
         for drink_id, booze_id in drinks:
             if last_drink < 0: last_drink = drink_id
             if drink_id != last_drink:
-# 		print "%d: " % last_drink,
-# 		print boozes,
-#		print self.can_make_drink(boozes, booze_dict) 
                 if self.can_make_drink(boozes, booze_dict): 
                     can_make.append(last_drink)
                 boozes = []
@@ -88,14 +85,11 @@ class Mixer(object):
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
-        print recipe_arg
-
         recipe = []
         size = 0
         for booze in recipe_arg:
             r = None
             booze_id = int(booze[5:])
-            print booze_id
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
                 if booze_id == disp.booze_id:
@@ -112,8 +106,6 @@ class Mixer(object):
                 return False
             recipe.append(r)
         
-        print recipe
-
         log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
         self.leds_color(255, 0, 255)
         dur = 0
