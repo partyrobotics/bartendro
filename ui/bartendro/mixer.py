@@ -88,6 +88,8 @@ class Mixer(object):
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
+        print recipe_arg
+
         recipe = []
         size = 0
         for booze in recipe_arg:
@@ -101,7 +103,7 @@ class Mixer(object):
                     r['dispenser'] = disp.id
                     r['dispenser_actual'] = disp.actual
                     r['booze'] = booze_id
-                    r['ml'] = int(recipe_arg[booze])
+                    r['ml'] = recipe_arg[booze]
                     size += r['ml']
                     break
             if not r:
@@ -109,8 +111,10 @@ class Mixer(object):
                 error(self.err)
                 return False
             recipe.append(r)
+        
+        print recipe
 
-        log("Making drink: '%s' size %d ml" % (drink.name.name, size))
+        log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
         self.leds_color(255, 0, 255)
         dur = 0
         active_disp = []
