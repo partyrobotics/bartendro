@@ -14,7 +14,6 @@
               {% for ing in drink.ingredients %}
                   <tr>
                      <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
-                     <td id="booze_newparts{{ ing.id }}" style="text-align: right; color: #ddd"></td>
                      <td id="booze{{ ing.id }}" style="text-align: right"></td>
                      <td>fl oz</td>
                   </tr>
@@ -131,7 +130,6 @@ function update_volumes()
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
         $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
         $("#booze_type" + ing[i].id).text(ing[i].type);
-        $("#booze_newparts" + ing[i].id).text(ing[i].newparts + " parts");
     } 
 }
 
@@ -145,7 +143,6 @@ function change_alcohol()
         {
             $("#booze_name" + ing[i].id).attr("id", "booze_name" + id);
             $("#booze" + ing[i].id).attr("id", "booze" + id);
-            $("#booze_newparts" + ing[i].id).attr("id", "booze_newparts" + id);
             $("#booze_name" + id).text(name);
             ing[i].name = name;
             ing[i].id = id;
@@ -258,13 +255,13 @@ function make_drink(drink, is_taster)
         lb += 'Serving Your'
     lb += '</p></br><p class="lb_drink">{{ drink.name.name }}</p>';
     lb += "</p></div>";
-    lightbox(lb);
+    $.modal(lb, { 'escClose' : false });
     $.ajax({
             url: "/ws/drink/" + drink + args,
             success: function(html)
             {
                 if (is_taster)
-                    closeLightbox();
+                    $.modal.close();
                 else
                     window.location = "/";
             }
@@ -272,8 +269,7 @@ function make_drink(drink, is_taster)
 }
 
 </script>
-<script type="text/javascript" src="{{ url_for('static', file='js/lightbox.js') }}"></script>
-
+<script type="text/javascript" src="{{ url_for('static', file='js/jquery.simplemodal.1.4.2.min.js') }}"></script>
 {% endblock %}
 {% block footer %}
 <table class="bottom_row"> 
