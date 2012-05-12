@@ -33,6 +33,7 @@ def view(request, id):
     has_alcohol = False
     has_sweet = False
     has_tart = False
+    show_sobriety = drink.id == 46
     for booze in boozes:
         if booze.type == BOOZE_TYPE_ALCOHOL: 
             has_alcohol = True
@@ -44,7 +45,7 @@ def view(request, id):
     show_sweet_tart = has_sweet and has_tart
     show_strength = has_alcohol and has_non_alcohol
     show_size = 1
-    show_taster = 1
+    show_taster = not show_sobriety
 
     if not custom_drink:
         return render_template("drink/index", 
@@ -54,7 +55,8 @@ def view(request, id):
                                show_sweet_tart=show_sweet_tart,
                                show_strength=show_strength,
                                show_size=show_size,
-                               show_taster=show_taster)
+                               show_taster=show_taster,
+                               show_sobriety=show_sobriety)
 
     dispensers = session.query(Dispenser).all()
     disp_boozes = {}
@@ -88,7 +90,8 @@ def view(request, id):
                            show_sweet_tart=show_sweet_tart,
                            show_strength=show_strength,
                            show_size=show_size,
-                           show_taster=show_taster)
+                           show_taster=show_taster,
+                           show_sobriety=show_sobriety)
 
 @expose('/drink/sobriety')
 def sobriety(request):
