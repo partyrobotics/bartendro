@@ -56,16 +56,29 @@ def view(request, id):
                                show_size=show_size,
                                show_taster=show_taster)
 
+    dispensers = session.query(Dispenser).all()
+    disp_boozes = {}
+    for dispenser in dispensers:
+        disp_boozes[dispenser.booze_id] = 1
+
+    print disp_boozes
+
     booze_group = session.query(BoozeGroup) \
                           .join(DrinkBooze, DrinkBooze.booze_id == BoozeGroup.abstract_booze_id) \
                           .join(BoozeGroupBooze) \
-                          .join(Dispenser, Dispenser.booze_id == BoozeGroupBooze.booze_id) \
                           .filter(Drink.id == id) \
                           .first()
 
-    booze_group.booze_group_boozes = sorted(booze_group.booze_group_boozes, 
-                                            key=lambda booze: booze.sequence )
+    filtered = []
+    for bgb in booze_group.booze_group_boozes:
+        print booze
+        try:
+            dummy = disp_boozes[bgb.booze_id]
+            filtered.append(bgb)
+        except KeyError:
+            pass
 
+    booze_group.booze_group_boozes = sorted(filtered, key=lambda booze: booze.sequence ) 
     return render_template("drink/index", 
                            drink=drink, 
                            title=drink.name.name,
