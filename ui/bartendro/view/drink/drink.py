@@ -9,6 +9,7 @@ from bartendro.model.booze import BOOZE_TYPE_UNKNOWN, BOOZE_TYPE_ALCOHOL, BOOZE_
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.model.booze_group_booze import BoozeGroupBooze
 from bartendro.model.drink_name import DrinkName
+from bartendro.model.dispenser import Dispenser
 from bartendro import constant 
 
 @expose('/drink/<id>')
@@ -48,7 +49,7 @@ def view(request, id):
     if not custom_drink:
         return render_template("drink/index", 
                                drink=drink, 
-                               title="Make a %s" % drink.name, 
+                               title=drink.name.name,
                                is_custom=0,
                                show_sweet_tart=show_sweet_tart,
                                show_strength=show_strength,
@@ -58,6 +59,7 @@ def view(request, id):
     booze_group = session.query(BoozeGroup) \
                           .join(DrinkBooze, DrinkBooze.booze_id == BoozeGroup.abstract_booze_id) \
                           .join(BoozeGroupBooze) \
+                          .join(Dispenser, Dispenser.booze_id == BoozeGroupBooze.booze_id) \
                           .filter(Drink.id == id) \
                           .first()
 
@@ -66,7 +68,7 @@ def view(request, id):
 
     return render_template("drink/index", 
                            drink=drink, 
-                           title="Make a %s" % drink.name,
+                           title=drink.name.name,
                            is_custom=1,
                            custom_drink=drink.custom_drink[0],
                            booze_group=booze_group,
@@ -74,3 +76,7 @@ def view(request, id):
                            show_strength=show_strength,
                            show_size=show_size,
                            show_taster=show_taster)
+
+@expose('/drink/sobriety')
+def sobriety(request):
+    return render_template("drink/sobriety")

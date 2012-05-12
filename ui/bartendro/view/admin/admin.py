@@ -26,7 +26,7 @@ def tail(f, n, offset=None):
 
 @expose('/admin')
 def admin(request):
-    return render_template("admin/index")
+    return render_template("admin/index", title="Admin")
 
 @expose('/admin/log/dispensed')
 def dispensed(request):
@@ -37,7 +37,7 @@ def dispensed(request):
     except IOError:
         lines = ["[error] cannot open log file."]
 
-    return render_template_no_cache("admin/log", title="Dispensed drinks", lines=lines)
+    return render_template_no_cache("admin/log", title="Dispensed", lines=lines)
 
 @expose('/admin/log/debug')
 def debug(request):
@@ -47,7 +47,7 @@ def debug(request):
         f.close()
     except IOError:
         lines = ["[error] cannot open log file.\n"]
-    return render_template_no_cache("admin/log", title="Debug log", lines=lines)
+    return render_template_no_cache("admin/log", title="Debug", lines=lines)
 
 @expose('/admin/log/comms')
 def comms(request):
@@ -57,4 +57,4 @@ def comms(request):
         f.close()
     except IOError:
         lines = ["[error] cannot open log file.\n"]
-    return render_template_no_cache("admin/log", title="Comms log", lines=lines)
+    return render_template_no_cache("admin/log", title="Comms", lines=lines)

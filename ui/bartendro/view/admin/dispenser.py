@@ -40,7 +40,12 @@ def view(request):
         form["dispenser%d" % (i + 1)].data = "%d" % booze_list[dispenser.booze_id - 1][0]
         form["actual%d" % (i + 1)].data = dispenser.actual
 
-    return render_template("admin/dispenser", calibrate_ml=CALIBRATE_ML, form=form, count=count, fields=fields, saved=saved)
+    return render_template("admin/dispenser", 
+                           title="Dispensers",
+                           calibrate_ml=CALIBRATE_ML, 
+                           form=form, count=count, 
+                           fields=fields, 
+                           saved=saved)
 
 @expose('/admin/dispenser/save')
 def save(request):
