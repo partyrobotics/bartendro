@@ -10,7 +10,7 @@ from bartendro.form.booze import BoozeForm
 def view(request):
     form = BoozeForm(request.form)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="Enter new booze")
+    return render_template("admin/booze", boozes=boozes, form=form, title="Booze")
 
 @expose('/admin/booze/edit/<id>')
 def edit(request, id):
@@ -19,7 +19,7 @@ def edit(request, id):
     booze = Booze.query.filter_by(id=int(id)).first()
     form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", booze=booze, boozes=boozes, form=form, title="Edit booze", saved=saved)
+    return render_template("admin/booze", booze=booze, boozes=boozes, form=form, title="Booze", saved=saved)
 
 @expose('/admin/booze/save')
 def save(request):

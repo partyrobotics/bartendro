@@ -31,7 +31,7 @@
                         {{ form.cancel(class="small_button") }}
                         {{ form.save(class="small_button") }}
                 </div>
- `       </form>
+        </form>
 	</div>
     </div>
 </div>

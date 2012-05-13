@@ -45,4 +45,7 @@ def index(request):
     other_drinks = filter_drink_list(can_make_dict, other_drinks)
     process_ingredients(other_drinks)
             
-    return render_template("index", top_drinks=top_drinks, other_drinks=other_drinks)
+    return render_template("index", 
+                           top_drinks=top_drinks, 
+                           other_drinks=other_drinks,
+                           title="Bartendro")

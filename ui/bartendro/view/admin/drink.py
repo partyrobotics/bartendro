@@ -42,7 +42,7 @@ def view(request):
         fields.append((bf, bp, dbi, show))
     form = F(**kwargs)
 
-    return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Enter new drink")
+    return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Drinks")
 
 @expose('/admin/drink/edit/<id>')
 def edit(request, id):
@@ -88,7 +88,7 @@ def edit(request, id):
     drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
     return render_template("admin/drink", drinks=drinks, form=form, fields=fields, 
-                           title="Edit drink", saved=saved)
+                           title="Drinks", saved=saved)
 
 
 @expose('/admin/drink/save')

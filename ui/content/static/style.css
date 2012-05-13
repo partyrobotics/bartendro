@@ -78,6 +78,7 @@ table.home_table{
 }
 table.home_table td{
     width: 50%;
+    vertical-align: top;
 }
 table.home_table a{
     text-decoration: none;
