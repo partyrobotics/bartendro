@@ -33,6 +33,10 @@ class BartendroUIServer(object):
         self.driver = driver.MasterDriver("/dev/ttyS1");
         self.driver.open()
         self.driver.chain_init();
+        if self.driver.count() != 15:
+            log("Found %d dispensers. Resetting chain." % self.driver.count())
+            self.driver.chain_init();
+	
         self.mixer = mixer.Mixer(self.driver)
 
         self.debug_log_file = "logs/bartendro.log"

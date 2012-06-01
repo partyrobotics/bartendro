@@ -33,7 +33,7 @@ def view(request, id):
     has_alcohol = False
     has_sweet = False
     has_tart = False
-    show_sobriety = drink.id == 46
+    show_sobriety = 0 #drink.id == 46
     for booze in boozes:
         if booze.type == BOOZE_TYPE_ALCOHOL: 
             has_alcohol = True
