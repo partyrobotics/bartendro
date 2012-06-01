@@ -11,6 +11,10 @@ def ws_reset(request):
     driver = local.application.driver
     driver.chain_init()
     driver.led(255, 0, 0, 255)
+    mc = local.application.mc
+    mc.delete("top_drinks")
+    mc.delete("other_drinks")
+    mc.delete("available_drink_list")
     return render_text("ok\n")
 
 @expose('/ws/testchain')
