@@ -161,5 +161,5 @@ class FlashGreenLeds(Thread):
         self.mixer = mixer
 
     def run(self):
-        sleep(3);
+        sleep(5);
         self.mixer.led_driver.idle()

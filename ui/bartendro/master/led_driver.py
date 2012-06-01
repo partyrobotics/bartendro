@@ -2,6 +2,7 @@
 
 import os
 from bartendro.utils import log, error, local
+from time import sleep, localtime
 import serial
 
 BAUD_RATE = 38400
@@ -24,6 +25,15 @@ class LEDDriver(object):
     def __init__(self, device):
         self.device = device
         self.ser = None
+        self.cl = open("logs/comm.log", "a")
+
+    def log(self, msg):
+        try:
+            t = localtime()
+            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+            self.cl.flush()
+        except IOError:
+            pass
 
     def open(self):
         '''Open the serial connection to the leds'''
@@ -58,13 +68,13 @@ class LEDDriver(object):
         if self.software_only: return
         self.ser.write("i")
 
-    def pour_drink(self):
+    def make_drink(self):
         if self.software_only: return
         self.ser.write("p")
 
-    def drink_done(self):
+    def drink_complete(self):
         if self.software_only: return
-        self.ser.write("p")
+        self.ser.write("d")
 
     def panic(self):
         if self.software_only: return

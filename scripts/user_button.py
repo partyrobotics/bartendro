@@ -29,3 +29,5 @@ def wait_for_button():
 while True:
 	wait_for_button()
         os.system("kill -9 `ps x | grep bartendro_server | grep -v grep | cut -d ' ' -f 2`")
+        # MASSIVE HACK
+        os.system("kill -9 `ps x | grep bartendro_server | grep -v grep | cut -d ' ' -f 3`")
