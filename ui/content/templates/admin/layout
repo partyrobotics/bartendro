@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="admin_top_bar"><p>Admin</p></div>
-  <div class="body">
+  <div class="admin_body">
     {% block body %}{% endblock %}
     <div class="body_push"></div>
   </div>

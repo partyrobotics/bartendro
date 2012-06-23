@@ -20,6 +20,12 @@ div.body{
     height: 100%;
     margin: 0 auto -110px 40px;
 }
+div.admin_body{
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 10px auto -110px 40px;
+}
 div.top_bar{
     position: fixed;
     width: 70px;
