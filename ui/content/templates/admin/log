@@ -2,8 +2,7 @@
 {% block body %}
 <div class="section">
     {{ title }}
-    <button type="button" class="buttons" onclick="reload()">reload</button>
-    <a href="/admin" class="buttons">admin</a>
+    <button type="button" class="small_button" onclick="reload()">reload</button>
 </div>
 <div class="log">
     {% for line in lines %}

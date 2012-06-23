@@ -4,13 +4,13 @@
     <h1>Admin menu</h1>
     <br/>
     <ul class="menu">
-        <li style="margin-bottom: 20px"><a class="admin" href="/">Home</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/booze">Edit Booze list</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/drink">Edit Drink list</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/log/dispensed">Drinks dispensed</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/log/debug">Debug log</a></li>
-        <li style="margin-bottom: 20px"><a class="admin" href="admin/log/comms">Comms log</a></li>
+        <li><a class="admin" href="/">Home</a></li>
+        <li><a class="admin" href="admin/booze">Edit Booze list</a></li>
+        <li><a class="admin" href="admin/drink">Edit Drink list</a></li>
+        <li><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
+        <li><a class="admin" href="admin/log/dispensed">Drinks dispensed</a></li>
+        <li><a class="admin" href="admin/log/debug">Debug log</a></li>
+        <li><a class="admin" href="admin/log/comms">Comms log</a></li>
     </ul>
 </div>
 {% endblock %}

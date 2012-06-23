@@ -58,9 +58,9 @@
 
                     {{ form.id() }}
 	            <div class="button">
-                        <button type="button" class="buttons" onclick="add_booze()">add booze</button>
-                        {{ form.cancel(class="buttons") }}
-                        {{ form.save(class="buttons") }}
+                        <button type="button" class="small_button" onclick="add_booze()">add booze</button>
+                        {{ form.cancel(class="small_button") }}
+                        {{ form.save(class="small_button") }}
                     </div>
 	        </form>
 	</div>

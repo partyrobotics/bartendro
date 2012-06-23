@@ -7,8 +7,8 @@
            <p>Your changes have been saved.</p>
         {% endif %}
         <p>There are {{ count }} dispensers available.
-           <button type="button" onclick="reset()">reset chain</button>
-           <button type="button" id="test_chain" onclick="test_chain()">test chain</button>
+           <button type="button" class="small_button" onclick="reset()">reset chain</button>
+           <button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button>
         </p>
         <div class="forms">
 		<form method="POST" action="/admin/dispenser/save">
@@ -24,8 +24,8 @@
                     {% endfor %}
 
 	            <div class="button">
-                        {{ form.cancel(class="buttons") }}
-                        {{ form.save(class="buttons") }}
+                        {{ form.cancel(class="small_button") }}
+                        {{ form.save(class="small_button") }}
                 </div>
  `       </form>
 	</div>
