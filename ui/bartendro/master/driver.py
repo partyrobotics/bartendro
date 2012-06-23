@@ -142,10 +142,10 @@ class MasterDriver(object):
         return self.send("%d off\n" % dispenser)
 
     def dispense_time(self, dispenser, duration):
-        return self.send("%d disptime %d\n" % (dispenser, duration))
+        return self.send("%d timedisp %d\n" % (dispenser, duration))
 
     def dispense_ticks(self, dispenser, ticks):
-        return self.send("%d dispticks %d\n" % (dispenser, ticks))
+        return self.send("%d tickdisp %d\n" % (dispenser, ticks))
 
     def led(self, dispenser, r, g, b):
         return self.send("%d led %d %d %d\n" % (dispenser, r, g, b))
@@ -209,6 +209,7 @@ class MasterDriver(object):
 
         self.send("%d dispstat\n" % dispenser)
         ret = self.ser.readline()
+        print "'%s'\n" % ret
         if not ret: 
             msg = "dispstat response timeout"
             self.log(msg)

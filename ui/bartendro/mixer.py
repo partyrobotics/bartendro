@@ -9,7 +9,9 @@ from bartendro.model import drink_booze
 from bartendro.model import booze
 
 MS_PER_ML = 86 
-CALIBRATION_TICKS = 30000
+TICKS_PER_ML = 1075
+CALIBRATE_ML = 10 
+CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
 class Mixer(object):
     '''This is where the magic happens!'''
@@ -107,12 +109,11 @@ class Mixer(object):
         active_disp = []
         for r in recipe:
             r['ml'] = r['part'] * size / total_parts
-            # FIXME 90
             if r['dispenser_actual'] == 0:
-                r['ms'] = int(r['ml'] * MS_PER_ML)
+                r['ms'] = int(r['ml'] * TICKS_PER_ML)
             else:
-                r['ms'] = int(r['ml'] * MS_PER_ML * (90.0 / float(r['dispenser_actual'])))
-            self.driver.dispense(r['dispenser'] - 1, int(r['ms']))
+                r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
+            self.driver.dispense_time(r['dispenser'] - 1, int(r['ms']))
             log("..dispense %d for %d ms" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
