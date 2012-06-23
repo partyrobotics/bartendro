@@ -1,42 +1,53 @@
 {% extends 'layout' %}
 {% block body %}
-<div class="top_bar"><p>Bartendro</p></div>	
 <div class="drink_content">
-    <div class="drink_heading">Make: {{ drink.name.name }}</div></br>
+  <div class="drink_heading">Make: {{ drink.name.name }}</div>
+  <div>
+      <div class="dispense_drink_detail">
+         <div class="pour_desc">
+            <p>{{ drink.desc }}</p>
+         </div>
+         <div class="pour_ing">
+            <br/>
+            ingredients:
+            <ul>
+              {% for ing, parts in drink.ingredients %}
+                  <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
+              {% endfor %}
+            </ul>
+         </div>
+      </div>
 
-	 <div class="pour">    
-		<div><button type="button" class="taster" onclick="make_taster({{ drink.id }})">Taste it first</button></div>
-		<p class="recommendation">Suggested drink size is {{ drink.sugg_size }} oz</p> 
-	 		<div class="size">
-	 			<div><button type="button" class="adjust_drink_button" onclick="size_bigger()">bigger</button></div>
-    			<div class="size_text"><p class="text" id="size_text">4 fluid ounces</p></div>
-      		<div><button type="button" class="adjust_drink_button" onclick="size_smaller()">smaller</button></div>
-      	</div>
-		<div><button type="button" class="make_drink" onclick="make_drink({{ drink.id }})">Pour</button></div>
-	</div>
-	<div class="drink_left">
-    	<div class="pour_desc">{{ drink.desc }}</div>
-   	<div class="pour_ing">
-                ingredients:</br>
-                <ul>
-                {% for ing, parts in drink.ingredients %}
-                    <li>{{ parts }} part{% if parts > 1 %}s{% endif %} {{ ing }}</li>
-                {% endfor %}
-                </ul>
+      <div class="dispense_stack">
+        <div class="dispense_stack_element" id="dispense_stack_taster">
+          <table style="width: 100%">
+          <tr>
+             <td style="text-align: right">Not sure yet?</td>
+             <td style="text-align: right"><button type="button" class="taster_button small_button" onclick="make_taster({{ drink.id }})">pour me a taster</button></td>
+          </tr>
+          </table>
         </div>
-    </div>
-    	<div class="back_button"> 
-        	<button type="button" class="changed_mind" onclick="changed_mind()">Back</button>
-    	</div>
-</div>
 
+        <div class="dispense_stack_element" id="dispense_stack_size">
+          <div class="recommendation">Suggested drink size is {{ drink.sugg_size }} fluid ounces.</div>
+          <table style="width: 100%">
+          <tr>
+             <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
+             <td style="text-align: center;"><p class="text" id="size_text">4 fluid ounces</p></td>
+             <td style="text-align: right;"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+          </tr>
+          </table>
+        </div>
+
+      </div>
+  </div>
+</div>
 <script type="text/javascript">
 
 var taster_size = 1;
 var max_drink_size_multiplier = 3;
 var drink_size = {{ drink.sugg_size }};
 var drink_strength = 0;
-
 $(document).ready(function() 
 {
     $("#size_text").text(drink_size + " fluid ounces");
@@ -89,7 +100,7 @@ function strength_weaker()
     drink_strength--;
     set_strength_text();
 }
-function changed_mind()
+function back()
 {
     window.location = "/";
 }
@@ -119,4 +130,10 @@ function dispense_drink(drink, size)
 </script>
 <script type="text/javascript" src="{{ url_for('static', file='js/lightbox.js') }}"></script>
 
+{% endblock %}
+{% block footer %}
+<div class="bottom_row"> 
+     <button type="button" class="back_button large_button" onclick="back()">Back</button>
+     <button type="button" class="pour_button large_button" onclick="make_drink({{ drink.id }})">pour!</button>
+</div>
 {% endblock %}
