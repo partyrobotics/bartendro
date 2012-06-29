@@ -93,7 +93,6 @@ ISR (TIMER1_OVF_vect)
 
         // collect statistics
         g_last_dispense_duration = g_time - g_dispense_start_time;
-        g_last_dispense_ticks = g_hall_sensor_1;
     }
 }
 
@@ -105,7 +104,7 @@ ISR(PCINT1_vect)
     if (PINC & (1<<PINC1))
         g_hall_sensor_2++;
 
-    if (g_dispense_target_ticks > 0 && g_hall_sensor_1 >= g_dispense_target_ticks)
+    if (g_dispense_target_ticks > 0 && g_hall_sensor_2 >= g_dispense_target_ticks)
     {
         g_dispense_target_ticks = 0;
         g_is_dispensing = 0;
@@ -113,7 +112,7 @@ ISR(PCINT1_vect)
 
         // collect statistics
         g_last_dispense_duration = g_time - g_dispense_start_time;
-        g_last_dispense_ticks = g_hall_sensor_1;
+        g_last_dispense_ticks = g_hall_sensor_2;
     }
 }
 
@@ -182,6 +181,7 @@ void dispense_time(uint32_t time)
     g_dispense_start_time = g_time;
     g_dispense_target_time = g_time + time;
     g_hall_sensor_1 = 0;
+    g_hall_sensor_2 = 0;
     sei();
 #if DEBUG
     dprintf("dispense target: %d\n", g_dispense_target_time);
@@ -199,6 +199,7 @@ void dispense_ticks(uint32_t ticks)
 
     cli();
     g_hall_sensor_1 = 0;
+    g_hall_sensor_2 = 0;
     g_dispense_start_time = g_time;
     g_dispense_target_ticks = ticks;
     sei();
