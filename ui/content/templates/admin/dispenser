@@ -2,15 +2,19 @@
 {% block body %}
 <div class="main">
     <div class="admin_content">	
+        <div style="float: left">
         <h2>Dispensers</h2>
-        {% if saved %}
-           <p>Your changes have been saved.</p>
-        {% endif %}
-        <p>There are {{ count }} dispensers available.
-           <button type="button" class="small_button" onclick="reset()">reset chain</button>
-           <button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button>
-        </p>
-        <div class="forms">
+          {% if saved %}
+             <p>Your changes have been saved.</p>
+          {% endif %}
+          </br>
+          <p>There are {{ count }} dispensers available.</p>
+          </br>
+          <p><button type="button" class="small_button" onclick="reset()">reset chain</button></p>
+          </br>
+          <p><button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button></p>
+        </div>
+        <div class="forms" style="float: right; margin-right: 10px">
 		<form method="POST" action="/admin/dispenser/save">
 
                     {% for i in range(1, count + 1) %}
@@ -18,7 +22,7 @@
                               {{ form["dispenser%s" % i].label }}: 
                               {{ form["dispenser%s" % i](class="form") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
-                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</button>
+                        <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">{{ calibrate_ml }}ml</button>
                               {{ form["actual%s" % i](size="3") }}
                         </div>
                     {% endfor %}

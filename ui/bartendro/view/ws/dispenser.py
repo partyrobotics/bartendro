@@ -27,5 +27,4 @@ def ws_dispenser_test(request, disp):
     while driver.is_dispensing(disp - 1):
 	sleep(.1)
     t, ticks = driver.get_dispense_stats(disp - 1)
-    log("Calibration run: %d ms and %d ticks" % (t, ticks))
     return render_text("ok\n")

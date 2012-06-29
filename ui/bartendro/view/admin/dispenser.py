@@ -30,7 +30,7 @@ def view(request):
     for i in xrange(1, 17):
         dis = "dispenser%d" % i
         actual = "actual%d" % i
-        setattr(F, dis, SelectField("dispenser %d" % i, choices=sorted_booze_list)) 
+        setattr(F, dis, SelectField("%d" % i, choices=sorted_booze_list)) 
         setattr(F, actual, IntegerField(actual, [validators.NumberRange(min=1, max=100)]))
         kwargs[dis] = "1" # string of selected booze
         fields.append((dis, actual))
