@@ -50,7 +50,8 @@ $(document).ready(function() {
                 </br> 
                 <div class="home_drink_ingredients">
                 {% for ing, parts in drink.ingredients %}
-                   {{ ing }}
+                   {{ ing }}{% if not loop.last %}, {% endif %}
+                   
                 {% endfor %}
                 </div>
                 <div class="home_drink_desc">{{ drink.desc }}</div>
