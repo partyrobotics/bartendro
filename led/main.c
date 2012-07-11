@@ -21,7 +21,6 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
-#define TIMER0_INIT 235 // 20 ticks before it overflows
 #define DEBUG 0
 
 #define NUM_LED 4
@@ -29,8 +28,8 @@
 
 #define COLOR_LATCH_DURATION 501
 #define CLOCK_PERIOD 100
-#define CLOCK_PIN 0
-#define DATA_PIN 1
+#define CLOCK_PIN 8
+#define DATA_PIN 9
 
 // Time keeping
 static volatile uint32_t g_time = 0;
@@ -98,9 +97,9 @@ void delay_us(int us)
 
 void ledstick_setup(void)
 {
-    // PC0 - pin a0 - clock
-    // PC1 - pin a1 - signal
-    DDRC |= (1<<PC0)|(1<<PC1);
+    // PB0 - pin 8 - clock
+    // PB1 - pin 9 - signal
+    DDRB |= (1<<PB0)|(1<<PB1);
 
     // Set PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
@@ -243,7 +242,7 @@ void plot_function(uint8_t delay, void (*func)(uint8_t, color_t *))
             leds[(j * 3) + 2] = c.blue;
         }
         set_led_colors(leds);
-        delay_ms(20);
+        delay_ms(delay);
     }
 }
 
