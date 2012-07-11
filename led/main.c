@@ -27,7 +27,7 @@
 #define NUM_DATA (NUM_LED * 3)
 
 #define COLOR_LATCH_DURATION 501
-#define CLOCK_PERIOD 100
+#define CLOCK_PERIOD 10
 #define CLOCK_PIN 0
 #define DATA_PIN 1
 #define CLOCK_PORT PORTC
@@ -204,7 +204,7 @@ void rainbow(void)
                 leds[(j * 3) + 2] = led.blue;
             }
             set_led_colors(leds);
-            delay_ms(10);
+            delay_ms(30);
         }
 }
 
@@ -279,17 +279,17 @@ int main(void)
         {
             case 'd':
                 dprintf("Drink done\n");
-                plot_function(3, &drink_done);
+                plot_function(20, &drink_done);
                 break;
 
             case 'p':
                 dprintf("Pour drink\n");
-                plot_function(10, &drink_pouring);
+                plot_function(25, &drink_pouring);
                 break;
 
             case 'e':
                 dprintf("Panic!\n");
-                plot_function(0, &panic);
+                plot_function(20, &panic);
                 break;
 
             case 'i':
