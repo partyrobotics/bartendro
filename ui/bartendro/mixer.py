@@ -16,18 +16,16 @@ CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 class Mixer(object):
     '''This is where the magic happens!'''
 
-    def __init__(self, driver):
+    def __init__(self, driver, led_driver):
         self.driver = driver
+        self.led_driver = led_driver
         self.err = ""
         self.disp_count = self.driver.count()
-        self.leds_color(0, 0, 255)
         self.mc = local.application.mc
+        self.led_driver.idle()
 
     def get_error(self):
         return self.err
-
-    def leds_color(self, r, g, b):
-        self.driver.led(255, r, g, b)
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -108,7 +106,7 @@ class Mixer(object):
             recipe.append(r)
         
         log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
-        self.leds_color(255, 0, 255)
+        self.led_driver.make_drink()
         dur = 0
         active_disp = []
         for r in recipe:
@@ -123,17 +121,16 @@ class Mixer(object):
 
             if r['ms'] > dur: dur = r['ms']
 
-        self.leds_color(255, 100, 0)
         while True:
             sleep(.1)
             done = True
-	    for disp in active_disp:
-		if self.driver.is_dispensing(disp - 1): 
+            for disp in active_disp:
+                if self.driver.is_dispensing(disp - 1): 
                     done = False
                     break
             if done: break
 
-        self.leds_color(0, 255, 0)
+        self.led_driver.drink_complete()
         log("drink complete")
 
         try:
@@ -164,10 +161,5 @@ class FlashGreenLeds(Thread):
         self.mixer = mixer
 
     def run(self):
-        for i in xrange(5):
-            self.mixer.leds_color(0, 255, 0)
-            sleep(.15)
-            self.mixer.leds_color(0, 0, 0)
-            sleep(.15)
-        self.mixer.leds_color(0, 0, 255)
-        print "done flashing"
+        sleep(3);
+        self.mixer.led_driver.idle()

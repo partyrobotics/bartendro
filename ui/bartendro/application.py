@@ -9,7 +9,7 @@ from werkzeug import SharedDataMiddleware
 
 from bartendro.utils import session, metadata, local, local_manager, url_map, log, error
 from bartendro.views import view_map
-from bartendro.master import driver
+from bartendro.master import driver, led_driver
 from bartendro import mixer
 import bartendro.models
 
@@ -36,8 +36,11 @@ class BartendroUIServer(object):
         if self.driver.count() != 15:
             log("Found %d dispensers. Resetting chain." % self.driver.count())
             self.driver.chain_init();
+
+        self.led_driver = led_driver.LEDDriver("/dev/ttyACM0");
+        self.led_driver.open()
 	
-        self.mixer = mixer.Mixer(self.driver)
+        self.mixer = mixer.Mixer(self.driver, self.led_driver)
 
         self.debug_log_file = "logs/bartendro.log"
         self.access_log_file = "logs/access.log"

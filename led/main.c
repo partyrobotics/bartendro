@@ -208,35 +208,23 @@ void rainbow(void)
         }
 }
 
-void fade_in(void)
+void panic(uint8_t t, color_t *c)
 {
-    uint8_t i, j;
-    uint8_t leds[NUM_LED * 3];
- 
-    for(i = 0; !should_break(); i++)
-    {
-        for(j = 0; j < NUM_LED; j++)
-        {
-            leds[(j * 3)] = i;
-            leds[(j * 3) + 1] = 0;
-            leds[(j * 3) + 2] = 0;
-        }
-        set_led_colors(leds);
-        delay_ms(2);
-    }
+    c->red =  (int)((sin((float)t / M_PI_2) + 1.0) * 127);
+    c->blue = c->green = 0;
 }
 
-void green_wobble(uint8_t t, color_t *c)
+void drink_done(uint8_t t, color_t *c)
 {
-    c->green =  (int)((sin((float)t / M_PI_2) + 1.0) * 128);
+    c->green =  (int)((sin((float)t / M_PI_2) + 1.0) * 127);
     c->blue = c->red = 0;
 }
 
-void wobble_wobble(uint8_t t, color_t *c)
+void drink_pouring(uint8_t t, color_t *c)
 {
-    c->red =  (int)((sin((float)t / M_PI_2) + 1.0) * 128);
+    c->red =  (int)((sin((float)t / M_PI_2) + 1.0) * 127);
     c->green = 0;
-    c->blue =  (int)((cos((float)t / M_PI_2) + 1.0) * 128);
+    c->blue =  (int)((cos((float)t / M_PI_2) + 1.0) * 127);
 }
 
 void plot_function(uint8_t delay, void (*func)(uint8_t, color_t *))
@@ -255,7 +243,7 @@ void plot_function(uint8_t delay, void (*func)(uint8_t, color_t *))
             leds[(j * 3) + 2] = c.blue;
         }
         set_led_colors(leds);
-        delay_ms(delay);
+        delay_ms(20);
     }
 }
 
@@ -291,12 +279,17 @@ int main(void)
         {
             case 'd':
                 dprintf("Drink done\n");
-                plot_function(3, &green_wobble);
+                plot_function(3, &drink_done);
                 break;
 
             case 'p':
                 dprintf("Pour drink\n");
-                plot_function(10, &wobble_wobble);
+                plot_function(10, &drink_pouring);
+                break;
+
+            case 'e':
+                dprintf("Panic!\n");
+                plot_function(0, &panic);
                 break;
 
             case 'i':
