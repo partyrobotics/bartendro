@@ -27,9 +27,11 @@
 #define NUM_DATA (NUM_LED * 3)
 
 #define COLOR_LATCH_DURATION 501
-#define CLOCK_PERIOD 100
-#define CLOCK_PIN 8
-#define DATA_PIN 9
+#define CLOCK_PERIOD 10
+#define CLOCK_PIN 0
+#define DATA_PIN 1
+#define CLOCK_PORT PORTC
+#define DATA_PORT PORTC
 
 // Time keeping
 static volatile uint32_t g_time = 0;
@@ -97,9 +99,8 @@ void delay_us(int us)
 
 void ledstick_setup(void)
 {
-    // PB0 - pin 8 - clock
-    // PB1 - pin 9 - signal
-    DDRB |= (1<<PB0)|(1<<PB1);
+    // setting clock and data ports
+    DDRC |= (1<<PC0)|(1<<PC1);
 
     // Set PWM pins as outputs
     DDRD |= (1<<PD6)|(1<<PD5)|(1<<PD3);
@@ -148,15 +149,15 @@ void set_led_colors(uint8_t *leds)
                 for(i = 0; i < 8; i++)
                 {
                     if (byte & (1 << (8 - i)))
-                        sbi(PORTC, DATA_PIN);
+                        sbi(DATA_PORT, DATA_PIN);
                     else
-                        cbi(PORTC, DATA_PIN);
+                        cbi(DATA_PORT, DATA_PIN);
                     delay_us(CLOCK_PERIOD);
 
-                    sbi(PORTC, CLOCK_PIN);
+                    sbi(CLOCK_PORT, CLOCK_PIN);
                     delay_us(CLOCK_PERIOD);
 
-                    cbi(PORTC, CLOCK_PIN);
+                    cbi(CLOCK_PORT, CLOCK_PIN);
                 }
             }
      delay_us(COLOR_LATCH_DURATION);
@@ -203,7 +204,7 @@ void rainbow(void)
                 leds[(j * 3) + 2] = led.blue;
             }
             set_led_colors(leds);
-            delay_ms(10);
+            delay_ms(30);
         }
 }
 
@@ -278,17 +279,17 @@ int main(void)
         {
             case 'd':
                 dprintf("Drink done\n");
-                plot_function(3, &drink_done);
+                plot_function(20, &drink_done);
                 break;
 
             case 'p':
                 dprintf("Pour drink\n");
-                plot_function(10, &drink_pouring);
+                plot_function(25, &drink_pouring);
                 break;
 
             case 'e':
                 dprintf("Panic!\n");
-                plot_function(0, &panic);
+                plot_function(20, &panic);
                 break;
 
             case 'i':
