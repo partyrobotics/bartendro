@@ -11,6 +11,7 @@ from bartendro.model.booze_group import BoozeGroup
 from bartendro.model.booze_group_booze import BoozeGroupBooze
 
 from bartendro.model.dispenser import Dispenser
+from bartendro.model.drink_log import DrinkLog
 
 Drink.name = relationship(DrinkName, backref=backref("drink"))
 
@@ -26,3 +27,5 @@ BoozeGroup.abstract_booze = relationship(Booze, backref=backref("booze_group"))
 BoozeGroupBooze.booze_group = relationship(BoozeGroup, backref=backref("booze_group_boozes"))
 BoozeGroupBooze.booze = relationship(Booze, backref=backref("booze_group_booze"))
 CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
+
+DrinkLog.drink = relationship(Drink)
