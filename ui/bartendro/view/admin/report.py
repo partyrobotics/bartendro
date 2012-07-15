@@ -7,10 +7,14 @@ from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.form.booze import BoozeForm
 
+@expose('/admin/report')
+def report_index(request):
+    return render_template("admin/report", title="Top drinks report")
+
 @expose('/admin/report/<begin>/<end>')
-def view_report(request, begin, end):
-    begindate = int(time.mktime(time.strptime(begin + " 0:00", "%Y-%m-%d %H:%M")))
-    enddate = int(time.mktime(time.strptime(end + " 23:59", "%Y-%m-%d %H:%M")))
+def report_view(request, begin, end):
+    begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
+    enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
 
     total_number = session.query("number")\
                  .from_statement("""SELECT count(*) as number
@@ -38,7 +42,7 @@ def view_report(request, begin, end):
                  .params(begin=begindate, end=enddate).all()
 
     return render_template("admin/report", top_drinks = top_drinks, 
-                                           title="Top Drinks", 
+                                           title="Top drinks report",
                                            total_number=total_number[0],
                                            total_volume=total_volume[0],
                                            begin=begin, 

@@ -7,3 +7,4 @@
 *.o
 *.map
 *.hex
+ui/logs

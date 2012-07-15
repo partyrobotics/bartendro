@@ -1,0 +1,143 @@
+{% extends 'drink/sobriety_layout' %}
+{% block body %}
+<style>
+body{
+    width: 100%;
+    height: 100%;
+    font-family:"Arial";
+}
+.sobriety{
+    display: none;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    margin: 20px;
+    padding: 20px;
+    border-style: dotted;
+    border-width: 5px;
+    border-color: red;
+    font-size: 18pt;
+}
+.instructions{
+    display: none;
+    margin: 10%;
+}
+.result{
+    display: none;
+    text-align: center;
+    margin: 20%;
+}
+.clickme{
+    display: none;
+    height: 80%;
+    width: 80%;
+    margin: 10%;
+    text-align: center;
+}
+.clickme_button{
+    position: absolute;
+    width: 130px;
+    height: 60px;
+    font-size: 17pt;
+}
+.start_button{
+    width: 250px;
+    height: 80px;
+    font-size: 30pt;
+}
+.result_button{
+    width: 350px;
+    height: 80px;
+    font-size: 24pt;
+}
+</style>
+<div class="sobriety">
+    <div class="instructions">
+        <p>
+        The drink you want contains expensive booze.
+        As Lunarvillian, we understand that you're a professional,
+        but we have to require you to prove that you are sober
+        enough to appreciate good booze.
+        </p>
+        <p>
+        A few seconds after you press the start button, another button
+        will appear in a randomly spot on the screen. Click it as fast as 
+        you can. If you can't click it fast enough, <em><b>no good
+        booze for you</b></em>!
+        </p>
+        <p style="text-align: center; width: 100%">
+           <button class="start_button" onclick="start_me()">start!</button>
+        </p>
+    </div>
+    <div class="clickme">
+        <button class="clickme_button" onclick="click_me()">CLICK ME</button>
+    </div>    
+    <div class="result">
+        <b>Your time: <span id="result_time"></span> milliseconds.</b>
+        <p id="result_message"></p>
+        <button class="result_button" id="onward" onclick="onward()">try again</button>
+    </div>    
+</div>    
+<script type="text/javascript">
+
+var acceptable_speed = 1000;
+var start_time;
+var width, height;
+var elapsed;
+
+$(document).ready(function() {
+    max_x = $("body").width() - $(".clickme_button").width();
+    max_y = $("body").height() - $(".clickme_button").height();
+    sobriety_test();
+});
+
+function sobriety_test()
+{
+    $(".sobriety").show();
+    $(".instructions").show();
+}
+
+function start_me()
+{
+    var date = new Date();
+    start_time = date.getTime();
+    x = Math.floor(Math.random() * max_x);
+    y = Math.floor(Math.random() * max_y);
+
+    $(".instructions").hide();
+    $(".clickme").show();
+    $(".clickme").css({left : x, top : y});
+}
+function click_me()
+{
+    var date = new Date();
+    elapsed = date.getTime() - start_time;
+    $("#result_time").text(elapsed+'');
+    if (elapsed > acceptable_speed)
+    {
+        $("#onward").text("no booze for you!");
+        $("#result_message").text("You suck! You're too drunk to get good booze!");
+    }
+    else
+    {
+        $("#onward").text("booze me up!");
+        $("#result_message").text("Good job! You can haz good booze!");
+    }
+        
+    $(".clickme").hide();
+    $(".result").show();
+}
+function onward()
+{
+    if (elapsed < acceptable_speed)
+    {
+        window.location = "/";
+        return;
+    }
+    $(".instructions").show();
+    $(".result").hide();
+}
+</script>
+{% endblock %}
