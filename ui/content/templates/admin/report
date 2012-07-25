@@ -41,5 +41,13 @@ function view_report()
     // fix this with a url_for post flask port
     window.location = "/admin/report/" + encodeURI(begindate) + "/" + encodeURI(enddate);
 }
+$(function() 
+{
+    $( "#begin" ).datepicker();
+});
+$(function() 
+{
+    $( "#end" ).datepicker();
+});
 </script>
 {% endblock %}
