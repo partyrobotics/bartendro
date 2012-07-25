@@ -1,6 +1,6 @@
 {% extends 'layout' %}
 {% block body %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', file='sobriety.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', file='css/sobriety.css') }}">
 <div class="drink_content">
   <div class="drink_heading">Make: {{ drink.name.name }}</div>
   <div>
