@@ -78,25 +78,17 @@
 </div>
 
 <div class="row dispense_pour_buttons">
-  <div class="span2">
+  <div class="span4">
     &nbsp;
   </div>
-  <div class="span8">
-    <div class="row">
-       <div class="{% if show_taster %}span4{%else%}span6{%endif%}" style="text-align: right">
-          <button type="button" class="bottom_row_button" onclick="back()">back</button>
-       </div>
-       {% if show_taster %}
-           <div class="span4" style="text-align: center">
-                    <button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id}}, 1)">taster</button></td>
-           </div>
-       {% endif %}
-       <div class="{% if show_taster %}span4{%else%}span6{%endif%}">
-         <button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }}, 0)">pour!</button></td>
-       </div>
-    </div>
+  <div class="span4">
+      <button type="button" class="btn_large back_button" onclick="back()">back</button>
+      {% if show_taster %}
+        <button type="button" class="btn_large taster_button" onclick="make_drink({{ drink.id}}, 1)">taster</button></td>
+      {% endif %}
+      <button type="button" class="btn_large pour_button" onclick="make_drink({{ drink.id }}, 0)">pour!</button></td>
   </div>
-  <div class="span2">
+  <div class="span4">
     &nbsp;
   </div>
 </div>
