@@ -45,7 +45,7 @@ def view(request, id):
     show_sweet_tart = has_sweet and has_tart
     show_strength = has_alcohol and has_non_alcohol
     show_size = 0
-    show_taster = 0 #not show_sobriety
+    show_taster = 1 #not show_sobriety
 
     if not custom_drink:
         return render_template("drink/index", 

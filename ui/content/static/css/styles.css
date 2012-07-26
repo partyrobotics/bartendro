@@ -76,3 +76,45 @@ div.drink_heading{
     border: 1px hidden lightgrey;
     border-bottom-style: solid;
 }
+div.dispense_drink_detail{
+    float: left;
+    width: 40%;
+}
+div.dispense_stack{
+    border-left: 1px solid #ccc;
+}
+div.dispense_stack_element{
+    padding-top: 5px;
+    padding-bottom: 10px;
+    margin: 10px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: #ccc;
+    font-size: 13pt;
+}
+table.dispense_stack_table{
+    width: 100%;
+    margin: 13px 10px 7px 10px;
+}
+#dispense_stack_make_drink{
+    text-align: right;
+}
+div.dispense_stack_size{
+}
+div.dispense_stack_booze{
+}
+select.dispense_stack_booze_select{
+    margin: 20px 0 0 20px;
+    width: 300px;
+}
+
+#dispense_stack_strength_text{
+    margin-left: 50px;
+}
+div.dispense_pour_buttons{
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #ccc;
+}
