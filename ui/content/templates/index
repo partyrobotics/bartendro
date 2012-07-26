@@ -1,11 +1,11 @@
 {% extends 'layout' %}
 {% block body %}
-<div>
+
     <div class="home_section_header">THE ESSENTIALS</div>
-    {{ drink_table(top_drinks) }}
+    {{ drink_rows(top_drinks) }}
     <div class="home_section_header">THE WILD SIDE</div>
-    {{ drink_table(other_drinks) }}
-</div>
+    {{ drink_rows(other_drinks) }}
+
 <script type="text/javascript">
 // defining flags
 var isCtrl = false;
@@ -37,32 +37,30 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-{% macro drink_table(drinks) -%}
-    <table class="home_table">
-    {% for drink in drinks %}
-      {% if (loop.index0 % 2) == 0 %}
-         <tr> 
-      {% endif %}
-      <td class="drink" >
-      	<a href="/drink/{{ drink.id }}">
-            <div class="sub">
-                <div class="home_drink_name">{{ drink.name.name }}</div>
-                </br> 
-                <div class="home_drink_ingredients">
-                {% for ing in drink.ingredients %}
-                   {{ ing.name }}{% if not loop.last %}, {% endif %}
-                   
-                {% endfor %}
-                </div>
-                <div class="home_drink_desc">{{ drink.desc }}</div>
-            </div>
-      	<a>
-      </td>
-     
-      {% if (loop.index0 % 2) == 1 %}
-         </tr> 
-      {% endif %}
-
+{% macro drink_div(drink) -%}
+    <a href="/drink/{{ drink.id }}">
+        <div class="home_drink_name">{{ drink.name.name }}</div>
+        </br> 
+        <div class="home_drink_ingredients">
+            {% for ing in drink.ingredients %}
+               {{ ing.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+        <div class="home_drink_desc">{{ drink.desc }}</div>
+    </a>
+{% endmacro %}
+{% macro drink_rows(drinks) -%}
+    {% for row in drinks|batch(2) %}
+       <div class="row-fluid">
+          {% for drink in row %}
+              <div class="span6">
+                 {% if drink %}
+                    {{ drink_div(drink) }}
+                 {% else %}
+                    <div></div>
+                 {% endif %}
+              </div>
+          {% endfor %}
+       </div>
     {% endfor %}
-    </table>
 {% endmacro %}

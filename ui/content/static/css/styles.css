@@ -1,0 +1,78 @@
+div.logo{
+    position: fixed;
+    width: 70px;
+    z-index: -1;
+}
+div.logo p
+{
+    transform: rotate(270deg);
+    -ms-transform: rotate(270deg); /* IE 9 */
+    -webkit-transform: rotate(270deg); /* Safari and Chrome */
+    -o-transform: rotate(270deg); /* Opera */
+    -moz-transform: rotate(270deg); /* Firefox */
+    text-align: left;
+    vertical-align: bottom;
+    font-weight: bold;
+    font-size: 4.5em;
+    color: #ccc;
+    letter-spacing: 6px;
+    margin-top: 320px;
+}
+div.home_section_header{
+    color: #000;
+    margin: 20px 0px 20px 0px;
+    text-align: center;
+    letter-spacing: 12px;
+}
+div.home_section{
+    margin: 10px 30px 10px 30px;
+    border: 1px hidden #ccc;
+    border-top-style: solid;
+    text-overflow:ellipsis;
+    display: block;
+    overflow:hidden;
+}
+div.home_drink_name{
+    height: 20px;
+    float: left;
+    margin-top: 5px;
+    text-align: left;   
+    vertical-align: top;
+    text-transform:capitalize;
+    font-size: 1.5em;   
+    font-weight: normal;
+    color: #0088cc;
+    font-variant:small-caps;
+}
+div.home_drink_ingredients{
+   height: 1em; 
+    margin:auto;
+    margin-top: 10px;
+    margin-left: 15px;
+    text-align: left;
+    font-size: .8em;    
+    text-align: left;
+    text-transform:lowercase;
+    text-transform: capitalize;
+    font-variant:normal;
+    color: dimgrey;
+    }
+div.home_drink_desc{
+    margin-left: 7px;
+    margin-top: 12px;
+    vertical-align: top;
+    font-size: .85em;   
+    color: dimgrey;
+}   
+div.drink_heading{
+    margin-bottom: 20px;
+    text-align: left;
+    line-height:150%;
+    font-family:Tahoma,sans-serif;
+    text-transform:capitalize;
+    font-size:3em;
+    color: #0088cc;
+    font-variant:small-caps;
+    border: 1px hidden lightgrey;
+    border-bottom-style: solid;
+}

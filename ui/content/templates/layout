@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>{{ title }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', file='css/styles.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', file='css/bootstrap-2.0.4.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', file='css/bootstrap-responsive-2.0.4.css') }}">
   <link rel="icon" type="image/vnd.microsoft.icon" href="{{ url_for('static', file='images/icon.ico') }}">
-  <script type="text/javascript" src="{{ url_for('static', file='js/bootstrap-2.0.4.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', file='js/jquery-1.7.2.min.js') }}"></script>
 </head>
 <body>
-  <div class="top_bar"><p>Bartendro</p></div>
-    <div class="body">
-      {% block body %}{% endblock %}
-      <div class="body_push"></div>
-    </div>
+  <div class="row">
+      <div class="span1 logo"><p>Bartendro</p></div>
+      <div class="offset1 span11">
+        {% block body %}{% endblock %}
+      </div>
+  </div>
   {% block footer %}{% endblock %}
 </body>
 </html>
