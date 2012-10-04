@@ -400,7 +400,7 @@ uint8_t adc_read(void)
     return val;
 }
 
-uint8_t read_liquid_out_sensor(void)
+uint8_t get_liquid_level(void)
 {
     uint8_t  i;
     uint16_t v = 0;
