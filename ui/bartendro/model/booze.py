@@ -27,12 +27,13 @@ class Booze(Base):
     desc = Column(UnicodeText, nullable=False)
     abv = Column(Integer, default=0)
     type = Column(Integer, default=0)
+    out = Column(Integer, default=0)
 
     # add unique constraint for name
     UniqueConstraint('name', name='booze_name_undx')
  
     query = session.query_property()
-    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, data = None):
+    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, out = 0, data = None):
         if data: 
             self.update(data)
             return
@@ -41,6 +42,7 @@ class Booze(Base):
         self.desc = desc
         self.abv = abv
         self.type = type
+        self.out = out
 
     def update(self, data):
         self.name = data['name']
