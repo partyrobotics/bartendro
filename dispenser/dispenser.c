@@ -375,27 +375,67 @@ void setup(void)
     serial_init();
 }
 
+#define NUM_ADC_SAMPLES 5
+void adc_setup(void)
+{
+    ADCSRA = (1 << ADPS1); // | (1 << ADPS0);
+    ADMUX = (1<<REFS0); // | (1<< REFS1);
+    ADCSRA |= (1<<ADEN);
+}
+
+void adc_shutdown(void)
+{
+    ADCSRA &= ~(1<<ADEN);
+}
+
+uint8_t adc_read(void)
+{
+    uint8_t val, dummy;
+
+    ADCSRA |= (1<<ADSC);
+    while(ADCSRA & 0b01000000);
+    val = ADCL;
+    dummy = ADCH;
+    ADCSRA &= ~(1<<ADSC);
+    return val;
+}
+
+uint8_t read_liquid_out_sensor(void)
+{
+    uint8_t  i;
+    uint16_t v = 0;
+
+    adc_setup();
+
+    for(i = 0; i < NUM_ADC_SAMPLES; i++)
+        v += adc_read();
+
+    adc_shutdown();
+
+    return (uint8_t)(v / NUM_ADC_SAMPLES);
+}
+
 void led_pwm_setup(void)
 {
-	/* Set to Phase correct PWM */
-	TCCR0A |= _BV(WGM00);
-	TCCR2A |= _BV(WGM20);
+    /* Set to Phase correct PWM */
+    TCCR0A |= _BV(WGM00);
+    TCCR2A |= _BV(WGM20);
 
-	// Set the compare output mode
-	TCCR0A |= _BV(COM0A1);
-	TCCR0A |= _BV(COM0B1);
-	TCCR2A |= _BV(COM2B1);
+    // Set the compare output mode
+    TCCR0A |= _BV(COM0A1);
+    TCCR0A |= _BV(COM0B1);
+    TCCR2A |= _BV(COM2B1);
 
-	// Reset timers and comparators
-	OCR0A = 0;
-	OCR0B = 0;
-	OCR2B = 0;
-	TCNT0 = 0;
-	TCNT2 = 0;
+    // Reset timers and comparators
+    OCR0A = 0;
+    OCR0B = 0;
+    OCR2B = 0;
+    TCNT0 = 0;
+    TCNT2 = 0;
 
     // Set the clock source
-	TCCR0B |= _BV(CS00) | _BV(CS01);
-	TCCR2B |= _BV(CS22);
+    TCCR0B |= _BV(CS00) | _BV(CS01);
+    TCCR2B |= _BV(CS22);
 }
 
 void set_led_color(uint8_t red, uint8_t green, uint8_t blue)
@@ -525,6 +565,12 @@ void handle_cmd(char *line)
     if (strcmp(cmd, "dispstat") == 0)
     {
         sprintf(resp, "!%ld dispstat %ld %ld\n", addr, g_last_dispense_duration, g_last_dispense_ticks);
+    }
+    else
+    if (strcmp(cmd, "level") == 0)
+    {
+        uint8_t level = get_liquid_level();
+        sprintf(resp, "!%ld level %d\n", addr, level);
     }
     else
     if (strcmp(cmd, "ping") == 0)
