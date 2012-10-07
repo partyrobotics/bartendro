@@ -386,6 +386,13 @@ div.errors{
     margin-left:20px;
         color: red;
 }
+.warning {
+    background-color: #faa;
+}
+.dispenser_out {
+    color: #f00;
+    font-weight: bold;
+}
 div.bottom_bar{
     float: bottom;
     vertical-align: bottom;

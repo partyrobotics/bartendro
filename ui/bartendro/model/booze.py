@@ -27,7 +27,6 @@ class Booze(Base):
     desc = Column(UnicodeText, nullable=False)
     abv = Column(Integer, default=0)
     type = Column(Integer, default=0)
-    out = Column(Integer, default=0)
 
     # add unique constraint for name
     UniqueConstraint('name', name='booze_name_undx')

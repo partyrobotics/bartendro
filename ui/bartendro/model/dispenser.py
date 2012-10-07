@@ -13,6 +13,7 @@ class Dispenser(Base):
     id = Column(Integer, primary_key=True)
     booze_id = Column(Integer, ForeignKey('booze.id'), nullable=False)
     actual = Column(Integer, default = 0)
+    out = Column(Integer, default=0)
 
     query = session.query_property()
     def __init__(self, booze, actual):

@@ -24,6 +24,8 @@ def view(request):
     boozes = session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
+    empty_dispensers = [dispenser.out for dispenser in dispensers]
+    print empty_dispensers
 
     kwargs = {}
     fields = []
@@ -45,7 +47,8 @@ def view(request):
                            calibrate_ml=CALIBRATE_ML, 
                            form=form, count=count, 
                            fields=fields, 
-                           saved=saved)
+                           saved=saved,
+                           empty=empty_dispensers)
 
 @expose('/admin/dispenser/save')
 def save(request):

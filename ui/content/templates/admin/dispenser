@@ -18,9 +18,9 @@
 		<form method="POST" action="/admin/dispenser/save">
 
                     {% for i in range(1, count + 1) %}
-	                <div class="forminput">
+	                <div class="forminput{% if empty[i] %} warning{% endif %}">
                               {{ form["dispenser%s" % i].label }}: 
-                              {{ form["dispenser%s" % i](class="form") }}
+                              {{ form["dispenser%s" % i](class="form dispenser_out") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
                         <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</button>
                               {{ form["actual%s" % i](size="3") }}
