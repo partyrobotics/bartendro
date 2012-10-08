@@ -17,6 +17,17 @@ import bartendro.models
 class BartendroUIServer(object):
 
     def __init__(self, db_uri):
+
+        try: 
+            self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
+            self.num_dispensers = 15
+        except KeyError:
+            self.software_only = 0
+
+        if self.software_only:
+            log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
+            return
+
         local.application = self
         self.setup_logging()
         log("Bartendro starting")
@@ -30,7 +41,7 @@ class BartendroUIServer(object):
         self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         self.mc.flush_all()
 
-        self.driver = driver.MasterDriver("/dev/ttyS1");
+        self.driver = driver.MasterDriver("/dev/ttyS1", self.software_only);
         self.driver.open()
         self.driver.chain_init();
         if self.driver.count() != 15:
@@ -51,6 +62,7 @@ class BartendroUIServer(object):
         metadata.create_all(self.database_engine)
   
     def setup_logging(self):
+        if self.software_only: return
         self.log = logging.getLogger('bartendro')
         hdlr = logging.FileHandler('logs/bartendro.log')
         formatter = logging.Formatter('%(asctime)s %(message)s')

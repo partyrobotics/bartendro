@@ -26,7 +26,7 @@ class LogFileException:
 class MasterDriver(object):
     '''This object interacts with the bartendro master controller.'''
 
-    def __init__(self, device):
+    def __init__(self, device, software_only):
         self.device = device
         self.ser = None
         self.msg = ""
@@ -35,8 +35,10 @@ class MasterDriver(object):
         self.ss.setup()
         self.num_dispensers = 0
         self.cl = open("logs/comm.log", "a")
+        self.software_only = software_only
 
     def log(self, msg):
+        if self.software_only: return
         try:
             t = localtime()
             self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
@@ -47,15 +49,7 @@ class MasterDriver(object):
     def open(self):
         '''Open the serial connection to the master'''
 
-        try: 
-            self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
-            self.num_dispensers = 15
-        except KeyError:
-            self.software_only = 0
-
-        if self.software_only:
-            log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
-            return
+        if self.software_only: return
 
         try:
             self.ser = serial.Serial(self.device, 
