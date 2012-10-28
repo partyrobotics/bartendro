@@ -201,15 +201,15 @@ void dprintf(const char *fmt, ...)
 typedef struct 
 {
     uint8_t reset_port, reset_pin;
-    uint8_t rx_port, rx_pin, rx_pcicr, rx_pcint;
+    uint8_t rx_port, rx_pin, rx_pcicr, rx_pcint, rx_pcmsk;
     uint8_t tx_port, tx_pin;
 } dispenser_t;
 
 #define NUM_DISPENSERS 2
 static dispenser_t dispensers[NUM_DISPENSERS] =
-{  // reset_port, reset_pin, rx_port, rx_pin, rx_pcirc, rx_pcint, tx_port, tx_pin
-    { 3,          6,         1,       1,      PCIE0,    PCINT1,   1,       2      },
-    { 3,          6,         1,       3,      PCIE0,    PCINT3,   1,       4      },
+{  // reset_port, reset_pin, rx_port, rx_pin, rx_pcicr, rx_pcint, rx_pcmsk, tx_port, tx_pin
+    { 3,          6,         1,       1,      PCIE0,    PCINT1,   0,        1,       2      },
+    { 3,          6,         1,       3,      PCIE0,    PCINT3,   1,        1,       4      },
 };
 
 uint8_t get_port(uint8_t port)
@@ -242,9 +242,24 @@ uint8_t get_port_ddr(uint8_t port)
     }
 }
 
+uint8_t get_pcmsk(uint8_t msk)
+{
+    switch(msk)
+    {
+        case 0:
+            return PCMSK0;
+        case 1:
+            return PCMSK1;
+        case 2: 
+            return PCMSK2;
+        default:
+            return 0xFF;
+    }
+}
+
 void setup_ports(void)
 {
-    uint8_t i, ddr, port;
+    uint8_t i, ddr, port, msk;
 
     for(i = 0; i < NUM_DISPENSERS; i++)
     {
@@ -254,7 +269,9 @@ void setup_ports(void)
         ddr |= (1 << dispensers[i].reset_pin);
 
         dispensers[i].rx_port = get_port(dispensers[i].rx_port);
-        dispensers[i].rx_pcicr |= (1 << dispensers[1].rx_pcint);
+        PCICR |= (1 << dispensers[i].rx_pcicr);
+        msk = get_pcmsk(dispensers[i].rx_pcmsk);
+        msk |= (1 << dispensers[1].rx_pcint);
 
         port = get_port(dispensers[i].tx_port);
         ddr = get_port_ddr(dispensers[i].tx_port);
