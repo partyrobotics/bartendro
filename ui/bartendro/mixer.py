@@ -38,15 +38,21 @@ class Mixer(object):
 
     def liquid_level_test(self, dispenser, threshold):
 
-        print "Start liquid level test:"
-        self.driver.start(dispenser)
+        print "Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold)
+
+        level = self.driver.get_liquid_level(dispenser)
+	print "initial reading: %d" % level
+        if level <= threshold:
+	    print "liquid is out before starting: %d" % level
+	    return
+
         last = -1
-        level = 255;
+        self.driver.start(dispenser)
         while level > threshold:
             level = self.driver.get_liquid_level(dispenser)
             if level != last:
-                print "  %d" % level
-                last = level
+                 print "  %d" % level
+            last = level
 
         self.driver.stop(dispenser)
         print "Stopped at level: %d" % level

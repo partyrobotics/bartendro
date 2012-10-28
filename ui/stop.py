@@ -6,6 +6,6 @@ import time
 from optparse import OptionParser
 from bartendro.master import driver
 
-driver = driver.MasterDriver("/dev/ttyS1", True);
+driver = driver.MasterDriver("/dev/ttyACM0", True);
 driver.open()
 driver.chain_init();

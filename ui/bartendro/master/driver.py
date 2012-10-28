@@ -183,7 +183,7 @@ class MasterDriver(object):
         try:
             self.log("r: '%s'\n" % ret.replace("\n", ""))
             disp, cmd, value = ret.split(" ")
-            return value[0]
+            return int(value)
         except ValueError:
             self.log("parse error")
 	    return -1
