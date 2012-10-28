@@ -36,6 +36,24 @@ class Mixer(object):
                 ok = False
         return ok
 
+    def liquid_level_test(self, dispenser, threshold):
+
+        print "Start liquid level test:"
+        self.driver.start(dispenser)
+        last = -1
+        level = 255;
+        while level > threshold:
+            level = self.driver.get_liquid_level(dispenser)
+            if level != last:
+                print "  %d" % level
+                last = level
+
+        self.driver.stop(dispenser)
+        print "Stopped at level: %d" % level
+        sleep(.1);
+        level = self.driver.get_liquid_level(dispenser)
+        print "motor stopped at level: %d" % level
+
     def get_available_drink_list(self):
         can_make = self.mc.get("available_drink_list")
         if can_make: 

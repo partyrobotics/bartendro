@@ -168,6 +168,26 @@ class MasterDriver(object):
             self.log("parse error")
 	    return False
 
+    def get_liquid_level(self, dispenser):
+        '''expects "!3 level 69" '''
+
+        if self.software_only: return False
+
+        self.send("%d level\n" % dispenser)
+        ret = self.ser.readline()
+        if not ret: 
+            msg = "get level timeout!"
+            self.log(msg)
+            error(msg)
+	    return False
+        try:
+            self.log("r: '%s'\n" % ret.replace("\n", ""))
+            disp, cmd, value = ret.split(" ")
+            return value[0]
+        except ValueError:
+            self.log("parse error")
+	    return -1
+
     def ping(self, dispenser):
         '''expects "!3 pong" '''
         if self.software_only: return True
