@@ -1,0 +1,22 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="main">
+    <div class="forms" style="float: right; margin-right: 10px">
+        <form method="POST" action="/admin/liquidout/test">
+            <div>
+            {{ form["dispenser"].label }}: 
+            {{ form["dispenser"](class="") }}
+            </div>
+
+            <div>
+            {{ form["threshold"].label }}: 
+            {{ form["threshold"](class="") }}
+            </div>
+
+            <div class="button">
+               {{ form.go(class="small_button") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
