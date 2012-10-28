@@ -375,11 +375,11 @@ void setup(void)
     serial_init();
 }
 
-#define NUM_ADC_SAMPLES 5
+#define NUM_ADC_SAMPLES 25
 void adc_setup(void)
 {
     ADCSRA = (1 << ADPS1); // | (1 << ADPS0);
-    ADMUX = (1<<REFS0); // | (1<< REFS1);
+    ADMUX = (1<<REFS0)  | (1<< MUX1);
     ADCSRA |= (1<<ADEN);
 }
 
