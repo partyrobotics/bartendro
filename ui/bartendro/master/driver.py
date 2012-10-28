@@ -65,8 +65,9 @@ class MasterDriver(object):
         log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
 
     def chain_init(self):
-
-        if self.software_only: return
+        if self.software_only: 
+            self.num_dispensers = 15
+            return
 
         log("initialize communication chain")
         self.log("initialize communication chain")

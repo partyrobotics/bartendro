@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from os import path
+import os 
 import memcache
 import logging
 from sqlalchemy import create_engine
@@ -18,19 +18,15 @@ class BartendroUIServer(object):
 
     def __init__(self, db_uri):
 
+
         try: 
             self.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
             self.num_dispensers = 15
         except KeyError:
             self.software_only = 0
 
-        if self.software_only:
-            log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
-            return
-
-        local.application = self
         self.setup_logging()
-        log("Bartendro starting")
+        local.application = self
 
         self.database_engine = create_engine(db_uri, convert_unicode=True)
         self.dispatch = SharedDataMiddleware(self.dispatch, {
@@ -58,11 +54,18 @@ class BartendroUIServer(object):
         self.drinks_log_file = "logs/drinks.log"
         self.comm_log_file = "logs/comm.log"
 
+        if self.software_only:
+            log("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
+            return
+
+        log("Bartendro starting")
+
+        local.application = self
+
     def init_database(self):
         metadata.create_all(self.database_engine)
   
     def setup_logging(self):
-        if self.software_only: return
         self.log = logging.getLogger('bartendro')
         hdlr = logging.FileHandler('logs/bartendro.log')
         formatter = logging.Formatter('%(asctime)s %(message)s')
