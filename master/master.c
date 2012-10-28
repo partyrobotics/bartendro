@@ -12,8 +12,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "packet.h"
-
 // Bit manipulation macros
 #define sbi(a, b) ((a) |= 1 << (b))       //sets bit B in variable A
 #define cbi(a, b) ((a) &= ~(1 << (b)))    //clears bit B in variable A
@@ -21,6 +19,38 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
+#define TIMER1_INIT 0xFFE6 // 16mhz / 64 cs / 25 = 100us per 'tick'
+#define RESET_DURATION 1
+
+static volatile uint32_t g_time = 0;
+static volatile uint32_t g_falling_edge_time = 0;
+
+ISR(INT0_vect)
+{
+    if (PIND & (1<<PIND2))
+    {
+        sbi(PORTB, 5);
+        g_falling_edge_time = g_time + RESET_DURATION;
+    }
+    else
+    {
+        cbi(PORTB, 5);
+        if (g_falling_edge_time > 0 && g_time >= g_falling_edge_time)
+        {
+             cbi(PORTD, 6);
+             _delay_us(10);
+             sbi(PORTD, 6);
+        }
+
+        g_falling_edge_time = 0;
+    }
+}
+
+ISR (TIMER1_OVF_vect)
+{
+    g_time++;
+    TCNT1 = TIMER1_INIT;
+}
 
 void serial_init(void)
 {
@@ -33,13 +63,13 @@ void serial_init(void)
     UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
 }
 
-void serial_tx(unsigned char ch)
+void serial_tx(uint8_t ch)
 {
     while ( !( UCSR0A & (1<<UDRE0)) );
     UDR0 = ch;
 }
 
-unsigned char serial_rx(void)
+uint8_t serial_rx(void)
 {
     while ( !(UCSR0A & (1<<RXC0))) 
         ;
@@ -63,12 +93,134 @@ void dprintf(const char *fmt, ...)
     }
 }
 
+/*
+   Master pin mappings:
+
+   15 RX pins from dispenser
+   1  RESET from RPI
+   1  TX    from RPI
+   =================
+   17 total
+
+   Inputs:
+
+       PD0        -> rpi RESET
+       PD1 (INT0) -> rpi TX
+       PD2        -> rpi RX
+
+       PE0        -> disp 0, TX
+       PD3        -> disp 0, RX
+       PD4        -> disp 0, RESET
+
+       PE1        -> disp 1, TX
+       PD5        -> disp 1, RX
+       PD6        -> disp 1, RESET
+
+       PE2        -> disp 2, TX
+       PD7        -> disp 2, RX
+       PG0        -> disp 2, RESET
+       
+       PE3        -> disp 3, TX
+       PG1        -> disp 3, RX
+       PC0        -> disp 3, RESET
+
+       PE4        -> disp 4, TX
+       PC1        -> disp 4, RX
+       PC2        -> disp 4, RESET
+
+       PE5        -> disp 5, TX
+       PC3        -> disp 5, RX
+       PC4        -> disp 5, RESET
+
+       PE6        -> disp 6, TX
+       PC5        -> disp 6, RX
+       PC6        -> disp 6, RESET
+
+       PE7        -> disp 7, TX
+       PC7        -> disp 7, RX
+       PG2        -> disp 7, RESET
+       
+       PB0        -> disp 8, TX
+       PA7        -> disp 8, RX
+       PA6        -> disp 8, RESET
+
+       PB1        -> disp 9, TX
+       PA5        -> disp 9, RX
+       PA4        -> disp 9, RESET
+
+       PB2        -> disp 10, TX
+       PA3        -> disp 10, RX
+       PA2        -> disp 10, RESET
+
+       PB3        -> disp 11, TX
+       PA1        -> disp 11, RX
+       PA0        -> disp 11, RESET
+
+       PB4        -> disp 12, TX
+       PF7        -> disp 12, RX
+       PF6        -> disp 12, RESET
+
+       PB5        -> disp 13, TX
+       PF5        -> disp 13, RX
+       PF4        -> disp 13, RESET
+       
+       PB6        -> disp 14, TX
+       PF3        -> disp 14, RX
+       PF2        -> disp 14, RESET
+
+       PB7        -> disp 15, TX
+       PF1        -> disp 15, RX
+       PF0        -> disp 15, RESET
+
+
+       --------------------
+
+   Test mappings:
+
+       PD5 -> RESET
+
+*/
+
+void flash_led(uint8_t fast)
+{
+    int i;
+
+    for(i = 0; i < 5; i++)
+    {
+        sbi(PORTB, 5);
+        if (fast)
+            _delay_ms(50);
+        else
+            _delay_ms(250);
+        cbi(PORTB, 5);
+        if (fast)
+            _delay_ms(50);
+        else
+            _delay_ms(250);
+    }
+}
+
 int main (void)
 {
-    uint8_t i;
-
     serial_init();
-    dprintf("master test!\n");
+
+    DDRB |= (1<< PORTB5);
+    DDRD |= (1<< PORTD6);
+
+    EICRA |= (1 << ISC00);
+    EIMSK |= (1<< INT0);
+
+    // Timer setup for reset pulse width measuring
+    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
+
+    sbi(PORTB, 6);
+    flash_led(1);
+
+    sei();
+    for(;;)
+        ;
 
     return 0;
 }
