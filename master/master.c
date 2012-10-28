@@ -177,9 +177,113 @@ void dprintf(const char *fmt, ...)
 
    Test mappings:
 
-       PD5 -> RESET
+   RPI:
+
+       PD2 -> RESET input 
+       PD3 -> MUX select
+       PD4 -> RX 
+       PD5 -> TX
+
+   Dispenser 0:
+
+       PD6 -> RESET
+       PB1 -> RX (PCINT1)
+       PB2 -> TX
+
+   Dispenser 1:
+
+       PD6 -> RESET
+       PB3 -> RX (PCINT3)
+       PB4 -> TX
 
 */
+
+typedef struct 
+{
+    uint8_t reset_port, reset_pin;
+    uint8_t rx_port, rx_pin, rx_pcicr, rx_pcint;
+    uint8_t tx_port, tx_pin;
+} dispenser_t;
+
+#define NUM_DISPENSERS 2
+static dispenser_t dispensers[NUM_DISPENSERS] =
+{  // reset_port, reset_pin, rx_port, rx_pin, rx_pcirc, rx_pcint, tx_port, tx_pin
+    { 3,          6,         1,       1,      PCIE0,    PCINT1,   1,       2      },
+    { 3,          6,         1,       3,      PCIE0,    PCINT3,   1,       4      },
+};
+
+uint8_t get_port(uint8_t port)
+{
+    switch(port)
+    {
+        case 1:
+            return PORTB;
+        case 2:
+            return PORTC;
+        case 3: 
+            return PORTD;
+        default:
+            return 0xFF;
+    }
+}
+
+uint8_t get_port_ddr(uint8_t port)
+{
+    switch(port)
+    {
+        case 1:
+            return DDRB;
+        case 2:
+            return DDRC;
+        case 3: 
+            return DDRD;
+        default:
+            return 0xFF;
+    }
+}
+
+void setup_ports(void)
+{
+    uint8_t i, ddr, port;
+
+    for(i = 0; i < NUM_DISPENSERS; i++)
+    {
+        port = get_port(dispensers[i].reset_port);
+        ddr = get_port_ddr(dispensers[i].reset_port);
+        dispensers[i].reset_port = port;
+        ddr |= (1 << dispensers[i].reset_pin);
+
+        dispensers[i].rx_port = get_port(dispensers[i].rx_port);
+        dispensers[i].rx_pcicr |= (1 << dispensers[1].rx_pcint);
+
+        port = get_port(dispensers[i].tx_port);
+        ddr = get_port_ddr(dispensers[i].tx_port);
+        dispensers[i].tx_port = port;
+        ddr |= (1 << dispensers[i].tx_pin);
+    }
+}
+
+void setup(void)
+{
+    setup_ports();
+
+    // on board LED
+    DDRB |= (1<< PORTB5);
+
+    // TX to rpi
+    DDRD |= (1<< PORTD5);
+
+    // INT0 for RPI RX
+    EICRA |= (1 << ISC00);
+    EIMSK |= (1<< INT0);
+
+    // Timer setup for reset pulse width measuring
+    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
+
+    serial_init();
+}
 
 void flash_led(uint8_t fast)
 {
@@ -202,18 +306,8 @@ void flash_led(uint8_t fast)
 
 int main (void)
 {
-    serial_init();
+    setup();
 
-    DDRB |= (1<< PORTB5);
-    DDRD |= (1<< PORTD6);
-
-    EICRA |= (1 << ISC00);
-    EIMSK |= (1<< INT0);
-
-    // Timer setup for reset pulse width measuring
-    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
-    TCNT1 = TIMER1_INIT;
-    TIMSK1 |= (1<<TOIE1);
 
     sbi(PORTB, 6);
     flash_led(1);
