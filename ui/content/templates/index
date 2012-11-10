@@ -1,10 +1,17 @@
 {% extends 'layout' %}
 {% block body %}
 <div>
-    <div class="home_section_header">THE ESSENTIALS</div>
-    {{ drink_table(top_drinks) }}
-    <div class="home_section_header">THE WILD SIDE</div>
-    {{ drink_table(other_drinks) }}
+    {% if top_drinks or other_drinks %}
+        <div class="home_section_header">THE ESSENTIALS</div>
+        {{ drink_table(top_drinks) }}
+        <div class="home_section_header">THE WILD SIDE</div>
+        {{ drink_table(other_drinks) }}
+    {% else %}
+        <br/> <br/> <br/>
+        <div class="out-of-booze">
+            Bartendro can make no drinks at this time. We're sorry!
+        </div>
+    {% endif %}
 </div>
 <script type="text/javascript">
 // defining flags
@@ -62,7 +69,8 @@ $(document).ready(function() {
       {% if (loop.index0 % 2) == 1 %}
          </tr> 
       {% endif %}
-
+    {% else %}
+        <tr><td class="out-of-booze">No drinks from this section can currently be made.</td></tr>
     {% endfor %}
     </table>
 {% endmacro %}

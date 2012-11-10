@@ -13,14 +13,20 @@
           <p><button type="button" class="small_button" onclick="reset()">reset chain</button></p>
           </br>
           <p><button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button></p>
+          </br>
+          <p><button type="button" class="small_button" id="check_levels" onclick="check_levels()">check liquid levels</button></p>
         </div>
         <div class="forms" style="float: right; margin-right: 10px">
 		<form method="POST" action="/admin/dispenser/save">
 
                     {% for i in range(1, count + 1) %}
-	                <div class="forminput{% if empty[i] %} warning{% endif %}">
-                              {{ form["dispenser%s" % i].label }}: 
-                              {{ form["dispenser%s" % i](class="form dispenser_out") }}
+	                <div class="forminput">
+	                {% if empty[i-1] %}
+                              {{ form["dispenser%s" % i].label(class="dispenser_out")}}: 
+                        {% else %}
+                              {{ form["dispenser%s" % i].label}}: 
+                        {% endif %}
+                              {{ form["dispenser%s" % i](class="form") }}
                         <button type="button" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</button>
                         <button type="button" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</button>
                               {{ form["actual%s" % i](size="3") }}
@@ -94,6 +100,23 @@ function test_chain()
             {
                 $("#test_chain").text('test chain');
                 $("#test_chain").attr('disabled', false);
+            }
+    });
+}
+function check_levels()
+{
+    $("#check_levels").text("checking levels...");
+    $("#check_levels").attr('disabled', true);
+    $.ajax({
+            url: "/ws/checklevels" ,
+            success: function(html)
+            {
+                 location.reload();
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                 alert("Error checking levels. Useless error info: " + errorThrown);
+                 location.reload();
             }
     });
 }

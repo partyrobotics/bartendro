@@ -26,3 +26,13 @@ def ws_test_chain(request):
 	    raise ServiceUnavailable("Error: Dispenser %d failed ping." % disp)
     return render_text("ok\n")
 
+@expose('/ws/checklevels')
+def ws_check_levels(request):
+    mixer = local.application.mixer
+    if not mixer.check_liquid_levels():
+        raise ServiceUnavailable("Error: Checking dispenser levels failed.")
+    mc = local.application.mc
+    mc.delete("top_drinks")
+    mc.delete("other_drinks")
+    mc.delete("available_drink_list")
+    return render_text("ok\n")
