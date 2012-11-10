@@ -22,85 +22,8 @@
 #define TIMER1_INIT 0xFFE6 // 16mhz / 64 cs / 25 = 100us per 'tick'
 #define RESET_DURATION 1
 
-static volatile uint32_t g_time = 0;
-static volatile uint32_t g_falling_edge_time = 0;
-
-ISR(INT0_vect)
-{
-    if (PIND & (1<<PIND2))
-    {
-        sbi(PORTB, 5);
-        g_falling_edge_time = g_time + RESET_DURATION;
-    }
-    else
-    {
-        cbi(PORTB, 5);
-        if (g_falling_edge_time > 0 && g_time >= g_falling_edge_time)
-        {
-             cbi(PORTD, 6);
-             _delay_us(10);
-             sbi(PORTD, 6);
-        }
-
-        g_falling_edge_time = 0;
-    }
-}
-
-ISR (TIMER1_OVF_vect)
-{
-    g_time++;
-    TCNT1 = TIMER1_INIT;
-}
-
-void serial_init(void)
-{
-    /*Set baud rate */ 
-    UBRR0H = (unsigned char)(UBBR>>8); 
-    UBRR0L = (unsigned char)UBBR; 
-    /* Enable transmitter */ 
-    UCSR0B = (1<<TXEN0)|(1<<RXEN0); 
-    /* Set frame format: 8data, 1stop bit */ 
-    UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
-}
-
-void serial_tx(uint8_t ch)
-{
-    while ( !( UCSR0A & (1<<UDRE0)) );
-    UDR0 = ch;
-}
-
-uint8_t serial_rx(void)
-{
-    while ( !(UCSR0A & (1<<RXC0))) 
-        ;
-
-    return UDR0;
-}
-
-#define MAX 80 
-void dprintf(const char *fmt, ...)
-{
-    va_list va;
-    va_start (va, fmt);
-    char buffer[MAX];
-    char *ptr = buffer;
-    vsnprintf(buffer, MAX, fmt, va);
-    va_end (va);
-    for(ptr = buffer; *ptr; ptr++)
-    {
-        if (*ptr == '\n') serial_tx('\r');
-        serial_tx(*ptr);
-    }
-}
-
 /*
    Master pin mappings:
-
-   15 RX pins from dispenser
-   1  RESET from RPI
-   1  TX    from RPI
-   =================
-   17 total
 
    Inputs:
 
@@ -179,9 +102,9 @@ void dprintf(const char *fmt, ...)
 
    RPI:
 
-       PD2 -> RESET input 
-       PD3 -> MUX select
-       PD4 -> RX 
+       PD2 -> RESET input (INT0)
+       PD4 -> MUX select (PCINT20)
+       PD3 -> RX (INT1)
        PD5 -> TX
 
    Dispenser 0:
@@ -211,6 +134,115 @@ static dispenser_t dispensers[NUM_DISPENSERS] =
     { 3,          6,         1,       1,      PCIE0,    PCINT1,   0,        1,       2      },
     { 3,          6,         1,       3,      PCIE0,    PCINT3,   1,        1,       4      },
 };
+
+static volatile uint32_t g_time = 0;
+static volatile uint32_t g_falling_edge_time = 0;
+static volatile uint8_t  g_dispenser = 0;
+static volatile uint8_t  g_mux_pin_0 = 0;
+
+// reset pin change
+ISR(INT0_vect)
+{
+    if (PIND & (1<<PIND2))
+    {
+        sbi(PORTB, 5);
+        g_falling_edge_time = g_time + RESET_DURATION;
+    }
+    else
+    {
+        cbi(PORTB, 5);
+        if (g_falling_edge_time > 0 && g_time >= g_falling_edge_time)
+        {
+             cbi(PORTD, 6);
+             _delay_us(10);
+             sbi(PORTD, 6);
+        }
+
+        g_falling_edge_time = 0;
+    }
+}
+
+// Main RX pin change
+ISR(INT1_vect)
+{
+    dispenser_t *disp;
+
+    disp = &dispensers[g_dispenser];
+    if (PIND & (1<<PIND3))
+        sbi(disp->tx_port, disp->tx_pin);
+    else
+        cbi(disp->tx_port, disp->tx_pin);
+}
+
+ISR(PCINT0_vect)
+{
+    // TODO: Add support for more mux pins
+    if (g_mux_pin_0 != (PIND & (1<<PIND4)))
+    {
+        g_mux_pin_0 = PIND & (1<<PIND4);
+        g_dispenser = g_mux_pin_0;
+    }
+
+    // other pin change stuff here
+    dispenser_t *disp;
+
+    disp = &dispensers[g_dispenser];
+    // is the current dispenser RX on this PCINT?
+    if (disp.pcint == PCINT0)
+    {
+
+
+
+    }
+}
+
+ISR (TIMER1_OVF_vect)
+{
+    g_time++;
+    TCNT1 = TIMER1_INIT;
+}
+
+void serial_init(void)
+{
+    /*Set baud rate */ 
+    UBRR0H = (unsigned char)(UBBR>>8); 
+    UBRR0L = (unsigned char)UBBR; 
+    /* Enable transmitter */ 
+    UCSR0B = (1<<TXEN0)|(1<<RXEN0); 
+    /* Set frame format: 8data, 1stop bit */ 
+    UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
+}
+
+void serial_tx(uint8_t ch)
+{
+    while ( !( UCSR0A & (1<<UDRE0)) );
+    UDR0 = ch;
+}
+
+uint8_t serial_rx(void)
+{
+    while ( !(UCSR0A & (1<<RXC0))) 
+        ;
+
+    return UDR0;
+}
+
+#define MAX 80 
+void dprintf(const char *fmt, ...)
+{
+    va_list va;
+    va_start (va, fmt);
+    char buffer[MAX];
+    char *ptr = buffer;
+    vsnprintf(buffer, MAX, fmt, va);
+    va_end (va);
+    for(ptr = buffer; *ptr; ptr++)
+    {
+        if (*ptr == '\n') serial_tx('\r');
+        serial_tx(*ptr);
+    }
+}
+
 
 uint8_t get_port(uint8_t port)
 {
@@ -291,8 +323,12 @@ void setup(void)
     DDRD |= (1<< PORTD5);
 
     // INT0 for RPI RX
-    EICRA |= (1 << ISC00);
-    EIMSK |= (1<< INT0);
+    EICRA |= (1 << ISC00) | (1 << ISC10);
+    EIMSK |= (1 << INT0) | (1 << INT1);
+
+    // MUX select
+    PCMSK2 |= (1 << PCINT20);
+    PCICR |= (1 << PCIE2);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
