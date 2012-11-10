@@ -283,7 +283,7 @@ uint8_t should_break(void)
 
 int main(void)
 {
-    uint8_t ch, last_ch = 'i';
+    uint8_t ch, last_ch = 'i', next;
 
     ledstick_setup();
     dprintf("bartendro led driver starting\n");
@@ -324,7 +324,7 @@ int main(void)
                 break;
         }
 
-        switch(next):
+        switch(next)
         {
             // main LED control
             case 'd':
