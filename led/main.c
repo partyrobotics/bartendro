@@ -139,19 +139,19 @@ void ledstick_setup(void)
 void set_dia_led(uint8_t red, uint8_t green, uint8_t blue)
 {
     if (red)
-        sbi(PORTD, 7);
-    else
         cbi(PORTD, 7);
+    else
+        sbi(PORTD, 7);
 
     if (green)
-        sbi(PORTB, 0);
-    else
         cbi(PORTB, 0);
+    else
+        sbi(PORTB, 0);
 
     if (blue)
-        sbi(PORTB, 1);
-    else
         cbi(PORTB, 1);
+    else
+        sbi(PORTB, 1);
 }
 
 void set_pwm_colors(uint8_t *c)
@@ -286,6 +286,7 @@ int main(void)
     uint8_t ch, last_ch = 'i', next;
 
     ledstick_setup();
+    set_dia_led(0, 0, 0);
     dprintf("bartendro led driver starting\n");
     sei();
     startup();
