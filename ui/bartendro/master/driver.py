@@ -6,6 +6,7 @@ from subprocess import call
 from gpio import GPIO
 from time import sleep, localtime
 import serial
+import random
 
 BAUD_RATE = 38400
 
@@ -171,7 +172,7 @@ class MasterDriver(object):
     def get_liquid_level(self, dispenser):
         '''expects "!3 level 69" '''
 
-        if self.software_only: return False
+        if self.software_only: return 100 #int(random.random() * 26)
 
         self.send("%d level\n" % dispenser)
         ret = self.ser.readline()
@@ -179,7 +180,7 @@ class MasterDriver(object):
             msg = "get level timeout!"
             self.log(msg)
             error(msg)
-	    return False
+	    return -1
         try:
             self.log("r: '%s'\n" % ret.replace("\n", ""))
             disp, cmd, value = ret.split(" ")

@@ -18,7 +18,6 @@ def save(request):
     #if request.method == 'POST' and form.validate():
     dispenser = int(request.form.get("dispenser") or '1') - 1
     threshold = int(request.form.get("threshold") or '0')
-    print "Dispenser %d threshold %d" % (dispenser, threshold)
     local.application.mixer.liquid_level_test(dispenser, threshold)
 
     return render_template("admin/liquidout", form=form, title="Liquid out test")

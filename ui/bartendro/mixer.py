@@ -13,6 +13,9 @@ TICKS_PER_ML = 671
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
+LIQUID_OUT_THRESHOLD = 13
+LIQUID_OUT_WARNING   = 20
+
 class Mixer(object):
     '''This is where the magic happens!'''
 
@@ -35,6 +38,21 @@ class Mixer(object):
             except KeyError:
                 ok = False
         return ok
+
+    def check_liquid_levels(self):
+
+        dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
+        for i, dispenser in enumerate(dispensers):
+            level = self.driver.get_liquid_level(i)
+            if level <= LIQUID_OUT_THRESHOLD:
+                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
+                if not dispenser.out:
+                    dispenser.out = True
+            else:
+                if dispenser.out:
+                    dispenser.out = False
+        session.commit()
+        return True
 
     def liquid_level_test(self, dispenser, threshold):
 
@@ -74,7 +92,7 @@ class Mixer(object):
                                                         WHERE bgb.booze_id = dispenser.booze_id)""")
 
         boozes = session.query("booze_id") \
-                        .from_statement("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d") \
+                        .from_statement("SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d") \
                         .params(d=self.disp_count).all()
         boozes.extend(add_boozes)
 

@@ -444,6 +444,12 @@ a.admin:hover,a.admin:active{
    color:lightgrey;
    text-decoration:none;
 }
+.out-of-booze {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
 ul.menu{
     margin-left: -20px;     
 }
