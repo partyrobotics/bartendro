@@ -13,11 +13,23 @@ TICKS_PER_ML = 671
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
-LIQUID_OUT_THRESHOLD = 13
-LIQUID_OUT_WARNING   = 20
+LIQUID_OUT_THRESHOLD       = 40
+LIQUID_WARNING_THRESHOLD   = 60
+
+DISPENSER_OUT     = 1
+DISPENSER_OK      = 0
+DISPENSER_WARNING = 2
 
 class Mixer(object):
     '''This is where the magic happens!'''
+
+    class MixerState:
+        INIT = object()            # the bot is initializing
+        READY = object()           # the bot is ready to make drinks
+        WARNING = object()         # one or more bottles of booze is low
+        OUT_OF_BOOZE = object()    # one of more bottles of booze is OUT
+        # not in use yet
+        # BUSTED = object()          # out of all booze, can't make ANY drinks
 
     def __init__(self, driver, led_driver):
         self.driver = driver
@@ -26,6 +38,8 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.mc = local.application.mc
         self.led_driver.idle()
+        self.state = Mixer.MixerState.INIT
+        self.check_liquid_levels()
 
     def get_error(self):
         return self.err
@@ -40,19 +54,41 @@ class Mixer(object):
         return ok
 
     def check_liquid_levels(self):
+        new_state = Mixer.MixerState.READY
 
         dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
         for i, dispenser in enumerate(dispensers):
+            dispenser.out = DISPENSER_OK
             level = self.driver.get_liquid_level(i)
+            if level <= LIQUID_WARNING_THRESHOLD:
+                if new_state == Mixer.MixerState.READY:
+                    new_state = Mixer.MixerState.WARNING
+                if dispenser.out != DISPENSER_WARNING:
+                    dispenser.out = DISPENSER_WARNING
+
             if level <= LIQUID_OUT_THRESHOLD:
+                if new_state == Mixer.MixerState.READY or new_state == Mixer.MixerState.WARNING:
+                    new_state = Mixer.MixerState.OUT_OF_BOOZE
+                if dispenser.out != DISPENSER_OUT:
+                    dispenser.out = DISPENSER_OUT
+
+            if dispenser.out == DISPENSER_OUT:
                 print "Dispenser %d is OUT! (%d)" % (i + 1, level)
-                if not dispenser.out:
-                    dispenser.out = True
-            else:
-                if dispenser.out:
-                    dispenser.out = False
+            elif dispenser.out == DISPENSER_WARNING:
+                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
+
         session.commit()
-        return True
+
+        if new_state == Mixer.MixerState.OUT_OF_BOOZE:
+            self.led_driver.out_of_booze()
+        elif new_state == Mixer.MixerState.WARNING:
+            self.led_driver.warning()
+        else:
+            self.led_driver.all_good()
+
+        self.state = new_state
+
+        return new_state
 
     def liquid_level_test(self, dispenser, threshold):
 
@@ -122,6 +158,7 @@ class Mixer(object):
         return can_make
 
     def make_drink(self, id, recipe_arg):
+
 
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
@@ -193,8 +230,11 @@ class Mixer(object):
 #            self.driver.chain_init()
 #            log("resetting the chain!")
 
-        FlashGreenLeds(self).start()
+        if not self.check_liquid_levels():
+            self.led_driver.panic()
+            return False
 
+        FlashGreenLeds(self).start()
         return True 
 
 class FlashGreenLeds(Thread):

@@ -172,7 +172,7 @@ class MasterDriver(object):
     def get_liquid_level(self, dispenser):
         '''expects "!3 level 69" '''
 
-        if self.software_only: return 100 #int(random.random() * 26)
+        if self.software_only: return int(random.random() * 300)
 
         self.send("%d level\n" % dispenser)
         ret = self.ser.readline()
