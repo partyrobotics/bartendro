@@ -283,7 +283,7 @@ uint8_t should_break(void)
 
 int main(void)
 {
-    uint8_t ch;
+    uint8_t ch, last_ch = 'i';
 
     ledstick_setup();
     dprintf("bartendro led driver starting\n");
@@ -304,18 +304,28 @@ int main(void)
             case 'w':
                 dprintf("warning, some booze is low!");
                 set_dia_led(0, 0, 1);
+                next = last_ch;
                 break;
 
             case 'o':
                 dprintf("trouble, some booze is OUT!");
                 set_dia_led(1, 0, 0);
+                next = last_ch;
                 break;
 
             case 'g':
                 dprintf("all good!");
                 set_dia_led(0, 1, 0);
+                next = last_ch;
                 break;
 
+            default:
+                next = ch;
+                break;
+        }
+
+        switch(next):
+        {
             // main LED control
             case 'd':
                 dprintf("Drink done\n");
