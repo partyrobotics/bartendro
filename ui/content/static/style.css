@@ -393,6 +393,10 @@ div.errors{
     color: #f00;
     font-weight: bold;
 }
+.dispenser_warning {
+    color: #FA9005;
+    font-weight: bold;
+}
 div.bottom_bar{
     float: bottom;
     vertical-align: bottom;

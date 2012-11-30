@@ -108,6 +108,11 @@ void ledstick_setup(void)
     // on board LED
     DDRB |= (1<<PB5);
 
+    // diagnostic LED on pins 7, 8, 9
+    DDRD |= (1<<PD7); // red
+    DDRB |= (1<<PB0); // green
+    DDRB |= (1<<PB1); // blue
+
     serial_init();
 
     /* Set to Fast PWM */
@@ -129,6 +134,24 @@ void ledstick_setup(void)
     // Set the clock source
     TCCR0B |= _BV(CS00);
     TCCR2B |= _BV(CS20);
+}
+
+void set_dia_led(uint8_t red, uint8_t green, uint8_t blue)
+{
+    if (red)
+        cbi(PORTD, 7);
+    else
+        sbi(PORTD, 7);
+
+    if (green)
+        cbi(PORTB, 0);
+    else
+        sbi(PORTB, 0);
+
+    if (blue)
+        cbi(PORTB, 1);
+    else
+        sbi(PORTB, 1);
 }
 
 void set_pwm_colors(uint8_t *c)
@@ -260,9 +283,10 @@ uint8_t should_break(void)
 
 int main(void)
 {
-    uint8_t ch;
+    uint8_t ch, last_ch = 'i', next;
 
     ledstick_setup();
+    set_dia_led(0, 0, 0);
     dprintf("bartendro led driver starting\n");
     sei();
     startup();
@@ -277,6 +301,33 @@ int main(void)
         }
         switch(ch)
         {
+            // diagnostic LED control
+            case 'w':
+                dprintf("warning, some booze is low!");
+                set_dia_led(0, 0, 1);
+                next = last_ch;
+                break;
+
+            case 'o':
+                dprintf("trouble, some booze is OUT!");
+                set_dia_led(1, 0, 0);
+                next = last_ch;
+                break;
+
+            case 'g':
+                dprintf("all good!");
+                set_dia_led(0, 1, 0);
+                next = last_ch;
+                break;
+
+            default:
+                next = ch;
+                break;
+        }
+
+        switch(next)
+        {
+            // main LED control
             case 'd':
                 dprintf("Drink done\n");
                 plot_function(20, &drink_done);

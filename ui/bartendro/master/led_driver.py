@@ -79,3 +79,18 @@ class LEDDriver(object):
     def panic(self):
         if self.software_only: return
         self.ser.write("e")
+
+    def warning(self):
+        print "state: WARNING!"
+        if self.software_only: return
+        self.ser.write("w")
+
+    def out_of_booze(self):
+        print "state: OUT OF BOOZE!"
+        if self.software_only: return
+        self.ser.write("o")
+
+    def all_good(self):
+        print "state: ALL GOOD!"
+        if self.software_only: return
+        self.ser.write("g")
