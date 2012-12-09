@@ -22,6 +22,12 @@
 #define TIMER1_INIT 0xFFE6 // 16mhz / 64 cs / 25 = 100us per 'tick'
 #define RESET_DURATION 1
 
+void    set_pin(uint8_t port, uint8_t pin);
+void    clear_pin(uint8_t port, uint8_t pin);
+uint8_t get_port(uint8_t port);
+uint8_t get_port_ddr(uint8_t port);
+uint8_t get_pcmsk(uint8_t msk);
+
 /*
    Master pin mappings:
 
@@ -103,21 +109,21 @@
    RPI:
 
        PD2 -> RESET input (INT0)
-       PD4 -> MUX select (PCINT20)
-       PD3 -> RX (INT1)
-       PD5 -> TX
+       PD3 -> MUX select (PCINT19)
+       PD0 -> RX (PCINT16)
+       PD1 -> TX
 
    Dispenser 0:
 
        PD6 -> RESET
-       PB1 -> RX (PCINT1)
-       PB2 -> TX
+       PD5 -> RX (PCINT21)
+       PD4 -> TX
 
    Dispenser 1:
 
        PD6 -> RESET
-       PB3 -> RX (PCINT3)
-       PB4 -> TX
+       PB0 -> RX (PCINT0)
+       PD7 -> TX
 
 */
 
@@ -129,14 +135,14 @@ typedef struct
 } dispenser_t;
 
 #define NUM_DISPENSERS 2
-static dispenser_t dispensers[NUM_DISPENSERS] =
+static volatile dispenser_t dispensers[NUM_DISPENSERS] =
 {  // reset_port, reset_pin, rx_port, rx_pin, rx_pcicr, rx_pcint, rx_pcmsk, tx_port, tx_pin
-    { 3,          6,         1,       1,      PCIE0,    PCINT1,   0,        1,       2      },
-    { 3,          6,         1,       3,      PCIE0,    PCINT3,   1,        1,       4      },
+    { 'D',        6,         'D',     5,      PCIE1,    PCINT13,  1,        'D',     4      },
+    { 'D',        6,         'B',     0,      PCIE0,    PCINT0,   0,        'D',     7      },
 };
 
 static volatile uint32_t g_time = 0;
-static volatile uint32_t g_falling_edge_time = 0;
+static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_mux_pin_0 = 0;
 
@@ -145,54 +151,101 @@ ISR(INT0_vect)
 {
     if (PIND & (1<<PIND2))
     {
-        sbi(PORTB, 5);
-        g_falling_edge_time = g_time + RESET_DURATION;
+        g_reset_fe_time = g_time + RESET_DURATION;
     }
     else
     {
-        cbi(PORTB, 5);
-        if (g_falling_edge_time > 0 && g_time >= g_falling_edge_time)
-        {
+        if (g_reset_fe_time > 0 && g_time >= g_reset_fe_time)
+        { // TODO: move this over to be table driven
              cbi(PORTD, 6);
              _delay_us(10);
              sbi(PORTD, 6);
         }
 
-        g_falling_edge_time = 0;
+        g_reset_fe_time = 0;
     }
 }
 
-// Main RX pin change
-ISR(INT1_vect)
-{
-    dispenser_t *disp;
-
-    disp = &dispensers[g_dispenser];
-    if (PIND & (1<<PIND3))
-        sbi(disp->tx_port, disp->tx_pin);
-    else
-        cbi(disp->tx_port, disp->tx_pin);
-}
+volatile uint8_t pcint0 = 0;
 
 ISR(PCINT0_vect)
 {
-    // TODO: Add support for more mux pins
-    if (g_mux_pin_0 != (PIND & (1<<PIND4)))
+    uint8_t      state;
+
+    // Check for RX for Dispenser 1
+    state = PINB & (1<<PINB0);
+    if (state != pcint0)
     {
-        g_mux_pin_0 = PIND & (1<<PIND4);
-        g_dispenser = g_mux_pin_0;
+        if (g_dispenser == 1)
+        {
+            if (state)
+                sbi(PORTD, 1);
+            else
+                cbi(PORTD, 1);
+        }
+        pcint0 = state;
+    }
+}
+
+// unused right now
+ISR(PCINT1_vect)
+{
+}
+
+volatile uint8_t pcint16 = 0;
+volatile uint8_t pcint19 = 0;
+volatile uint8_t pcint21 = 0;
+ISR(PCINT2_vect)
+{
+    uint8_t      state;
+
+    // Check for RX from the RPI
+    state = PIND & (1<<PIND0);
+    if (state != pcint16)
+    {
+        // TODO: Fix this!
+        if (state)
+        {
+            if (g_dispenser == 0)
+                sbi(PORTD, 4);
+            else
+                sbi(PORTD, 7);
+        }
+        else
+        {
+            if (g_dispenser == 0)
+                cbi(PORTD, 4);
+            else
+                cbi(PORTD, 7);
+        }
+
+        pcint16 = state;
     }
 
-    // other pin change stuff here
-    dispenser_t *disp;
-
-    disp = &dispensers[g_dispenser];
-    // is the current dispenser RX on this PCINT?
-    if (disp.pcint == PCINT0)
+    // Check for RX for Dispenser 0
+    state = PIND & (1<<PIND5);
+    if (state != pcint21)
     {
+        if (g_dispenser == 0)
+        {
+            if (state)
+                sbi(PORTD, 1);
+            else
+                cbi(PORTD, 1);
+        }
+        pcint21 = state;
+    }
 
-
-
+    // Check for MUX select from the RPI
+    state = PIND & (1<<PIND3);
+    if (state != pcint19)
+    {
+        if (state)
+            sbi(PORTB, 5);
+        else
+            cbi(PORTB, 5);
+        g_dispenser = state;
+        pcint19 = state;
     }
 }
 
@@ -202,47 +255,37 @@ ISR (TIMER1_OVF_vect)
     TCNT1 = TIMER1_INIT;
 }
 
-void serial_init(void)
+void set_pin(uint8_t port, uint8_t pin)
 {
-    /*Set baud rate */ 
-    UBRR0H = (unsigned char)(UBBR>>8); 
-    UBRR0L = (unsigned char)UBBR; 
-    /* Enable transmitter */ 
-    UCSR0B = (1<<TXEN0)|(1<<RXEN0); 
-    /* Set frame format: 8data, 1stop bit */ 
-    UCSR0C = (0<<USBS0)|(3<<UCSZ00); 
-}
-
-void serial_tx(uint8_t ch)
-{
-    while ( !( UCSR0A & (1<<UDRE0)) );
-    UDR0 = ch;
-}
-
-uint8_t serial_rx(void)
-{
-    while ( !(UCSR0A & (1<<RXC0))) 
-        ;
-
-    return UDR0;
-}
-
-#define MAX 80 
-void dprintf(const char *fmt, ...)
-{
-    va_list va;
-    va_start (va, fmt);
-    char buffer[MAX];
-    char *ptr = buffer;
-    vsnprintf(buffer, MAX, fmt, va);
-    va_end (va);
-    for(ptr = buffer; *ptr; ptr++)
+    switch(port)
     {
-        if (*ptr == '\n') serial_tx('\r');
-        serial_tx(*ptr);
+        case 'B':
+            sbi(PORTB, pin);
+            return;
+        case 'C':
+            sbi(PORTC, pin);
+            return;
+        case 'D': 
+            sbi(PORTD, pin);
+            return;
     }
 }
 
+void clear_pin(uint8_t port, uint8_t pin)
+{
+    switch(port)
+    {
+        case 'B':
+            cbi(PORTB, pin);
+            return;
+        case 'C':
+            cbi(PORTC, pin);
+            return;
+        case 'D': 
+            cbi(PORTD, pin);
+            return;
+    }
+}
 
 uint8_t get_port(uint8_t port)
 {
@@ -319,23 +362,29 @@ void setup(void)
     // on board LED
     DDRB |= (1<< PORTB5);
 
-    // TX to rpi
-    DDRD |= (1<< PORTD5);
+    // TX to RPI
+    DDRD |= (1<< PORTD1);
+    // TX to dispenser 0
+    DDRD |= (1<< PORTD4);
+    // TX to dispenser 1
+    DDRD |= (1<< PORTD7);
+    // RESET
+    DDRD |= (1<< PORTD6);
 
-    // INT0 for RPI RX
-    EICRA |= (1 << ISC00) | (1 << ISC10);
-    EIMSK |= (1 << INT0) | (1 << INT1);
+    // INT0 for RPI reset
+    EICRA |= (1 << ISC00);
+    EIMSK |= (1 << INT0);
 
-    // MUX select
-    PCMSK2 |= (1 << PCINT20);
-    PCICR |= (1 << PCIE2);
+    // PCINT setup
+    PCMSK0 |= (1 << PCINT0);
+//    PCMSK1 |= (1 << PCINT13);
+    PCMSK2 |= (1 << PCINT19) | (1 << PCINT16) | (1 << PCINT21);
+    PCICR |= (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
-
-    serial_init();
 }
 
 void flash_led(uint8_t fast)
@@ -361,8 +410,8 @@ int main (void)
 {
     setup();
 
-
-    sbi(PORTB, 6);
+    // Set RESET to high, to enable the dispensers to run
+    sbi(PORTD, 6);
     flash_led(1);
 
     sei();
