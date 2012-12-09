@@ -19,7 +19,7 @@
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
-#define TIMER1_INIT 0xFFE6 // 16mhz / 64 cs / 25 = 100us per 'tick'
+#define TIMER1_INIT 0xFFE6 
 #define RESET_DURATION 1
 
 void    set_pin(uint8_t port, uint8_t pin);
@@ -27,6 +27,8 @@ void    clear_pin(uint8_t port, uint8_t pin);
 uint8_t get_port(uint8_t port);
 uint8_t get_port_ddr(uint8_t port);
 uint8_t get_pcmsk(uint8_t msk);
+
+// TODO: Look for serial IO errors!
 
 /*
    Master pin mappings:
@@ -172,12 +174,14 @@ ISR(PCINT0_vect)
 {
     uint8_t      state;
 
+
     // Check for RX for Dispenser 1
     state = PINB & (1<<PINB0);
     if (state != pcint0)
     {
         if (g_dispenser == 1)
         {
+            sbi(PORTB, 5);
             if (state)
                 sbi(PORTD, 1);
             else
@@ -240,11 +244,7 @@ ISR(PCINT2_vect)
     state = PIND & (1<<PIND3);
     if (state != pcint19)
     {
-        if (state)
-            sbi(PORTB, 5);
-        else
-            cbi(PORTB, 5);
-        g_dispenser = state;
+        g_dispenser = state ? 1 : 0;
         pcint19 = state;
     }
 }
