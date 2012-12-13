@@ -1,5 +1,5 @@
 CC=avr-gcc
-CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega328
+CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega328p
 OBJ2HEX=avr-objcopy 
 TARGET=master
 
