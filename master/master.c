@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "../dispenser/serial.h"
 #include "../dispenser/packet.h"
 
 // Bit manipulation macros
@@ -19,8 +20,9 @@
 #define cbi(a, b) ((a) &= ~(1 << (b)))    //clears bit B in variable A
 #define tbi(a, b) ((a) ^= 1 << (b))       //toggles bit B in variable A
 
-#define TIMER1_INIT 0xFFE6 
-#define RESET_DURATION 1
+#define NUM_DISPENSERS   2
+#define TIMER1_INIT      0xFFE6 
+#define RESET_DURATION   1
 
 void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
@@ -42,14 +44,14 @@ uint8_t get_pcmsk(uint8_t msk);
 
    Dispenser 0:
 
-       PC0 -> RESET
-       PD2 -> TX
+       PD2 -> RESET
+       PD1 -> TX
        PD3 -> RX (pcint19)
 
    Dispenser 1:
 
-       PC0 -> RESET
-       PD2 -> TX
+       PD2 -> RESET
+       PD1 -> TX
        PD4 -> RX (pcint20)
 
 */
@@ -72,7 +74,6 @@ static volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_mux_pin_0 = 0;
-
 
 #if 0
     // TODO re-connect this reset detection code
@@ -106,9 +107,9 @@ ISR(PCINT0_vect)
     if (state != pcint0)
     {
         if (state)
-            sbi(PORTD, 2);
+            sbi(PORTD, 1);
         else
-            cbi(PORTD, 2);
+            cbi(PORTD, 1);
         pcint0 = state;
     }
 }
@@ -280,11 +281,83 @@ void flash_led(uint8_t fast)
     }
 }
 
+uint8_t send_packet(packet_t *p)
+{
+    uint8_t i, *ch = (uint8_t *)p;
+
+    for(i = 0; i < sizeof(packet_t); i++, ch++)
+        serial_tx(*ch);
+
+    return 1;
+}
+
+
+// check for COLLISIONS
+void setup_ids(void)
+{
+    packet_t p;
+    uint8_t  i, count = 0;
+    uint8_t  dispensers[NUM_DISPENSERS];
+
+    serial_init();
+    serial_enable(0, 1);
+
+    p.dest = PACKET_BROADCAST;
+    p.type = PACKET_FIND_ID;
+    for(i = 0; i < 255; i++)
+    {
+        p.p.uint8[0] = i;
+        send_packet(&p);
+        
+        _delay_ms(1);
+
+        // dispenser 0
+        if (PIND & (1 << PIND3))
+        {
+            sbi(PORTB, 5);
+            dispensers[0] = i;
+            count++;
+        }
+
+        // dispenser 1
+        if (PIND & (1 << PIND4))
+        {
+            dispensers[1] = i;
+            count++;
+        }
+    }
+//    flash_led(count == 2);
+
+    p.type = PACKET_ASSIGN_ID;
+    for(i = 0; i < count; i++)
+    {
+        p.dest = dispensers[i];
+        p.p.uint8[0] = i;
+        send_packet(&p);
+    }
+
+    p.type = PACKET_START;
+    send_packet(&p);
+
+    serial_enable(0, 0);
+}
+
 int main (void)
 {
-    setup();
+    DDRB |= (1 << PORTB5);
+    DDRD |= (1 << PORTD2);
+
+    // Reset the dispensers
+    sbi(PORTD, 2);
+    _delay_ms(RESET_DURATION + RESET_DURATION);
+    cbi(PORTD, 2);
+
+    // Wait for dispensers to start up
+    _delay_ms(500);
 
     flash_led(1);
+    setup_ids();
+    setup();
 
     sei();
     for(;;)

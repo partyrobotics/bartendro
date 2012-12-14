@@ -11,10 +11,56 @@
 #include <avr/eeprom.h>
 #include <stdarg.h>
 #include <stdlib.h>
-
 #include "defs.h"
+
 #include "packet.h"
 #include "serial.h"
+
+static volatile uint32_t g_time = 0;
+static volatile uint32_t g_reset_fe_time = 0;
+static volatile uint32_t g_reset = 0;
+#define RESET_DURATION   1
+#define TIMER1_INIT      0xFFE6
+
+ISR (TIMER1_OVF_vect)
+{
+    g_time++;
+    TCNT1 = TIMER1_INIT;
+}
+
+// reset pin change
+ISR(INT0_vect)
+{
+    if (PIND & (1<<PIND2))
+    {
+        g_reset_fe_time = g_time + RESET_DURATION;
+    }
+    else
+    {
+        if (g_reset_fe_time > 0 && g_time >= g_reset_fe_time)
+            g_reset = 1;
+        g_reset_fe_time = 0;
+    }
+}
+
+uint8_t check_reset(void)
+{
+    uint8_t reset;
+
+    cli();
+    reset = g_reset;
+    sei();
+
+    return reset;
+}
+
+uint8_t serial_rx_check_reset()
+{
+    while ( !(UCSR0A & (1<<RXC0)) && !check_reset()) 
+         ;
+
+    return UDR0;
+}
 
 void set_led(uint8_t red, uint8_t green, uint8_t blue)
 {
@@ -32,24 +78,6 @@ void set_led(uint8_t red, uint8_t green, uint8_t blue)
         sbi(PORTB, 3);
 }
 
-void flash_led(uint8_t fast)
-{
-    int i;
-
-    for(i = 0; i < 5; i++)
-    {
-        sbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-        cbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-    }
-}
 
 uint32_t EEMEM _ee_random_number;
 uint32_t EEMEM _ee_run_time;
@@ -66,8 +94,12 @@ uint8_t receive_packet(packet_t *p)
 {
     uint8_t i, *ch = (uint8_t *)p;
 
-    for(i = 0; i < sizeof(packet_t); i++)
-        *ch = serial_rx();
+    for(i = 0; i < sizeof(packet_t); i++, ch++)
+    {
+        *ch = serial_rx_check_reset();
+        if (check_reset())
+            return 0;
+    }
 
     return 1;
 }
@@ -90,7 +122,9 @@ uint8_t get_address(void)
     set_led(1, 0, 0);
     for(;;)
     {
-        receive_packet(&p);
+        if (!receive_packet(&p))
+            return 0xFF;
+
         if (p.type != PACKET_FIND_ID)
             break;
 
@@ -100,21 +134,34 @@ uint8_t get_address(void)
             sbi(PORTD, 1);
         }
         else
+        {
+            set_led(1, 1, 0);
             cbi(PORTD, 1);
+        }
     }
 
     for(;;)
     {
-        receive_packet(&p);
-        if (p.type != PACKET_ASSIGN_ID && p.dest == id)
-            break;
+        if (!receive_packet(&p))
+            return 0xFF;
+
+        if (p.type == PACKET_ASSIGN_ID)
+        {
+            if (p.dest == id)
+            {
+                set_led(1, 0, 1);
+                break;
+            }
+        }
     }
     id = p.p.uint8[0];
     set_led(0, 0, 1);
 
     for(;;)
     {
-        receive_packet(&p);
+        if (!receive_packet(&p))
+            return 0xFF;
+
         if (p.type == PACKET_START)
             break;
     }
@@ -125,19 +172,64 @@ uint8_t get_address(void)
     return id;
 }
 
+void setup(void)
+{
+    // Set up LEDs
+
+    // Timer setup for reset pulse width measuring
+    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
+
+    // INT0 for router reset
+    EICRA |= (1 << ISC00);
+    EIMSK |= (1 << INT0);
+}
+
+void flash_led(uint8_t fast)
+{
+    int i;
+
+    for(i = 0; i < 5; i++)
+    {
+        sbi(PORTB, 5);
+        if (fast)
+            _delay_ms(50);
+        else
+            _delay_ms(250);
+        cbi(PORTB, 5);
+        if (fast)
+            _delay_ms(50);
+        else
+            _delay_ms(250);
+    }
+}
+
 int main (void)
 {
     uint8_t id;
 
-    serial_init();
-    DDRB |= (1<< PORTB5) | (1 << PORTB1) | (1 << PORTB2) | (1 << PORTB3);
-    set_led(0, 0, 0);
-
-    flash_led(1);
-
-    id = get_address();
     for(;;)
-        ;
+    {
+        cli();
+        g_reset = 0;
 
+        DDRB |= (1<< PORTB5) | (1 << PORTB1) | (1 << PORTB2) | (1 << PORTB3);
+        set_led(0, 0, 0);
+
+        setup();
+        serial_init();
+        flash_led(1);
+
+        sei();
+
+        id = get_address();
+        if (id == 0xFF)
+            continue;
+
+        for(; !check_reset();)
+        {
+        }
+    }
     return 0;
 }
