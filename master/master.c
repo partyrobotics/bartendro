@@ -111,8 +111,12 @@ ISR(PCINT0_vect)
     }
 }
 
-volatile uint8_t pcint19 = 0;
-volatile uint8_t pcint20 = 0;
+volatile uint8_t  pcint19 = 0;
+volatile uint8_t  pcint20 = 0;
+volatile uint32_t g_rx_pcint19_fe_time = 0;
+volatile uint32_t g_rx_pcint20_fe_time = 0;
+volatile uint8_t  g_dispenser_rx[NUM_DISPENSERS];
+volatile uint8_t  g_in_id_assignment;
 
 ISR(PCINT2_vect)
 {
@@ -122,6 +126,18 @@ ISR(PCINT2_vect)
     state = PIND & (1<<PIND3);
     if (state != pcint19)
     {
+        if (g_in_id_assignment)
+        {
+            if (state)
+                g_rx_pcint19_fe_time = g_time + RESET_DURATION;
+            else
+            {
+                if (g_rx_pcint19_fe_time > 0 && g_time >= g_rx_pcint19_fe_time)
+                    g_dispenser_rx[0] = 1;
+                g_rx_pcint19_fe_time = 0;
+            }
+        }
+        else
         if (g_dispenser == 0)
         {
             if (state)
@@ -136,6 +152,18 @@ ISR(PCINT2_vect)
     state = PIND & (1<<PIND4);
     if (state != pcint20)
     {
+        if (g_in_id_assignment)
+        {
+            if (state)
+                g_rx_pcint20_fe_time = g_time + RESET_DURATION;
+            else
+            {
+                if (g_rx_pcint20_fe_time > 0 && g_time >= g_rx_pcint20_fe_time)
+                    g_dispenser_rx[1] = 1;
+                g_rx_pcint20_fe_time = 0;
+            }
+        }
+        else
         if (g_dispenser == 1)
         {
             if (state)
@@ -269,6 +297,8 @@ void setup(void)
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
+
+    sei();
 }
 
 void flash_led(uint8_t fast)
@@ -311,7 +341,7 @@ uint8_t send_packet(packet_t *p)
 void setup_ids(void)
 {
     packet_t p;
-    uint8_t  i, count = 0;
+    uint8_t  i, j, state, count = 0;
     uint8_t  dispensers[NUM_DISPENSERS];
 
     memset(dispensers, 0xFF, sizeof(dispensers));
@@ -319,40 +349,44 @@ void setup_ids(void)
     serial_init();
     serial_enable(0, 1);
 
-    for(;;)
+    cli();
+    g_in_id_assignment = 1;
+    sei();
+    for(;; count = 0)
     {
         p.dest = PACKET_BROADCAST;
         p.type = PACKET_FIND_ID;
         for(i = 0; i < 255; i++)
         {
+            cli();
+            memset((void *)g_dispenser_rx, 0, sizeof(g_dispenser_rx));
+            sei();
+
             p.p.uint8[0] = i;
             send_packet(&p);
             
-            _delay_ms(2);
-
-            // dispenser 0
-            if (PIND & (1 << PIND3))
+            _delay_ms(5);
+            for(j = 0; j < NUM_DISPENSERS; j++)
             {
-                dispensers[0] = i;
-                count++;
-            }
-
-            // dispenser 1
-            if (PIND & (1 << PIND4))
-            {
-                dispensers[1] = i;
-                count++;
+                cli();
+                state = g_dispenser_rx[j];
+                sei();
+                if (state)
+                {
+                    dispensers[j] = i;
+                    count++;
+                }
             }
         }
-        flash_led(count == 2);
-        for(i = 0; i < min(count, 5); i++)
+        flash_led(count == NUM_DISPENSERS);
+        for(i = 0; i < min(count, 10); i++)
         {
             sbi(PORTB, 2);
-            _delay_ms(50);
+            _delay_ms(200);
             cbi(PORTB, 2);
-            _delay_ms(50);
+            _delay_ms(200);
         }
-        if (count == 2)
+        if (count == NUM_DISPENSERS)
             break;
 
         reset_dispensers();
@@ -372,7 +406,13 @@ void setup_ids(void)
     p.type = PACKET_START;
     send_packet(&p);
 
+    // Disable serial IO and put D2 back to output
     serial_enable(0, 0);
+    DDRD |= (1<< PORTD2);
+
+    cli();
+    g_in_id_assignment = 0;
+    sei();
 }
 
 int main (void)
@@ -385,9 +425,8 @@ int main (void)
     {
         cli();
         reset_dispensers();
-        setup_ids();
         setup();
-        sei();
+        setup_ids();
         _delay_ms(500);
         _delay_ms(500);
         _delay_ms(500);

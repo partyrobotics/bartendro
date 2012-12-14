@@ -122,7 +122,6 @@ uint8_t receive_packet(packet_t *p)
                 i = 0;
                 ch = (uint8_t *)p;
                 timeout = now + RECEIVE_TIMEOUT;
-                sbi(PORTB, 5);
             }
         }
     }
@@ -161,9 +160,7 @@ uint8_t get_address(void)
         if (rec == REC_CRC_FAIL)
         {
             set_led(1, 1, 0);
-            for(;!check_reset();)
-                ;
-            return 0xFF;
+            continue;
         }
         if (rec == REC_RESET)
             return 0xFF;
@@ -172,11 +169,15 @@ uint8_t get_address(void)
             break;
 
         if (p.p.uint8[0] == id)
+        {
+            set_led(1, 0, 1);
+            sbi(PORTB, 5);
             sbi(PORTD, 1);
-        else
+            _delay_ms(RESET_DURATION + RESET_DURATION);
+            cbi(PORTB, 5);
             cbi(PORTD, 1);
+        }
     }
-    set_led(1, 0, 1);
 
     // We haven't processed the previous packet yet
     for(;;)
@@ -185,7 +186,7 @@ uint8_t get_address(void)
         {
             if (p.dest == id)
             {
-                set_led(1, 1, 0);
+                set_led(0, 1, 1);
                 break;
             }
         }
