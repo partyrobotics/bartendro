@@ -299,22 +299,26 @@ void setup_ids(void)
     uint8_t  i, count = 0;
     uint8_t  dispensers[NUM_DISPENSERS];
 
+    memset(dispensers, 0xFF, sizeof(dispensers));
+
     serial_init();
     serial_enable(0, 1);
 
     p.dest = PACKET_BROADCAST;
+    p.type = PACKET_NOP;
+    send_packet(&p);
+
     p.type = PACKET_FIND_ID;
     for(i = 0; i < 255; i++)
     {
         p.p.uint8[0] = i;
         send_packet(&p);
         
-        _delay_ms(1);
+        _delay_ms(5);
 
         // dispenser 0
         if (PIND & (1 << PIND3))
         {
-            sbi(PORTB, 5);
             dispensers[0] = i;
             count++;
         }
@@ -326,14 +330,19 @@ void setup_ids(void)
             count++;
         }
     }
-//    flash_led(count == 2);
+    flash_led(count == 2);
+    if (count == 1)
+        sbi(PORTB, 5);
 
     p.type = PACKET_ASSIGN_ID;
-    for(i = 0; i < count; i++)
+    for(i = 0; i < NUM_DISPENSERS; i++)
     {
-        p.dest = dispensers[i];
-        p.p.uint8[0] = i;
-        send_packet(&p);
+        if (dispensers[i] != 0xFF)
+        {
+            p.dest = dispensers[i];
+            p.p.uint8[0] = i;
+            send_packet(&p);
+        }
     }
 
     p.type = PACKET_START;
@@ -344,7 +353,7 @@ void setup_ids(void)
 
 int main (void)
 {
-    DDRB |= (1 << PORTB5);
+    DDRB |= (1 << PORTB5) | (1 << PORTB2);
     DDRD |= (1 << PORTD2);
 
     // Reset the dispensers

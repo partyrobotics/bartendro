@@ -119,40 +119,44 @@ uint8_t get_address(void)
     // Pick a random 8-bit number
     id = random() % 255;
 
+    // The first packet is a NOP packet, ignore it
+    if (!receive_packet(&p))
+        return 0xFF;
+
     set_led(1, 0, 0);
     for(;;)
     {
         if (!receive_packet(&p))
             return 0xFF;
 
-        if (p.type != PACKET_FIND_ID)
+        if (p.type == PACKET_ASSIGN_ID)
             break;
+        if (p.type != PACKET_FIND_ID)
+            set_led(0, 1, 1);
 
         if (p.p.uint8[0] == id)
-        {
-            set_led(0, 1, 0);
             sbi(PORTD, 1);
-        }
         else
-        {
-            set_led(1, 1, 0);
             cbi(PORTD, 1);
-        }
     }
+    set_led(1, 0, 1);
 
+    // We haven't processed the previous packet yet
     for(;;)
     {
-        if (!receive_packet(&p))
-            return 0xFF;
-
         if (p.type == PACKET_ASSIGN_ID)
         {
             if (p.dest == id)
             {
-                set_led(1, 0, 1);
+                set_led(1, 1, 0);
                 break;
             }
         }
+        if (p.type == PACKET_START)
+            set_led(1, 1, 1);
+
+        if (!receive_packet(&p))
+            return 0xFF;
     }
     id = p.p.uint8[0];
     set_led(0, 0, 1);
@@ -165,7 +169,7 @@ uint8_t get_address(void)
         if (p.type == PACKET_START)
             break;
     }
-    set_led(0, 0, 0);
+    set_led(0, 1, 0);
 
     serial_enable(1, 1);
 

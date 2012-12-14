@@ -4,6 +4,7 @@
 #define PACKET_FIND_ID   0
 #define PACKET_ASSIGN_ID 1
 #define PACKET_START     2
+#define PACKET_NOP       3
 
 #define PACKET_BROADCAST 0xFF
 
