@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <util/crc16.h>
 
 #include <stddef.h>
 #include <math.h>
@@ -20,6 +21,7 @@ static volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
 #define RESET_DURATION   1
+#define RECEIVE_TIMEOUT  100
 #define TIMER1_INIT      0xFFE6
 
 ISR (TIMER1_OVF_vect)
@@ -92,22 +94,55 @@ void set_random_seed_from_eeprom(void)
 
 uint8_t receive_packet(packet_t *p)
 {
-    uint8_t i, *ch = (uint8_t *)p;
+    uint32_t timeout, now;
+    uint16_t crc = 0;
+    uint8_t  i, *ch = (uint8_t *)p;
 
+    i = UDR0; // read whatever might be leftover
     for(i = 0; i < sizeof(packet_t); i++, ch++)
     {
         *ch = serial_rx_check_reset();
         if (check_reset())
-            return 0;
+            return REC_RESET;
+
+        if (i == 0)
+        {
+            cli();
+            timeout = g_time;
+            sei();
+            timeout += RECEIVE_TIMEOUT;
+        }
+        else
+        {
+            cli();
+            now = g_time;
+            sei();
+            if (now > timeout)
+            {
+                i = 0;
+                ch = (uint8_t *)p;
+                timeout = now + RECEIVE_TIMEOUT;
+                sbi(PORTB, 5);
+            }
+        }
     }
 
-    return 1;
+    crc = _crc16_update(crc, p->dest);
+    crc = _crc16_update(crc, p->type);
+    crc = _crc16_update(crc, p->p.uint8[0]);
+    crc = _crc16_update(crc, p->p.uint8[1]);
+    crc = _crc16_update(crc, p->p.uint8[2]);
+    crc = _crc16_update(crc, p->p.uint8[3]);
+    if (crc != p->crc)
+        return REC_CRC_FAIL;
+
+    return REC_OK;
 }
 
 // TODO: Handle collisions
 uint8_t get_address(void)
 {
-    uint8_t  id;
+    uint8_t  id, rec;
     packet_t p;
 
     set_random_seed_from_eeprom();
@@ -119,20 +154,22 @@ uint8_t get_address(void)
     // Pick a random 8-bit number
     id = random() % 255;
 
-    // The first packet is a NOP packet, ignore it
-    if (!receive_packet(&p))
-        return 0xFF;
-
     set_led(1, 0, 0);
     for(;;)
     {
-        if (!receive_packet(&p))
+        rec = receive_packet(&p);
+        if (rec == REC_CRC_FAIL)
+        {
+            set_led(1, 1, 0);
+            for(;!check_reset();)
+                ;
+            return 0xFF;
+        }
+        if (rec == REC_RESET)
             return 0xFF;
 
         if (p.type == PACKET_ASSIGN_ID)
             break;
-        if (p.type != PACKET_FIND_ID)
-            set_led(0, 1, 1);
 
         if (p.p.uint8[0] == id)
             sbi(PORTD, 1);
@@ -152,10 +189,16 @@ uint8_t get_address(void)
                 break;
             }
         }
-        if (p.type == PACKET_START)
-            set_led(1, 1, 1);
 
-        if (!receive_packet(&p))
+        rec = receive_packet(&p);
+        if (rec == REC_CRC_FAIL)
+        {
+            set_led(1, 1, 0);
+            for(;!check_reset();)
+                ;
+            return 0xFF;
+        }
+        if (rec == REC_RESET)
             return 0xFF;
     }
     id = p.p.uint8[0];
@@ -163,7 +206,15 @@ uint8_t get_address(void)
 
     for(;;)
     {
-        if (!receive_packet(&p))
+        rec = receive_packet(&p);
+        if (rec == REC_CRC_FAIL)
+        {
+            set_led(1, 1, 0);
+            for(;!check_reset();)
+                ;
+            return 0xFF;
+        }
+        if (rec == REC_RESET)
             return 0xFF;
 
         if (p.type == PACKET_START)
@@ -209,6 +260,19 @@ void flash_led(uint8_t fast)
     }
 }
 
+void test(void)
+{
+    packet_t p;
+
+    for(;;)
+    {
+        if (receive_packet(&p) == REC_OK)
+            set_led(0, 1, 0);
+        else
+            set_led(1, 0, 0);
+    }
+}
+
 int main (void)
 {
     uint8_t id;
@@ -226,6 +290,8 @@ int main (void)
         flash_led(1);
 
         sei();
+
+//        test();
 
         id = get_address();
         if (id == 0xFF)

@@ -5,8 +5,11 @@
 #define PACKET_ASSIGN_ID 1
 #define PACKET_START     2
 #define PACKET_NOP       3
-
 #define PACKET_BROADCAST 0xFF
+
+#define REC_OK           0
+#define REC_CRC_FAIL     1
+#define REC_RESET        2
 
 typedef struct
 {
@@ -21,6 +24,7 @@ typedef struct
         uint32_t uint32;
         int32_t  int32;
     } p;
+    uint16_t     crc;
 } packet_t;
 
 #endif

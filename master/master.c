@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <util/crc16.h>
 
 #include <stddef.h>
 #include <math.h>
@@ -12,13 +13,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "../dispenser/defs.h"
 #include "../dispenser/serial.h"
 #include "../dispenser/packet.h"
-
-// Bit manipulation macros
-#define sbi(a, b) ((a) |= 1 << (b))       //sets bit B in variable A
-#define cbi(a, b) ((a) &= ~(1 << (b)))    //clears bit B in variable A
-#define tbi(a, b) ((a) ^= 1 << (b))       //toggles bit B in variable A
 
 #define NUM_DISPENSERS   2
 #define TIMER1_INIT      0xFFE6 
@@ -156,6 +153,18 @@ ISR (TIMER1_OVF_vect)
     TCNT1 = TIMER1_INIT;
 }
 
+void reset_dispensers(void)
+{
+    // Reset the dispensers
+    sbi(PORTD, 2);
+    _delay_ms(RESET_DURATION + RESET_DURATION);
+    cbi(PORTD, 2);
+
+    // Wait for dispensers to start up
+    _delay_ms(500);
+    _delay_ms(500);
+}
+
 void set_pin(uint8_t port, uint8_t pin)
 {
     switch(port)
@@ -283,14 +292,20 @@ void flash_led(uint8_t fast)
 
 uint8_t send_packet(packet_t *p)
 {
+    uint16_t crc = 0;
     uint8_t i, *ch = (uint8_t *)p;
 
+    crc = _crc16_update(crc, p->dest);
+    crc = _crc16_update(crc, p->type);
+    crc = _crc16_update(crc, p->p.uint8[0]);
+    crc = _crc16_update(crc, p->p.uint8[1]);
+    crc = _crc16_update(crc, p->p.uint8[2]);
+    p->crc = _crc16_update(crc, p->p.uint8[3]);
     for(i = 0; i < sizeof(packet_t); i++, ch++)
         serial_tx(*ch);
 
     return 1;
 }
-
 
 // check for COLLISIONS
 void setup_ids(void)
@@ -304,35 +319,44 @@ void setup_ids(void)
     serial_init();
     serial_enable(0, 1);
 
-    p.dest = PACKET_BROADCAST;
-    p.type = PACKET_NOP;
-    send_packet(&p);
-
-    p.type = PACKET_FIND_ID;
-    for(i = 0; i < 255; i++)
+    for(;;)
     {
-        p.p.uint8[0] = i;
-        send_packet(&p);
-        
-        _delay_ms(5);
-
-        // dispenser 0
-        if (PIND & (1 << PIND3))
+        p.dest = PACKET_BROADCAST;
+        p.type = PACKET_FIND_ID;
+        for(i = 0; i < 255; i++)
         {
-            dispensers[0] = i;
-            count++;
-        }
+            p.p.uint8[0] = i;
+            send_packet(&p);
+            
+            _delay_ms(2);
 
-        // dispenser 1
-        if (PIND & (1 << PIND4))
-        {
-            dispensers[1] = i;
-            count++;
+            // dispenser 0
+            if (PIND & (1 << PIND3))
+            {
+                dispensers[0] = i;
+                count++;
+            }
+
+            // dispenser 1
+            if (PIND & (1 << PIND4))
+            {
+                dispensers[1] = i;
+                count++;
+            }
         }
+        flash_led(count == 2);
+        for(i = 0; i < min(count, 5); i++)
+        {
+            sbi(PORTB, 2);
+            _delay_ms(50);
+            cbi(PORTB, 2);
+            _delay_ms(50);
+        }
+        if (count == 2)
+            break;
+
+        reset_dispensers();
     }
-    flash_led(count == 2);
-    if (count == 1)
-        sbi(PORTB, 5);
 
     p.type = PACKET_ASSIGN_ID;
     for(i = 0; i < NUM_DISPENSERS; i++)
@@ -355,23 +379,18 @@ int main (void)
 {
     DDRB |= (1 << PORTB5) | (1 << PORTB2);
     DDRD |= (1 << PORTD2);
-
-    // Reset the dispensers
-    sbi(PORTD, 2);
-    _delay_ms(RESET_DURATION + RESET_DURATION);
-    cbi(PORTD, 2);
-
-    // Wait for dispensers to start up
-    _delay_ms(500);
-
     flash_led(1);
-    setup_ids();
-    setup();
 
-    sei();
     for(;;)
     {
+        cli();
+        reset_dispensers();
+        setup_ids();
+        setup();
+        sei();
+        _delay_ms(500);
+        _delay_ms(500);
+        _delay_ms(500);
     }
-
     return 0;
 }
