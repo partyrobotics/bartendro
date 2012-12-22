@@ -321,7 +321,7 @@ void setup(void)
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
 
-    TWAR = (1 << 1); // address
+    TWAR = (1 << 3); // address
     TWDR = 0x0;  
     TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWEA);  
 
