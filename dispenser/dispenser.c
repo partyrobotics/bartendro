@@ -1,4 +1,3 @@
-#define F_CPU 8000000UL 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -16,6 +15,7 @@
 
 #include "packet.h"
 #include "serial.h"
+#include "led.h"
 
 static volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
@@ -63,23 +63,6 @@ uint8_t serial_rx_check_reset()
 
     return UDR0;
 }
-
-void set_led(uint8_t red, uint8_t green, uint8_t blue)
-{
-    if (red)
-        cbi(PORTB, 1);
-    else
-        sbi(PORTB, 1);
-    if (green)
-        cbi(PORTB, 2);
-    else
-        sbi(PORTB, 2);
-    if (blue)
-        cbi(PORTB, 3);
-    else
-        sbi(PORTB, 3);
-}
-
 
 uint32_t EEMEM _ee_random_number;
 uint32_t EEMEM _ee_run_time;
@@ -153,13 +136,15 @@ uint8_t get_address(void)
     // Pick a random 8-bit number
     id = random() % 255;
 
-    set_led(1, 0, 0);
+    set_led_rgb(255, 0, 0);
+    receive_packet(&p);
+
     for(;;)
     {
         rec = receive_packet(&p);
         if (rec == REC_CRC_FAIL)
         {
-            set_led(1, 1, 0);
+            set_led_rgb(255, 255, 255);
             continue;
         }
         if (rec == REC_RESET)
@@ -170,7 +155,7 @@ uint8_t get_address(void)
 
         if (p.p.uint8[0] == id)
         {
-            set_led(1, 0, 1);
+            set_led_rgb(255, 0, 255);
             sbi(PORTB, 5);
             sbi(PORTD, 1);
             _delay_ms(RESET_DURATION + RESET_DURATION);
@@ -182,19 +167,13 @@ uint8_t get_address(void)
     // We haven't processed the previous packet yet
     for(;;)
     {
-        if (p.type == PACKET_ASSIGN_ID)
-        {
-            if (p.dest == id)
-            {
-                set_led(0, 1, 1);
+        if (p.type == PACKET_ASSIGN_ID && p.dest == id)
                 break;
-            }
-        }
 
         rec = receive_packet(&p);
         if (rec == REC_CRC_FAIL)
         {
-            set_led(1, 1, 0);
+            set_led_rgb(255, 255, 0);
             for(;!check_reset();)
                 ;
             return 0xFF;
@@ -203,25 +182,28 @@ uint8_t get_address(void)
             return 0xFF;
     }
     id = p.p.uint8[0];
-    set_led(0, 0, 1);
+    set_led_rgb(0, 0, 255);
 
     for(;;)
     {
         rec = receive_packet(&p);
+        set_led_rgb(0, 255, 255);
         if (rec == REC_CRC_FAIL)
         {
-            set_led(1, 1, 0);
+            set_led_rgb(255, 255, 0);
             for(;!check_reset();)
                 ;
             return 0xFF;
         }
         if (rec == REC_RESET)
+        {
             return 0xFF;
+        }
 
         if (p.type == PACKET_START)
             break;
     }
-    set_led(0, 1, 0);
+    set_led_rgb(0, 255, 0);
 
     serial_enable(1, 1);
 
@@ -231,6 +213,7 @@ uint8_t get_address(void)
 void setup(void)
 {
     // Set up LEDs
+    DDRD |= (1<<PD3)|(1<<PD4);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
@@ -261,19 +244,6 @@ void flash_led(uint8_t fast)
     }
 }
 
-void test(void)
-{
-    packet_t p;
-
-    for(;;)
-    {
-        if (receive_packet(&p) == REC_OK)
-            set_led(0, 1, 0);
-        else
-            set_led(1, 0, 0);
-    }
-}
-
 int main (void)
 {
     uint8_t id;
@@ -284,19 +254,20 @@ int main (void)
         g_reset = 0;
 
         DDRB |= (1<< PORTB5) | (1 << PORTB1) | (1 << PORTB2) | (1 << PORTB3);
-        set_led(0, 0, 0);
+        set_led_rgb(0, 0, 0);
 
         setup();
         serial_init();
+//        led_startup();
         flash_led(1);
 
         sei();
 
-//        test();
-
         id = get_address();
         if (id == 0xFF)
             continue;
+
+        sbi(PORTB, 5);
 
         for(; !check_reset();)
         {

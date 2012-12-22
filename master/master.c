@@ -214,6 +214,7 @@ void reset_dispensers(void)
     // Wait for dispensers to start up
     _delay_ms(500);
     _delay_ms(500);
+//    _delay_ms(500);
 }
 
 void set_pin(uint8_t port, uint8_t pin)
@@ -382,6 +383,9 @@ void setup_ids(void)
     for(;; count = 0)
     {
         p.dest = PACKET_BROADCAST;
+        p.type = PACKET_NOP;
+        send_packet(&p);
+
         p.type = PACKET_FIND_ID;
         for(i = 0; i < 255; i++)
         {
@@ -405,7 +409,7 @@ void setup_ids(void)
                 }
             }
         }
-#if 0
+#if 1
         flash_led(count == NUM_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {
@@ -420,6 +424,7 @@ void setup_ids(void)
 
         reset_dispensers();
     }
+    _delay_ms(10);
 
     p.type = PACKET_ASSIGN_ID;
     for(i = 0; i < NUM_DISPENSERS; i++)
@@ -429,6 +434,7 @@ void setup_ids(void)
             p.dest = dispensers[i];
             p.p.uint8[0] = i;
             send_packet(&p);
+            _delay_ms(5);
         }
     }
 
