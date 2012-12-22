@@ -3,7 +3,7 @@
 import smbus
 import time
 bus = smbus.SMBus(0)
-address = 0x01
+address = 4 
 
 while True:
     bus.write_byte(address, 34)
