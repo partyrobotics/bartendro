@@ -1,6 +1,7 @@
 #define F_CPU 8000000UL 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/twi.h>
 #include <util/delay.h>
 #include <util/crc16.h>
 
@@ -38,6 +39,8 @@ uint8_t get_pcmsk(uint8_t msk);
        PD0 -> RESET input
        PB0 -> RX (pcint0)
        PB1 -> TX
+       A4  -> SDA red wire
+       A5  -> SCL green wire
 
    Dispenser 0:
 
@@ -90,6 +93,26 @@ static volatile uint8_t  g_mux_pin_0 = 0;
         g_reset_fe_time = 0;
     }
 #endif
+
+ISR(TWI_vect)
+{
+   uint8_t twi_status, data;
+
+   // Get TWI Status Register, mask the prescaler bits (TWPS1,TWPS0)
+   twi_status=TWSR & 0xF8;     
+   switch(twi_status) 
+   {
+       case TW_SR_DATA_ACK:     // 0x80: data received, ACK returned
+           data = TWDR;
+           if (data == 34)
+               sbi(PORTB, 2);
+           else
+               cbi(PORTB, 2);
+
+           break;
+   }
+   TWCR |= (1<<TWINT);    // Clear TWINT Flag
+}
 
 volatile uint8_t pcint0 = 0;
 volatile uint8_t pcint1 = 0;
@@ -298,6 +321,10 @@ void setup(void)
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
 
+    TWAR = (1 << 1); // address
+    TWDR = 0x0;  
+    TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWEA);  
+
     sei();
 }
 
@@ -378,6 +405,7 @@ void setup_ids(void)
                 }
             }
         }
+#if 0
         flash_led(count == NUM_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {
@@ -386,6 +414,7 @@ void setup_ids(void)
             cbi(PORTB, 2);
             _delay_ms(200);
         }
+#endif
         if (count == NUM_DISPENSERS)
             break;
 
@@ -421,15 +450,11 @@ int main (void)
     DDRD |= (1 << PORTD2);
     flash_led(1);
 
+    reset_dispensers();
+    setup();
+    setup_ids();
     for(;;)
     {
-        cli();
-        reset_dispensers();
-        setup();
-        setup_ids();
-        _delay_ms(500);
-        _delay_ms(500);
-        _delay_ms(500);
     }
     return 0;
 }
