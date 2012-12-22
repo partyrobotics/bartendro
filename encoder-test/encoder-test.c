@@ -22,25 +22,15 @@
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-#define RESET_DURATION   100
 #define RECEIVE_TIMEOUT  100
 #define TIMER1_INIT      0xFFE6
 
 volatile uint32_t g_time = 0;
-volatile uint32_t g_hall0_fe_time = 0;
-volatile uint32_t g_hall1_fe_time = 0;
-volatile uint32_t g_hall2_fe_time = 0;
-volatile uint32_t g_hall3_fe_time = 0;
 
 volatile uint8_t g_hall0 = 0;
 volatile uint8_t g_hall1 = 0;
 volatile uint8_t g_hall2 = 0;
 volatile uint8_t g_hall3 = 0;
-
-volatile uint8_t  pcint18 = 0;
-volatile uint8_t  pcint19 = 0;
-volatile uint8_t  pcint20 = 0;
-volatile uint8_t  pcint21 = 0;
 
 #define HALL_DURATION 100 //ms
 #define BAUD 38400
@@ -57,60 +47,20 @@ ISR(PCINT2_vect)
     uint8_t      state;
 
     state = PIND & (1<<PIND2);
-    if (state != pcint18)
-    {
-        if (state)
-            g_hall0_fe_time = g_time + HALL_DURATION;
-        else
-        {
-            if (g_hall0_fe_time > 0 && g_time >= g_hall0_fe_time)
-            {
-                tbi(PORTB, 5);
-                g_hall0 = 1;
-            }
-            g_hall0_fe_time = 0;
-        }
-        pcint18 = state;
-    }
+    if (state != g_hall0)
+        g_hall0 = state;
+
     state = PIND & (1<<PIND3);
-    if (state != pcint19)
-    {
-        if (state)
-            g_hall1_fe_time = g_time + HALL_DURATION;
-        else
-        {
-            if (g_hall1_fe_time > 0 && g_time >= g_hall1_fe_time)
-                g_hall1 = 1;
-            g_hall1_fe_time = 0;
-        }
-        pcint19 = state;
-    }
+    if (state != g_hall1)
+        g_hall1 = state;
+
     state = PIND & (1<<PIND4);
-    if (state != pcint20)
-    {
-        if (state)
-            g_hall2_fe_time = g_time + HALL_DURATION;
-        else
-        {
-            if (g_hall2_fe_time > 0 && g_time >= g_hall2_fe_time)
-                g_hall2 = 1;
-            g_hall2_fe_time = 0;
-        }
-        pcint20 = state;
-    }
+    if (state != g_hall2)
+        g_hall2 = state;
+
     state = PIND & (1<<PIND5);
-    if (state != pcint21)
-    {
-        if (state)
-            g_hall3_fe_time = g_time + HALL_DURATION;
-        else
-        {
-            if (g_hall3_fe_time > 0 && g_time >= g_hall3_fe_time)
-                g_hall3 = 1;
-            g_hall3_fe_time = 0;
-        }
-        pcint21 = state;
-    }
+    if (state != g_hall3)
+        g_hall3 = state;
 }
 
 void serial_init(void)
@@ -222,12 +172,11 @@ int main (void)
     for(;;)
     {
         cli();
-        h0 = g_hall0;
-        h1 = g_hall1;
-        h2 = g_hall2;
-        h3 = g_hall3;
+        h0 = g_hall0 ? 1 : 0;
+        h1 = g_hall1 ? 1 : 0;
+        h2 = g_hall2 ? 1 : 0;
+        h3 = g_hall3 ? 1 : 0;
         t = g_time;
-        g_hall0 = g_hall1 = g_hall2 = g_hall3 = 0; 
         sei();
 
         if (h0 != last_h0 || h1 != last_h1 || h2 != last_h2 || h3 != last_h3)
