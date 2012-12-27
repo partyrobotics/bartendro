@@ -31,18 +31,34 @@ class Mixer(object):
         # not in use yet
         # BUSTED = object()          # out of all booze, can't make ANY drinks
 
-    def __init__(self, driver, led_driver):
+    def __init__(self, driver):
         self.driver = driver
-        self.led_driver = led_driver
         self.err = ""
         self.disp_count = self.driver.count()
         self.mc = local.application.mc
-        self.led_driver.idle()
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
 
     def get_error(self):
         return self.err
+
+    def leds_idle(self):
+        pass
+
+    def leds_make_drink(self):
+        pass
+
+    def leds_drink_done(self):
+        pass
+
+    def led_status_out_of_booze(self):
+        pass
+
+    def led_status_warning(self):
+        pass
+
+    def led_status_all_good():
+        pass
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -80,11 +96,11 @@ class Mixer(object):
         session.commit()
 
         if new_state == Mixer.MixerState.OUT_OF_BOOZE:
-            self.led_driver.out_of_booze()
+            self.led_status_out_of_booze()
         elif new_state == Mixer.MixerState.WARNING:
-            self.led_driver.warning()
+            self.led_status_warning()
         else:
-            self.led_driver.all_good()
+            self.led_status_all_good()
 
         self.state = new_state
 
@@ -159,7 +175,6 @@ class Mixer(object):
 
     def make_drink(self, id, recipe_arg):
 
-
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
@@ -185,7 +200,7 @@ class Mixer(object):
             recipe.append(r)
         
         log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
-        self.led_driver.make_drink()
+        self.led_make_drink()
         dur = 0
         active_disp = []
         for r in recipe:
@@ -209,7 +224,7 @@ class Mixer(object):
                     break
             if done: break
 
-        self.led_driver.drink_complete()
+        self.led_drink_complete()
         log("drink complete")
 
         try:
@@ -220,18 +235,8 @@ class Mixer(object):
         except IOError:
             pass
 
-#        trouble = False
-#        for disp in xrange(self.disp_count):
-#            if not self.driver.ping(disp):
-#                error("dispenser %d failed to respond to ping" % disp)
-#                trouble = True
-#
-#        if trouble:
-#            self.driver.chain_init()
-#            log("resetting the chain!")
-
         if not self.check_liquid_levels():
-            self.led_driver.panic()
+            self.led_panic()
             return False
 
         FlashGreenLeds(self).start()
@@ -244,4 +249,4 @@ class FlashGreenLeds(Thread):
 
     def run(self):
         sleep(5);
-        self.mixer.led_driver.idle()
+        self.mixer.led_idle()

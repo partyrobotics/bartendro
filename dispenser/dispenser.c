@@ -228,7 +228,7 @@ uint8_t read_current_sense(void)
     return (uint8_t)(v / NUM_ADC_SAMPLES);
 }
 
-uint8_t read_liquid_out_sensor(void)
+uint8_t read_liquid_level_sensor(void)
 {
     uint8_t  i;
     uint16_t v = 0;

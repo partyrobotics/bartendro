@@ -37,15 +37,12 @@ class BartendroUIServer(object):
         self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         self.mc.flush_all()
 
-        self.driver = driver.MasterDriver("/dev/ttyS1", self.software_only);
+        self.driver = driver.MasterDriver("/dev/ttyAMA0", self.software_only);
         self.driver.open()
         self.driver.chain_init();
         log("Found %d dispensers." % self.driver.count())
 
-        self.led_driver = led_driver.LEDDriver("/dev/ttyACM0");
-        self.led_driver.open()
-	
-        self.mixer = mixer.Mixer(self.driver, self.led_driver)
+        self.mixer = mixer.Mixer(self.driver)
 
         self.debug_log_file = "logs/bartendro.log"
         self.access_log_file = "logs/access.log"
