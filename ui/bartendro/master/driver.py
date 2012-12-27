@@ -3,7 +3,6 @@
 import os
 from bartendro.utils import log, error, local
 from subprocess import call
-from gpio import GPIO
 from time import sleep, localtime
 import serial
 import random
@@ -34,8 +33,6 @@ class MasterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
-        self.ss = GPIO(134)
-        self.ss.setup()
         self.num_dispensers = 0
         self.cl = open("logs/comm.log", "a")
         self.software_only = software_only
@@ -72,13 +69,35 @@ class MasterDriver(object):
         self.ser.close()
         self.ser = None
 
-    def chain_init(self):
+    def crc16_update(self, crc, a):
+        crc ^= a;
+        for i in xrange(0, 8):
+            if crc & 1:
+                crc = (crc >> 1) ^ 0xA001;
+            else:
+                crc = (crc >> 1);
+
+        return crc;
+
+    def send_packet(self, packet):
+        if self.software_only: return True
+        ser.write(packet)
+        for ch in packet:
+            crc = self.crc_update(crc, ch)
+        ser.write(pack("<H", crc))
         return True
 
+    def send_packet8(self, dest, type, val):
+        return send_packet(pack("bbbbbb", dest, type, val, 0, 0, 0))
+
+    def send_packet16(self, dest, type, val):
+        return send_packet(pack("<bbHH", dest, type, val, 0))
+
+    def send_packet32(self, dest, type, val):
+        return send_packet(pack("<bbI", dest, type, val))
+
     def make_shot(self):
-        if self.software_only: return True
-        packet = pack("bbbbbbH", 0, 5, SHOT_TICKS, 0, 0, 0, 0);
-        ser.write(packet)
+        send_packet(0, PACKET_TICK_DISPENSE, 20)
         return True
 
     def count(self):
@@ -114,7 +133,6 @@ class MasterDriver(object):
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0");
     md.open()
-    md.chain_init()
     sleep(1)
     md.dispense(0, 3000);
     while md.is_dispensing(0):

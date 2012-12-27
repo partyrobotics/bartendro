@@ -88,10 +88,10 @@ class Mixer(object):
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
 
-            if dispenser.out == DISPENSER_OUT:
-                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
-            elif dispenser.out == DISPENSER_WARNING:
-                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
+#            if dispenser.out == DISPENSER_OUT:
+#                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
+#            elif dispenser.out == DISPENSER_WARNING:
+#                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
 
         session.commit()
 

@@ -39,7 +39,6 @@ class BartendroUIServer(object):
 
         self.driver = driver.MasterDriver("/dev/ttyAMA0", self.software_only);
         self.driver.open()
-        self.driver.chain_init();
         log("Found %d dispensers." % self.driver.count())
 
         self.mixer = mixer.Mixer(self.driver)

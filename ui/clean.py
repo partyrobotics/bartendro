@@ -31,7 +31,6 @@ pumps = [int(p) for p in pumps]
 
 driver = driver.MasterDriver("/dev/ttyS1", True);
 driver.open()
-driver.chain_init();
 
 print "Found %s dispensers. I hope that is right!" % driver.count()
 
