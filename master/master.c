@@ -28,7 +28,13 @@ uint8_t get_port(uint8_t port);
 uint8_t get_port_ddr(uint8_t port);
 uint8_t get_pcmsk(uint8_t msk);
 
-// TODO: Look for serial IO errors!
+// TODO:
+// THink about serial IO errors on this level.
+// check for COLLISIONS in name assignment
+// Ensure that I2C has error correction
+// Implement dispenser select
+// implement number of dispensers available
+// Implement data driven interrupt routing
 
 /*
 
@@ -367,7 +373,6 @@ uint8_t send_packet(packet_t *p)
     return 1;
 }
 
-// check for COLLISIONS
 void setup_ids(void)
 {
     packet_t p;
