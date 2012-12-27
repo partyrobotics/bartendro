@@ -1,0 +1,13 @@
+{% extends 'layout' %}
+{% block body %}
+<div style="font-size: 25pt; font-weight: bold; text-align: center; margin-bottom: 20px">ShotBot</div>
+<div style="text-align: center">
+<button style="width: 50%; height: 200px; font-size: 30pt; border-radius: 1em;" onclick="make_drink()">I want a shot!</button>
+</div>
+<script type="text/javascript">
+function make_drink()
+{
+     $.ajax({ url: "/ws/shotbot"});
+}
+</script>
+{% endblock %}

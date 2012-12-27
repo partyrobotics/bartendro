@@ -40,9 +40,7 @@ class BartendroUIServer(object):
         self.driver = driver.MasterDriver("/dev/ttyS1", self.software_only);
         self.driver.open()
         self.driver.chain_init();
-        if self.driver.count() != 15:
-            log("Found %d dispensers. Resetting chain." % self.driver.count())
-            self.driver.chain_init();
+        log("Found %d dispensers." % self.driver.count())
 
         self.led_driver = led_driver.LEDDriver("/dev/ttyACM0");
         self.led_driver.open()
