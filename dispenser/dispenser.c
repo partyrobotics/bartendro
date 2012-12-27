@@ -20,9 +20,28 @@
 static volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
+static volatile uint32_t g_ticks = 0;
+static volatile uint8_t g_hall0 = 0;
+static volatile uint8_t g_hall1 = 0;
+static volatile uint8_t g_hall2 = 0;
+static volatile uint8_t g_hall3 = 0;
+
 #define RESET_DURATION   1
 #define RECEIVE_TIMEOUT  100
 #define TIMER1_INIT      0xFFE6
+
+/*
+   0  - PD0 - RX
+   1  - PD1 - TX
+   2  - PD2 - RESET
+   3  - PD3 - LED clock
+   4  - PD4 - LED data
+   5  - PD5 - Hall 0 (pcint 21)
+   6  - PD6 - Hall 1 (pcint 22)
+   7  - PD7 - Hall 2 (pcint 23)
+   8  - PB0 - Hall 3 (pcint 0)
+   9  - PB1 - motor
+*/
 
 ISR (TIMER1_OVF_vect)
 {
@@ -42,6 +61,48 @@ ISR(INT0_vect)
         if (g_reset_fe_time > 0 && g_time >= g_reset_fe_time)
             g_reset = 1;
         g_reset_fe_time = 0;
+    }
+}
+
+ISR(PCINT0_vect)
+{
+    uint8_t      state;
+
+    state = PINB & (1<<PINB0);
+    if (state != g_hall3)
+        g_hall3 = state;
+}
+
+ISR(PCINT2_vect)
+{
+    uint8_t state;
+
+    state = PIND & (1<<PIND5);
+    if (state != g_hall0)
+    {
+        g_hall0 = state;
+        g_ticks++;
+    }
+
+    state = PIND & (1<<PIND6);
+    if (state != g_hall1)
+    {
+        g_hall1 = state;
+        g_ticks++;
+    }
+
+    state = PIND & (1<<PIND7);
+    if (state != g_hall2)
+    {
+        g_hall2 = state;
+        g_ticks++;
+    }
+
+    state = PINB & (1<<PINB0);
+    if (state != g_hall3)
+    {
+        g_hall3 = state;
+        g_ticks++;
     }
 }
 
@@ -77,7 +138,7 @@ void set_random_seed_from_eeprom(void)
 
 uint8_t receive_packet(packet_t *p)
 {
-    uint32_t timeout, now;
+    uint32_t timeout = 0, now;
     uint16_t crc = 0;
     uint8_t  i, *ch = (uint8_t *)p;
 
@@ -102,6 +163,7 @@ uint8_t receive_packet(packet_t *p)
             sei();
             if (now > timeout)
             {
+                sbi(PORTB, 5);
                 i = 0;
                 ch = (uint8_t *)p;
                 timeout = now + RECEIVE_TIMEOUT;
@@ -215,6 +277,15 @@ void setup(void)
     // Set up LEDs
     DDRD |= (1<<PD3)|(1<<PD4);
 
+    // Set up motor output
+    DDRB |= (1<<PB1);
+
+    // pull ups
+    sbi(PORTB, 5);
+    sbi(PORTB, 6);
+    sbi(PORTB, 7);
+    sbi(PORTB, 0);
+
     // Timer setup for reset pulse width measuring
     TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
     TCNT1 = TIMER1_INIT;
@@ -223,6 +294,49 @@ void setup(void)
     // INT0 for router reset
     EICRA |= (1 << ISC00);
     EIMSK |= (1 << INT0);
+
+    // PCINT setup
+    PCMSK0 |= (1 << PCINT0);
+    PCMSK2 |= (1 << PCINT21) | (1 << PCINT22) | (1 << PCINT23);
+    PCICR |=  (1 << PCIE2) | (1 << PCIE0);
+}
+
+void set_motor_state(uint8_t state)
+{
+    if (state)
+        sbi(PORTB, 1);
+    else
+        cbi(PORTB, 1);
+}
+
+void run_motor_timed(uint32_t duration)
+{
+    uint32_t t;
+
+    sbi(PORTB, 1);
+    for(t = 0; t < duration; t++)
+        _delay_ms(1);
+    cbi(PORTB, 1);
+}
+
+void run_motor_ticks(uint32_t ticks)
+{
+    uint32_t ticks_dest, ticks_now;
+
+    cli();
+    ticks_dest = g_ticks + ticks;
+    sei();
+
+    sbi(PORTB, 1);
+    for(;;)
+    {
+        cli();
+        ticks_now = g_ticks;
+        sei();
+        if (ticks_now >= ticks_dest)
+            break;
+    }
+    cbi(PORTB, 1);
 }
 
 void flash_led(uint8_t fast)
@@ -246,19 +360,23 @@ void flash_led(uint8_t fast)
 
 int main (void)
 {
-    uint8_t id;
+    uint8_t id, rec;
+    packet_t p;
 
     for(;;)
     {
         cli();
         g_reset = 0;
 
-        DDRB |= (1<< PORTB5) | (1 << PORTB1) | (1 << PORTB2) | (1 << PORTB3);
+        // Set the motor output and the on board LED as outputs
+        DDRB |= (1<< PORTB5) | (1<<PORTB1);
+
+        // Turn off the motor, in case its still running
+        cbi(PORTB, 1);
         set_led_rgb(0, 0, 0);
 
         setup();
         serial_init();
-//        led_startup();
         flash_led(1);
 
         sei();
@@ -267,11 +385,54 @@ int main (void)
         if (id == 0xFF)
             continue;
 
-        sbi(PORTB, 5);
-
+#if 0
         for(; !check_reset();)
         {
+            ch = serial_rx();
+            tbi(PORTB, 5);
+            if (ch == 'a')
+                set_led_rgb(0, 255, 0);
+            else
+                set_led_rgb(255, 0, 0);
         }
+#endif
+
+#if 1
+        for(; !check_reset();)
+        {
+            rec = receive_packet(&p);
+//            if (rec == REC_CRC_FAIL)
+//            {
+//                set_led_rgb(255, 255, 0);
+//                continue;
+//            }
+
+            if (rec == REC_RESET)
+                break;
+
+            if (p.dest == id)
+//            if (rec == REC_OK && p.dest == id)
+            {
+                switch(p.type)
+                {
+                    case PACKET_RUN_MOTOR:
+                        if (p.p.uint8[0])
+                            set_led_rgb(255, 0, 255);
+                        else
+                            set_led_rgb(0, 0, 255);
+                        set_motor_state(p.p.uint8[0]);
+                        break;
+                    case PACKET_MAKE_SHOT:
+                        if (p.p.uint8[0])
+                            set_led_rgb(255, 0, 255);
+                        else
+                            set_led_rgb(0, 0, 255);
+                        run_motor_ticks(p.p.uint8[0]);
+                        break;
+                }
+            }
+        }
+#endif
     }
     return 0;
 }

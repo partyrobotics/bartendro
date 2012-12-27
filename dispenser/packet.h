@@ -5,6 +5,8 @@
 #define PACKET_ASSIGN_ID 1
 #define PACKET_START     2
 #define PACKET_NOP       3
+#define PACKET_RUN_MOTOR 4
+#define PACKET_MAKE_SHOT 5
 #define PACKET_BROADCAST 0xFF
 
 #define REC_OK           0

@@ -122,6 +122,7 @@ ISR(PCINT0_vect)
 {
     uint8_t      state;
 
+    tbi(PORTB, 5);
     // Check for RX from the RPI
     state = PINB & (1<<PINB0);
     if (state != pcint0)
@@ -149,6 +150,7 @@ ISR(PCINT2_vect)
     state = PIND & (1<<PIND3);
     if (state != pcint19)
     {
+//    tbi(PORTB, 5);
         if (g_in_id_assignment)
         {
             if (state)
@@ -409,7 +411,7 @@ void setup_ids(void)
                 }
             }
         }
-#if 1
+#if 0
         flash_led(count == NUM_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {
@@ -443,7 +445,7 @@ void setup_ids(void)
 
     // Disable serial IO and put D2 back to output
     serial_enable(0, 0);
-    DDRD |= (1<< PORTD2);
+    DDRD |= (1<< PORTD2) | (1<< PORTD1);
 
     cli();
     g_in_id_assignment = 0;
@@ -464,3 +466,4 @@ int main (void)
     }
     return 0;
 }
+
