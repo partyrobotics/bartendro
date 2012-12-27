@@ -18,8 +18,15 @@
 #include "../dispenser/serial.h"
 #include "../dispenser/packet.h"
 
+#if F_CPU == 16000000UL
+#define    TIMER1_INIT      0xFFE6
+#define    TIMER1_FLAGS     _BV(CS01)|(1<<CS00); // 16Mhz / 64 / 25 = .0001 per tick
+#else
+#define    TIMER1_INIT      0xFFFC
+#define    TIMER1_FLAGS     _BV(CS01)|(1<<CS00); // 8Mhz / 256 / 3 = .000096 per tick
+#endif
+
 #define NUM_DISPENSERS   2
-#define TIMER1_INIT      0xFFE6 
 #define RESET_DURATION   1
 
 void    set_pin(uint8_t port, uint8_t pin);
@@ -326,7 +333,7 @@ void setup(void)
     PCICR |=  (1 << PCIE0) | (1 << PCIE2);
 
     // Timer setup for reset pulse width measuring
-    TCCR1B |= _BV(CS11)|(1<<CS10); // clock / 64 / 25 = .0001 per tick
+    TCCR1B |= TIMER1_FLAGS;
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
 
