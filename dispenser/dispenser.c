@@ -18,11 +18,11 @@
 #include "led.h"
 
 #if F_CPU == 16000000UL
-#define    TIMER0_INIT      0xE6
-#define    TIMER0_FLAGS     _BV(CS01)|(1<<CS00); // 16Mhz / 64 / 25 = .0001 per tick
+#define    TIMER1_INIT      0xFFE6
+#define    TIMER1_FLAGS     _BV(CS11)|(1<<CS10); // 16Mhz / 64 / 25 = .0001 per tick
 #else
-#define    TIMER0_INIT      0xFC
-#define    TIMER0_FLAGS     _BV(CS01)|(1<<CS00); // 8Mhz / 256 / 3 = .000096 per tick
+#define    TIMER1_INIT      0xFFFC
+#define    TIMER1_FLAGS     _BV(CS11)|(1<<CS10); // 8Mhz / 256 / 3 = .000096 per tick
 #endif
 
 static volatile uint32_t g_time = 0;
@@ -41,7 +41,6 @@ uint32_t EEMEM _ee_run_time;
 #define RESET_DURATION   1
 #define RECEIVE_TIMEOUT  100
 #define NUM_ADC_SAMPLES 5
-#define TIMER1_INIT      0xFFE6
 
 /*
    0  - PD0 - RX
@@ -49,63 +48,60 @@ uint32_t EEMEM _ee_run_time;
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-   5  - PD5 - Hall 0 (pcint 21)
-   6  - PD6 - Hall 1 (pcint 22)
-   7  - PD7 - Hall 2 (pcint 23)
-   8  - PB0 - Hall 3 (pcint 0)
-   9  - PB1 - motor
+   5  - PD5 - motor PWM out
+   6  - PD6 - Hall 0 (pcint 22)
+   7  - PD7 - Hall 1 (pcint 23)
+   8  - PB0 - Hall 2 (pcint 1)
+   9  - PB1 - Hall 3 (pcint 0) 
   10  - PB2 - SYNC 
   A0  - PA0 - CS
   A1  - PA1 - liquid level
 
 */
-
 void setup(void)
 {
-    // Set up LEDs
-    DDRD |= (1<<PD3)|(1<<PD4);
+    // Set up LEDs & motor out
+    DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
 
-    // Set up motor output
-    DDRB |= (1<<PB1);
+    // Set up on board LED output
+    DDRB |= (1<<PB5);
 
     // pull ups
-    sbi(PORTB, 5);
-    sbi(PORTB, 6);
-    sbi(PORTB, 7);
+    sbi(PORTD, 6);
+    sbi(PORTD, 7);
     sbi(PORTB, 0);
+    sbi(PORTB, 1);
 
     // Timer setup for reset pulse width measuring
-    TCCR0B |= TIMER0_FLAGS;
-    TCNT0 = TIMER0_INIT;
-    TIMSK0 |= (1<<TOIE0);
+    TCCR1B |= TIMER1_FLAGS;
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
 
-    /* Set to Phase correct PWM */
-    TCCR1A |= _BV(WGM10);
-
-    // Set the compare output mode
-    TCCR1A |= _BV(COM1A1);
-
-    // Reset timers and comparators
-    OCR1A = 0;
-    TCNT1 = 0;
+    // Set to Phase correct PWM, compare output mode
+    TCCR0A |= _BV(WGM00) | _BV(COM0B1);
 
     // Set the clock source
-    TCCR1B |= _BV(CS00) | _BV(CS01);
+    TCCR0B |= _BV(CS00) | _BV(CS01);
+
+    // Reset timers and comparators
+    OCR0B = 0;
+    TCNT0 = 0;
+
     // INT0 for router reset
     EICRA |= (1 << ISC00);
     EIMSK |= (1 << INT0);
 
     // PCINT setup
-    PCMSK0 |= (1 << PCINT0);
-    PCMSK2 |= (1 << PCINT21) | (1 << PCINT22) | (1 << PCINT23);
+    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1);
+    PCMSK2 |= (1 << PCINT22) | (1 << PCINT23);
     PCICR |=  (1 << PCIE2) | (1 << PCIE0);
 }
 
 // update g_time
-ISR (TIMER0_OVF_vect)
+ISR (TIMER1_OVF_vect)
 {
     g_time++;
-    TCNT0 = TIMER0_INIT;
+    TCNT1 = TIMER1_INIT;
 }
 
 // reset pin change
@@ -128,41 +124,38 @@ ISR(PCINT0_vect)
     uint8_t      state;
 
     state = PINB & (1<<PINB0);
-    if (state != g_hall3)
-        g_hall3 = state;
-}
-
-ISR(PCINT2_vect)
-{
-    uint8_t state;
-
-    state = PIND & (1<<PIND5);
-    if (state != g_hall0)
-    {
-        g_hall0 = state;
-        g_ticks++;
-    }
-
-    state = PIND & (1<<PIND6);
-    if (state != g_hall1)
-    {
-        g_hall1 = state;
-        g_ticks++;
-    }
-
-    state = PIND & (1<<PIND7);
     if (state != g_hall2)
     {
         g_hall2 = state;
         g_ticks++;
     }
 
-    state = PINB & (1<<PINB0);
+    state = PINB & (1<<PINB1);
     if (state != g_hall3)
     {
         g_hall3 = state;
         g_ticks++;
     }
+}
+
+ISR(PCINT2_vect)
+{
+    uint8_t state;
+
+    state = PIND & (1<<PIND6);
+    if (state != g_hall0)
+    {
+        g_hall0 = state;
+        g_ticks++;
+    }
+
+    state = PIND & (1<<PIND7);
+    if (state != g_hall1)
+    {
+        g_hall1 = state;
+        g_ticks++;
+    }
+
 }
 
 uint8_t check_reset(void)
@@ -243,18 +236,18 @@ uint8_t read_liquid_level_sensor(void)
 
 void set_motor_speed(uint8_t speed)
 {
-    OCR1A = speed;
+    OCR0B = speed;
 }
 
 void run_motor_timed(uint32_t duration)
 {
     uint32_t t;
 
-    set_led_rgb(0, 255, 255);
-    sbi(PORTB, 1);
-    for(t = 0; t < duration; t++)
+    set_led_rgb(255, 0, 255);
+    set_motor_speed(128);
+    for(t = 0; t < duration && !check_reset(); t++)
         _delay_ms(1);
-    cbi(PORTB, 1);
+    set_motor_speed(0);
     set_led_rgb(0, 255, 0);
 }
 
@@ -266,9 +259,9 @@ void run_motor_ticks(uint32_t ticks)
     ticks_dest = g_ticks + ticks;
     sei();
 
-    set_led_rgb(255, 255, 255);
-    sbi(PORTB, 1);
-    for(;;)
+    set_led_rgb(255, 0, 255);
+    set_motor_speed(255);
+    for(; !check_reset();)
     {
         cli();
         ticks_now = g_ticks;
@@ -276,7 +269,7 @@ void run_motor_ticks(uint32_t ticks)
         if (ticks_now >= ticks_dest)
             break;
     }
-    cbi(PORTB, 1);
+    set_motor_speed(0);
     set_led_rgb(0, 255, 0);
 }
 
@@ -335,7 +328,6 @@ uint8_t receive_packet(packet_t *p)
             sei();
             if (now > timeout)
             {
-                sbi(PORTB, 5);
                 i = 0;
                 ch = (uint8_t *)p;
                 timeout = now + RECEIVE_TIMEOUT;
@@ -369,7 +361,7 @@ uint8_t get_address(void)
     // Pick a random 8-bit number
     id = random() % 255;
 
-    set_led_rgb(255, 0, 0);
+    set_led_rgb(0, 0, 255);
     receive_packet(&p);
 
     for(;;)
@@ -377,7 +369,7 @@ uint8_t get_address(void)
         rec = receive_packet(&p);
         if (rec == REC_CRC_FAIL)
         {
-            set_led_rgb(255, 255, 255);
+            set_led_rgb(255, 255, 0);
             continue;
         }
         if (rec == REC_RESET)
@@ -388,11 +380,8 @@ uint8_t get_address(void)
 
         if (p.p.uint8[0] == id)
         {
-            set_led_rgb(255, 0, 255);
-            sbi(PORTB, 5);
             sbi(PORTD, 1);
             _delay_ms(RESET_DURATION + RESET_DURATION);
-            cbi(PORTB, 5);
             cbi(PORTD, 1);
         }
     }
@@ -420,7 +409,6 @@ uint8_t get_address(void)
     for(;;)
     {
         rec = receive_packet(&p);
-        set_led_rgb(0, 255, 255);
         if (rec == REC_CRC_FAIL)
         {
             set_led_rgb(255, 255, 0);
@@ -442,6 +430,7 @@ uint8_t get_address(void)
 
     return id;
 }
+
 void flash_led(uint8_t fast)
 {
     int i;
@@ -471,16 +460,10 @@ int main (void)
         cli();
         g_reset = 0;
 
-        // Set the motor output and the on board LED as outputs
-        DDRB |= (1<< PORTB5) | (1<<PORTB1);
-
-        // Turn off the motor, in case its still running
-        cbi(PORTB, 1);
-        set_led_rgb(0, 0, 0);
-
         setup();
-        serial_init();
         flash_led(1);
+        serial_init();
+        set_led_rgb(0, 0, 0);
 
         sei();
 
@@ -488,17 +471,7 @@ int main (void)
         if (id == 0xFF)
             continue;
 
-#if 0
-        for(; !check_reset();)
-        {
-            ch = serial_rx();
-            tbi(PORTB, 5);
-            if (ch == 'a')
-                set_led_rgb(0, 255, 0);
-            else
-                set_led_rgb(255, 0, 0);
-        }
-#else
+
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
@@ -527,7 +500,6 @@ int main (void)
                 }
             }
         }
-#endif
     }
     return 0;
 }
