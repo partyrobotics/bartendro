@@ -7,10 +7,12 @@ from gpio import GPIO
 from time import sleep, localtime
 import serial
 import random
+from struct import pack
 
 BAUD_RATE = 38400
 
 MAX_DISPENSERS = 15
+SHOT_TICKS     = 20
 
 class SttyNotFoundException:
     pass
@@ -74,6 +76,9 @@ class MasterDriver(object):
         return True
 
     def make_shot(self):
+        if self.software_only: return True
+        packet = pack("bbbbbbH", 0, 5, SHOT_TICKS, 0, 0, 0, 0);
+        ser.write(packet)
         return True
 
     def count(self):
