@@ -1,13 +1,14 @@
 #ifndef __PACKET_H__
 #define __PACKET_H__
 
-#define PACKET_FIND_ID   0
-#define PACKET_ASSIGN_ID 1
-#define PACKET_START     2
-#define PACKET_NOP       3
-#define PACKET_RUN_MOTOR 4
-#define PACKET_MAKE_SHOT 5
-#define PACKET_BROADCAST 0xFF
+#define PACKET_FIND_ID         0
+#define PACKET_ASSIGN_ID       1
+#define PACKET_START           2
+#define PACKET_NOP             3
+#define PACKET_SET_MOTOR_SPEED 4
+#define PACKET_TICK_DISPENSE   5
+#define PACKET_TIME_DISPENSE   6
+#define PACKET_BROADCAST       0xFF
 
 #define REC_OK           0
 #define REC_CRC_FAIL     1
