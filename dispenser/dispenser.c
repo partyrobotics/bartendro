@@ -221,6 +221,10 @@ uint8_t read_liquid_level_sensor(void)
 void set_motor_speed(uint8_t speed)
 {
     OCR0B = speed;
+    if (speed)
+        set_led_rgb(255, 0, 255);
+    else
+        set_led_rgb(0, 255, 0);
 }
 
 void run_motor_timed(uint32_t duration)
@@ -228,7 +232,7 @@ void run_motor_timed(uint32_t duration)
     uint32_t t;
 
     set_led_rgb(255, 0, 255);
-    set_motor_speed(128);
+    set_motor_speed(255);
     for(t = 0; t < duration && !check_reset(); t++)
         _delay_ms(1);
     set_motor_speed(0);
