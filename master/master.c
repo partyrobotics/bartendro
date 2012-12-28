@@ -373,7 +373,7 @@ void setup_ids(void)
             sei();
 
             serial_tx(i);
-            _delay_ms(5);
+            _delay_ms(3);
             for(j = 0; j < NUM_DISPENSERS; j++)
             {
                 cli();
@@ -386,7 +386,7 @@ void setup_ids(void)
                 }
             }
         }
-
+#if 0
         flash_led(count == NUM_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {
@@ -395,6 +395,7 @@ void setup_ids(void)
             cbi(PORTB, 2);
             _delay_ms(200);
         }
+#endif
         if (count == NUM_DISPENSERS)
             break;
 

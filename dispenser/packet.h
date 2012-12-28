@@ -4,7 +4,7 @@
 #define PACKET_FIND_ID         0
 #define PACKET_ASSIGN_ID       1
 #define PACKET_START           2
-#define PACKET_NOP             3
+#define PACKET_PING            3
 #define PACKET_SET_MOTOR_SPEED 4
 #define PACKET_TICK_DISPENSE   5
 #define PACKET_TIME_DISPENSE   6

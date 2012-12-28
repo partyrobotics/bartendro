@@ -372,6 +372,7 @@ int main (void)
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
+            tbi(PORTB, 5);
             if (rec == REC_CRC_FAIL)
             {
                 set_led_rgb(255, 255, 0);
@@ -385,6 +386,11 @@ int main (void)
             {
                 switch(p.type)
                 {
+                    case PACKET_PING:
+                        set_led_rgb(0, 0, 255);
+                        _delay_ms(100);
+                        set_led_rgb(0, 255, 0);
+                        break;
                     case PACKET_SET_MOTOR_SPEED:
                         set_motor_speed(p.p.uint8[0]);
                         break;
