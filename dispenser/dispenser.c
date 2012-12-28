@@ -267,7 +267,8 @@ void set_random_seed_from_eeprom(void)
 
 uint8_t get_address(void)
 {
-    uint8_t  id, rec, cur_id, new_id, ch;
+    uint8_t  rec, ch;
+    uint8_t  id, old_id, new_id, my_new_id = 255;
 
     set_random_seed_from_eeprom();
 
@@ -298,17 +299,16 @@ uint8_t get_address(void)
         if (ch == 255)
             break;
     }
-    set_led_rgb(255, 0, 255);
     for(;;)
     {
         for(;;)
         {
-            if (serial_rx_nb(&cur_id))
+            if (serial_rx_nb(&old_id))
                 break;
             if (check_reset())
                 return 0xFF;
         }
-        if (cur_id == 0xFF)
+        if (old_id == 0xFF)
             break;
 
         for(;;)
@@ -318,15 +318,18 @@ uint8_t get_address(void)
             if (check_reset())
                 return 0xFF;
         }
-        if (cur_id == id)
-            id = new_id;
+        if (id == old_id)
+            my_new_id = new_id;
     }
-    set_led_rgb(0, 255, 0);
+    if (my_new_id == 0xFF || my_new_id > 14 || my_new_id == id)
+        set_led_rgb(255, 0, 0);
+    else
+        set_led_rgb(0, 255, 0);
 
     // Switch to using sending serial data
     serial_enable(1, 1);
 
-    return id;
+    return my_new_id;
 }
 
 void flash_led(uint8_t fast)
@@ -372,7 +375,6 @@ int main (void)
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
-            tbi(PORTB, 5);
             if (rec == REC_CRC_FAIL)
             {
                 set_led_rgb(255, 255, 0);
@@ -384,6 +386,7 @@ int main (void)
 
             if (rec == REC_OK && p.dest == id)
             {
+                tbi(PORTB, 5);
                 switch(p.type)
                 {
                     case PACKET_PING:
