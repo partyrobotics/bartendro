@@ -8,4 +8,3 @@ from bartendro.master import driver
 
 driver = driver.MasterDriver("/dev/ttyACM0", True);
 driver.open()
-driver.chain_init();

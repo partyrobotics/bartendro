@@ -9,7 +9,6 @@ from bartendro.form.booze import BoozeForm
 @expose('/ws/reset')
 def ws_reset(request):
     driver = local.application.driver
-    driver.chain_init()
     driver.led(255, 0, 0, 255)
     mc = local.application.mc
     mc.delete("top_drinks")

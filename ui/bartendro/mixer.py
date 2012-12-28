@@ -72,10 +72,10 @@ class Mixer(object):
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
 
-            if dispenser.out == DISPENSER_OUT:
-                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
-            elif dispenser.out == DISPENSER_WARNING:
-                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
+#            if dispenser.out == DISPENSER_OUT:
+#                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
+#            elif dispenser.out == DISPENSER_WARNING:
+#                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
 
         session.commit()
 
@@ -219,16 +219,6 @@ class Mixer(object):
             drinklog.close()
         except IOError:
             pass
-
-#        trouble = False
-#        for disp in xrange(self.disp_count):
-#            if not self.driver.ping(disp):
-#                error("dispenser %d failed to respond to ping" % disp)
-#                trouble = True
-#
-#        if trouble:
-#            self.driver.chain_init()
-#            log("resetting the chain!")
 
         if not self.check_liquid_levels():
             self.led_driver.panic()
