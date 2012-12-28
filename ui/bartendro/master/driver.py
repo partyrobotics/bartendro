@@ -52,6 +52,7 @@ class MasterDriver(object):
         if self.software_only: return
 
         try:
+            print "Opening %s" % self.device
             self.ser = serial.Serial(self.device, 
                                      BAUD_RATE, 
                                      bytesize=serial.EIGHTBITS, 
@@ -81,23 +82,24 @@ class MasterDriver(object):
 
     def send_packet(self, packet):
         if self.software_only: return True
-        ser.write(packet)
+        self.ser.write(packet)
+        crc = 0
         for ch in packet:
-            crc = self.crc_update(crc, ch)
-        ser.write(pack("<H", crc))
+            crc = self.crc16_update(crc, ord(ch))
+        self.ser.write(pack("<H", crc))
         return True
 
     def send_packet8(self, dest, type, val):
-        return send_packet(pack("bbbbbb", dest, type, val, 0, 0, 0))
+        return self.send_packet(pack("bbbbbb", dest, type, val, 0, 0, 0))
 
     def send_packet16(self, dest, type, val):
-        return send_packet(pack("<bbHH", dest, type, val, 0))
+        return self.send_packet(pack("<bbHH", dest, type, val, 0))
 
     def send_packet32(self, dest, type, val):
-        return send_packet(pack("<bbI", dest, type, val))
+        return self.send_packet(pack("<bbI", dest, type, val))
 
     def make_shot(self):
-        send_packet(0, PACKET_TICK_DISPENSE, 20)
+        self.send_packet32(0, 5, 80)
         return True
 
     def count(self):
