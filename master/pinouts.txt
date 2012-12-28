@@ -1,0 +1,23 @@
+Pro mini pin - atmel pin - description (comment):
+0 - D0 - dispensers TX (needs fan-out * 15)
+1 - D1 - dispenser RX 0 (PCINT17)
+2 - D2 - dispensers RST (needs fan-out * 15)
+3 - D3 - dispenser RX 1(PCINT19)
+4 - D4 - dispenser RX 2 (PCINT20)
+5 - D5 - dispenser RX 3 (PCINT21)
+6 - D6 - dispenser RX 4 (PCINT22)
+7 - D7 - dispenser RX 5 (PCINT23)
+8 - PB0 - RPI RX
+9 - PB1 - RPI TX
+10 - PB2 - dispenser RX 6 (PCINT2)
+11 - PB3 - dispenser RX 7 (PCINT3)
+12 - PB4 - dispenser RX 8 (PCINT4)
+13 - PB5 - dispenser RX 9 (PCINT5)
+---  - PB6 - dispenser RX 10 (PCINT6)
+---  - PB7 - dispenser RX 11 (PCINT7)
+A0 - PC0 - dispenser RX 12 (PCINT8)
+A1 - PC1 - dispenser RX 13 (PCINT9)
+A2 - PC2 - dispenser RX 14 (PCINT10)
+A3 - PC3 - SYNC (PCINT11)
+A4 - PC4 - RPI SDA 
+A5 - PC5 - RPI SCL

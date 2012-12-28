@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#include <util/crc16.h>
 
 #include <stddef.h>
 #include <math.h>
@@ -25,7 +24,7 @@
 #define    TIMER1_FLAGS     _BV(CS11)|(1<<CS10); // 8Mhz / 256 / 3 = .000096 per tick
 #endif
 
-static volatile uint32_t g_time = 0;
+volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
 static volatile uint32_t g_ticks = 0;
@@ -39,7 +38,6 @@ uint32_t EEMEM _ee_random_number;
 uint32_t EEMEM _ee_run_time;
 
 #define RESET_DURATION   1
-#define RECEIVE_TIMEOUT  100
 #define NUM_ADC_SAMPLES 5
 
 /*
@@ -169,20 +167,6 @@ uint8_t check_reset(void)
     return reset;
 }
 
-uint8_t serial_rx_check_reset()
-{
-    while ( !(UCSR0A & (1<<RXC0)) && !check_reset()) 
-         ;
-
-    return UDR0;
-}
-
-void serial_tx_check_reset(uint8_t ch)
-{
-    while ((!( UCSR0A & (1<<UDRE0))) && !check_reset());
-    UDR0 = ch;
-}
-
 void adc_setup(void)
 {
     ADCSRA = (1 << ADPS1);
@@ -281,76 +265,9 @@ void set_random_seed_from_eeprom(void)
     srandom(r);
 }
 
-uint8_t send_packet(packet_t *p)
-{
-    uint16_t crc = 0;
-    uint8_t i, *ch = (uint8_t *)p;
-
-    crc = _crc16_update(crc, p->dest);
-    crc = _crc16_update(crc, p->type);
-    crc = _crc16_update(crc, p->p.uint8[0]);
-    crc = _crc16_update(crc, p->p.uint8[1]);
-    crc = _crc16_update(crc, p->p.uint8[2]);
-    p->crc = _crc16_update(crc, p->p.uint8[3]);
-    for(i = 0; i < sizeof(packet_t) && !check_reset(); i++, ch++)
-        serial_tx_check_reset(*ch);
-
-    if (check_reset())
-        return 0;
-
-    return 1;
-}
-
-uint8_t receive_packet(packet_t *p)
-{
-    uint32_t timeout = 0, now;
-    uint16_t crc = 0;
-    uint8_t  i, *ch = (uint8_t *)p;
-
-    i = UDR0; // read whatever might be leftover
-    for(i = 0; i < sizeof(packet_t); i++, ch++)
-    {
-        *ch = serial_rx_check_reset();
-        if (check_reset())
-            return REC_RESET;
-
-        if (i == 0)
-        {
-            cli();
-            timeout = g_time;
-            sei();
-            timeout += RECEIVE_TIMEOUT;
-        }
-        else
-        {
-            cli();
-            now = g_time;
-            sei();
-            if (now > timeout)
-            {
-                i = 0;
-                ch = (uint8_t *)p;
-                timeout = now + RECEIVE_TIMEOUT;
-            }
-        }
-    }
-
-    crc = _crc16_update(crc, p->dest);
-    crc = _crc16_update(crc, p->type);
-    crc = _crc16_update(crc, p->p.uint8[0]);
-    crc = _crc16_update(crc, p->p.uint8[1]);
-    crc = _crc16_update(crc, p->p.uint8[2]);
-    crc = _crc16_update(crc, p->p.uint8[3]);
-    if (crc != p->crc)
-        return REC_CRC_FAIL;
-
-    return REC_OK;
-}
-
 uint8_t get_address(void)
 {
-    uint8_t  id, rec;
-    packet_t p;
+    uint8_t  id, rec, cur_id, new_id, ch;
 
     set_random_seed_from_eeprom();
 
@@ -362,70 +279,51 @@ uint8_t get_address(void)
     id = random() % 255;
 
     set_led_rgb(0, 0, 255);
-    receive_packet(&p);
-
     for(;;)
     {
-        rec = receive_packet(&p);
-        if (rec == REC_CRC_FAIL)
+        for(;;)
         {
-            set_led_rgb(255, 255, 0);
-            continue;
+            if (serial_rx_nb(&ch))
+                break;
+            if (check_reset())
+                return 0xFF;
         }
-        if (rec == REC_RESET)
-            return 0xFF;
 
-        if (p.type == PACKET_ASSIGN_ID)
-            break;
-
-        if (p.p.uint8[0] == id)
+        if (ch == id)
         {
             sbi(PORTD, 1);
             _delay_ms(RESET_DURATION + RESET_DURATION);
             cbi(PORTD, 1);
         }
-    }
-
-    // We haven't processed the previous packet yet
-    for(;;)
-    {
-        if (p.type == PACKET_ASSIGN_ID && p.dest == id)
-                break;
-
-        rec = receive_packet(&p);
-        if (rec == REC_CRC_FAIL)
-        {
-            set_led_rgb(255, 255, 0);
-            for(;!check_reset();)
-                ;
-            return 0xFF;
-        }
-        if (rec == REC_RESET)
-            return 0xFF;
-    }
-    id = p.p.uint8[0];
-    set_led_rgb(0, 0, 255);
-
-    for(;;)
-    {
-        rec = receive_packet(&p);
-        if (rec == REC_CRC_FAIL)
-        {
-            set_led_rgb(255, 255, 0);
-            for(;!check_reset();)
-                ;
-            return 0xFF;
-        }
-        if (rec == REC_RESET)
-        {
-            return 0xFF;
-        }
-
-        if (p.type == PACKET_START)
+        if (ch == 255)
             break;
+    }
+    set_led_rgb(255, 0, 255);
+    for(;;)
+    {
+        for(;;)
+        {
+            if (serial_rx_nb(&cur_id))
+                break;
+            if (check_reset())
+                return 0xFF;
+        }
+        if (cur_id == 0xFF)
+            break;
+
+        for(;;)
+        {
+            if (serial_rx_nb(&new_id))
+                break;
+            if (check_reset())
+                return 0xFF;
+        }
+        if (cur_id == id)
+            id = new_id;
     }
     set_led_rgb(0, 255, 0);
 
+    // Switch to using sending serial data
     serial_enable(1, 1);
 
     return id;
@@ -470,7 +368,6 @@ int main (void)
         id = get_address();
         if (id == 0xFF)
             continue;
-
 
         for(; !check_reset();)
         {

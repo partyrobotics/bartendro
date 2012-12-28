@@ -10,6 +10,11 @@
 #define PACKET_TIME_DISPENSE   6
 #define PACKET_BROADCAST       0xFF
 
+#define PACKET_ACK_OK          0
+#define PACKET_ACK_CRC_FAIL    1
+#define PACKET_ACK_TIMEOUT     2
+
+
 #define REC_OK           0
 #define REC_CRC_FAIL     1
 #define REC_RESET        2
