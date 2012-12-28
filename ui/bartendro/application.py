@@ -9,7 +9,7 @@ from werkzeug import SharedDataMiddleware
 
 from bartendro.utils import session, metadata, local, local_manager, url_map, log, error
 from bartendro.views import view_map
-from bartendro.master import driver, led_driver
+from bartendro.master import driver
 from bartendro import mixer
 import bartendro.models
 
