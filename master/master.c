@@ -199,7 +199,8 @@ ISR(PCINT2_vect)
 ISR (TIMER1_OVF_vect)
 {
     g_time++;
-    tbi(PORTD, 7);
+    if (g_sync)
+        tbi(PORTD, 7);
     TCNT1 = TIMER1_INIT;
 }
 
@@ -442,6 +443,10 @@ uint8_t setup_ids(void)
     return count;
 }
 
+void idle(void)
+{
+}
+
 int main (void)
 {
     uint8_t reset = 0, count;
@@ -451,6 +456,7 @@ int main (void)
         DDRB |= (1 << PORTB5) | (1 << PORTB2);
         DDRD |= (1 << PORTD2);
         flash_led(1);
+        g_sync = 0;
 
         reset_dispensers();
         setup();

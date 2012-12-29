@@ -24,6 +24,15 @@
 #define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
 #endif
 
+
+// EEprom data 
+uint32_t EEMEM _ee_random_number;
+uint32_t EEMEM _ee_run_time;
+
+#define RESET_DURATION  1
+#define SYNC_COUNT      10 // Every SYNC_INIT ms we will change the color animation
+#define NUM_ADC_SAMPLES 5
+
 volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
@@ -33,13 +42,7 @@ static volatile uint8_t g_hall1 = 0;
 static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
-
-// EEprom data 
-uint32_t EEMEM _ee_random_number;
-uint32_t EEMEM _ee_run_time;
-
-#define RESET_DURATION   1
-#define NUM_ADC_SAMPLES 5
+static volatile uint32_t g_sync_count = 0;
 
 /*
    0  - PD0 - RX
@@ -139,10 +142,7 @@ ISR(PCINT0_vect)
     state = PINB & (1<<PINB2);
     if (state != g_sync)
     {
-        if (state)
-            sbi(PORTB, 5);
-        else
-            cbi(PORTB, 5);
+        g_sync_count++;
         g_sync = state;
     }
 }
@@ -176,6 +176,29 @@ uint8_t check_reset(void)
     sei();
 
     return reset;
+}
+
+void idle(void)
+{
+    color_t c;
+    uint8_t animate = 0;
+    static uint32_t t = 0;
+
+    cli();
+    if (g_sync_count >= SYNC_COUNT)
+    {
+        g_sync_count = 0;
+        animate = 1;
+    }
+    sei();
+
+    if (animate)
+    {
+        // do some animation!
+        panic(t, &c);
+        set_led_rgb_no_delay(c.red, c.green, c.blue);
+        t++;
+    }
 }
 
 void adc_setup(void)
@@ -232,22 +255,16 @@ uint8_t read_liquid_level_sensor(void)
 void set_motor_speed(uint8_t speed)
 {
     OCR0B = speed;
-    if (speed)
-        set_led_rgb(255, 0, 255);
-    else
-        set_led_rgb(0, 255, 0);
 }
 
 void run_motor_timed(uint32_t duration)
 {
     uint32_t t;
 
-    set_led_rgb(255, 0, 255);
     set_motor_speed(255);
     for(t = 0; t < duration && !check_reset(); t++)
         _delay_ms(1);
     set_motor_speed(0);
-    set_led_rgb(0, 255, 0);
 }
 
 void run_motor_ticks(uint32_t ticks)
@@ -258,7 +275,6 @@ void run_motor_ticks(uint32_t ticks)
     ticks_dest = g_ticks + ticks;
     sei();
 
-    set_led_rgb(255, 0, 255);
     set_motor_speed(255);
     for(; !check_reset();)
     {
@@ -267,9 +283,9 @@ void run_motor_ticks(uint32_t ticks)
         sei();
         if (ticks_now >= ticks_dest)
             break;
+        idle();
     }
     set_motor_speed(0);
-    set_led_rgb(0, 255, 0);
 }
 
 void set_random_seed_from_eeprom(void)
@@ -387,21 +403,11 @@ int main (void)
         if (id == 0xFF)
             continue;
 
-//        for(; !check_reset();)
-//        {
-//            rec = serial_rx();
-//            tbi(PORTB, 5);
-//            serial_tx(rec);
-//        }
-
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
             if (rec == REC_CRC_FAIL)
-            {
-                set_led_rgb(255, 255, 0);
                 continue;
-            }
 
             if (rec == REC_RESET)
                 break;
@@ -411,9 +417,6 @@ int main (void)
                 switch(p.type)
                 {
                     case PACKET_PING:
-                        set_led_rgb(0, 0, 255);
-                        _delay_ms(100);
-                        set_led_rgb(0, 255, 0);
                         break;
                     case PACKET_SET_MOTOR_SPEED:
                         set_motor_speed(p.p.uint8[0]);
@@ -424,6 +427,8 @@ int main (void)
                     case PACKET_TIME_DISPENSE:
                         run_motor_timed(p.p.uint32);
                         break;
+//                    case PACKET_LED_IDLE:
+
                 }
             }
         }

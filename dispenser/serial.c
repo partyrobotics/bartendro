@@ -10,6 +10,7 @@
 
 extern uint8_t check_reset(void);
 extern volatile uint32_t g_time;
+extern void idle(void);
 
 void serial_init(void)
 {
@@ -104,7 +105,6 @@ uint8_t receive_packet(packet_t *p)
                 sei();
                 if (timeout > 0 && now > timeout)
                 {
-                    sbi(PORTB, 5);
                     i = 0;
                     ch = (uint8_t *)p;
                     timed_out = 1;
@@ -119,6 +119,7 @@ uint8_t receive_packet(packet_t *p)
                     }
                     break;
                 }
+                idle();
             }
             if (timed_out)
                 break;
@@ -145,6 +146,7 @@ uint8_t receive_packet(packet_t *p)
                 return REC_RESET;
             if (ret)
                 break;
+            idle();
         }
         return REC_OK;
     }
@@ -177,7 +179,6 @@ uint8_t send_packet(packet_t *p)
                     break;
             }
         }
-        sbi(PORTB, 5);
         for(;;)
         {
             ret = serial_rx_nb(&ack);
