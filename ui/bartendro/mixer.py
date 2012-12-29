@@ -9,7 +9,7 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 
-TICKS_PER_ML = 671
+TICKS_PER_ML = 1
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
@@ -42,13 +42,13 @@ class Mixer(object):
     def get_error(self):
         return self.err
 
-    def leds_idle(self):
+    def led_idle(self):
         pass
 
-    def leds_make_drink(self):
+    def led_make_drink(self):
         pass
 
-    def leds_drink_done(self):
+    def led_drink_complete(self):
         pass
 
     def led_status_out_of_booze(self):
@@ -57,7 +57,7 @@ class Mixer(object):
     def led_status_warning(self):
         pass
 
-    def led_status_all_good():
+    def led_status_all_good(self):
         pass
 
     def can_make_drink(self, boozes, booze_dict):
@@ -236,7 +236,7 @@ class Mixer(object):
             pass
 
         if not self.check_liquid_levels():
-            self.led_panic()
+            self.leds_panic()
             return False
 
         FlashGreenLeds(self).start()

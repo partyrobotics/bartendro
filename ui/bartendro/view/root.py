@@ -18,7 +18,7 @@ def filter_drink_list(can_make_dict, drinks):
             pass
     return filtered
 
-@expose('/bartendro')
+@expose('/')
 def index(request):
     mixer = local.application.mixer
 
