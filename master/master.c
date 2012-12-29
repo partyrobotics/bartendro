@@ -19,11 +19,11 @@
 #include "../dispenser/packet.h"
 
 #if F_CPU == 16000000UL
-#define    TIMER1_INIT      0xFFE6
-#define    TIMER1_FLAGS     _BV(CS01)|(1<<CS00); // 16Mhz / 64 / 25 = .0001 per tick
+#define    TIMER1_INIT      0xFFEF
+#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 16Mhz / 1024 / 16 = .001024 per tick
 #else
-#define    TIMER1_INIT      0xFFFC
-#define    TIMER1_FLAGS     _BV(CS01)|(1<<CS00); // 8Mhz / 256 / 3 = .000096 per tick
+#define    TIMER1_INIT      0xFFF7
+#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
 #endif
 
 #define MAX_DISPENSERS   15 
@@ -60,12 +60,14 @@ uint8_t get_pcmsk(uint8_t msk);
        PD2 -> RESET
        PD1 -> TX
        PD3 -> RX (pcint19)
+       PD7 -> SYNC
 
    Dispenser 1:
 
        PD2 -> RESET
        PD1 -> TX
        PD4 -> RX (pcint20)
+       PD7 -> SYNC
 
 */
 
@@ -135,6 +137,7 @@ volatile uint32_t g_rx_pcint19_fe_time = 0;
 volatile uint32_t g_rx_pcint20_fe_time = 0;
 volatile uint8_t  g_dispenser_rx[MAX_DISPENSERS];
 volatile uint8_t  g_in_id_assignment;
+volatile uint8_t  g_sync = 0;
 
 ISR(PCINT2_vect)
 {
@@ -196,6 +199,7 @@ ISR(PCINT2_vect)
 ISR (TIMER1_OVF_vect)
 {
     g_time++;
+    tbi(PORTD, 7);
     TCNT1 = TIMER1_INIT;
 }
 
@@ -311,6 +315,9 @@ void setup(void)
     // TX to dispensers
     DDRD |= (1<< PORTD2);
 
+    // SYNC to dispensers
+    DDRD |= (1<< PORTD7);
+
     // PCINT setup
     PCMSK0 |= (1 << PCINT0);
     PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) ;
@@ -424,6 +431,10 @@ uint8_t setup_ids(void)
     serial_enable(0, 0);
     DDRD |= (1<< PORTD2) | (1<< PORTD1);
 
+    // start by pulling D1 & B1 high, since serial lines when idle are high
+    sbi(PORTD, 1);
+    sbi(PORTB, 1);
+
     cli();
     g_in_id_assignment = 0;
     sei();
@@ -446,6 +457,7 @@ int main (void)
         count = setup_ids();
         cli();
         g_dispenser_count = count;
+        g_sync = 1;
         sei();
         for(;;)
         {

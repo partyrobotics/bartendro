@@ -17,11 +17,11 @@
 #include "led.h"
 
 #if F_CPU == 16000000UL
-#define    TIMER1_INIT      0xFFE6
-#define    TIMER1_FLAGS     _BV(CS11)|(1<<CS10); // 16Mhz / 64 / 25 = .0001 per tick
+#define    TIMER1_INIT      0xFFEF
+#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 16Mhz / 1024 / 16 = .001024 per tick
 #else
-#define    TIMER1_INIT      0xFFFC
-#define    TIMER1_FLAGS     _BV(CS11)|(1<<CS10); // 8Mhz / 256 / 3 = .000096 per tick
+#define    TIMER1_INIT      0xFFF7
+#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
 #endif
 
 volatile uint32_t g_time = 0;
@@ -32,6 +32,7 @@ static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
 static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
+static volatile uint8_t g_sync = 0;
 
 // EEprom data 
 uint32_t EEMEM _ee_random_number;
@@ -49,9 +50,9 @@ uint32_t EEMEM _ee_run_time;
    5  - PD5 - motor PWM out
    6  - PD6 - Hall 0 (pcint 22)
    7  - PD7 - Hall 1 (pcint 23)
-   8  - PB0 - Hall 2 (pcint 1)
-   9  - PB1 - Hall 3 (pcint 0) 
-  10  - PB2 - SYNC 
+   8  - PB0 - Hall 2 (pcint 0)
+   9  - PB1 - Hall 3 (pcint 1) 
+  10  - PB2 - SYNC (pcint 2)
   A0  - PA0 - CS
   A1  - PA1 - liquid level
 
@@ -90,7 +91,7 @@ void setup(void)
     EIMSK |= (1 << INT0);
 
     // PCINT setup
-    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1);
+    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2);
     PCMSK2 |= (1 << PCINT22) | (1 << PCINT23);
     PCICR |=  (1 << PCIE2) | (1 << PCIE0);
 }
@@ -133,6 +134,16 @@ ISR(PCINT0_vect)
     {
         g_hall3 = state;
         g_ticks++;
+    }
+
+    state = PINB & (1<<PINB2);
+    if (state != g_sync)
+    {
+        if (state)
+            sbi(PORTB, 5);
+        else
+            cbi(PORTB, 5);
+        g_sync = state;
     }
 }
 
@@ -376,6 +387,13 @@ int main (void)
         if (id == 0xFF)
             continue;
 
+//        for(; !check_reset();)
+//        {
+//            rec = serial_rx();
+//            tbi(PORTB, 5);
+//            serial_tx(rec);
+//        }
+
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
@@ -390,7 +408,6 @@ int main (void)
 
             if (rec == REC_OK && p.dest == id)
             {
-                tbi(PORTB, 5);
                 switch(p.type)
                 {
                     case PACKET_PING:
