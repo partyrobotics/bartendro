@@ -4,6 +4,6 @@ from bartendro.utils import session, render_template, render_json, expose, valid
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 
-@expose('/')
+@expose('/shotbot')
 def index(request):
     return render_template("shotbot", title="ShotBot!")
