@@ -28,7 +28,10 @@
 // Hook up more LED patterns.
 // Start with no patterns, sync off. Let bot start animations.
 // Add support for different animation speeds
-// Speed up the PWM to 20khz
+
+// Production TODO:
+// Hook up more RX pins
+// Move Sync to different pin
 
 // EEprom data 
 uint32_t EEMEM _ee_random_number;
