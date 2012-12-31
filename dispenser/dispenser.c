@@ -24,6 +24,11 @@
 #define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
 #endif
 
+// TODO
+// Hook up more LED patterns.
+// Start with no patterns, sync off. Let bot start animations.
+// Add support for different animation speeds
+// Speed up the PWM to 20khz
 
 // EEprom data 
 uint32_t EEMEM _ee_random_number;
@@ -32,6 +37,7 @@ uint32_t EEMEM _ee_run_time;
 #define RESET_DURATION  1
 #define SYNC_COUNT      10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES 5
+#define NUM_CURRENT_SENSE_SAMPLES 10
 
 volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
@@ -56,8 +62,8 @@ static volatile uint32_t g_sync_count = 0;
    8  - PB0 - Hall 2 (pcint 0)
    9  - PB1 - Hall 3 (pcint 1) 
   10  - PB2 - SYNC (pcint 2)
-  A0  - PA0 - CS
-  A1  - PA1 - liquid level
+  A0  - PC0 - CS
+  A1  - PC1 - liquid level
 
 */
 void setup(void)
@@ -83,7 +89,7 @@ void setup(void)
     TCCR0A |= _BV(WGM00) | _BV(COM0B1);
 
     // Set the clock source
-    TCCR0B |= _BV(CS00) | _BV(CS01);
+    TCCR0B |= (0 << CS00) | (1 << CS01);
 
     // Reset timers and comparators
     OCR0B = 0;
@@ -195,16 +201,23 @@ void idle(void)
     if (animate)
     {
         // do some animation!
-        panic(t, &c);
-        set_led_rgb_no_delay(c.red, c.green, c.blue);
+//        panic(t, &c);
+//        set_led_rgb_no_delay(c.red, c.green, c.blue);
         t++;
     }
 }
 
-void adc_setup(void)
+void adc_liquid_level_setup(void)
 {
     ADCSRA = (1 << ADPS1);
-    ADMUX = (1<<REFS0);
+    ADMUX = (1<<REFS0) | (1 << MUX0);
+    ADCSRA |= (1<<ADEN);
+}
+
+void adc_current_sense_setup(void)
+{
+    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2);
+    ADMUX = (1<<REFS0) | (0 << REFS1);
     ADCSRA |= (1<<ADEN);
 }
 
@@ -213,48 +226,46 @@ void adc_shutdown(void)
     ADCSRA &= ~(1<<ADEN);
 }
 
-uint8_t adc_read(uint8_t mux)
+uint16_t adc_read()
 {
-    uint8_t val, dummy;
+    uint8_t hi, low;
 
-    ADMUX = mux;
     ADCSRA |= (1<<ADSC);
     while(ADCSRA & 0b01000000);
-    val = ADCL;
-    dummy = ADCH;
-    ADCSRA &= ~(1<<ADSC);
-    return val;
+    low = ADCL;
+    hi = ADCH;
+    return (hi << 8) | low;
 }
 
-uint8_t read_current_sense(void)
+uint16_t read_current_sense(void)
 {
     uint8_t  i;
     uint16_t v = 0;
 
-    adc_setup();
-    for(i = 0; i < NUM_ADC_SAMPLES; i++)
-        v += adc_read(MUX0);
+    adc_current_sense_setup();
+    for(i = 0; i < NUM_CURRENT_SENSE_SAMPLES; i++)
+        v += adc_read();
     adc_shutdown();
 
-    return (uint8_t)(v / NUM_ADC_SAMPLES);
+    return (uint16_t)(v / NUM_CURRENT_SENSE_SAMPLES);
 }
 
-uint8_t read_liquid_level_sensor(void)
+uint16_t read_liquid_level_sensor(void)
 {
     uint8_t  i;
     uint16_t v = 0;
 
-    adc_setup();
+    adc_liquid_level_setup();
     for(i = 0; i < NUM_ADC_SAMPLES; i++)
-        v += adc_read(MUX1);
+        v += adc_read();
     adc_shutdown();
 
-    return (uint8_t)(v / NUM_ADC_SAMPLES);
+    return (uint16_t)(v / NUM_ADC_SAMPLES);
 }
 
 void set_motor_speed(uint8_t speed)
 {
-    OCR0B = speed;
+    OCR0B = 255 - speed;
 }
 
 void run_motor_timed(uint32_t duration)
@@ -275,6 +286,7 @@ void run_motor_ticks(uint32_t ticks)
     ticks_dest = g_ticks + ticks;
     sei();
 
+    set_led_rgb(255, 0, 255);
     set_motor_speed(255);
     for(; !check_reset();)
     {
@@ -283,9 +295,15 @@ void run_motor_ticks(uint32_t ticks)
         sei();
         if (ticks_now >= ticks_dest)
             break;
-        idle();
+
+//        idle();
+//        if (read_liquid_level_sensor() > 50)
+        if (read_current_sense() > 10)
+            sbi(PORTB, 5);
     }
     set_motor_speed(0);
+    set_led_rgb(0, 255, 0);
+    cbi(PORTB, 5);
 }
 
 void set_random_seed_from_eeprom(void)
@@ -298,7 +316,7 @@ void set_random_seed_from_eeprom(void)
 
 uint8_t get_address(void)
 {
-    uint8_t  rec, ch;
+    uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
     set_random_seed_from_eeprom();
@@ -382,7 +400,61 @@ void flash_led(uint8_t fast)
     }
 }
 
-int main (void)
+void rprintf(const char *buffer)
+{
+    uint8_t *ptr;
+
+    for(ptr = buffer; *ptr; ptr++)
+    {
+        if (*ptr == '\n') 
+            serial_tx('\r');
+        serial_tx(*ptr);
+    }
+}
+
+#define CURRENT_SENSE_THRESHOLD 864
+
+int _main(void)
+{
+    char str[80];
+    uint16_t adc, ticks = 0;
+
+    setup();
+    flash_led(1);
+    serial_init();
+    rprintf("hello!\n");
+
+    set_motor_speed(255);
+    for(;;)
+    {
+        adc = read_liquid_level_sensor();
+        if (0) //adc > CURRENT_SENSE_THRESHOLD)
+        {
+            ticks++;
+            if (ticks > 6)
+            {
+                rprintf("over current!\n");
+                sbi(PORTB, 5);
+//                set_motor_speed(0);
+            }
+        }
+        else
+        {
+            ticks = 0;
+            cbi(PORTB, 5);
+        }
+
+        if (adc > 10)
+        {
+            itoa(adc, str, 10);
+            rprintf(str);
+            rprintf("\n");
+        }
+        _delay_ms(50);
+    }
+}
+
+int main(void)
 {
     uint8_t id, rec;
     packet_t p;
@@ -393,6 +465,7 @@ int main (void)
         g_reset = 0;
 
         setup();
+        set_motor_speed(0);
         flash_led(1);
         serial_init();
         set_led_rgb(0, 0, 0);
@@ -417,8 +490,16 @@ int main (void)
                 switch(p.type)
                 {
                     case PACKET_PING:
+                        set_led_rgb(0, 0, 255);
+                        _delay_ms(500);
+                        set_led_rgb(0, 255, 0);
                         break;
                     case PACKET_SET_MOTOR_SPEED:
+                        if (p.p.uint8[0])
+                            set_led_rgb(255, 0, 255);
+                        else
+                            set_led_rgb(0, 255, 0);
+
                         set_motor_speed(p.p.uint8[0]);
                         break;
                     case PACKET_TICK_DISPENSE:
