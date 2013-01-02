@@ -408,6 +408,20 @@ void flash_led(uint8_t fast)
     }
 }
 
+void comm_test(void)
+{
+    uint8_t ch;
+
+    // disable all interrupts and just echo every character received.
+    cli();
+    set_led_rgb(0, 255, 255);
+    for(; !check_reset();)
+        if (serial_rx_nb(&ch))
+            for(; !serial_tx_nb(ch) && !check_reset();)
+                ;
+    sei();
+}
+
 int main(void)
 {
     uint8_t id, rec;
@@ -475,6 +489,10 @@ int main(void)
 
                     case PACKET_LED_DRINK_DONE:
                         set_led_pattern(led_pattern_drink_done);
+                        break;
+
+                    case PACKET_COMM_TEST:
+                        comm_test();
                         break;
                 }
             }
