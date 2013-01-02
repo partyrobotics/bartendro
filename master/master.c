@@ -1,4 +1,3 @@
-#define F_CPU 8000000UL 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/twi.h>
@@ -31,17 +30,56 @@
 
 void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
-uint8_t get_port(uint8_t port);
-uint8_t get_port_ddr(uint8_t port);
-uint8_t get_pcmsk(uint8_t msk);
+uint8_t get_pin_state(uint8_t port, uint8_t pin);
 
 // TODO:
 // THink about serial IO errors on this level.
 // check for COLLISIONS in name assignment
 // Ensure that I2C has error correction
-// Implement dispenser select
-// implement number of dispensers available
-// Implement data driven interrupt routing
+
+typedef struct 
+{
+    uint8_t port, pin;
+} dispenser_rx_defs_t;
+
+typedef struct
+{
+    uint32_t fe_time;
+    uint8_t  state;
+} dispenser_state_t;
+
+static dispenser_rx_defs_t g_dispenser_rx_defs[MAX_DISPENSERS] =
+{
+    { 'D', 3 },
+    { 'D', 4 },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+    { 0, 0  },
+};
+static volatile uint8_t g_dispenser_id[MAX_DISPENSERS];
+static volatile dispenser_state_t g_dispenser_state[MAX_DISPENSERS];
+
+#define NUM_PCINT_2_DISPENSERS 2
+static uint8_t g_pcint_2_dispenser_map[NUM_PCINT_2_DISPENSERS] = { 0, 1 };
+
+volatile uint32_t g_time = 0;
+static volatile uint32_t g_reset_fe_time = 0;
+static volatile uint8_t  g_dispenser = 0;
+static volatile uint8_t  g_reset = 0;
+static volatile uint8_t  g_dispenser_count = 0;
+volatile uint8_t         g_in_id_assignment;
+volatile uint8_t         g_sync = 0;
+volatile uint8_t         g_pcint0 = 0;
 
 /*
 
@@ -71,25 +109,94 @@ uint8_t get_pcmsk(uint8_t msk);
 
 */
 
-typedef struct 
+void setup(void)
 {
-    uint8_t reset_port, reset_pin;
-    uint8_t rx_port, rx_pin, rx_pcint;
-    uint8_t tx_port, tx_pin;
-} dispenser_t;
+    // on board LED
+    DDRB |= (1<< PORTB5);
 
-static volatile dispenser_t dispensers[2] =
-{  // reset_port, reset_pin, rx_port, rx_pin, rx_pcint, tx_port, tx_pin
-    { 'D',        6,         'D',     5,      PCINT13,  'D',     3      },
-    { 'D',        6,         'B',     0,      PCINT0,   'D',     5      },
-};
+    // TX to RPI
+    DDRB |= (1<< PORTB1);
+    // TX to dispensers
+    DDRD |= (1<< PORTD2);
 
-volatile uint32_t g_time = 0;
-static volatile uint32_t g_reset_fe_time = 0;
-static volatile uint8_t  g_dispenser = 0;
-static volatile uint8_t  g_mux_pin_0 = 0;
-static volatile uint8_t  g_reset = 0;
-static volatile uint8_t  g_dispenser_count = 0;
+    // SYNC to dispensers
+    DDRD |= (1<< PORTD7);
+
+    // PCINT setup
+    PCMSK0 |= (1 << PCINT0);
+    PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) ;
+    PCICR |=  (1 << PCIE0) | (1 << PCIE2);
+
+    // Timer setup for reset pulse width measuring
+    TCCR1B |= TIMER1_FLAGS;
+    TCNT1 = TIMER1_INIT;
+    TIMSK1 |= (1<<TOIE1);
+
+    // I2C setup
+    TWAR = (1 << 3); // address
+    TWDR = 0x0;  
+    TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWEA);  
+
+    sei();
+}
+
+ISR(PCINT0_vect)
+{
+    uint8_t      state;
+
+    // Check for RX from the RPI
+    state = PINB & (1<<PINB0);
+    if (state != g_pcint0)
+    {
+        if (state)
+            sbi(PORTD, 1);
+        else
+            cbi(PORTD, 1);
+        g_pcint0 = state;
+    }
+}
+
+ISR(PCINT2_vect)
+{
+    uint8_t state, i, disp;
+
+    for(i = 0; i < NUM_PCINT_2_DISPENSERS; i++)
+    {
+        disp = g_pcint_2_dispenser_map[i];
+        state = get_pin_state(g_dispenser_rx_defs[disp].port, g_dispenser_rx_defs[disp].pin);
+        if (state != g_dispenser_state[disp].state)
+        {
+            if (g_in_id_assignment)
+            {
+                if (state)
+                    g_dispenser_state[disp].fe_time = g_time + RESET_DURATION;
+                else
+                {
+                    if (g_dispenser_state[disp].fe_time > 0 && g_time >= g_dispenser_state[disp].fe_time)
+                        g_dispenser_id[disp] = 1;
+                    g_dispenser_state[disp].fe_time = 0;
+                }
+            }
+            else
+            if (g_dispenser == disp)
+            {
+                if (state)
+                    sbi(PORTB, 1);
+                else
+                    cbi(PORTB, 1);
+            }
+            g_dispenser_state[disp].state = state;
+        }
+    }
+}
+
+ISR (TIMER1_OVF_vect)
+{
+    g_time++;
+    if (g_sync)
+        tbi(PORTD, 7);
+    TCNT1 = TIMER1_INIT;
+}
 
 ISR(TWI_vect)
 {
@@ -111,99 +218,6 @@ ISR(TWI_vect)
    TWCR |= (1<<TWINT);    // Clear TWINT Flag
 }
 
-volatile uint8_t pcint0 = 0;
-volatile uint8_t pcint1 = 0;
-volatile uint8_t pcint2 = 0;
-
-ISR(PCINT0_vect)
-{
-    uint8_t      state;
-
-    // Check for RX from the RPI
-    state = PINB & (1<<PINB0);
-    if (state != pcint0)
-    {
-        if (state)
-            sbi(PORTD, 1);
-        else
-            cbi(PORTD, 1);
-        pcint0 = state;
-    }
-}
-
-volatile uint8_t  pcint19 = 0;
-volatile uint8_t  pcint20 = 0;
-volatile uint32_t g_rx_pcint19_fe_time = 0;
-volatile uint32_t g_rx_pcint20_fe_time = 0;
-volatile uint8_t  g_dispenser_rx[MAX_DISPENSERS];
-volatile uint8_t  g_in_id_assignment;
-volatile uint8_t  g_sync = 0;
-
-ISR(PCINT2_vect)
-{
-    uint8_t      state;
-
-    // Check for RX for Dispenser 0
-    state = PIND & (1<<PIND3);
-    if (state != pcint19)
-    {
-        if (g_in_id_assignment)
-        {
-            if (state)
-                g_rx_pcint19_fe_time = g_time + RESET_DURATION;
-            else
-            {
-                if (g_rx_pcint19_fe_time > 0 && g_time >= g_rx_pcint19_fe_time)
-                    g_dispenser_rx[0] = 1;
-                g_rx_pcint19_fe_time = 0;
-            }
-        }
-        else
-        if (g_dispenser == 0)
-        {
-            if (state)
-                sbi(PORTB, 1);
-            else
-                cbi(PORTB, 1);
-        }
-        pcint19 = state;
-    }
-
-    // Check for RX for Dispenser 1
-    state = PIND & (1<<PIND4);
-    if (state != pcint20)
-    {
-        if (g_in_id_assignment)
-        {
-            if (state)
-                g_rx_pcint20_fe_time = g_time + RESET_DURATION;
-            else
-            {
-                if (g_rx_pcint20_fe_time > 0 && g_time >= g_rx_pcint20_fe_time)
-                    g_dispenser_rx[1] = 1;
-                g_rx_pcint20_fe_time = 0;
-            }
-        }
-        else
-        if (g_dispenser == 1)
-        {
-            if (state)
-                sbi(PORTB, 1);
-            else
-                cbi(PORTB, 1);
-        }
-        pcint20 = state;
-    }
-}
-
-ISR (TIMER1_OVF_vect)
-{
-    g_time++;
-    if (g_sync)
-        tbi(PORTD, 7);
-    TCNT1 = TIMER1_INIT;
-}
-
 uint8_t check_reset(void)
 {
     return 0;
@@ -219,6 +233,19 @@ void reset_dispensers(void)
     // Wait for dispensers to start up
     _delay_ms(500);
     _delay_ms(500);
+}
+
+uint8_t get_pin_state(uint8_t port, uint8_t pin)
+{
+    switch(port)
+    {
+        case 'B':
+            return PINB & (1 << pin) ? 1 : 0;
+        case 'C':
+            return PINC & (1 << pin) ? 1 : 0;
+        case 'D': 
+            return PIND & (1 << pin) ? 1 : 0;
+    }
 }
 
 void set_pin(uint8_t port, uint8_t pin)
@@ -253,90 +280,6 @@ void clear_pin(uint8_t port, uint8_t pin)
     }
 }
 
-uint8_t get_port(uint8_t port)
-{
-    switch(port)
-    {
-        case 1:
-            return PORTB;
-        case 2:
-            return PORTC;
-        case 3: 
-            return PORTD;
-        default:
-            return 0xFF;
-    }
-}
-
-uint8_t get_port_ddr(uint8_t port)
-{
-    switch(port)
-    {
-        case 1:
-            return DDRB;
-        case 2:
-            return DDRC;
-        case 3: 
-            return DDRD;
-        default:
-            return 0xFF;
-    }
-}
-
-void setup_ports(void)
-{
-    uint8_t i, ddr, port;
-
-    for(i = 0; i < MAX_DISPENSERS; i++)
-    {
-        port = get_port(dispensers[i].reset_port);
-        ddr = get_port_ddr(dispensers[i].reset_port);
-        dispensers[i].reset_port = port;
-        ddr |= (1 << dispensers[i].reset_pin);
-
-        dispensers[i].rx_port = get_port(dispensers[i].rx_port);
-//        PCMSK |= (1 << dispensers[1].rx_pcint);
-
-        port = get_port(dispensers[i].tx_port);
-        ddr = get_port_ddr(dispensers[i].tx_port);
-        dispensers[i].tx_port = port;
-        ddr |= (1 << dispensers[i].tx_pin);
-    }
-}
-
-void setup(void)
-{
-//    setup_ports();
-
-    // on board LED
-    DDRB |= (1<< PORTB5);
-
-    // TX to RPI
-    DDRB |= (1<< PORTB1);
-    // TX to dispensers
-    DDRD |= (1<< PORTD2);
-
-    // SYNC to dispensers
-    DDRD |= (1<< PORTD7);
-
-    // PCINT setup
-    PCMSK0 |= (1 << PCINT0);
-    PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) ;
-    PCICR |=  (1 << PCIE0) | (1 << PCIE2);
-
-    // Timer setup for reset pulse width measuring
-    TCCR1B |= TIMER1_FLAGS;
-    TCNT1 = TIMER1_INIT;
-    TIMSK1 |= (1<<TOIE1);
-
-    // I2C setup
-    TWAR = (1 << 3); // address
-    TWDR = 0x0;  
-    TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWEA);  
-
-    sei();
-}
-
 void flash_led(uint8_t fast)
 {
     int i;
@@ -360,7 +303,7 @@ void flash_led(uint8_t fast)
 uint8_t setup_ids(void)
 {
     uint8_t  i, j, state, count = 0;
-    uint8_t  dispensers[MAX_DISPENSERS];
+    uint8_t  dispensers_found[MAX_DISPENSERS];
 
     serial_init();
     serial_enable(0, 1);
@@ -369,14 +312,14 @@ uint8_t setup_ids(void)
     g_in_id_assignment = 1;
     sei();
 
-    memset(dispensers, 0xFF, sizeof(dispensers));
+    memset(dispensers_found, 0xFF, sizeof(dispensers_found));
     for(;;)
     {
         count = 0;
         for(i = 0; i < 255; i++)
         {
             cli();
-            memset((void *)g_dispenser_rx, 0, sizeof(g_dispenser_rx));
+            memset((void *)g_dispenser_id, 0, sizeof(g_dispenser_id));
             sei();
 
             serial_tx(i);
@@ -384,11 +327,11 @@ uint8_t setup_ids(void)
             for(j = 0; j < MAX_DISPENSERS; j++)
             {
                 cli();
-                state = g_dispenser_rx[j];
+                state = g_dispenser_id[j];
                 sei();
                 if (state)
                 {
-                    dispensers[j] = i;
+                    dispensers_found[j] = i;
                     count++;
                 }
             }
@@ -417,9 +360,9 @@ uint8_t setup_ids(void)
 
     for(i = 0; i < MAX_DISPENSERS; i++)
     {
-        if (dispensers[i] != 255)
+        if (dispensers_found[i] != 255)
         {
-            serial_tx(dispensers[i]);
+            serial_tx(dispensers_found[i]);
             serial_tx(i);
         }
     }

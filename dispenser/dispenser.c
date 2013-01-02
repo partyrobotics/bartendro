@@ -494,7 +494,7 @@ int main(void)
                 {
                     case PACKET_PING:
                         set_led_rgb(0, 0, 255);
-                        _delay_ms(500);
+                        _delay_ms(200);
                         set_led_rgb(0, 255, 0);
                         break;
                     case PACKET_SET_MOTOR_SPEED:
