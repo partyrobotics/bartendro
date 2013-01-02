@@ -37,67 +37,56 @@ uint8_t get_pin_state(uint8_t port, uint8_t pin);
 // check for COLLISIONS in name assignment
 // Ensure that I2C has error correction
 
-typedef struct 
-{
-    uint8_t port, pin;
-} dispenser_rx_defs_t;
-
-typedef struct
-{
-    uint32_t fe_time;
-    uint8_t  state;
-} dispenser_state_t;
-
-static dispenser_rx_defs_t g_dispenser_rx_defs[MAX_DISPENSERS] =
-{
-    // For use with the breadboard
-    { 'D', 3 }, // 0
-    { 'D', 4 }, // 1
-    { 0, 0  }, // 2
-    { 0, 0  }, // 3
-    { 0, 0  }, // 4
-    { 0, 0  }, // 5
-    { 0, 0  }, // 6
-    { 0, 0  }, // 7
-    { 0, 0  }, // 8
-    { 0, 0  }, // 9
-    { 0, 0  }, // 10
-    { 0, 0  }, // 11
-    { 0, 0  }, // 12
-    { 0, 0  }, // 13
-    { 0, 0  }, // 14
 /*  For use with the production board
-    { 'D', 3 }, // 0
-    { 'D', 5 }, // 1
-    { 'D', 7  }, // 2
-    { 'B', 3  }, // 3
-    { 'B', 5  }, // 4
-    { 'B', 7  }, // 5
-    { 'C', 1  }, // 6
-    { 'D', 0  }, // 7
-    { 'D', 4  }, // 8
-    { 'D', 6  }, // 9
-    { 'B', 2  }, // 10
-    { 'B', 4  }, // 11
-    { 'B', 6  }, // 12
-    { 'C', 0  }, // 13
-    { 'C', 2  }, // 14
+    { 'D', 3 }, // 0 - pcint19
+    { 'D', 5 }, // 1 - pcint21
+    { 'D', 7  }, // 2 - pcint23
+    { 'B', 3  }, // 3 - pcint3
+    { 'B', 5  }, // 4 - pcint5
+    { 'B', 7  }, // 5 - pcint7
+    { 'C', 1  }, // 6 - pcint9
+    { 'D', 0  }, // 7 - pcint16
+    { 'D', 4  }, // 8 - pcint20
+    { 'D', 6  }, // 9 - pcint22
+    { 'B', 2  }, // 10 - pcint2
+    { 'B', 4  }, // 11 - pcint4
+    { 'B', 6  }, // 12 - pcint6
+    { 'C', 0  }, // 13 - pcint8
+    { 'C', 2  }, // 14 - pcint10
+
+ Sorted by pcints
+    { 'B', 2  }, // 10 - pcint2
+    { 'B', 3  }, // 3 - pcint3
+    { 'B', 4  }, // 11 - pcint4
+    { 'B', 5  }, // 4 - pcint5
+    { 'B', 6  }, // 12 - pcint6
+    { 'B', 7  }, // 5 - pcint7
+
+    { 'C', 0  }, // 13 - pcint8
+    { 'C', 1  }, // 6 - pcint9
+    { 'C', 2  }, // 14 - pcint10
+
+    { 'D', 0  }, // 7 - pcint16
+    { 'D', 3 }, // 0 - pcint19
+    { 'D', 4  }, // 8 - pcint20
+    { 'D', 5 }, // 1 - pcint21
+    { 'D', 6  }, // 9 - pcint22
+    { 'D', 7  }, // 2 - pcint23
 */
-};
-static volatile uint8_t g_dispenser_id[MAX_DISPENSERS];
-static volatile dispenser_state_t g_dispenser_state[MAX_DISPENSERS];
 
-#define NUM_PCINT_2_DISPENSERS 2
-static uint8_t g_pcint_2_dispenser_map[NUM_PCINT_2_DISPENSERS] = { 0, 1 };
+// global variables that actually control states
+volatile uint32_t        g_time = 0;
+volatile uint8_t         g_sync = 0;
 
-volatile uint32_t g_time = 0;
+// reset related variables
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_reset = 0;
+
+// dispenser select related stuff
 static volatile uint8_t  g_dispenser_count = 0;
 volatile uint8_t         g_in_id_assignment;
-volatile uint8_t         g_sync = 0;
-volatile uint8_t         g_pcint0 = 0;
+static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
 
 /*
 
@@ -158,6 +147,7 @@ void setup(void)
     sei();
 }
 
+static volatile uint8_t g_pcint0 = 0;
 ISR(PCINT0_vect)
 {
     uint8_t      state;
@@ -174,37 +164,66 @@ ISR(PCINT0_vect)
     }
 }
 
+// variables related to PCINT2
+static volatile uint8_t  pcint19 = 0;
+static volatile uint8_t  pcint20 = 0;
+static volatile uint32_t g_rx_pcint19_fe_time = 0;
+static volatile uint32_t g_rx_pcint20_fe_time = 0;
+
 ISR(PCINT2_vect)
 {
-    uint8_t state, i, disp;
+    uint8_t      state;
 
-    for(i = 0; i < NUM_PCINT_2_DISPENSERS; i++)
+    // Check for RX for Dispenser 0
+    state = PIND & (1<<PIND3);
+    if (state != pcint19)
     {
-        disp = g_pcint_2_dispenser_map[i];
-        state = get_pin_state(g_dispenser_rx_defs[disp].port, g_dispenser_rx_defs[disp].pin);
-        if (state != g_dispenser_state[disp].state)
+        if (g_in_id_assignment)
         {
-            if (g_in_id_assignment)
-            {
-                if (state)
-                    g_dispenser_state[disp].fe_time = g_time + RESET_DURATION;
-                else
-                {
-                    if (g_dispenser_state[disp].fe_time > 0 && g_time >= g_dispenser_state[disp].fe_time)
-                        g_dispenser_id[disp] = 1;
-                    g_dispenser_state[disp].fe_time = 0;
-                }
-            }
+            if (state)
+                g_rx_pcint19_fe_time = g_time + RESET_DURATION;
             else
-            if (g_dispenser == disp)
             {
-                if (state)
-                    sbi(PORTB, 1);
-                else
-                    cbi(PORTB, 1);
+                if (g_rx_pcint19_fe_time > 0 && g_time >= g_rx_pcint19_fe_time)
+                    g_dispenser_id[0] = 1;
+                g_rx_pcint19_fe_time = 0;
             }
-            g_dispenser_state[disp].state = state;
         }
+        else
+        if (g_dispenser == 0)
+        {
+            if (state)
+                sbi(PORTB, 1);
+            else
+                cbi(PORTB, 1);
+        }
+        pcint19 = state;
+    }
+
+    // Check for RX for Dispenser 1
+    state = PIND & (1<<PIND4);
+    if (state != pcint20)
+    {
+        if (g_in_id_assignment)
+        {
+            if (state)
+                g_rx_pcint20_fe_time = g_time + RESET_DURATION;
+            else
+            {
+                if (g_rx_pcint20_fe_time > 0 && g_time >= g_rx_pcint20_fe_time)
+                    g_dispenser_id[1] = 1;
+                g_rx_pcint20_fe_time = 0;
+            }
+        }
+        else
+        if (g_dispenser == 1)
+        {
+            if (state)
+                sbi(PORTB, 1);
+            else
+                cbi(PORTB, 1);
+        }
+        pcint20 = state;
     }
 }
 
@@ -262,51 +281,6 @@ void reset_dispensers(void)
     // Wait for dispensers to start up
     _delay_ms(500);
     _delay_ms(500);
-}
-
-uint8_t get_pin_state(uint8_t port, uint8_t pin)
-{
-    switch(port)
-    {
-        case 'B':
-            return PINB & (1 << pin) ? 1 : 0;
-        case 'C':
-            return PINC & (1 << pin) ? 1 : 0;
-        case 'D': 
-            return PIND & (1 << pin) ? 1 : 0;
-    }
-}
-
-void set_pin(uint8_t port, uint8_t pin)
-{
-    switch(port)
-    {
-        case 'B':
-            sbi(PORTB, pin);
-            return;
-        case 'C':
-            sbi(PORTC, pin);
-            return;
-        case 'D': 
-            sbi(PORTD, pin);
-            return;
-    }
-}
-
-void clear_pin(uint8_t port, uint8_t pin)
-{
-    switch(port)
-    {
-        case 'B':
-            cbi(PORTB, pin);
-            return;
-        case 'C':
-            cbi(PORTC, pin);
-            return;
-        case 'D': 
-            cbi(PORTD, pin);
-            return;
-    }
 }
 
 void flash_led(uint8_t fast)
