@@ -167,63 +167,79 @@ ISR(PCINT0_vect)
 // variables related to PCINT2
 static volatile uint8_t  pcint19 = 0;
 static volatile uint8_t  pcint20 = 0;
-static volatile uint32_t g_rx_pcint19_fe_time = 0;
-static volatile uint32_t g_rx_pcint20_fe_time = 0;
+static volatile uint32_t g_rx_pcint_fe_time[MAX_DISPENSERS];
 
-ISR(PCINT2_vect)
+void id_assignment_fe(uint8_t state, uint8_t disp)
 {
-    uint8_t      state;
+    if (state)
+        g_rx_pcint_fe_time[disp] = g_time + RESET_DURATION;
+    else
+    {
+        if (g_rx_pcint_fe_time[disp] > 0 && g_time >= g_rx_pcint_fe_time[disp])
+            g_dispenser_id[disp] = 1;
+        g_rx_pcint_fe_time[disp] = 0;
+    }
+}
 
-    // Check for RX for Dispenser 0
+void id_assignment_isr_pcint0(void)
+{
+    uint8_t state;
+
     state = PIND & (1<<PIND3);
     if (state != pcint19)
     {
-        if (g_in_id_assignment)
-        {
-            if (state)
-                g_rx_pcint19_fe_time = g_time + RESET_DURATION;
-            else
-            {
-                if (g_rx_pcint19_fe_time > 0 && g_time >= g_rx_pcint19_fe_time)
-                    g_dispenser_id[0] = 1;
-                g_rx_pcint19_fe_time = 0;
-            }
-        }
-        else
-        if (g_dispenser == 0)
-        {
-            if (state)
-                sbi(PORTB, 1);
-            else
-                cbi(PORTB, 1);
-        }
+        id_assignment_fe(state, 0);
         pcint19 = state;
     }
-
-    // Check for RX for Dispenser 1
     state = PIND & (1<<PIND4);
     if (state != pcint20)
     {
-        if (g_in_id_assignment)
-        {
-            if (state)
-                g_rx_pcint20_fe_time = g_time + RESET_DURATION;
-            else
-            {
-                if (g_rx_pcint20_fe_time > 0 && g_time >= g_rx_pcint20_fe_time)
-                    g_dispenser_id[1] = 1;
-                g_rx_pcint20_fe_time = 0;
-            }
-        }
-        else
-        if (g_dispenser == 1)
-        {
-            if (state)
-                sbi(PORTB, 1);
-            else
-                cbi(PORTB, 1);
-        }
+        id_assignment_fe(state, 1);
         pcint20 = state;
+    }
+}
+
+ISR(PCINT2_vect)
+{
+    uint8_t state;
+
+    if (g_in_id_assignment)
+    {
+        id_assignment_isr_pcint0();
+        return;
+    }
+    switch(g_dispenser)
+    {
+        case 0:
+            // Check for RX for Dispenser 0
+            state = PIND & (1<<PIND3);
+            if (state != pcint19)
+            {
+                if (g_dispenser == 0)
+                {
+                    if (state)
+                        sbi(PORTB, 1);
+                    else
+                        cbi(PORTB, 1);
+                }
+                pcint19 = state;
+            }
+            break;
+        case 1:
+            // Check for RX for Dispenser 1
+            state = PIND & (1<<PIND4);
+            if (state != pcint20)
+            {
+                if (g_dispenser == 1)
+                {
+                    if (state)
+                        sbi(PORTB, 1);
+                    else
+                        cbi(PORTB, 1);
+                }
+                pcint20 = state;
+            }
+            break;
     }
 }
 
