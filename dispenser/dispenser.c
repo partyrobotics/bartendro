@@ -218,6 +218,9 @@ void set_led_pattern(void (*func)(uint32_t, color_t *))
     if (func == NULL)
         set_led_rgb(0, 0, 0);
 
+    cli();
+    g_pattern_t = 0;
+    sei();
     g_led_function = func;
 }
 
