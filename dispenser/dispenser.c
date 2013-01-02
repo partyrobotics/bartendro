@@ -51,7 +51,8 @@ static volatile uint8_t g_hall1 = 0;
 static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
-static volatile uint32_t g_sync_count = 0;
+static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
+static void (*g_led_function)(uint32_t, color_t *);
 
 /*
    0  - PD0 - RX
@@ -191,7 +192,7 @@ void idle(void)
 {
     color_t c;
     uint8_t animate = 0;
-    static uint32_t t = 0;
+    uint32_t t = 0;
 
     cli();
     if (g_sync_count >= SYNC_COUNT)
@@ -201,13 +202,23 @@ void idle(void)
     }
     sei();
 
-    if (animate)
+    if (animate && g_led_function)
     {
+        cli();
+        t = g_pattern_t++;
+        sei();
         // do some animation!
-//        panic(t, &c);
-//        set_led_rgb_no_delay(c.red, c.green, c.blue);
-        t++;
+        (*g_led_function)(t, &c);
+        set_led_rgb_no_delay(c.red, c.green, c.blue);
     }
+}
+
+void set_led_pattern(void (*func)(uint32_t, color_t *))
+{
+    if (func == NULL)
+        set_led_rgb(0, 0, 0);
+
+    g_led_function = func;
 }
 
 void adc_liquid_level_setup(void)
@@ -289,7 +300,6 @@ void run_motor_ticks(uint32_t ticks)
     ticks_dest = g_ticks + ticks;
     sei();
 
-    set_led_rgb(255, 0, 255);
     set_motor_speed(255);
     for(; !check_reset();)
     {
@@ -299,14 +309,9 @@ void run_motor_ticks(uint32_t ticks)
         if (ticks_now >= ticks_dest)
             break;
 
-//        idle();
-//        if (read_liquid_level_sensor() > 50)
-        if (read_current_sense() > 10)
-            sbi(PORTB, 5);
+        idle();
     }
     set_motor_speed(0);
-    set_led_rgb(0, 255, 0);
-    cbi(PORTB, 5);
 }
 
 void set_random_seed_from_eeprom(void)
@@ -403,60 +408,6 @@ void flash_led(uint8_t fast)
     }
 }
 
-void rprintf(const char *buffer)
-{
-    uint8_t *ptr;
-
-    for(ptr = buffer; *ptr; ptr++)
-    {
-        if (*ptr == '\n') 
-            serial_tx('\r');
-        serial_tx(*ptr);
-    }
-}
-
-#define CURRENT_SENSE_THRESHOLD 864
-
-int _main(void)
-{
-    char str[80];
-    uint16_t adc, ticks = 0;
-
-    setup();
-    flash_led(1);
-    serial_init();
-    rprintf("hello!\n");
-
-    set_motor_speed(255);
-    for(;;)
-    {
-        adc = read_liquid_level_sensor();
-        if (0) //adc > CURRENT_SENSE_THRESHOLD)
-        {
-            ticks++;
-            if (ticks > 6)
-            {
-                rprintf("over current!\n");
-                sbi(PORTB, 5);
-//                set_motor_speed(0);
-            }
-        }
-        else
-        {
-            ticks = 0;
-            cbi(PORTB, 5);
-        }
-
-        if (adc > 10)
-        {
-            itoa(adc, str, 10);
-            rprintf(str);
-            rprintf("\n");
-        }
-        _delay_ms(50);
-    }
-}
-
 int main(void)
 {
     uint8_t id, rec;
@@ -490,6 +441,7 @@ int main(void)
 
             if (rec == REC_OK && p.dest == id)
             {
+                tbi(PORTB, 5);
                 switch(p.type)
                 {
                     case PACKET_PING:
@@ -498,21 +450,32 @@ int main(void)
                         set_led_rgb(0, 255, 0);
                         break;
                     case PACKET_SET_MOTOR_SPEED:
-                        if (p.p.uint8[0])
-                            set_led_rgb(255, 0, 255);
-                        else
-                            set_led_rgb(0, 255, 0);
-
                         set_motor_speed(p.p.uint8[0]);
                         break;
+
                     case PACKET_TICK_DISPENSE:
                         run_motor_ticks(p.p.uint32);
                         break;
+
                     case PACKET_TIME_DISPENSE:
                         run_motor_timed(p.p.uint32);
                         break;
-//                    case PACKET_LED_IDLE:
 
+                    case PACKET_LED_OFF:
+                        set_led_pattern(NULL);
+                        break;
+
+                    case PACKET_LED_IDLE:
+                        set_led_pattern(led_pattern_idle);
+                        break;
+
+                    case PACKET_LED_DISPENSE:
+                        set_led_pattern(led_pattern_dispense);
+                        break;
+
+                    case PACKET_LED_DRINK_DONE:
+                        set_led_pattern(led_pattern_drink_done);
+                        break;
                 }
             }
         }

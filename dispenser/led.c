@@ -99,34 +99,25 @@ void set_led_rgb_no_delay(uint8_t red, uint8_t green, uint8_t blue)
     delay_us(COLOR_LATCH_DURATION);
 }
 
-// function that does a fast red fade in/out
-void panic(uint32_t t, color_t *c)
+void led_pattern_idle(uint32_t t, color_t *c)
 {
     c->red =  (int)((sin((float)t / 50) + 1.0) * 127);
-    c->blue =  (int)((cos((float)t / 50) + 1.0) * 127);
+    c->blue = 0; 
+    c->green = (int)((sin((float)t / 50) + 1.0) * 127);
+}
+
+void led_pattern_dispense(uint32_t t, color_t *c)
+{
+    c->red =  (int)((sin((float)t / 30) + 1.0) * 127);
+    c->blue =  (int)((cos((float)t / 30) + 1.0) * 127);
     c->green = 0;
 }
 
-// does an orange fade in fase out
-void orange(uint32_t t, color_t *c)
+void led_pattern_drink_done(uint32_t t, color_t *c)
 {
-    c->red   = (int)((sin((float)t / 30) + 1.0) * 127);
-    c->green = (int)((sin((float)t / 30) + 1.0) * 64);
-    c->blue  = 0;
-}
-
-// Given a function pointer from one of the two functions above, animate that function
-void plot_function(uint16_t count, uint16_t delay, void (*func)(uint16_t, color_t *))
-{
-    uint16_t i;
-    color_t  c;
- 
-    for(i = 0; i< count; i++)
-    {
-        func(i, &c);
-        set_led_rgb_no_delay(c.red, c.green, c.blue);
-        delay_ms(delay);
-    }
+    c->red = 0;
+    c->blue = 0;
+    c->green = (int)((sin((float)t / 30) + 1.0) * 127);
 }
 
 // fade from one color to another colors in steps with a delay of delay

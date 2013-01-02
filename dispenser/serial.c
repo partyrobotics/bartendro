@@ -70,6 +70,16 @@ uint8_t serial_rx_nb(uint8_t *ch)
     return 0;
 }
 
+#ifdef ROUTER
+void idle()
+{
+}
+uint8_t check_reset(void)
+{
+    return 0;
+}
+#endif
+
 uint8_t receive_packet(packet_t *p)
 {
     uint32_t timeout = 0, now;

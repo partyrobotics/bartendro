@@ -50,21 +50,39 @@ typedef struct
 
 static dispenser_rx_defs_t g_dispenser_rx_defs[MAX_DISPENSERS] =
 {
-    { 'D', 3 },
-    { 'D', 4 },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
-    { 0, 0  },
+    // For use with the breadboard
+    { 'D', 3 }, // 0
+    { 'D', 4 }, // 1
+    { 0, 0  }, // 2
+    { 0, 0  }, // 3
+    { 0, 0  }, // 4
+    { 0, 0  }, // 5
+    { 0, 0  }, // 6
+    { 0, 0  }, // 7
+    { 0, 0  }, // 8
+    { 0, 0  }, // 9
+    { 0, 0  }, // 10
+    { 0, 0  }, // 11
+    { 0, 0  }, // 12
+    { 0, 0  }, // 13
+    { 0, 0  }, // 14
+/*  For use with the production board
+    { 'D', 3 }, // 0
+    { 'D', 5 }, // 1
+    { 'D', 7  }, // 2
+    { 'B', 3  }, // 3
+    { 'B', 5  }, // 4
+    { 'B', 7  }, // 5
+    { 'C', 1  }, // 6
+    { 'D', 0  }, // 7
+    { 'D', 4  }, // 8
+    { 'D', 6  }, // 9
+    { 'B', 2  }, // 10
+    { 'B', 4  }, // 11
+    { 'B', 6  }, // 12
+    { 'C', 0  }, // 13
+    { 'C', 2  }, // 14
+*/
 };
 static volatile uint8_t g_dispenser_id[MAX_DISPENSERS];
 static volatile dispenser_state_t g_dispenser_state[MAX_DISPENSERS];
@@ -98,14 +116,14 @@ volatile uint8_t         g_pcint0 = 0;
        PD2 -> RESET
        PD1 -> TX
        PD3 -> RX (pcint19)
-       PD7 -> SYNC
+       PC3 -> SYNC
 
    Dispenser 1:
 
        PD2 -> RESET
        PD1 -> TX
        PD4 -> RX (pcint20)
-       PD7 -> SYNC
+       PC3 -> SYNC
 
 */
 
@@ -120,7 +138,7 @@ void setup(void)
     DDRD |= (1<< PORTD2);
 
     // SYNC to dispensers
-    DDRD |= (1<< PORTD7);
+    DDRC |= (1<< PORTC3);
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT0);
@@ -194,7 +212,7 @@ ISR (TIMER1_OVF_vect)
 {
     g_time++;
     if (g_sync)
-        tbi(PORTD, 7);
+        tbi(PORTC, 3);
     TCNT1 = TIMER1_INIT;
 }
 
@@ -208,19 +226,30 @@ ISR(TWI_vect)
    {
        case TW_SR_DATA_ACK:     // 0x80: data received, ACK returned
            data = TWDR;
-           if (data == 255)
+           if (data == ROUTER_CMD_RESET)
+           {
                g_reset = 1;
-           if (data < g_dispenser_count)
-               g_dispenser = data;
+               break;
+           }
 
+           if (data < g_dispenser_count)
+           {
+               g_dispenser = data;
+               break;
+           }
+           if (data == ROUTER_CMD_SYNC_OFF)
+           {
+               g_sync = 0;
+               break;
+           }
+           if (data == ROUTER_CMD_SYNC_ON)
+           {
+               g_sync = 1;
+               break;
+           }
            break;
    }
    TWCR |= (1<<TWINT);    // Clear TWINT Flag
-}
-
-uint8_t check_reset(void)
-{
-    return 0;
 }
 
 void reset_dispensers(void)
@@ -386,10 +415,6 @@ uint8_t setup_ids(void)
     return count;
 }
 
-void idle(void)
-{
-}
-
 int main (void)
 {
     uint8_t reset = 0, count;
@@ -406,7 +431,7 @@ int main (void)
         count = setup_ids();
         cli();
         g_dispenser_count = count;
-        g_sync = 1;
+        g_sync = 0;
         sei();
         for(;;)
         {

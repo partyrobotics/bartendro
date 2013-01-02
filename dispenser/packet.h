@@ -8,12 +8,21 @@
 #define PACKET_SET_MOTOR_SPEED 4
 #define PACKET_TICK_DISPENSE   5
 #define PACKET_TIME_DISPENSE   6
+#define PACKET_LED_OFF         7
+#define PACKET_LED_IDLE        8
+#define PACKET_LED_DISPENSE    9
+#define PACKET_LED_DRINK_DONE  10
 #define PACKET_BROADCAST       0xFF
 
 #define PACKET_ACK_OK          0
 #define PACKET_ACK_CRC_FAIL    1
 #define PACKET_ACK_TIMEOUT     2
 
+#define ROUTER_CMD_SYNC_ON     251
+#define ROUTER_CMD_SYNC_OFF    252
+#define ROUTER_CMD_PING        253
+#define ROUTER_CMD_COUNT       254
+#define ROUTER_CMD_RESET       255
 
 #define REC_OK           0
 #define REC_CRC_FAIL     1
