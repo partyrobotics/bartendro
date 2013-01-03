@@ -7325,7 +7325,7 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <part name="Q2" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
 <part name="Q3" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
 <part name="Q4" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
-<part name="PL1" library="con-hirose-df3" deviceset="DF3-02" device="P" value="M"/>
+<part name="PL1" library="con-hirose-df3" deviceset="DF3-02" device="P" value="Motor Connector"/>
 <part name="U5" library="pierre" deviceset="VREG-5V-LDO-AP1117" device="SOT89-3L"/>
 <part name="C9" library="SparkFun-Passives" deviceset="CAP" device="0603-CAP" value="10u"/>
 <part name="C10" library="SparkFun-Passives" deviceset="CAP" device="0603-CAP" value="10u"/>
@@ -9668,8 +9668,13 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <instance part="Q2" gate="G$1" x="347.98" y="142.24"/>
 <instance part="Q3" gate="G$1" x="353.06" y="114.3"/>
 <instance part="Q4" gate="G$1" x="358.14" y="88.9"/>
-<instance part="PL1" gate="-1" x="256.54" y="106.68" rot="MR0"/>
-<instance part="PL1" gate="-2" x="256.54" y="111.76" rot="MR0"/>
+<instance part="PL1" gate="-1" x="256.54" y="106.68" smashed="yes" rot="MR0">
+<attribute name="NAME" x="257.048" y="107.696" size="1.778" layer="95" rot="MR180"/>
+<attribute name="VALUE" x="269.494" y="108.839" size="1.778" layer="96" rot="MR0"/>
+</instance>
+<instance part="PL1" gate="-2" x="256.54" y="111.76" smashed="yes" rot="MR0">
+<attribute name="NAME" x="257.048" y="112.776" size="1.778" layer="95" rot="MR180"/>
+</instance>
 <instance part="U5" gate="G$1" x="101.6" y="200.66" smashed="yes">
 <attribute name="NAME" x="96.52" y="203.2" size="1.778" layer="95"/>
 </instance>
@@ -10012,8 +10017,6 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <wire x1="246.38" y1="99.06" x2="246.38" y2="101.6" width="0.2032" layer="91"/>
 <junction x="246.38" y="99.06"/>
 <junction x="246.38" y="96.52"/>
-<label x="228.6" y="106.68" size="1.778" layer="95"/>
-<wire x1="246.38" y1="106.68" x2="228.6" y2="106.68" width="0.2032" layer="91"/>
 <wire x1="246.38" y1="101.6" x2="246.38" y2="106.68" width="0.1524" layer="91"/>
 <pinref part="PL1" gate="-1" pin="S"/>
 <wire x1="246.38" y1="106.68" x2="251.46" y2="106.68" width="0.1524" layer="91"/>
@@ -10022,7 +10025,7 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <pinref part="D1" gate="G$1" pin="A"/>
 </segment>
 </net>
-<net name="CURRENT_SENSE" class="0">
+<net name="1/4W" class="0">
 <segment>
 <label x="215.9" y="76.2" size="1.778" layer="95"/>
 <pinref part="Q1" gate="G$1" pin="S@3"/>
@@ -10042,6 +10045,7 @@ Standard 0603 ceramic capacitor, and 0.1" leaded capacitor.</description>
 <pinref part="R19" gate="G$1" pin="2"/>
 <wire x1="195.58" y1="68.58" x2="187.96" y2="68.58" width="0.1524" layer="91"/>
 <junction x="187.96" y="68.58"/>
+<label x="177.8" y="60.96" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="TX" class="0">
