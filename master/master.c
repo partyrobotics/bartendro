@@ -33,9 +33,7 @@ void    clear_pin(uint8_t port, uint8_t pin);
 uint8_t get_pin_state(uint8_t port, uint8_t pin);
 
 // TODO:
-// THink about serial IO errors on this level.
 // check for COLLISIONS in name assignment
-// Ensure that I2C has error correction
 
 /*  For use with the production board
     { 'D', 3 }, // 0 - pcint19

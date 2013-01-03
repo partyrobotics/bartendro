@@ -46,13 +46,19 @@ volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
 static volatile uint32_t g_ticks = 0;
+static volatile uint32_t g_dispense_target_ticks = 0;
+static volatile uint8_t g_is_dispensing = 0;
+
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
 static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
-static void (*g_led_function)(uint32_t, color_t *);
+static void (*g_led_function)(uint32_t, color_t *) = 0;
+
+void check_dispense_complete(void);
+void set_motor_speed(uint8_t speed);
 
 /*
    0  - PD0 - RX
@@ -148,6 +154,7 @@ ISR(PCINT0_vect)
         g_hall3 = state;
         g_ticks++;
     }
+    check_dispense_complete();
 
     state = PINB & (1<<PINB2);
     if (state != g_sync)
@@ -174,7 +181,17 @@ ISR(PCINT2_vect)
         g_hall1 = state;
         g_ticks++;
     }
+    check_dispense_complete();
+}
 
+void check_dispense_complete()
+{
+    if (g_dispense_target_ticks > 0 && g_ticks >= g_dispense_target_ticks)
+    {
+         g_dispense_target_ticks = 0;
+         g_is_dispensing = 0;
+         set_motor_speed(0);
+    }
 }
 
 uint8_t check_reset(void)
@@ -295,26 +312,15 @@ void run_motor_timed(uint32_t duration)
     set_motor_speed(0);
 }
 
-void run_motor_ticks(uint32_t ticks)
+void dispense_ticks(uint32_t ticks)
 {
-    uint32_t ticks_dest, ticks_now;
-
     cli();
-    ticks_dest = g_ticks + ticks;
+    g_dispense_target_ticks = ticks;
+    g_ticks = 0;
+    g_is_dispensing = 1;
     sei();
 
     set_motor_speed(255);
-    for(; !check_reset();)
-    {
-        cli();
-        ticks_now = g_ticks;
-        sei();
-        if (ticks_now >= ticks_dest)
-            break;
-
-        idle();
-    }
-    set_motor_speed(0);
 }
 
 void set_random_seed_from_eeprom(void)
@@ -458,7 +464,6 @@ int main(void)
 
             if (rec == REC_OK && p.dest == id)
             {
-                tbi(PORTB, 5);
                 switch(p.type)
                 {
                     case PACKET_PING:
@@ -471,7 +476,7 @@ int main(void)
                         break;
 
                     case PACKET_TICK_DISPENSE:
-                        run_motor_ticks(p.p.uint32);
+                        dispense_ticks(p.p.uint32);
                         break;
 
                     case PACKET_TIME_DISPENSE:

@@ -3,10 +3,12 @@
 #include <avr/interrupt.h>
 #include "defs.h"
 #include "serial.h"
+#include "pack7.h"
 
 #define BAUD 38400
 #define UBBR (F_CPU / 16 / BAUD - 1)
 #define RECEIVE_TIMEOUT  100
+#define MAX_PACKET_LEN 16
 
 extern uint8_t check_reset(void);
 extern volatile uint32_t g_time;
@@ -82,68 +84,89 @@ uint8_t check_reset(void)
 
 uint8_t receive_packet(packet_t *p)
 {
-    uint32_t timeout = 0, now;
     uint16_t crc = 0;
-    uint8_t  i, *ch = (uint8_t *)p, timed_out, ret, ack;
+    uint8_t  i, ret, ack, header, restart, ch, *ptr;
+    uint8_t  size, unpacked_size;
+    uint8_t  data[MAX_PACKET_LEN];
 
     for(;!check_reset();)
     {
-        timed_out = 0;
-        i = UDR0; // read whatever might be leftover
-        for(i = 0; i < sizeof(packet_t); i++, ch++)
+        header = 0;
+        restart = 0;
+        for(;;)
+        {
+            ret = serial_rx_nb(&ch);
+            if (check_reset())
+                return REC_RESET;
+
+            if (ret)
+            {
+                if (ch == 0xFF)
+                    header++;
+                else 
+                    header = 0;
+
+                if (header == 2)
+                    break;
+            }
+            idle();
+        }
+
+        for(;;)
+        {
+            ret = serial_rx_nb(&ch);
+            if (check_reset())
+                return REC_RESET;
+
+            if (ret)
+            {
+                if (ch == 0xFF)
+                {
+                    restart = 1;
+                    break;
+                }
+                size = ch;
+                break;
+            }
+            idle();
+        }
+        if (restart)
+            continue;
+
+        for(i = 0; i < size; i++)
         {
             for(;;)
             {
-                ret = serial_rx_nb(ch);
+                ret = serial_rx_nb(&ch);
                 if (check_reset())
                     return REC_RESET;
 
                 if (ret)
                 {
-                    if (i == 0)
+                    if (ch == 0xFF)
                     {
-                        cli();
-                        timeout = g_time;
-                        sei();
-                        timeout += RECEIVE_TIMEOUT;
+                        restart = 1;
+                        break;
                     }
-                    break;
-                }
-
-                cli();
-                now = g_time;
-                sei();
-                if (timeout > 0 && now > timeout)
-                {
-                    i = 0;
-                    ch = (uint8_t *)p;
-                    timed_out = 1;
-                    timeout = 0;
-                    for(;;)
-                    {
-                        ret = serial_tx_nb(PACKET_ACK_TIMEOUT);
-                        if (check_reset())
-                            return REC_RESET;
-                        if (ret)
-                            break;
-                    }
+                    data[i] = ch;
                     break;
                 }
                 idle();
             }
-            if (timed_out)
+            if (restart)
                 break;
         }
-        if (timed_out)
+        if (restart)
             continue;
 
+        tbi(PORTB, 5);
+
+        unpack_7bit(size, data, &unpacked_size, (uint8_t *)p);
+
         crc = 0;
-        crc = _crc16_update(crc, p->dest);
-        crc = _crc16_update(crc, p->type);
-        crc = _crc16_update(crc, p->p.uint8[0]);
-        crc = _crc16_update(crc, p->p.uint8[1]);
-        crc = _crc16_update(crc, p->p.uint8[2]);
-        crc = _crc16_update(crc, p->p.uint8[3]);
+        for(i = 0, ptr = (uint8_t *)p; i < unpacked_size - 2; i++, ptr++)
+            crc = _crc16_update(crc, *ptr);
+
         if (crc != p->crc)
             ack = PACKET_ACK_CRC_FAIL;
         else
@@ -158,7 +181,7 @@ uint8_t receive_packet(packet_t *p)
                 break;
             idle();
         }
-        return REC_OK;
+        return (ack == PACKET_ACK_OK) ? REC_OK : REC_CRC_FAIL;
     }
     return REC_RESET;
 }
