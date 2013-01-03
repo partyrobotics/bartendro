@@ -7523,8 +7523,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <part name="P+19" library="SparkFun-Aesthetics" deviceset="3.3V" device=""/>
 <part name="SUPPLY23" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY24" library="supply2" deviceset="GND" device=""/>
-<part name="R15" library="SparkFun-Resistors" deviceset="RESISTOR" device="0603-RES" value="1k"/>
-<part name="P+21" library="SparkFun-Aesthetics" deviceset="3.3V" device=""/>
 <part name="C11" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
 <part name="SUPPLY25" library="supply2" deviceset="GND" device=""/>
 <part name="R16" library="SparkFun-Resistors" deviceset="RESISTOR" device="0603-RES" value="10k"/>
@@ -9875,8 +9873,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <instance part="P+19" gate="G$1" x="309.88" y="88.9"/>
 <instance part="SUPPLY23" gate="GND" x="309.88" y="55.88"/>
 <instance part="SUPPLY24" gate="GND" x="368.3" y="53.34" rot="MR0"/>
-<instance part="R15" gate="G$1" x="299.72" y="86.36" rot="R90"/>
-<instance part="P+21" gate="G$1" x="299.72" y="91.44"/>
 <instance part="C11" gate="G$1" x="292.1" y="220.98"/>
 <instance part="SUPPLY25" gate="GND" x="292.1" y="213.36"/>
 <instance part="R16" gate="G$1" x="337.82" y="147.32" rot="R90"/>
@@ -10407,10 +10403,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <pinref part="P+19" gate="G$1" pin="3.3V"/>
 </segment>
 <segment>
-<pinref part="R15" gate="G$1" pin="2"/>
-<pinref part="P+21" gate="G$1" pin="3.3V"/>
-</segment>
-<segment>
 <pinref part="R17" gate="G$1" pin="2"/>
 <pinref part="P+24" gate="G$1" pin="3.3V"/>
 </segment>
@@ -10459,12 +10451,8 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="SDI"/>
-<wire x1="312.42" y1="76.2" x2="299.72" y2="76.2" width="0.1524" layer="91"/>
 <label x="279.4" y="76.2" size="1.778" layer="95"/>
-<pinref part="R15" gate="G$1" pin="1"/>
-<wire x1="299.72" y1="76.2" x2="279.4" y2="76.2" width="0.1524" layer="91"/>
-<wire x1="299.72" y1="81.28" x2="299.72" y2="76.2" width="0.1524" layer="91"/>
-<junction x="299.72" y="76.2"/>
+<wire x1="312.42" y1="76.2" x2="279.4" y2="76.2" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$12" class="0">
