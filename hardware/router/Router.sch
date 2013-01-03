@@ -139,6 +139,20 @@ We've spent an enormous amount of time creating and checking these footprints an
 &lt;br&gt;&lt;br&gt;
 &lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
 <packages>
+<package name="FIDUCIAL-1.5X3">
+<circle x="0" y="0" radius="0.9055" width="1.27" layer="29"/>
+<smd name="1" x="0" y="0" dx="1.5" dy="1.5" layer="1" roundness="100" cream="no"/>
+</package>
+<package name="FIDUCIAL-1X2">
+<smd name="1" x="0" y="0" dx="1" dy="1" layer="1" roundness="100" cream="no"/>
+</package>
+<package name="FIDUCIAL-1X2.5">
+<circle x="0" y="0" radius="0.9" width="1.27" layer="29"/>
+<smd name="1" x="0" y="0" dx="1" dy="1" layer="1" roundness="100" cream="no"/>
+</package>
+<package name="MICRO-FIDUCIAL">
+<smd name="1" x="0" y="0" dx="0.635" dy="0.635" layer="1" roundness="100" cream="no"/>
+</package>
 </packages>
 <symbols>
 <symbol name="A3L-LOC">
@@ -279,6 +293,11 @@ We've spent an enormous amount of time creating and checking these footprints an
 <text x="-1.016" y="3.556" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="VIN" x="0" y="0" visible="off" length="short" direction="sup" rot="R90"/>
 </symbol>
+<symbol name="FIDUCIAL">
+<wire x1="-0.762" y1="0.762" x2="0.762" y2="-0.762" width="0.254" layer="94"/>
+<wire x1="0.762" y1="0.762" x2="-0.762" y2="-0.762" width="0.254" layer="94"/>
+<circle x="0" y="0" radius="1.27" width="0.254" layer="94"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="FRAME-A3" prefix="FRAME">
@@ -320,36 +339,39 @@ A3 Larger Frame</description>
 </device>
 </devices>
 </deviceset>
+<deviceset name="FIDUCIAL" prefix="JP">
+<description>&lt;b&gt;Fiducial Alignment Points&lt;/b&gt;
+Various fiducial points for machine vision alignment.</description>
+<gates>
+<gate name="G$1" symbol="FIDUCIAL" x="0" y="0"/>
+</gates>
+<devices>
+<device name="1.5X3" package="FIDUCIAL-1.5X3">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="1X2" package="FIDUCIAL-1X2">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="1X2.5" package="FIDUCIAL-1X2.5">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="UFIDUCIAL" package="MICRO-FIDUCIAL">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
 </devicesets>
 </library>
 <library name="pierre">
 <packages>
-<package name="SO08">
-<description>&lt;b&gt;Small Outline Package&lt;/b&gt; Fits JEDEC packages (narrow SOIC-8)</description>
-<wire x1="-2.362" y1="-1.803" x2="2.362" y2="-1.803" width="0.1524" layer="51"/>
-<wire x1="2.362" y1="-1.803" x2="2.362" y2="1.803" width="0.1524" layer="21"/>
-<wire x1="2.362" y1="1.803" x2="-2.362" y2="1.803" width="0.1524" layer="51"/>
-<wire x1="-2.362" y1="1.803" x2="-2.362" y2="-1.803" width="0.1524" layer="21"/>
-<circle x="-1.8034" y="-0.9906" radius="0.1436" width="0.2032" layer="21"/>
-<smd name="1" x="-1.905" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="2" x="-0.635" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="3" x="0.635" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="4" x="1.905" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="5" x="1.905" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="6" x="0.635" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="7" x="-0.635" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<smd name="8" x="-1.905" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
-<text x="-1.27" y="-0.635" size="0.4064" layer="27">&gt;VALUE</text>
-<text x="-1.27" y="0" size="0.4064" layer="25">&gt;NAME</text>
-<rectangle x1="-2.0828" y1="-2.8702" x2="-1.7272" y2="-1.8542" layer="51"/>
-<rectangle x1="-0.8128" y1="-2.8702" x2="-0.4572" y2="-1.8542" layer="51"/>
-<rectangle x1="0.4572" y1="-2.8702" x2="0.8128" y2="-1.8542" layer="51"/>
-<rectangle x1="1.7272" y1="-2.8702" x2="2.0828" y2="-1.8542" layer="51"/>
-<rectangle x1="-2.0828" y1="1.8542" x2="-1.7272" y2="2.8702" layer="51"/>
-<rectangle x1="-0.8128" y1="1.8542" x2="-0.4572" y2="2.8702" layer="51"/>
-<rectangle x1="0.4572" y1="1.8542" x2="0.8128" y2="2.8702" layer="51"/>
-<rectangle x1="1.7272" y1="1.8542" x2="2.0828" y2="2.8702" layer="51"/>
-</package>
 <package name="SOT89-3L">
 <wire x1="2.3" y1="1.3" x2="2.3" y2="-1.3" width="0.2032" layer="21"/>
 <wire x1="2.3" y1="-1.3" x2="-2.3" y2="-1.3" width="0.2032" layer="21"/>
@@ -644,24 +666,27 @@ This is the "EZ" version, which has limited top masking for improved ease of ass
 <wire x1="-1.3" y1="2.45" x2="-1.3" y2="2.415" width="0.127" layer="21"/>
 <wire x1="-1.3" y1="2.415" x2="0" y2="0" width="0.127" layer="21"/>
 </package>
+<package name="RGBLED5050">
+<wire x1="-2.5" y1="2.5" x2="2.5" y2="2.5" width="0.127" layer="21"/>
+<wire x1="2.5" y1="2.5" x2="2.5" y2="-1.5" width="0.127" layer="21"/>
+<wire x1="2.5" y1="-1.5" x2="2.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="2.5" y1="-2.5" x2="1.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="-2.5" x2="-2.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="-2.5" y1="-2.5" x2="-2.5" y2="2.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="-2.5" x2="2.5" y2="-1.5" width="0.127" layer="21"/>
+<circle x="2.934" y="-2.688" radius="0.1414" width="0.127" layer="21"/>
+<circle x="0" y="0" radius="2.1" width="0.127" layer="21"/>
+<smd name="1" x="-2" y="1.7" dx="2" dy="1.1" layer="1"/>
+<smd name="2" x="-2" y="0" dx="2" dy="1.1" layer="1"/>
+<smd name="3" x="-2" y="-1.7" dx="2" dy="1.1" layer="1"/>
+<smd name="4" x="2" y="-1.7" dx="2" dy="1.1" layer="1"/>
+<smd name="5" x="2" y="0" dx="2" dy="1.1" layer="1"/>
+<smd name="6" x="2" y="1.7" dx="2" dy="1.1" layer="1"/>
+<text x="-1.7" y="2.9" size="1.27" layer="25" font="vector">&gt;NAME</text>
+<text x="-2" y="-4.1" size="1.27" layer="27" font="vector">&gt;VALUE</text>
+</package>
 </packages>
 <symbols>
-<symbol name="DS1302">
-<wire x1="-10.16" y1="10.16" x2="10.16" y2="10.16" width="0.254" layer="94"/>
-<wire x1="10.16" y1="10.16" x2="10.16" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="10.16" y1="-10.16" x2="-10.16" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="-10.16" x2="-10.16" y2="10.16" width="0.254" layer="94"/>
-<text x="10.16" y="-7.62" size="1.778" layer="94" rot="R180">DS1302</text>
-<text x="-12.7" y="-15.24" size="1.778" layer="95">&gt;NAME</text>
-<pin name="SCLK" x="-15.24" y="-2.54" length="middle" direction="in"/>
-<pin name="I/O" x="-15.24" y="0" length="middle"/>
-<pin name="GND" x="0" y="-15.24" length="middle" direction="pwr" rot="R90"/>
-<pin name="VBAT" x="15.24" y="-2.54" length="middle" direction="pwr" rot="R180"/>
-<pin name="CE" x="-15.24" y="2.54" length="middle" direction="in"/>
-<pin name="VCC" x="15.24" y="5.08" length="middle" direction="pwr" rot="R180"/>
-<pin name="X1" x="-5.08" y="15.24" length="middle" direction="pas" rot="R270"/>
-<pin name="X2" x="0" y="15.24" length="middle" direction="pas" rot="R270"/>
-</symbol>
 <symbol name="LDO">
 <wire x1="-5.08" y1="-5.08" x2="5.08" y2="-5.08" width="0.4064" layer="94"/>
 <wire x1="5.08" y1="-5.08" x2="5.08" y2="2.54" width="0.4064" layer="94"/>
@@ -702,30 +727,41 @@ This is the "EZ" version, which has limited top masking for improved ease of ass
 <pin name="1" x="0" y="2.54" visible="pad" length="short" direction="pas" function="dot"/>
 <pin name="2" x="0" y="0" visible="pad" length="short" direction="pas" function="dot"/>
 </symbol>
+<symbol name="RGBLED">
+<wire x1="1.27" y1="5.08" x2="-5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="-5.08" y2="0" width="0.254" layer="94"/>
+<wire x1="1.27" y1="6.35" x2="1.27" y2="5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="5.08" x2="1.27" y2="3.81" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-3.81" x2="1.27" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-5.08" x2="1.27" y2="-6.35" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="1.27" y2="1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="5.08" x2="-1.27" y2="6.35" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="6.35" x2="-1.27" y2="3.81" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="3.81" x2="1.27" y2="5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-5.08" x2="-1.27" y2="-3.81" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="-3.81" x2="-1.27" y2="-6.35" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="-6.35" x2="1.27" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="1.27" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-5.08" x2="1.27" y2="-5.08" width="0.254" layer="94"/>
+<text x="-3.81" y="8.89" size="1.778" layer="95">&gt;NAME</text>
+<text x="2.54" y="1.27" size="1.778" layer="94">Red</text>
+<text x="2.54" y="-3.81" size="1.778" layer="94">Grn</text>
+<text x="2.54" y="6.35" size="1.778" layer="94">Blue</text>
+<pin name="BLUE_C" x="5.08" y="5.08" visible="off" length="point" rot="R180"/>
+<pin name="GREEN_C" x="5.08" y="-5.08" visible="off" length="point" rot="R180"/>
+<pin name="GREEN_A" x="-5.08" y="-5.08" visible="off" length="point"/>
+<pin name="RED_C" x="5.08" y="0" visible="off" length="point" rot="R180"/>
+<pin name="BLUE_A" x="-5.08" y="5.08" visible="off" length="point"/>
+<pin name="RED_A" x="-5.08" y="0" visible="off" length="point"/>
+</symbol>
 </symbols>
 <devicesets>
-<deviceset name="DS1302_SMT">
-<gates>
-<gate name="G$1" symbol="DS1302" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="SO08">
-<connects>
-<connect gate="G$1" pin="CE" pad="5"/>
-<connect gate="G$1" pin="GND" pad="4"/>
-<connect gate="G$1" pin="I/O" pad="6"/>
-<connect gate="G$1" pin="SCLK" pad="7"/>
-<connect gate="G$1" pin="VBAT" pad="8"/>
-<connect gate="G$1" pin="VCC" pad="1"/>
-<connect gate="G$1" pin="X1" pad="2"/>
-<connect gate="G$1" pin="X2" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="VREG-5V-LDO-AP1117">
 <gates>
 <gate name="G$1" symbol="LDO" x="0" y="0"/>
@@ -859,6 +895,27 @@ This is the "EZ" version, which has limited top masking for improved ease of ass
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="RGBLED" prefix="LED">
+<description>For 5050 RGB LEDs, the order of the LEDs may vary from one manufacturer to another!</description>
+<gates>
+<gate name="G$1" symbol="RGBLED" x="0" y="0"/>
+</gates>
+<devices>
+<device name="5050" package="RGBLED5050">
+<connects>
+<connect gate="G$1" pin="BLUE_A" pad="1"/>
+<connect gate="G$1" pin="BLUE_C" pad="6"/>
+<connect gate="G$1" pin="GREEN_A" pad="3"/>
+<connect gate="G$1" pin="GREEN_C" pad="4"/>
+<connect gate="G$1" pin="RED_A" pad="2"/>
+<connect gate="G$1" pin="RED_C" pad="5"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -2629,6 +2686,26 @@ We've spent an enormous amount of time creating and checking these footprints an
 <vertex x="18.8976" y="0" curve="-90"/>
 </polygon>
 </package>
+<package name="STAND-OFF">
+<description>&lt;b&gt;Stand Off&lt;/b&gt;&lt;p&gt;
+This is the mechanical footprint for a #4 phillips button head screw. Use the keepout ring to avoid running the screw head into surrounding components. SKU : PRT-00447</description>
+<wire x1="0" y1="1.8542" x2="0" y2="-1.8542" width="0.2032" layer="41" curve="-180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="41" curve="-180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="42" curve="180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="42" curve="-180"/>
+<circle x="0" y="0" radius="2.794" width="0.127" layer="39"/>
+<hole x="0" y="0" drill="3.302"/>
+</package>
+<package name="STAND-OFF-TIGHT">
+<description>&lt;b&gt;Stand Off&lt;/b&gt;&lt;p&gt;
+This is the mechanical footprint for a #4 phillips button head screw. Use the keepout ring to avoid running the screw head into surrounding components. SKU : PRT-00447</description>
+<wire x1="0" y1="1.8542" x2="0" y2="-1.8542" width="0.2032" layer="41" curve="-180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="41" curve="-180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="42" curve="180"/>
+<wire x1="0" y1="-1.8542" x2="0" y2="1.8542" width="0.2032" layer="42" curve="-180"/>
+<circle x="0" y="0" radius="2.794" width="0.127" layer="39"/>
+<hole x="0" y="0" drill="3.048"/>
+</package>
 </packages>
 <symbols>
 <symbol name="BATTERY">
@@ -2641,6 +2718,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 <text x="-3.81" y="-6.35" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="-" x="5.08" y="0" visible="off" length="short" direction="pwr" rot="R180"/>
 <pin name="+" x="-5.08" y="0" visible="off" length="short" direction="pwr"/>
+</symbol>
+<symbol name="STAND-OFF">
+<circle x="0" y="0" radius="1.27" width="0.254" layer="94"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -2773,6 +2853,25 @@ Various common sizes : AA, AAA, 20mm coin cell and 12mm coin cell.</description>
 <connect gate="G$1" pin="+" pad="PWR@1"/>
 <connect gate="G$1" pin="-" pad="GND@1"/>
 </connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="STAND-OFF" prefix="JP">
+<description>&lt;b&gt;#4 Stand Off&lt;/b&gt;&lt;p&gt;
+This is the mechanical footprint for a #4 phillips button head screw. Use the keepout ring to avoid running the screw head into surrounding components. SKU : PRT-00447</description>
+<gates>
+<gate name="G$1" symbol="STAND-OFF" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="STAND-OFF">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="TIGHT" package="STAND-OFF-TIGHT">
 <technologies>
 <technology name=""/>
 </technologies>
@@ -3370,87 +3469,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 </deviceset>
 </devicesets>
 </library>
-<library name="adafruit">
-<packages>
-<package name="RGBLED5050">
-<wire x1="-2.5" y1="2.5" x2="2.5" y2="2.5" width="0.127" layer="21"/>
-<wire x1="2.5" y1="2.5" x2="2.5" y2="-1.5" width="0.127" layer="21"/>
-<wire x1="2.5" y1="-1.5" x2="2.5" y2="-2.5" width="0.127" layer="21"/>
-<wire x1="2.5" y1="-2.5" x2="1.5" y2="-2.5" width="0.127" layer="21"/>
-<wire x1="1.5" y1="-2.5" x2="-2.5" y2="-2.5" width="0.127" layer="21"/>
-<wire x1="-2.5" y1="-2.5" x2="-2.5" y2="2.5" width="0.127" layer="21"/>
-<wire x1="1.5" y1="-2.5" x2="2.5" y2="-1.5" width="0.127" layer="21"/>
-<circle x="2.934" y="-2.688" radius="0.1414" width="0.127" layer="21"/>
-<circle x="0" y="0" radius="2.1" width="0.127" layer="21"/>
-<smd name="1" x="-2" y="1.7" dx="2" dy="1.1" layer="1"/>
-<smd name="2" x="-2" y="0" dx="2" dy="1.1" layer="1"/>
-<smd name="3" x="-2" y="-1.7" dx="2" dy="1.1" layer="1"/>
-<smd name="4" x="2" y="-1.7" dx="2" dy="1.1" layer="1"/>
-<smd name="5" x="2" y="0" dx="2" dy="1.1" layer="1"/>
-<smd name="6" x="2" y="1.7" dx="2" dy="1.1" layer="1"/>
-<text x="-1.7" y="2.9" size="1.27" layer="25" font="vector">&gt;NAME</text>
-<text x="-2" y="-4.1" size="1.27" layer="27" font="vector">&gt;VALUE</text>
-</package>
-</packages>
-<symbols>
-<symbol name="RGBLED">
-<wire x1="1.27" y1="5.08" x2="-5.08" y2="5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="0" x2="-5.08" y2="0" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="6.35" x2="1.27" y2="5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="5.08" x2="1.27" y2="3.81" width="0.254" layer="94"/>
-<wire x1="1.27" y1="1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
-<wire x1="1.27" y1="0" x2="1.27" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-6.35" x2="1.27" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-5.08" x2="1.27" y2="-3.81" width="0.254" layer="94"/>
-<wire x1="1.27" y1="5.08" x2="-1.27" y2="6.35" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="6.35" x2="-1.27" y2="3.81" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="3.81" x2="1.27" y2="5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-5.08" x2="-1.27" y2="-3.81" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="-3.81" x2="-1.27" y2="-6.35" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="-6.35" x2="1.27" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-5.08" x2="5.08" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="5.08" y1="0" x2="1.27" y2="0" width="0.254" layer="94"/>
-<text x="-3.81" y="8.89" size="1.778" layer="95">&gt;NAME</text>
-<text x="2.54" y="-3.81" size="1.778" layer="94">Red</text>
-<text x="2.54" y="1.27" size="1.778" layer="94">Grn</text>
-<text x="2.54" y="6.35" size="1.778" layer="94">Blue</text>
-<pin name="BLUE_C" x="5.08" y="5.08" visible="off" length="point" rot="R180"/>
-<pin name="GREEN_C" x="5.08" y="0" visible="off" length="point" rot="R180"/>
-<pin name="GREEN_A" x="-5.08" y="0" visible="off" length="point"/>
-<pin name="RED_C" x="5.08" y="-5.08" visible="off" length="point" rot="R180"/>
-<pin name="BLUE_A" x="-5.08" y="5.08" visible="off" length="point"/>
-<pin name="RED_A" x="-5.08" y="-5.08" visible="off" length="point"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="RGBLED" prefix="LED">
-<description>For 5050 RGB LEDs, the order of the LEDs may vary from one manufacturer to another!</description>
-<gates>
-<gate name="G$1" symbol="RGBLED" x="0" y="0"/>
-</gates>
-<devices>
-<device name="5050" package="RGBLED5050">
-<connects>
-<connect gate="G$1" pin="BLUE_A" pad="3"/>
-<connect gate="G$1" pin="BLUE_C" pad="4"/>
-<connect gate="G$1" pin="GREEN_A" pad="1"/>
-<connect gate="G$1" pin="GREEN_C" pad="6"/>
-<connect gate="G$1" pin="RED_A" pad="2"/>
-<connect gate="G$1" pin="RED_C" pad="5"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="SparkFun-DiscreteSemi">
 <description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
 In this library you'll find discrete semiconductors- transistors, diodes, TRIACs, optoisolators, etc.&lt;br&gt;&lt;br&gt;
@@ -3685,6 +3703,84 @@ High-power, low thermal resistance package.</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="SparkFun-FreqCtrl">
+<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
+In this library you'll find crystals and oscillators and other things that go "tick".&lt;br&gt;&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is the end user's responsibility to ensure correctness and suitablity for a given componet or application. If you enjoy using this library, please buy one of our products at www.sparkfun.com.
+&lt;br&gt;&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+<package name="SO08">
+<description>&lt;b&gt;Small Outline Package&lt;/b&gt; Fits JEDEC packages (narrow SOIC-8)</description>
+<wire x1="-2.362" y1="-1.803" x2="2.362" y2="-1.803" width="0.1524" layer="51"/>
+<wire x1="2.362" y1="-1.803" x2="2.362" y2="1.803" width="0.1524" layer="21"/>
+<wire x1="2.362" y1="1.803" x2="-2.362" y2="1.803" width="0.1524" layer="51"/>
+<wire x1="-2.362" y1="1.803" x2="-2.362" y2="-1.803" width="0.1524" layer="21"/>
+<circle x="-1.8034" y="-0.9906" radius="0.1436" width="0.2032" layer="21"/>
+<smd name="1" x="-1.905" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="2" x="-0.635" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="3" x="0.635" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="4" x="1.905" y="-2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="5" x="1.905" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="6" x="0.635" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="7" x="-0.635" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<smd name="8" x="-1.905" y="2.6162" dx="0.6096" dy="2.2098" layer="1"/>
+<text x="-1.27" y="-0.635" size="0.4064" layer="27">&gt;VALUE</text>
+<text x="-1.27" y="0" size="0.4064" layer="25">&gt;NAME</text>
+<rectangle x1="-2.0828" y1="-2.8702" x2="-1.7272" y2="-1.8542" layer="51"/>
+<rectangle x1="-0.8128" y1="-2.8702" x2="-0.4572" y2="-1.8542" layer="51"/>
+<rectangle x1="0.4572" y1="-2.8702" x2="0.8128" y2="-1.8542" layer="51"/>
+<rectangle x1="1.7272" y1="-2.8702" x2="2.0828" y2="-1.8542" layer="51"/>
+<rectangle x1="-2.0828" y1="1.8542" x2="-1.7272" y2="2.8702" layer="51"/>
+<rectangle x1="-0.8128" y1="1.8542" x2="-0.4572" y2="2.8702" layer="51"/>
+<rectangle x1="0.4572" y1="1.8542" x2="0.8128" y2="2.8702" layer="51"/>
+<rectangle x1="1.7272" y1="1.8542" x2="2.0828" y2="2.8702" layer="51"/>
+</package>
+</packages>
+<symbols>
+<symbol name="DS1307">
+<wire x1="-7.62" y1="5.08" x2="10.16" y2="5.08" width="0.254" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="10.16" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-7.62" x2="-7.62" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-7.62" x2="-7.62" y2="5.08" width="0.254" layer="94"/>
+<text x="-7.62" y="5.842" size="1.778" layer="95">&gt;Name</text>
+<text x="-7.62" y="-10.16" size="1.778" layer="95">&gt;Value</text>
+<pin name="X1" x="-10.16" y="2.54" length="short"/>
+<pin name="X2" x="-10.16" y="0" length="short"/>
+<pin name="VBATT" x="-10.16" y="-2.54" length="short"/>
+<pin name="GND" x="-10.16" y="-5.08" length="short"/>
+<pin name="SDA" x="12.7" y="-5.08" length="short" rot="R180"/>
+<pin name="SCL" x="12.7" y="-2.54" length="short" rot="R180"/>
+<pin name="SQW" x="12.7" y="0" length="short" rot="R180"/>
+<pin name="VCC" x="12.7" y="2.54" length="short" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="DS1307">
+<description>I2C real-time clock with battery backup.</description>
+<gates>
+<gate name="G$1" symbol="DS1307" x="0" y="0"/>
+</gates>
+<devices>
+<device name="SO8" package="SO08">
+<connects>
+<connect gate="G$1" pin="GND" pad="4"/>
+<connect gate="G$1" pin="SCL" pad="6"/>
+<connect gate="G$1" pin="SDA" pad="5"/>
+<connect gate="G$1" pin="SQW" pad="7"/>
+<connect gate="G$1" pin="VBATT" pad="3"/>
+<connect gate="G$1" pin="VCC" pad="8"/>
+<connect gate="G$1" pin="X1" pad="1"/>
+<connect gate="G$1" pin="X2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -3696,7 +3792,6 @@ High-power, low thermal resistance package.</description>
 </classes>
 <parts>
 <part name="FRAME1" library="SparkFun-Aesthetics" deviceset="FRAME-A3" device=""/>
-<part name="U3" library="pierre" deviceset="DS1302_SMT" device=""/>
 <part name="C3" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
 <part name="U2" library="pierre" deviceset="VREG-5V-LDO-AP1117" device="SOT89-3L"/>
 <part name="C1" library="SparkFun-Passives" deviceset="CAP" device="0603-CAP" value="10u"/>
@@ -3734,15 +3829,14 @@ High-power, low thermal resistance package.</description>
 <part name="J16" library="SparkFun" deviceset="RJ45-8" device="PTH"/>
 <part name="SUPPLY22" library="supply2" deviceset="GND" device=""/>
 <part name="J17" library="microbuilder" deviceset="RASPBERRYPI_B" device="B"/>
-<part name="Y1" library="pierre" deviceset="CRYSTAL" device="TC26H_EZ"/>
+<part name="Y1" library="pierre" deviceset="CRYSTAL" device="TC26H_EZ" value="32.768kHz"/>
 <part name="SUPPLY25" library="supply2" deviceset="GND" device=""/>
-<part name="U$40" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
+<part name="U$40" library="SparkFun-Aesthetics" deviceset="5V" device="" value="5V_rpi"/>
 <part name="SUPPLY26" library="supply2" deviceset="GND" device=""/>
 <part name="U$42" library="SparkFun-Aesthetics" deviceset="5V" device="" value="3.3V"/>
 <part name="C2" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
 <part name="SUPPLY27" library="supply2" deviceset="GND" device=""/>
 <part name="C7" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
-<part name="LED1" library="adafruit" deviceset="RGBLED" device="5050"/>
 <part name="U$43" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="SUPPLY28" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY29" library="supply2" deviceset="GND" device=""/>
@@ -3750,7 +3844,6 @@ High-power, low thermal resistance package.</description>
 <part name="U1" library="SparkFun-DigitalIC" deviceset="ATMEGA168" device=""/>
 <part name="U$1" library="SparkFun-Aesthetics" deviceset="5V" device="" value="3.3V"/>
 <part name="U$15" library="SparkFun-Aesthetics" deviceset="5V" device="" value="3.3V"/>
-<part name="U$37" library="SparkFun-Aesthetics" deviceset="5V" device="" value="3.3V"/>
 <part name="Q1" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NMOS"/>
 <part name="Q2" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NMOS"/>
 <part name="Q3" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NMOS"/>
@@ -3805,21 +3898,37 @@ High-power, low thermal resistance package.</description>
 <part name="U$35" library="SparkFun-Aesthetics" deviceset="VIN" device=""/>
 <part name="U$36" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="SUPPLY21" library="supply2" deviceset="GND" device=""/>
+<part name="J18" library="SparkFun" deviceset="RJ45-8" device="PTH"/>
+<part name="U$39" library="SparkFun-Aesthetics" deviceset="VIN" device=""/>
+<part name="U$41" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
+<part name="SUPPLY31" library="supply2" deviceset="GND" device=""/>
+<part name="JP1" library="SparkFun-Aesthetics" deviceset="FIDUCIAL" device="1.5X3"/>
+<part name="JP2" library="SparkFun-Aesthetics" deviceset="FIDUCIAL" device="1.5X3"/>
+<part name="JP3" library="SparkFun-Aesthetics" deviceset="FIDUCIAL" device="1.5X3"/>
+<part name="JP4" library="SparkFun-Aesthetics" deviceset="FIDUCIAL" device="1.5X3"/>
+<part name="JP5" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device="TIGHT"/>
+<part name="JP6" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device="TIGHT"/>
+<part name="JP7" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device="TIGHT"/>
+<part name="JP8" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device="TIGHT"/>
+<part name="U3" library="SparkFun-FreqCtrl" deviceset="DS1307" device="SO8"/>
+<part name="U$37" library="SparkFun-Aesthetics" deviceset="5V" device="" value="5V_rpi"/>
+<part name="LED1" library="pierre" deviceset="RGBLED" device="5050"/>
 </parts>
 <sheets>
 <sheet>
 <plain>
 <text x="330.2" y="241.3" size="1.778" layer="91">Programming Header</text>
 <text x="320.04" y="93.98" size="1.778" layer="91">RPI Header</text>
-<text x="180.34" y="104.14" size="1.778" layer="91">RTC</text>
+<text x="182.88" y="91.44" size="1.778" layer="91">RTC</text>
 <text x="335.28" y="195.58" size="1.778" layer="91">12V In, 5V 1A Out</text>
 <text x="101.6" y="243.84" size="2.54" layer="94">Power In</text>
 <text x="327.66" y="4.445" size="2.54" layer="94">Pierre Michael</text>
 <text x="325.12" y="14.605" size="2.54" layer="94">1</text>
+<text x="93.98" y="40.64" size="1.778" layer="95">Accessory Port</text>
+<text x="203.2" y="63.5" size="1.778" layer="91">I2C Pullups on RPI 1.8k to 3.3V</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
-<instance part="U3" gate="G$1" x="182.88" y="76.2"/>
 <instance part="C3" gate="G$1" x="246.38" y="104.14"/>
 <instance part="U2" gate="G$1" x="342.9" y="187.96" smashed="yes">
 <attribute name="NAME" x="337.82" y="190.5" size="1.778" layer="95"/>
@@ -3858,17 +3967,19 @@ High-power, low thermal resistance package.</description>
 <instance part="J14" gate="G$1" x="15.24" y="83.82" rot="MR0"/>
 <instance part="J15" gate="G$1" x="15.24" y="53.34" rot="MR0"/>
 <instance part="J16" gate="G$1" x="15.24" y="22.86" rot="MR0"/>
-<instance part="SUPPLY22" gate="GND" x="210.82" y="55.88"/>
+<instance part="SUPPLY22" gate="GND" x="154.94" y="55.88"/>
 <instance part="J17" gate="G$1" x="325.12" y="71.12"/>
-<instance part="Y1" gate="G$1" x="180.34" y="99.06" rot="R180"/>
-<instance part="SUPPLY25" gate="GND" x="182.88" y="58.42"/>
+<instance part="Y1" gate="G$1" x="157.48" y="81.28" smashed="yes" rot="R270">
+<attribute name="NAME" x="152.4" y="82.296" size="1.778" layer="95"/>
+<attribute name="VALUE" x="152.4" y="86.36" size="1.778" layer="96"/>
+</instance>
+<instance part="SUPPLY25" gate="GND" x="170.18" y="63.5"/>
 <instance part="U$40" gate="G$1" x="355.6" y="93.98"/>
 <instance part="SUPPLY26" gate="GND" x="365.76" y="68.58"/>
 <instance part="U$42" gate="G$1" x="157.48" y="180.34"/>
 <instance part="C2" gate="G$1" x="144.78" y="160.02"/>
 <instance part="SUPPLY27" gate="GND" x="144.78" y="152.4"/>
 <instance part="C7" gate="G$1" x="231.14" y="104.14"/>
-<instance part="LED1" gate="G$1" x="358.14" y="142.24"/>
 <instance part="U$43" gate="G$1" x="373.38" y="152.4"/>
 <instance part="SUPPLY28" gate="GND" x="320.04" y="121.92"/>
 <instance part="SUPPLY29" gate="GND" x="335.28" y="109.22"/>
@@ -3876,7 +3987,6 @@ High-power, low thermal resistance package.</description>
 <instance part="U1" gate="G$1" x="193.04" y="160.02"/>
 <instance part="U$1" gate="G$1" x="246.38" y="111.76"/>
 <instance part="U$15" gate="G$1" x="299.72" y="93.98"/>
-<instance part="U$37" gate="G$1" x="210.82" y="88.9"/>
 <instance part="Q1" gate="G$1" x="307.34" y="142.24"/>
 <instance part="Q2" gate="G$1" x="320.04" y="129.54"/>
 <instance part="Q3" gate="G$1" x="335.28" y="116.84"/>
@@ -3896,7 +4006,7 @@ High-power, low thermal resistance package.</description>
 <instance part="U$38" gate="G$1" x="114.3" y="233.68"/>
 <instance part="SUPPLY24" gate="GND" x="114.3" y="223.52"/>
 <instance part="U6" gate="G$1" x="104.14" y="228.6" rot="MR0"/>
-<instance part="BAT1" gate="G$1" x="210.82" y="63.5" rot="R270"/>
+<instance part="BAT1" gate="G$1" x="154.94" y="63.5" rot="R270"/>
 <instance part="U$18" gate="G$1" x="132.08" y="200.66"/>
 <instance part="U$2" gate="G$1" x="71.12" y="231.14"/>
 <instance part="U$3" gate="G$1" x="76.2" y="231.14"/>
@@ -3940,6 +4050,21 @@ High-power, low thermal resistance package.</description>
 <instance part="U$35" gate="G$1" x="33.02" y="33.02"/>
 <instance part="U$36" gate="G$1" x="38.1" y="33.02"/>
 <instance part="SUPPLY21" gate="GND" x="33.02" y="12.7"/>
+<instance part="J18" gate="G$1" x="99.06" y="20.32" rot="MR0"/>
+<instance part="U$39" gate="G$1" x="116.84" y="30.48"/>
+<instance part="U$41" gate="G$1" x="121.92" y="30.48"/>
+<instance part="SUPPLY31" gate="GND" x="116.84" y="10.16"/>
+<instance part="JP1" gate="G$1" x="281.94" y="22.86"/>
+<instance part="JP2" gate="G$1" x="281.94" y="17.78"/>
+<instance part="JP3" gate="G$1" x="281.94" y="12.7"/>
+<instance part="JP4" gate="G$1" x="281.94" y="7.62"/>
+<instance part="JP5" gate="G$1" x="264.16" y="22.86"/>
+<instance part="JP6" gate="G$1" x="264.16" y="17.78"/>
+<instance part="JP7" gate="G$1" x="264.16" y="12.7"/>
+<instance part="JP8" gate="G$1" x="264.16" y="7.62"/>
+<instance part="U3" gate="G$1" x="182.88" y="78.74"/>
+<instance part="U$37" gate="G$1" x="203.2" y="88.9"/>
+<instance part="LED1" gate="G$1" x="358.14" y="142.24" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -3985,10 +4110,6 @@ High-power, low thermal resistance package.</description>
 <pinref part="J9" gate="G$1" pin="8"/>
 <wire x1="27.94" y1="228.6" x2="33.02" y2="228.6" width="0.1524" layer="91"/>
 <pinref part="SUPPLY14" gate="GND" pin="GND"/>
-</segment>
-<segment>
-<pinref part="U3" gate="G$1" pin="GND"/>
-<pinref part="SUPPLY25" gate="GND" pin="GND"/>
 </segment>
 <segment>
 <pinref part="C2" gate="G$1" pin="2"/>
@@ -4108,6 +4229,17 @@ High-power, low thermal resistance package.</description>
 <pinref part="SUPPLY21" gate="GND" pin="GND"/>
 <pinref part="J16" gate="G$1" pin="8"/>
 </segment>
+<segment>
+<wire x1="111.76" y1="12.7" x2="116.84" y2="12.7" width="0.1524" layer="91"/>
+<pinref part="SUPPLY31" gate="GND" pin="GND"/>
+<pinref part="J18" gate="G$1" pin="8"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="GND"/>
+<wire x1="172.72" y1="73.66" x2="170.18" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="73.66" x2="170.18" y2="66.04" width="0.1524" layer="91"/>
+<pinref part="SUPPLY25" gate="GND" pin="GND"/>
+</segment>
 </net>
 <net name="3.3V" class="0">
 <segment>
@@ -4149,12 +4281,6 @@ High-power, low thermal resistance package.</description>
 <wire x1="165.1" y1="180.34" x2="170.18" y2="180.34" width="0.1524" layer="91"/>
 <junction x="165.1" y="177.8"/>
 <junction x="157.48" y="177.8"/>
-</segment>
-<segment>
-<pinref part="U3" gate="G$1" pin="VCC"/>
-<wire x1="210.82" y1="88.9" x2="210.82" y2="81.28" width="0.2032" layer="91"/>
-<wire x1="210.82" y1="81.28" x2="198.12" y2="81.28" width="0.2032" layer="91"/>
-<pinref part="U$37" gate="G$1" pin="5V"/>
 </segment>
 <segment>
 <pinref part="R9" gate="G$1" pin="2"/>
@@ -4308,9 +4434,8 @@ High-power, low thermal resistance package.</description>
 </net>
 <net name="BAT1+" class="0">
 <segment>
-<wire x1="210.82" y1="68.58" x2="210.82" y2="73.66" width="0.2032" layer="91"/>
-<pinref part="U3" gate="G$1" pin="VBAT"/>
-<wire x1="210.82" y1="73.66" x2="198.12" y2="73.66" width="0.2032" layer="91"/>
+<wire x1="154.94" y1="68.58" x2="154.94" y2="76.2" width="0.2032" layer="91"/>
+<wire x1="154.94" y1="76.2" x2="172.72" y2="76.2" width="0.2032" layer="91"/>
 <pinref part="BAT1" gate="G$1" pin="+"/>
 </segment>
 </net>
@@ -4369,16 +4494,17 @@ High-power, low thermal resistance package.</description>
 </net>
 <net name="N$6" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="X2"/>
 <pinref part="Y1" gate="G$1" pin="1"/>
-<wire x1="182.88" y1="91.44" x2="182.88" y2="99.06" width="0.2032" layer="91"/>
+<wire x1="165.1" y1="83.82" x2="157.48" y2="83.82" width="0.2032" layer="91"/>
+<wire x1="165.1" y1="83.82" x2="165.1" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="U3" gate="G$1" pin="X1"/>
+<wire x1="165.1" y1="81.28" x2="172.72" y2="81.28" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$7" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="X1"/>
 <pinref part="Y1" gate="G$1" pin="2"/>
-<wire x1="177.8" y1="91.44" x2="177.8" y2="99.06" width="0.2032" layer="91"/>
+<wire x1="172.72" y1="78.74" x2="157.48" y2="78.74" width="0.2032" layer="91"/>
 </segment>
 </net>
 <net name="SYNC" class="0">
@@ -4638,6 +4764,16 @@ High-power, low thermal resistance package.</description>
 <wire x1="218.44" y1="175.26" x2="233.68" y2="175.26" width="0.1524" layer="91"/>
 <label x="233.68" y="175.26" size="1.778" layer="95" rot="MR0"/>
 </segment>
+<segment>
+<wire x1="111.76" y1="22.86" x2="127" y2="22.86" width="0.1524" layer="91"/>
+<label x="127" y="22.86" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J18" gate="G$1" pin="4"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="SDA"/>
+<wire x1="195.58" y1="73.66" x2="220.98" y2="73.66" width="0.1524" layer="91"/>
+<label x="220.98" y="73.66" size="1.778" layer="95" rot="MR0"/>
+</segment>
 </net>
 <net name="RPI_SCL" class="0">
 <segment>
@@ -4650,12 +4786,22 @@ High-power, low thermal resistance package.</description>
 <wire x1="218.44" y1="172.72" x2="233.68" y2="172.72" width="0.1524" layer="91"/>
 <label x="233.68" y="172.72" size="1.778" layer="95" rot="MR0"/>
 </segment>
+<segment>
+<wire x1="111.76" y1="17.78" x2="127" y2="17.78" width="0.1524" layer="91"/>
+<label x="127" y="17.78" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J18" gate="G$1" pin="6"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="SCL"/>
+<wire x1="195.58" y1="76.2" x2="220.98" y2="76.2" width="0.1524" layer="91"/>
+<label x="220.98" y="76.2" size="1.778" layer="95" rot="MR0"/>
+</segment>
 </net>
 <net name="N$9" class="0">
 <segment>
-<pinref part="LED1" gate="G$1" pin="BLUE_A"/>
 <pinref part="R1" gate="G$1" pin="1"/>
 <wire x1="353.06" y1="147.32" x2="347.98" y2="147.32" width="0.1524" layer="91"/>
+<pinref part="LED1" gate="G$1" pin="GREEN_C"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -4675,16 +4821,16 @@ High-power, low thermal resistance package.</description>
 </net>
 <net name="N$12" class="0">
 <segment>
-<pinref part="LED1" gate="G$1" pin="GREEN_A"/>
 <pinref part="R2" gate="G$1" pin="1"/>
 <wire x1="353.06" y1="142.24" x2="347.98" y2="142.24" width="0.1524" layer="91"/>
+<pinref part="LED1" gate="G$1" pin="RED_C"/>
 </segment>
 </net>
 <net name="N$13" class="0">
 <segment>
-<pinref part="LED1" gate="G$1" pin="RED_A"/>
 <pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="353.06" y1="137.16" x2="347.98" y2="137.16" width="0.1524" layer="91"/>
+<pinref part="LED1" gate="G$1" pin="BLUE_C"/>
 </segment>
 </net>
 <net name="N$14" class="0">
@@ -4702,9 +4848,9 @@ High-power, low thermal resistance package.</description>
 <label x="360.68" y="68.58" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<pinref part="Q3" gate="G$1" pin="G"/>
-<wire x1="327.66" y1="116.84" x2="304.8" y2="116.84" width="0.1524" layer="91"/>
-<label x="304.8" y="116.84" size="1.778" layer="95"/>
+<pinref part="Q2" gate="G$1" pin="G"/>
+<wire x1="312.42" y1="129.54" x2="289.56" y2="129.54" width="0.1524" layer="91"/>
+<label x="289.56" y="129.54" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="GREEN" class="0">
@@ -4714,9 +4860,9 @@ High-power, low thermal resistance package.</description>
 <label x="360.68" y="66.04" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<pinref part="Q2" gate="G$1" pin="G"/>
-<wire x1="312.42" y1="129.54" x2="289.56" y2="129.54" width="0.1524" layer="91"/>
-<label x="289.56" y="129.54" size="1.778" layer="95"/>
+<pinref part="Q1" gate="G$1" pin="G"/>
+<wire x1="299.72" y1="142.24" x2="279.4" y2="142.24" width="0.1524" layer="91"/>
+<label x="279.4" y="142.24" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="BLUE" class="0">
@@ -4726,9 +4872,9 @@ High-power, low thermal resistance package.</description>
 <label x="360.68" y="60.96" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<pinref part="Q1" gate="G$1" pin="G"/>
-<wire x1="299.72" y1="142.24" x2="279.4" y2="142.24" width="0.1524" layer="91"/>
-<label x="279.4" y="142.24" size="1.778" layer="95"/>
+<pinref part="Q3" gate="G$1" pin="G"/>
+<wire x1="327.66" y1="116.84" x2="304.8" y2="116.84" width="0.1524" layer="91"/>
+<label x="304.8" y="116.84" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="RX7/MOSI" class="0">
@@ -4784,11 +4930,6 @@ High-power, low thermal resistance package.</description>
 </net>
 <net name="RPI_CE" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="CE"/>
-<wire x1="167.64" y1="78.74" x2="142.24" y2="78.74" width="0.1524" layer="91"/>
-<label x="142.24" y="78.74" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="J17" gate="G$1" pin="GPIO3"/>
 <wire x1="307.34" y1="68.58" x2="287.02" y2="68.58" width="0.1524" layer="91"/>
 <label x="287.02" y="68.58" size="1.778" layer="95"/>
@@ -4796,22 +4937,12 @@ High-power, low thermal resistance package.</description>
 </net>
 <net name="RPI_I/O" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="I/O"/>
-<wire x1="167.64" y1="76.2" x2="142.24" y2="76.2" width="0.1524" layer="91"/>
-<label x="142.24" y="76.2" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="J17" gate="G$1" pin="GPIO2"/>
 <wire x1="307.34" y1="71.12" x2="287.02" y2="71.12" width="0.1524" layer="91"/>
 <label x="287.02" y="71.12" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="RPI_SCLK" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="SCLK"/>
-<wire x1="167.64" y1="73.66" x2="142.24" y2="73.66" width="0.1524" layer="91"/>
-<label x="142.24" y="73.66" size="1.778" layer="95"/>
-</segment>
 <segment>
 <pinref part="J17" gate="G$1" pin="GPIO0"/>
 <wire x1="307.34" y1="73.66" x2="287.02" y2="73.66" width="0.1524" layer="91"/>
@@ -4907,6 +5038,11 @@ High-power, low thermal resistance package.</description>
 <wire x1="27.94" y1="33.02" x2="33.02" y2="33.02" width="0.1524" layer="91"/>
 <pinref part="U$35" gate="G$1" pin="VIN"/>
 <pinref part="J16" gate="G$1" pin="1"/>
+</segment>
+<segment>
+<wire x1="111.76" y1="30.48" x2="116.84" y2="30.48" width="0.1524" layer="91"/>
+<pinref part="U$39" gate="G$1" pin="VIN"/>
+<pinref part="J18" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="5V" class="0">
@@ -5009,23 +5145,34 @@ High-power, low thermal resistance package.</description>
 </segment>
 <segment>
 <pinref part="U$43" gate="G$1" pin="5V"/>
-<pinref part="LED1" gate="G$1" pin="BLUE_C"/>
 <wire x1="373.38" y1="152.4" x2="373.38" y2="147.32" width="0.1524" layer="91"/>
 <wire x1="363.22" y1="147.32" x2="373.38" y2="147.32" width="0.1524" layer="91"/>
-<pinref part="LED1" gate="G$1" pin="GREEN_C"/>
 <wire x1="373.38" y1="147.32" x2="373.38" y2="142.24" width="0.1524" layer="91"/>
 <wire x1="373.38" y1="142.24" x2="363.22" y2="142.24" width="0.1524" layer="91"/>
-<pinref part="LED1" gate="G$1" pin="RED_C"/>
 <wire x1="373.38" y1="142.24" x2="373.38" y2="137.16" width="0.1524" layer="91"/>
 <wire x1="373.38" y1="137.16" x2="363.22" y2="137.16" width="0.1524" layer="91"/>
 <junction x="373.38" y="147.32"/>
 <junction x="373.38" y="142.24"/>
+<pinref part="LED1" gate="G$1" pin="GREEN_A"/>
+<pinref part="LED1" gate="G$1" pin="BLUE_A"/>
+<pinref part="LED1" gate="G$1" pin="RED_A"/>
 </segment>
 <segment>
 <pinref part="J17" gate="G$1" pin="5.0V@1"/>
 <pinref part="U$40" gate="G$1" pin="5V"/>
 <wire x1="345.44" y1="86.36" x2="355.6" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="355.6" y1="86.36" x2="355.6" y2="93.98" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<wire x1="121.92" y1="27.94" x2="121.92" y2="30.48" width="0.1524" layer="91"/>
+<pinref part="U$41" gate="G$1" pin="5V"/>
+<wire x1="111.76" y1="27.94" x2="121.92" y2="27.94" width="0.1524" layer="91"/>
+<pinref part="J18" gate="G$1" pin="2"/>
+</segment>
+<segment>
+<wire x1="203.2" y1="88.9" x2="203.2" y2="81.28" width="0.2032" layer="91"/>
+<wire x1="203.2" y1="81.28" x2="195.58" y2="81.28" width="0.2032" layer="91"/>
+<pinref part="U$37" gate="G$1" pin="5V"/>
 </segment>
 </net>
 </nets>
