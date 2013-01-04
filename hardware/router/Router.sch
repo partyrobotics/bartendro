@@ -271,11 +271,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <vertex x="0.4186" y="-1.0105"/>
 </polygon>
 </package>
-<package name="CREATIVE_COMMONS">
-<text x="-20.32" y="5.08" size="1.778" layer="27">Released under the Creative Commons Attribution Share-Alike 3.0 License</text>
-<text x="0" y="2.54" size="1.778" layer="27">http://creativecommons.org/licenses/by-sa/3.0</text>
-<text x="11.43" y="0" size="1.778" layer="27">Designed by:</text>
-</package>
 </packages>
 <symbols>
 <symbol name="5V">
@@ -3849,44 +3844,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <vertex x="0.6834" y="-1.65"/>
 </polygon>
 </symbol>
-<symbol name="LETTER_L">
-<wire x1="0" y1="185.42" x2="248.92" y2="185.42" width="0.4064" layer="94"/>
-<wire x1="248.92" y1="185.42" x2="248.92" y2="0" width="0.4064" layer="94"/>
-<wire x1="0" y1="185.42" x2="0" y2="0" width="0.4064" layer="94"/>
-<wire x1="0" y1="0" x2="248.92" y2="0" width="0.4064" layer="94"/>
-</symbol>
-<symbol name="DOCFIELD">
-<wire x1="0" y1="0" x2="71.12" y2="0" width="0.254" layer="94"/>
-<wire x1="101.6" y1="15.24" x2="87.63" y2="15.24" width="0.254" layer="94"/>
-<wire x1="0" y1="0" x2="0" y2="5.08" width="0.254" layer="94"/>
-<wire x1="0" y1="5.08" x2="71.12" y2="5.08" width="0.254" layer="94"/>
-<wire x1="0" y1="5.08" x2="0" y2="15.24" width="0.254" layer="94"/>
-<wire x1="101.6" y1="15.24" x2="101.6" y2="5.08" width="0.254" layer="94"/>
-<wire x1="71.12" y1="5.08" x2="71.12" y2="0" width="0.254" layer="94"/>
-<wire x1="71.12" y1="5.08" x2="87.63" y2="5.08" width="0.254" layer="94"/>
-<wire x1="71.12" y1="0" x2="101.6" y2="0" width="0.254" layer="94"/>
-<wire x1="87.63" y1="15.24" x2="87.63" y2="5.08" width="0.254" layer="94"/>
-<wire x1="87.63" y1="15.24" x2="0" y2="15.24" width="0.254" layer="94"/>
-<wire x1="87.63" y1="5.08" x2="101.6" y2="5.08" width="0.254" layer="94"/>
-<wire x1="101.6" y1="5.08" x2="101.6" y2="0" width="0.254" layer="94"/>
-<wire x1="0" y1="15.24" x2="0" y2="22.86" width="0.254" layer="94"/>
-<wire x1="101.6" y1="35.56" x2="0" y2="35.56" width="0.254" layer="94"/>
-<wire x1="101.6" y1="35.56" x2="101.6" y2="22.86" width="0.254" layer="94"/>
-<wire x1="0" y1="22.86" x2="101.6" y2="22.86" width="0.254" layer="94"/>
-<wire x1="0" y1="22.86" x2="0" y2="35.56" width="0.254" layer="94"/>
-<wire x1="101.6" y1="22.86" x2="101.6" y2="15.24" width="0.254" layer="94"/>
-<text x="1.27" y="1.27" size="2.54" layer="94" font="vector">Date:</text>
-<text x="12.7" y="1.27" size="2.54" layer="94" font="vector">&gt;LAST_DATE_TIME</text>
-<text x="72.39" y="1.27" size="2.54" layer="94" font="vector">Sheet:</text>
-<text x="86.36" y="1.27" size="2.54" layer="94" font="vector">&gt;SHEET</text>
-<text x="88.9" y="11.43" size="2.54" layer="94" font="vector">REV:</text>
-<text x="1.524" y="17.78" size="2.54" layer="94" font="vector">TITLE:</text>
-<text x="15.494" y="17.78" size="2.7432" layer="94" font="vector">&gt;DRAWING_NAME</text>
-<text x="2.54" y="31.75" size="1.9304" layer="94">Released under the Creative Commons</text>
-<text x="2.54" y="27.94" size="1.9304" layer="94">Attribution Share-Alike 3.0 License</text>
-<text x="2.54" y="24.13" size="1.9304" layer="94">http://creativecommons.org/licenses/by-sa/3.0</text>
-<text x="1.27" y="11.43" size="2.54" layer="94">Design by:</text>
-</symbol>
 </symbols>
 <devicesets>
 <deviceset name="5V">
@@ -3960,21 +3917,6 @@ Various fiducial points for machine vision alignment.</description>
 </technologies>
 </device>
 <device name="L" package="OSHW-LOGO-L">
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="FRAME-LETTER" prefix="FRAME">
-<description>&lt;b&gt;Schematic Frame&lt;/b&gt;&lt;p&gt;
-Standard 8.5x11 US Letter frame</description>
-<gates>
-<gate name="G$1" symbol="LETTER_L" x="0" y="0"/>
-<gate name="G$2" symbol="DOCFIELD" x="147.32" y="0" addlevel="must"/>
-</gates>
-<devices>
-<device name="" package="CREATIVE_COMMONS">
 <technologies>
 <technology name=""/>
 </technologies>
@@ -8094,7 +8036,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <part name="R3" library="SparkFun-Resistors" deviceset="RESISTOR" device="0603-RES" value="300"/>
 <part name="U$38" library="SparkFun-Aesthetics" deviceset="VIN" device=""/>
 <part name="SUPPLY24" library="supply2" deviceset="GND" device=""/>
-<part name="U6" library="pierre" deviceset="CON-MATENLOK" device=""/>
+<part name="J0" library="pierre" deviceset="CON-MATENLOK" device=""/>
 <part name="BAT1" library="SparkFun-Electromechanical" deviceset="BATTERY" device="12PTH" value="3V"/>
 <part name="U$18" library="SparkFun-Aesthetics" deviceset="5V" device="" value="3.3V"/>
 <part name="U$2" library="SparkFun-Aesthetics" deviceset="VIN" device=""/>
@@ -8161,9 +8103,8 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <part name="SUPPLY32" library="supply2" deviceset="GND" device=""/>
 <part name="C8" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="47u"/>
 <part name="C9" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
-<part name="U$5" library="SparkFun-Aesthetics" deviceset="OSHW-LOGO" device="S"/>
-<part name="FRAME3" library="SparkFun-Aesthetics" deviceset="FRAME-LETTER" device=""/>
 <part name="J17" library="pierre" deviceset="RASPBERRYPI_B" device="B"/>
+<part name="U$46" library="SparkFun-Aesthetics" deviceset="OSHW-LOGO" device="M"/>
 </parts>
 <sheets>
 <sheet>
@@ -9834,7 +9775,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </instance>
 <instance part="U$38" gate="G$1" x="114.3" y="233.68"/>
 <instance part="SUPPLY24" gate="GND" x="114.3" y="223.52"/>
-<instance part="U6" gate="G$1" x="104.14" y="228.6" rot="MR0"/>
+<instance part="J0" gate="G$1" x="104.14" y="228.6" rot="MR0"/>
 <instance part="BAT1" gate="G$1" x="154.94" y="68.58" rot="R270"/>
 <instance part="U$18" gate="G$1" x="132.08" y="200.66"/>
 <instance part="U$2" gate="G$1" x="71.12" y="231.14"/>
@@ -9901,9 +9842,8 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <instance part="SUPPLY32" gate="GND" x="157.48" y="10.16"/>
 <instance part="C8" gate="G$1" x="124.46" y="231.14"/>
 <instance part="C9" gate="G$1" x="147.32" y="228.6"/>
-<instance part="U$5" gate="G$1" x="254" y="19.05"/>
-<instance part="FRAME3" gate="G$2" x="283.21" y="3.81"/>
 <instance part="J17" gate="G$1" x="325.12" y="88.9"/>
+<instance part="U$46" gate="G$1" x="251.46" y="17.78"/>
 </instances>
 <busses>
 </busses>
@@ -9922,7 +9862,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <wire x1="104.14" y1="228.6" x2="114.3" y2="228.6" width="0.1524" layer="91"/>
 <pinref part="SUPPLY24" gate="GND" pin="GND"/>
 <wire x1="114.3" y1="228.6" x2="114.3" y2="226.06" width="0.1524" layer="91"/>
-<pinref part="U6" gate="G$1" pin="2"/>
+<pinref part="J0" gate="G$1" pin="2"/>
 <junction x="104.14" y="228.6"/>
 <pinref part="C8" gate="G$1" pin="-"/>
 <wire x1="124.46" y1="226.06" x2="114.3" y2="226.06" width="0.1524" layer="91"/>
@@ -10784,7 +10724,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <pinref part="U$38" gate="G$1" pin="VIN"/>
 <wire x1="114.3" y1="233.68" x2="114.3" y2="231.14" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="231.14" x2="104.14" y2="231.14" width="0.1524" layer="91"/>
-<pinref part="U6" gate="G$1" pin="1"/>
+<pinref part="J0" gate="G$1" pin="1"/>
 <junction x="104.14" y="231.14"/>
 <pinref part="C8" gate="G$1" pin="+"/>
 <wire x1="124.46" y1="233.68" x2="114.3" y2="233.68" width="0.1524" layer="91"/>
