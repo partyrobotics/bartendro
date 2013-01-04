@@ -7496,7 +7496,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <part name="Q2" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
 <part name="Q3" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
 <part name="Q4" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="SMD" value="NFET"/>
-<part name="PL1" library="con-hirose-df3" deviceset="DF3-02" device="P" value="Motor Connector"/>
+<part name="PL1" library="con-hirose-df3" deviceset="DF3-02" device="P"/>
 <part name="U5" library="pierre" deviceset="VREG-5V-LDO-AP1117" device="SOT89-3L"/>
 <part name="C9" library="SparkFun-Passives" deviceset="CAP" device="0603-CAP" value="10u"/>
 <part name="C10" library="SparkFun-Passives" deviceset="CAP" device="0603-CAP" value="10u"/>
@@ -9955,9 +9955,10 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <pinref part="C4" gate="G$1" pin="2"/>
 <wire x1="106.68" y1="218.44" x2="106.68" y2="215.9" width="0.1524" layer="91"/>
 <wire x1="106.68" y1="215.9" x2="96.52" y2="215.9" width="0.1524" layer="91"/>
-<junction x="83.82" y="215.9"/>
 <wire x1="83.82" y1="215.9" x2="96.52" y2="215.9" width="0.1524" layer="91"/>
 <wire x1="96.52" y1="215.9" x2="96.52" y2="218.44" width="0.1524" layer="91"/>
+<pinref part="C15" gate="G$1" pin="-"/>
+<wire x1="83.82" y1="218.44" x2="83.82" y2="215.9" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="SUPPLY7" gate="GND" pin="GND"/>
@@ -10734,6 +10735,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <junction x="96.52" y="226.06"/>
 <pinref part="C15" gate="G$1" pin="+"/>
 <wire x1="96.52" y1="226.06" x2="83.82" y2="226.06" width="0.1524" layer="91"/>
+<junction x="83.82" y="226.06"/>
 </segment>
 <segment>
 <wire x1="50.8" y1="218.44" x2="50.8" y2="228.6" width="0.2032" layer="91"/>
@@ -10817,12 +10819,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <wire x1="142.24" y1="91.44" x2="142.24" y2="88.9" width="0.1524" layer="91"/>
 <pinref part="U3" gate="G$1" pin="A"/>
 <wire x1="142.24" y1="88.9" x2="147.32" y2="88.9" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$15" class="0">
-<segment>
-<pinref part="C15" gate="G$1" pin="-"/>
-<wire x1="83.82" y1="218.44" x2="83.82" y2="215.9" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
