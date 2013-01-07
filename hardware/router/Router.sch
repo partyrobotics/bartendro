@@ -271,6 +271,11 @@ We've spent an enormous amount of time creating and checking these footprints an
 <vertex x="0.4186" y="-1.0105"/>
 </polygon>
 </package>
+<package name="CREATIVE_COMMONS">
+<text x="-20.32" y="5.08" size="1.778" layer="27">Released under the Creative Commons Attribution Share-Alike 3.0 License</text>
+<text x="0" y="2.54" size="1.778" layer="27">http://creativecommons.org/licenses/by-sa/3.0</text>
+<text x="11.43" y="0" size="1.778" layer="27">Designed by:</text>
+</package>
 </packages>
 <symbols>
 <symbol name="5V">
@@ -3844,6 +3849,44 @@ We've spent an enormous amount of time creating and checking these footprints an
 <vertex x="0.6834" y="-1.65"/>
 </polygon>
 </symbol>
+<symbol name="LETTER_L">
+<wire x1="0" y1="185.42" x2="248.92" y2="185.42" width="0.4064" layer="94"/>
+<wire x1="248.92" y1="185.42" x2="248.92" y2="0" width="0.4064" layer="94"/>
+<wire x1="0" y1="185.42" x2="0" y2="0" width="0.4064" layer="94"/>
+<wire x1="0" y1="0" x2="248.92" y2="0" width="0.4064" layer="94"/>
+</symbol>
+<symbol name="DOCFIELD">
+<wire x1="0" y1="0" x2="71.12" y2="0" width="0.254" layer="94"/>
+<wire x1="101.6" y1="15.24" x2="87.63" y2="15.24" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="0" y2="5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="5.08" x2="71.12" y2="5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="5.08" x2="0" y2="15.24" width="0.254" layer="94"/>
+<wire x1="101.6" y1="15.24" x2="101.6" y2="5.08" width="0.254" layer="94"/>
+<wire x1="71.12" y1="5.08" x2="71.12" y2="0" width="0.254" layer="94"/>
+<wire x1="71.12" y1="5.08" x2="87.63" y2="5.08" width="0.254" layer="94"/>
+<wire x1="71.12" y1="0" x2="101.6" y2="0" width="0.254" layer="94"/>
+<wire x1="87.63" y1="15.24" x2="87.63" y2="5.08" width="0.254" layer="94"/>
+<wire x1="87.63" y1="15.24" x2="0" y2="15.24" width="0.254" layer="94"/>
+<wire x1="87.63" y1="5.08" x2="101.6" y2="5.08" width="0.254" layer="94"/>
+<wire x1="101.6" y1="5.08" x2="101.6" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="15.24" x2="0" y2="22.86" width="0.254" layer="94"/>
+<wire x1="101.6" y1="35.56" x2="0" y2="35.56" width="0.254" layer="94"/>
+<wire x1="101.6" y1="35.56" x2="101.6" y2="22.86" width="0.254" layer="94"/>
+<wire x1="0" y1="22.86" x2="101.6" y2="22.86" width="0.254" layer="94"/>
+<wire x1="0" y1="22.86" x2="0" y2="35.56" width="0.254" layer="94"/>
+<wire x1="101.6" y1="22.86" x2="101.6" y2="15.24" width="0.254" layer="94"/>
+<text x="1.27" y="1.27" size="2.54" layer="94" font="vector">Date:</text>
+<text x="12.7" y="1.27" size="2.54" layer="94" font="vector">&gt;LAST_DATE_TIME</text>
+<text x="72.39" y="1.27" size="2.54" layer="94" font="vector">Sheet:</text>
+<text x="86.36" y="1.27" size="2.54" layer="94" font="vector">&gt;SHEET</text>
+<text x="88.9" y="11.43" size="2.54" layer="94" font="vector">REV:</text>
+<text x="1.524" y="17.78" size="2.54" layer="94" font="vector">TITLE:</text>
+<text x="15.494" y="17.78" size="2.7432" layer="94" font="vector">&gt;DRAWING_NAME</text>
+<text x="2.54" y="31.75" size="1.9304" layer="94">Released under the Creative Commons</text>
+<text x="2.54" y="27.94" size="1.9304" layer="94">Attribution Share-Alike 3.0 License</text>
+<text x="2.54" y="24.13" size="1.9304" layer="94">http://creativecommons.org/licenses/by-sa/3.0</text>
+<text x="1.27" y="11.43" size="2.54" layer="94">Design by:</text>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="5V">
@@ -3917,6 +3960,21 @@ Various fiducial points for machine vision alignment.</description>
 </technologies>
 </device>
 <device name="L" package="OSHW-LOGO-L">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="FRAME-LETTER" prefix="FRAME">
+<description>&lt;b&gt;Schematic Frame&lt;/b&gt;&lt;p&gt;
+Standard 8.5x11 US Letter frame</description>
+<gates>
+<gate name="G$1" symbol="LETTER_L" x="0" y="0"/>
+<gate name="G$2" symbol="DOCFIELD" x="147.32" y="0" addlevel="must"/>
+</gates>
+<devices>
+<device name="" package="CREATIVE_COMMONS">
 <technologies>
 <technology name=""/>
 </technologies>
@@ -8105,6 +8163,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <part name="C9" library="SparkFun" deviceset="CAP" device="0603-CAP" value="100n"/>
 <part name="J17" library="pierre" deviceset="RASPBERRYPI_B" device="B"/>
 <part name="U$46" library="SparkFun-Aesthetics" deviceset="OSHW-LOGO" device="M"/>
+<part name="FRAME3" library="SparkFun-Aesthetics" deviceset="FRAME-LETTER" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8117,9 +8176,41 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <text x="93.98" y="40.64" size="1.778" layer="95">Accessory Port 0</text>
 <text x="193.04" y="63.5" size="1.778" layer="91">I2C Pullups on RPI 1.8k to 3.3V</text>
 <text x="134.62" y="40.64" size="1.778" layer="95">Accessory Port 1</text>
-<text x="304.8508" y="13.1572" size="3.048" layer="94" font="vector" distance="30">Party Robotics (pmichael)</text>
 <frame x1="0" y1="0" x2="388.62" y2="261.62" columns="8" rows="5" layer="94"/>
-<text x="375.9708" y="10.6172" size="2.54" layer="94" font="vector" distance="30">1</text>
+<text x="48.26" y="234.315" size="1.778" layer="95">Pump1</text>
+<text x="48.26" y="203.835" size="1.778" layer="95">Pump2</text>
+<text x="10.16" y="219.075" size="1.778" layer="95">Pump9</text>
+<text x="10.16" y="249.555" size="1.778" layer="95">Pump8</text>
+<text x="10.16" y="188.595" size="1.778" layer="95">Pump10</text>
+<text x="10.16" y="158.115" size="1.778" layer="95">Pump11</text>
+<text x="48.26" y="173.355" size="1.778" layer="95">Pump3</text>
+<text x="48.26" y="142.875" size="1.778" layer="95">Pump4</text>
+<text x="10.16" y="127.635" size="1.778" layer="95">Pump12</text>
+<text x="48.26" y="112.395" size="1.778" layer="95">Pump5</text>
+<text x="10.16" y="97.155" size="1.778" layer="95">Pump13</text>
+<text x="48.26" y="81.915" size="1.778" layer="95">Pump6</text>
+<text x="10.16" y="66.675" size="1.778" layer="95">Pump14</text>
+<text x="48.26" y="51.435" size="1.778" layer="95">Pump7</text>
+<text x="10.16" y="36.195" size="1.778" layer="95">Pump15</text>
+<text x="236.22" y="185.42" size="1.778" layer="95">Pump14</text>
+<text x="236.22" y="182.88" size="1.778" layer="95">Pump7</text>
+<text x="236.22" y="180.34" size="1.778" layer="95">Pump15</text>
+<text x="236.22" y="162.56" size="1.778" layer="95">Pump8</text>
+<text x="236.22" y="154.94" size="1.778" layer="95">Pump1</text>
+<text x="236.22" y="152.4" size="1.778" layer="95">Pump9</text>
+<text x="236.22" y="149.86" size="1.778" layer="95">Pump2</text>
+<text x="236.22" y="147.32" size="1.778" layer="95">Pump10</text>
+<text x="236.22" y="144.78" size="1.778" layer="95">Pump3</text>
+<text x="236.22" y="134.62" size="1.778" layer="95">Pump11</text>
+<text x="236.22" y="132.08" size="1.778" layer="95">Pump4</text>
+<text x="236.22" y="129.54" size="1.778" layer="95">Pump12</text>
+<text x="236.22" y="127" size="1.778" layer="95">Pump5</text>
+<text x="154.94" y="162.56" size="1.778" layer="95">Pump13</text>
+<text x="154.94" y="152.4" size="1.778" layer="95">Pump6</text>
+<text x="337.82" y="251.46" size="1.778" layer="95">Rev 1 to Rev 1.1 Changes:
+Swapped PD0 and PD1</text>
+<text x="304.8508" y="13.1572" size="3.048" layer="94" font="vector" distance="30">Party Robotics (pmichael)</text>
+<text x="375.9708" y="10.6172" size="2.54" layer="94" font="vector" distance="30">1.1</text>
 <rectangle x1="360.14025" y1="27.71775" x2="360.96575" y2="27.78125" layer="94"/>
 <rectangle x1="360.01325" y1="27.78125" x2="361.15625" y2="27.84475" layer="94"/>
 <rectangle x1="359.82275" y1="27.84475" x2="360.33075" y2="27.90825" layer="94"/>
@@ -9703,36 +9794,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <rectangle x1="362.99775" y1="38.70325" x2="363.75975" y2="38.76675" layer="94"/>
 <rectangle x1="363.06125" y1="38.76675" x2="363.69625" y2="38.83025" layer="94"/>
 <rectangle x1="363.25175" y1="38.83025" x2="363.50575" y2="38.89375" layer="94"/>
-<text x="48.26" y="234.315" size="1.778" layer="95">Pump1</text>
-<text x="48.26" y="203.835" size="1.778" layer="95">Pump2</text>
-<text x="10.16" y="219.075" size="1.778" layer="95">Pump9</text>
-<text x="10.16" y="249.555" size="1.778" layer="95">Pump8</text>
-<text x="10.16" y="188.595" size="1.778" layer="95">Pump10</text>
-<text x="10.16" y="158.115" size="1.778" layer="95">Pump11</text>
-<text x="48.26" y="173.355" size="1.778" layer="95">Pump3</text>
-<text x="48.26" y="142.875" size="1.778" layer="95">Pump4</text>
-<text x="10.16" y="127.635" size="1.778" layer="95">Pump12</text>
-<text x="48.26" y="112.395" size="1.778" layer="95">Pump5</text>
-<text x="10.16" y="97.155" size="1.778" layer="95">Pump13</text>
-<text x="48.26" y="81.915" size="1.778" layer="95">Pump6</text>
-<text x="10.16" y="66.675" size="1.778" layer="95">Pump14</text>
-<text x="48.26" y="51.435" size="1.778" layer="95">Pump7</text>
-<text x="10.16" y="36.195" size="1.778" layer="95">Pump15</text>
-<text x="236.22" y="185.42" size="1.778" layer="95">Pump1</text>
-<text x="236.22" y="182.88" size="1.778" layer="95">Pump7</text>
-<text x="236.22" y="180.34" size="1.778" layer="95">Pump14</text>
-<text x="236.22" y="160.02" size="1.778" layer="95">Pump8</text>
-<text x="236.22" y="154.94" size="1.778" layer="95">Pump1</text>
-<text x="236.22" y="152.4" size="1.778" layer="95">Pump9</text>
-<text x="236.22" y="149.86" size="1.778" layer="95">Pump2</text>
-<text x="236.22" y="147.32" size="1.778" layer="95">Pump10</text>
-<text x="236.22" y="144.78" size="1.778" layer="95">Pump3</text>
-<text x="236.22" y="134.62" size="1.778" layer="95">Pump11</text>
-<text x="236.22" y="132.08" size="1.778" layer="95">Pump4</text>
-<text x="236.22" y="129.54" size="1.778" layer="95">Pump12</text>
-<text x="236.22" y="127" size="1.778" layer="95">Pump5</text>
-<text x="154.94" y="162.56" size="1.778" layer="95">Pump13</text>
-<text x="154.94" y="152.4" size="1.778" layer="95">Pump6</text>
 </plain>
 <instances>
 <instance part="C3" gate="G$1" x="246.38" y="104.14"/>
@@ -9874,6 +9935,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <instance part="C9" gate="G$1" x="147.32" y="228.6"/>
 <instance part="J17" gate="G$1" x="325.12" y="88.9"/>
 <instance part="U$46" gate="G$1" x="251.46" y="17.78"/>
+<instance part="FRAME3" gate="G$2" x="283.21" y="3.81"/>
 </instances>
 <busses>
 </busses>
@@ -10114,9 +10176,9 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <label x="43.18" y="236.22" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<wire x1="233.68" y1="160.02" x2="218.44" y2="160.02" width="0.1524" layer="91"/>
-<label x="233.68" y="160.02" size="1.778" layer="95" rot="MR0"/>
-<pinref part="U1" gate="G$1" pin="PD1(TXD)"/>
+<wire x1="233.68" y1="162.56" x2="218.44" y2="162.56" width="0.1524" layer="91"/>
+<label x="233.68" y="162.56" size="1.778" layer="95" rot="MR0"/>
+<pinref part="U1" gate="G$1" pin="PD0(RXD)"/>
 </segment>
 </net>
 <net name="RX1" class="0">
@@ -10405,11 +10467,6 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </net>
 <net name="TX" class="0">
 <segment>
-<wire x1="233.68" y1="162.56" x2="218.44" y2="162.56" width="0.1524" layer="91"/>
-<label x="233.68" y="162.56" size="1.778" layer="95" rot="MR0"/>
-<pinref part="U1" gate="G$1" pin="PD0(RXD)"/>
-</segment>
-<segment>
 <pinref part="J9" gate="G$1" pin="4"/>
 <wire x1="27.94" y1="238.76" x2="43.18" y2="238.76" width="0.1524" layer="91"/>
 <label x="43.18" y="238.76" size="1.778" layer="95" rot="MR0"/>
@@ -10483,6 +10540,11 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <wire x1="27.94" y1="25.4" x2="43.18" y2="25.4" width="0.1524" layer="91"/>
 <label x="43.18" y="25.4" size="1.778" layer="95" rot="MR0"/>
 <pinref part="J16" gate="G$1" pin="4"/>
+</segment>
+<segment>
+<wire x1="233.68" y1="160.02" x2="218.44" y2="160.02" width="0.1524" layer="91"/>
+<label x="233.68" y="160.02" size="1.778" layer="95" rot="MR0"/>
+<pinref part="U1" gate="G$1" pin="PD1(TXD)"/>
 </segment>
 </net>
 <net name="DISP_!RST" class="0">
@@ -11082,4 +11144,10 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </errors>
 </schematic>
 </drawing>
+<compatibility>
+<note version="6.3" minversion="6.2.2" severity="warning">
+Since Version 6.2.2 text objects can contain more than one line,
+which will not be processed correctly with this version.
+</note>
+</compatibility>
 </eagle>
