@@ -21,15 +21,27 @@ PACKET_PING            = 3
 PACKET_SET_MOTOR_SPEED = 4
 PACKET_TICK_DISPENSE   = 5
 PACKET_TIME_DISPENSE   = 6
+PACKET_LED_OFF         = 7
+PACKET_LED_IDLE        = 8
+PACKET_LED_DISPENSE    = 9
+PACKET_LED_DRINK_DONE  = 10
 PACKET_BROADCAST       = 0xFF
 
 ROUTER_BUS              = 0
 ROUTER_ADDRESS          = 4
 ROUTER_SELECT_CMD_BEGIN = 0
 ROUTER_SELECT_CMD_END   = MAX_DISPENSERS
-ROUTER_CMD_PING  = 253
-ROUTER_CMD_COUNT = 254
-ROUTER_CMD_RESET = 255
+ROUTER_CMD_SYNC_ON      = 251
+ROUTER_CMD_SYNC_OFF     = 252
+ROUTER_CMD_PING         = 253
+ROUTER_CMD_COUNT        = 254
+ROUTER_CMD_RESET        = 255
+
+# TODO 
+# NameError: global name 'I2CIOError' is not defined
+# CHeck timeout ACK that comes in less than timeout time
+# Improve error handling and repeating requests that failed
+# Hook up more LED algs & drive during drink making
 
 class SttyNotFoundException:
     pass
@@ -73,10 +85,17 @@ class MasterDriver(object):
 
     def select(self, dispenser):
         if self.software_only: return
-        if dispenser < self.num_dispensers:
+        if dispenser < self.num_dispensers and self.selected != dispenser:
             self.selected = dispenser
-            print "select dispenser %d" % self.selected
             self.router.write_byte(ROUTER_ADDRESS, dispenser)
+            sleep(.01)
+
+    def sync(self, state):
+        if self.software_only: return
+        if (state):
+            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
+        else:
+            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
 
     def count(self):
         return self.num_dispensers
@@ -105,6 +124,8 @@ class MasterDriver(object):
             raise I2CIOError
 
         self.reset();
+        sleep(3);
+        self.led_idle()
 
     def close(self):
         if self.software_only: return
@@ -125,7 +146,6 @@ class MasterDriver(object):
 
     def send_packet(self, packet):
         if self.software_only: return True
-        print "Send packet to %d" % self.selected
         self.ser.write(packet)
         crc = 0
         for ch in packet:
@@ -134,9 +154,19 @@ class MasterDriver(object):
 
         ch = self.ser.read(1)
         if len(ch) < 1:
-            print "timeout"
+            print "  * read ack timeout"
             return False
-        return True
+        ack = ord(ch)
+        if ack == PACKET_ACK_OK: return True
+        if ack == PACKET_CRC_FAIL: 
+            print "  * crc fail"
+            return False
+        if ack == PACKET_ACK_TIMEOUT: 
+            print "  * ack timeout"
+            return False
+
+        print "  * Invalid ACK code %d" % ord(ch)
+        return False
 
     def send_packet8(self, dest, type, val):
         return self.send_packet(pack("BBBBBB", dest, type, val, 0, 0, 0))
@@ -152,8 +182,7 @@ class MasterDriver(object):
         return True
 
     def ping(self):
-        self.send_packet32(self.selected, PACKET_PING, 0)
-        return True
+        return self.send_packet32(self.selected, PACKET_PING, 0)
 
     def start(self, dispenser):
         self.select(dispenser)
@@ -170,9 +199,43 @@ class MasterDriver(object):
         print "dispense %d ticks" % ticks
         self.select(dispenser)
         return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
+
+    def led_off(self):
+        # TODO: use broadcast
+        self.sync(0)
+        for dispenser in xrange(self.num_dispensers):
+            self.select(dispenser)
+            self.send_packet8(dispenser, PACKET_LED_OFF, 0);
         return True
 
-    def led(self, dispenser, r, g, b):
+    def led_idle(self):
+        # TODO: use broadcast
+        self.sync(0)
+        for dispenser in xrange(self.num_dispensers):
+            self.select(dispenser)
+            self.send_packet8(dispenser, PACKET_LED_IDLE, 0);
+        sleep(.01)
+        self.sync(1)
+        return True
+
+    def led_dispense(self):
+        # TODO: use broadcast
+        self.sync(0)
+        for dispenser in xrange(self.num_dispensers):
+            self.select(dispenser)
+            self.send_packet8(dispenser, PACKET_LED_DISPENSE, 0);
+        sleep(.01)
+        self.sync(1)
+        return True
+
+    def led_complete(self):
+        # TODO: use broadcast
+        self.sync(0)
+        for dispenser in xrange(self.num_dispensers):
+            self.select(dispenser)
+            self.send_packet8(dispenser, PACKET_LED_DRINK_DONE, 0);
+        sleep(.01)
+        self.sync(1)
         return True
 
     def is_dispensing(self, dispenser):
@@ -184,17 +247,32 @@ class MasterDriver(object):
     def get_dispense_stats(self, dispenser):
         return (0, 0)
 
-if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyAMA0", 0);
-    md.open()
-    sleep(6)
+def ping_test(md):
     while True:
-        print "ping 0"
+        print "ping 0:"
         md.select(0)
+        sleep(.1)
+        ret = md.ping()
+        sleep(1)
+
+        print "ping 1:"
+        md.select(1)
         sleep(.1)
         md.ping()
         sleep(1)
-        print "ping 1"
-        md.select(1)
-        md.ping()
-        sleep(1)
+
+if __name__ == "__main__":
+    md = MasterDriver("/dev/ttyAMA0", 0);
+    md.open()
+    sleep(5)
+    #    ping_test(md)
+    while True:
+        print "idle"
+        md.led_idle()
+        sleep(5)
+        print "dispense"
+        md.led_dispense()
+        sleep(5)
+        print "done"
+        md.led_drink_done()
+        sleep(5)

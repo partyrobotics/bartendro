@@ -43,13 +43,13 @@ class Mixer(object):
         return self.err
 
     def led_idle(self):
-        pass
+        self.driver.led_idle()
 
-    def led_make_drink(self):
-        pass
+    def led_dispense(self):
+        self.driver.led_dispense()
 
-    def led_drink_complete(self):
-        pass
+    def led_complete(self):
+        self.driver.led_complete()
 
     def led_status_out_of_booze(self):
         pass
@@ -200,7 +200,7 @@ class Mixer(object):
             recipe.append(r)
         
         log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
-        self.led_make_drink()
+        self.led_dispense()
         dur = 0
         active_disp = []
         for r in recipe:
@@ -224,7 +224,7 @@ class Mixer(object):
                     break
             if done: break
 
-        self.led_drink_complete()
+        self.led_complete()
         log("drink complete")
 
         try:
