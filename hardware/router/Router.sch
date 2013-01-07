@@ -9703,6 +9703,36 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <rectangle x1="362.99775" y1="38.70325" x2="363.75975" y2="38.76675" layer="94"/>
 <rectangle x1="363.06125" y1="38.76675" x2="363.69625" y2="38.83025" layer="94"/>
 <rectangle x1="363.25175" y1="38.83025" x2="363.50575" y2="38.89375" layer="94"/>
+<text x="48.26" y="234.315" size="1.778" layer="95">Pump1</text>
+<text x="48.26" y="203.835" size="1.778" layer="95">Pump2</text>
+<text x="10.16" y="219.075" size="1.778" layer="95">Pump9</text>
+<text x="10.16" y="249.555" size="1.778" layer="95">Pump8</text>
+<text x="10.16" y="188.595" size="1.778" layer="95">Pump10</text>
+<text x="10.16" y="158.115" size="1.778" layer="95">Pump11</text>
+<text x="48.26" y="173.355" size="1.778" layer="95">Pump3</text>
+<text x="48.26" y="142.875" size="1.778" layer="95">Pump4</text>
+<text x="10.16" y="127.635" size="1.778" layer="95">Pump12</text>
+<text x="48.26" y="112.395" size="1.778" layer="95">Pump5</text>
+<text x="10.16" y="97.155" size="1.778" layer="95">Pump13</text>
+<text x="48.26" y="81.915" size="1.778" layer="95">Pump6</text>
+<text x="10.16" y="66.675" size="1.778" layer="95">Pump14</text>
+<text x="48.26" y="51.435" size="1.778" layer="95">Pump7</text>
+<text x="10.16" y="36.195" size="1.778" layer="95">Pump15</text>
+<text x="236.22" y="185.42" size="1.778" layer="95">Pump1</text>
+<text x="236.22" y="182.88" size="1.778" layer="95">Pump7</text>
+<text x="236.22" y="180.34" size="1.778" layer="95">Pump14</text>
+<text x="236.22" y="160.02" size="1.778" layer="95">Pump8</text>
+<text x="236.22" y="154.94" size="1.778" layer="95">Pump1</text>
+<text x="236.22" y="152.4" size="1.778" layer="95">Pump9</text>
+<text x="236.22" y="149.86" size="1.778" layer="95">Pump2</text>
+<text x="236.22" y="147.32" size="1.778" layer="95">Pump10</text>
+<text x="236.22" y="144.78" size="1.778" layer="95">Pump3</text>
+<text x="236.22" y="134.62" size="1.778" layer="95">Pump11</text>
+<text x="236.22" y="132.08" size="1.778" layer="95">Pump4</text>
+<text x="236.22" y="129.54" size="1.778" layer="95">Pump12</text>
+<text x="236.22" y="127" size="1.778" layer="95">Pump5</text>
+<text x="154.94" y="162.56" size="1.778" layer="95">Pump13</text>
+<text x="154.94" y="152.4" size="1.778" layer="95">Pump6</text>
 </plain>
 <instances>
 <instance part="C3" gate="G$1" x="246.38" y="104.14"/>
