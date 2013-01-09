@@ -2,11 +2,12 @@
 
 import os
 from subprocess import call
-from time import sleep, localtime
+from time import sleep, localtime, time
 import smbus
 import serial
 import random
 from struct import pack
+import pack7
 
 BAUD_RATE = 38400
 
@@ -25,6 +26,7 @@ PACKET_LED_OFF         = 7
 PACKET_LED_IDLE        = 8
 PACKET_LED_DISPENSE    = 9
 PACKET_LED_DRINK_DONE  = 10
+PACKET_COMM_TEST       = 0xFE
 PACKET_BROADCAST       = 0xFF
 
 ROUTER_BUS              = 0
@@ -111,7 +113,7 @@ class MasterDriver(object):
                                      BAUD_RATE, 
                                      bytesize=serial.EIGHTBITS, 
                                      parity=serial.PARITY_NONE, 
-                                     stopbits=serial.STOPBITS_ONE, 
+                                     stopbits=serial.STOPBITS_ONE,
                                      timeout=2)
         except serial.serialutil.SerialException:
             raise SerialIOError
@@ -146,6 +148,12 @@ class MasterDriver(object):
 
     def send_packet(self, packet):
         if self.software_only: return True
+
+        # If there are any spurious characters, nuke em!
+        self.ser.flushInput()
+        self.ser.flushOutput()
+
+        t0 = time()
         self.ser.write(packet)
         crc = 0
         for ch in packet:
@@ -153,8 +161,10 @@ class MasterDriver(object):
         self.ser.write(pack("<H", crc))
 
         ch = self.ser.read(1)
+        t1 = time()
+        print "Packet transit time: %f" % (t1 - t0)
         if len(ch) < 1:
-            print "  * read ack timeout"
+            print "  * read timeout"
             return False
         ack = ord(ch)
         if ack == PACKET_ACK_OK: return True
@@ -238,6 +248,11 @@ class MasterDriver(object):
         self.sync(1)
         return True
 
+    def comm_test(self):
+        self.sync(0)
+        self.select(0)
+        return self.send_packet8(0, PACKET_COMM_TEST, 0);
+
     def is_dispensing(self, dispenser):
         return False
 
@@ -251,21 +266,21 @@ def ping_test(md):
     while True:
         print "ping 0:"
         md.select(0)
-        sleep(.1)
-        ret = md.ping()
+        while True:
+            ret = md.ping()
+            if ret: break
+            print "re-transmit"
         sleep(1)
 
         print "ping 1:"
         md.select(1)
-        sleep(.1)
-        md.ping()
+        while True:
+            ret = md.ping()
+            if ret: break
+            print "re-transmit"
         sleep(1)
 
-if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyAMA0", 0);
-    md.open()
-    sleep(5)
-    #    ping_test(md)
+def led_test(md):
     while True:
         print "idle"
         md.led_idle()
@@ -273,6 +288,23 @@ if __name__ == "__main__":
         print "dispense"
         md.led_dispense()
         sleep(5)
-        print "done"
-        md.led_drink_done()
+        print "complete"
+        md.led_complete()
         sleep(5)
+
+def comm_test(md):
+    print "put disp 0 into comm test"
+    md.select(0)
+    while not md.comm_test():
+        sleep(1)
+
+    print "put disp 1 into comm test"
+    md.select(1)
+    while not md.comm_test():
+        sleep(1)
+
+if __name__ == "__main__":
+    md = MasterDriver("/dev/ttyAMA0", 0);
+    md.open()
+#    ping_test(md)
+    led_test(md)
