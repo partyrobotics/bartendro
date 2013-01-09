@@ -1,5 +1,5 @@
 CC=avr-gcc
-CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega328p -DF_CPU=8000000UL
+CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega328p -DF_CPU=8000000UL -DROUTER
 OBJ2HEX=avr-objcopy 
 TARGET=master
 
