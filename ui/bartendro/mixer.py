@@ -43,13 +43,16 @@ class Mixer(object):
         return self.err
 
     def led_idle(self):
-        self.driver.led_idle()
+        #self.driver.led_idle()
+        pass
 
     def led_dispense(self):
-        self.driver.led_dispense()
+        #self.driver.led_dispense()
+        pass
 
     def led_complete(self):
-        self.driver.led_complete()
+        #self.driver.led_complete()
+        pass
 
     def led_status_out_of_booze(self):
         pass

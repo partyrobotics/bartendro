@@ -127,7 +127,7 @@ class MasterDriver(object):
 
         self.reset();
         sleep(3);
-        self.led_idle()
+#self.led_idle()
 
     def close(self):
         if self.software_only: return
@@ -153,16 +153,22 @@ class MasterDriver(object):
         self.ser.flushInput()
         self.ser.flushOutput()
 
-        t0 = time()
-        self.ser.write(packet)
+        # Write the header signature FF FF
+        self.ser.write(chr(0xFF))
+        self.ser.write(chr(0xFF))
+
         crc = 0
         for ch in packet:
             crc = self.crc16_update(crc, ord(ch))
-        self.ser.write(pack("<H", crc))
 
+        encoded = pack7.pack_7bit(packet + pack("<H", crc))
+        self.ser.write(chr(len(encoded)))
+        self.ser.write(encoded)
+
+        t0 = time()
         ch = self.ser.read(1)
         t1 = time()
-        print "Packet transit time: %f" % (t1 - t0)
+        print "packet time: %f" % (t1 - t0)
         if len(ch) < 1:
             print "  * read timeout"
             return False
@@ -264,12 +270,13 @@ class MasterDriver(object):
 
 def ping_test(md):
     while True:
-        print "ping 0:"
         md.select(0)
         while True:
+            print "ping 0:"
             ret = md.ping()
             if ret: break
             print "re-transmit"
+            sleep(1)
         sleep(1)
 
         print "ping 1:"
