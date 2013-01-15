@@ -12,6 +12,7 @@
 #define PACKET_LED_IDLE        8
 #define PACKET_LED_DISPENSE    9
 #define PACKET_LED_DRINK_DONE  10
+#define PACKET_IS_DISPENSING   11
 #define PACKET_COMM_TEST       0xFE
 #define PACKET_BROADCAST       0xFF
 
@@ -25,9 +26,12 @@
 #define ROUTER_CMD_COUNT       254
 #define ROUTER_CMD_RESET       255
 
-#define REC_OK           0
-#define REC_CRC_FAIL     1
-#define REC_RESET        2
+#define NUM_PACKET_SEND_TRIES  3
+
+#define COMM_OK           0
+#define COMM_CRC_FAIL     1
+#define COMM_RESET        2
+#define COMM_SEND_FAIL    3
 
 typedef struct
 {

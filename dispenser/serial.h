@@ -13,5 +13,6 @@ uint8_t serial_tx_nb(uint8_t ch);
 
 uint8_t receive_packet(packet_t *p);
 uint8_t send_packet(packet_t *p);
+uint8_t send_packet8(uint8_t type, uint8_t data);
 
 #endif

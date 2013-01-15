@@ -1,3 +1,4 @@
+#include <string.h>
 #include <avr/io.h>
 #include <util/crc16.h>
 #include <avr/interrupt.h>
@@ -97,7 +98,7 @@ uint8_t receive_packet(packet_t *p)
         {
             ret = serial_rx_nb(&ch);
             if (check_reset())
-                return REC_RESET;
+                return COMM_RESET;
 
             if (ret)
             {
@@ -116,7 +117,7 @@ uint8_t receive_packet(packet_t *p)
         {
             ret = serial_rx_nb(&ch);
             if (check_reset())
-                return REC_RESET;
+                return COMM_RESET;
 
             if (ret)
             {
@@ -139,7 +140,7 @@ uint8_t receive_packet(packet_t *p)
             {
                 ret = serial_rx_nb(&ch);
                 if (check_reset())
-                    return REC_RESET;
+                    return COMM_RESET;
 
                 if (ret)
                 {
@@ -176,20 +177,32 @@ uint8_t receive_packet(packet_t *p)
         {
             ret = serial_tx_nb(ack);
             if (check_reset())
-                return REC_RESET;
+                return COMM_RESET;
             if (ret)
                 break;
             idle();
         }
-        return (ack == PACKET_ACK_OK) ? REC_OK : REC_CRC_FAIL;
+        return (ack == PACKET_ACK_OK) ? COMM_OK : COMM_CRC_FAIL;
     }
-    return REC_RESET;
+    return COMM_RESET;
+}
+
+uint8_t send_packet8(uint8_t type, uint8_t data)
+{
+    packet_t p;
+    
+    memset(&p, 0, sizeof(packet_t));
+    p.type = type;
+    p.p.uint8[0] = data;
+
+    return send_packet(&p);
 }
 
 uint8_t send_packet(packet_t *p)
 {
     uint16_t crc = 0;
-    uint8_t i, *ch = (uint8_t *)p, ret, ack;
+    uint8_t i, *ch, ret, ack, tries, encoded_size;
+    uint8_t encoded[sizeof(packet_t) + ((sizeof(packet_t) + 7) / 8)];
 
     crc = _crc16_update(crc, p->dest);
     crc = _crc16_update(crc, p->type);
@@ -198,34 +211,32 @@ uint8_t send_packet(packet_t *p)
     crc = _crc16_update(crc, p->p.uint8[2]);
     p->crc = _crc16_update(crc, p->p.uint8[3]);
 
-    for(;;)
+    pack_7bit(sizeof(packet_t), (uint8_t *)p, &encoded_size, encoded);
+    for(tries = 0; tries < NUM_PACKET_SEND_TRIES; tries++)
     {
-        for(i = 0; i < sizeof(packet_t); i++, ch++)
-        {
-            for(;;)
-            {
-                ret = serial_tx_nb(*ch);
-                if (check_reset())
-                    return REC_RESET;
+        // If we have any characters pending, nuke 'em
+        serial_rx_nb(&ack);
 
-                if (ret)
-                    break;
-            }
-        }
+        serial_tx(0xFF);
+        serial_tx(0xFF);
+        serial_tx(encoded_size);
+        for(i = 0, ch = (uint8_t *)encoded; i < encoded_size; i++, ch++)
+            serial_tx(*ch);
+
         for(;;)
         {
             ret = serial_rx_nb(&ack);
             if (check_reset())
-                return REC_RESET;
+                return COMM_RESET;
 
             if (ret)
                 break;
         }
         if (ack == PACKET_ACK_OK)
-            return REC_OK;
+            return COMM_OK;
     }
 
-    // should never get here
-    return PACKET_ACK_OK;
+    // whoops, we didn't succesfully send the packet. :-(
+    return COMM_SEND_FAIL;
 }
 

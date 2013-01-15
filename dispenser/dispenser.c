@@ -154,7 +154,7 @@ ISR(PCINT0_vect)
         g_hall3 = state;
         g_ticks++;
     }
-    check_dispense_complete();
+    check_dispense_complete_isr();
 
     state = PINB & (1<<PINB2);
     if (state != g_sync)
@@ -181,10 +181,11 @@ ISR(PCINT2_vect)
         g_hall1 = state;
         g_ticks++;
     }
-    check_dispense_complete();
+    check_dispense_complete_isr();
 }
 
-void check_dispense_complete()
+// this function is called from an ISR, so no need to turn off/on interrupts
+void check_dispense_complete_isr()
 {
     if (g_dispense_target_ticks > 0 && g_ticks >= g_dispense_target_ticks)
     {
@@ -314,6 +315,15 @@ void run_motor_timed(uint32_t duration)
 
 void dispense_ticks(uint32_t ticks)
 {
+    uint8_t dispensing;
+
+    cli();
+    dispensing = g_is_dispensing;
+    sei();
+
+    if (dispensing)
+        return;
+
     cli();
     g_dispense_target_ticks = ticks;
     g_ticks = 0;
@@ -321,6 +331,17 @@ void dispense_ticks(uint32_t ticks)
     sei();
 
     set_motor_speed(255);
+}
+
+void is_dispensing(void)
+{
+    uint8_t dispensing;
+
+    cli();
+    dispensing = g_is_dispensing;
+    sei();
+
+    send_packet8(PACKET_IS_DISPENSING, dispensing);
 }
 
 void set_random_seed_from_eeprom(void)
@@ -456,13 +477,13 @@ int main(void)
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
-            if (rec == REC_CRC_FAIL)
+            if (rec == COMM_CRC_FAIL)
                 continue;
 
-            if (rec == REC_RESET)
+            if (rec == COMM_RESET)
                 break;
 
-            if (rec == REC_OK && p.dest == id)
+            if (rec == COMM_OK && p.dest == id)
             {
                 switch(p.type)
                 {
@@ -471,6 +492,7 @@ int main(void)
                         _delay_ms(200);
                         set_led_rgb(0, 255, 0);
                         break;
+
                     case PACKET_SET_MOTOR_SPEED:
                         set_motor_speed(p.p.uint8[0]);
                         break;
@@ -481,6 +503,10 @@ int main(void)
 
                     case PACKET_TIME_DISPENSE:
                         run_motor_timed(p.p.uint32);
+                        break;
+
+                    case PACKET_IS_DISPENSING:
+                        is_dispensing();
                         break;
 
                     case PACKET_LED_OFF:
