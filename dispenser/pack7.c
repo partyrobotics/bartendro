@@ -2,10 +2,24 @@
 #include <stdint.h>
 #include <string.h>
 
+const char *b2b(int x)
+{
+    static char b[9];
+    b[0] = '\0';
+
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
 void pack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out)
 {
     uint16_t buffer = 0;
-    uint8_t  bitcount = 0;
+    uint8_t  bitcount = 0, i;
 
     *out_count = 0;
     for(;;)
@@ -27,8 +41,8 @@ void pack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out)
         if (in_count == 0)
             break;
     }
-    *out = buffer & 0xFF;
-    out_count++;
+    *out = buffer << (7 - bitcount);
+    (*out_count)++;
 }
 
 void unpack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out)
@@ -60,6 +74,6 @@ void unpack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out
             break;
     }
 
-    out--;
-    *out |= buffer;
+    *out = buffer;
+    (*out_count)++;
 }

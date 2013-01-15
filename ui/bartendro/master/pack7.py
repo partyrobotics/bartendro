@@ -19,7 +19,7 @@ def pack_7bit(data):
 
         if len(data) == 0: break
 
-    out += chr(buffer)
+    out += chr(buffer << (7 - bitcount))
     return out
 
 def unpack_7bit(data):
@@ -41,5 +41,6 @@ def unpack_7bit(data):
 
         if len(data) == 0: break
 
-    out = out[0:-1] + chr(buffer | ord(out[-1]))
+    out += chr(buffer)
     return out
+
