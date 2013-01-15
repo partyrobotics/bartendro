@@ -316,10 +316,10 @@ void flash_led(uint8_t fast)
     }
 }
 
-// TODO: handle collisions and missing dispensers
+// TODO: test collision support 
 uint8_t setup_ids(void)
 {
-    uint8_t  i, j, state, count = 0;
+    uint8_t  i, j, state, count = 0, single_pass_count;
     uint8_t  dispensers_found[MAX_DISPENSERS];
 
     serial_init();
@@ -341,7 +341,7 @@ uint8_t setup_ids(void)
 
             serial_tx(i);
             _delay_ms(3);
-            for(j = 0; j < MAX_DISPENSERS; j++)
+            for(j = 0, single_pass_count = 0; j < MAX_DISPENSERS; j++)
             {
                 cli();
                 state = g_dispenser_id[j];
@@ -350,8 +350,18 @@ uint8_t setup_ids(void)
                 {
                     dispensers_found[j] = i;
                     count++;
+                    single_pass_count++;
                 }
             }
+            // Did we get a collision??
+            if (single_pass_count > 1)
+                break;
+        }
+        // If we did get a collision, reset the dispensers and try the process again
+        if (single_pass_count > 1)
+        {
+            reset_dispensers();
+            continue;
         }
 #if 0
         flash_led(count == 2); //MAX_DISPENSERS);
