@@ -25,8 +25,7 @@
 #endif
 
 // TODO
-// Hook up more LED patterns.
-// Start with no patterns, sync off. Let bot start animations.
+// Re-add LED patterns & code LED patterns without floating point math
 // Add support for different animation speeds
 
 // Production TODO:
@@ -57,7 +56,7 @@ static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
 static void (*g_led_function)(uint32_t, color_t *) = 0;
 
-void check_dispense_complete(void);
+void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed);
 
 /*
@@ -185,7 +184,7 @@ ISR(PCINT2_vect)
 }
 
 // this function is called from an ISR, so no need to turn off/on interrupts
-void check_dispense_complete_isr()
+void check_dispense_complete_isr(void)
 {
     if (g_dispense_target_ticks > 0 && g_ticks >= g_dispense_target_ticks)
     {
@@ -296,6 +295,11 @@ uint16_t read_liquid_level_sensor(void)
     adc_shutdown();
 
     return (uint16_t)(v / NUM_ADC_SAMPLES);
+}
+
+void liquid_level(void)
+{
+    send_packet16(PACKET_LIQUID_LEVEL, read_liquid_level_sensor());
 }
 
 void set_motor_speed(uint8_t speed)
@@ -507,6 +511,10 @@ int main(void)
 
                     case PACKET_IS_DISPENSING:
                         is_dispensing();
+                        break;
+
+                    case PACKET_LIQUID_LEVEL:
+                        liquid_level();
                         break;
 
                     case PACKET_LED_OFF:

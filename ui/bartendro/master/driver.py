@@ -67,7 +67,7 @@ class MasterDriver(object):
         self.ret = 0
         self.num_dispensers = 2
         self.selected = 0
-        self.cl = None; #open("logs/comm.log", "a")
+        self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
         self.router = None
 
@@ -125,8 +125,8 @@ class MasterDriver(object):
         except IOError:
             raise I2CIOError
 
-        self.reset();
-        sleep(3);
+        self.reset()
+        sleep(3)
 #self.led_idle()
 
     def close(self):
@@ -137,17 +137,19 @@ class MasterDriver(object):
         self.bus = None
 
     def crc16_update(self, crc, a):
-        crc ^= a;
+        crc ^= a
         for i in xrange(0, 8):
             if crc & 1:
-                crc = (crc >> 1) ^ 0xA001;
+                crc = (crc >> 1) ^ 0xA001
             else:
-                crc = (crc >> 1);
+                crc = (crc >> 1)
 
-        return crc;
+        return crc
 
-    def send_packet(self, packet):
+    def send_packet(self, dest, packet):
         if self.software_only: return True
+
+        self.select(dest)
 
         # If there are any spurious characters, nuke em!
         self.ser.flushInput()
@@ -185,13 +187,13 @@ class MasterDriver(object):
         return False
 
     def send_packet8(self, dest, type, val):
-        return self.send_packet(pack("BBBBBB", dest, type, val, 0, 0, 0))
+        return self.send_packet(dest, pack("BBBBBB", dest, type, val, 0, 0, 0))
 
     def send_packet16(self, dest, type, val):
-        return self.send_packet(pack("<BBHH", dest, type, val, 0))
+        return self.send_packet(dest, pack("<BBHH", dest, type, val, 0))
 
     def send_packet32(self, dest, type, val):
-        return self.send_packet(pack("<BBI", dest, type, val))
+        return self.send_packet(dest, pack("<BBI", dest, type, val))
 
     def make_shot(self):
         self.send_packet32(0, 5, 80)
@@ -201,35 +203,29 @@ class MasterDriver(object):
         return self.send_packet32(self.selected, PACKET_PING, 0)
 
     def start(self, dispenser):
-        self.select(dispenser)
         return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255)
 
     def stop(self, dispenser):
-        self.select(dispenser)
         return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
         return True
 
     def dispense_ticks(self, dispenser, ticks):
-        print "dispense %d ticks" % ticks
-        self.select(dispenser)
         return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
 
     def led_off(self):
         # TODO: use broadcast
         self.sync(0)
         for dispenser in xrange(self.num_dispensers):
-            self.select(dispenser)
-            self.send_packet8(dispenser, PACKET_LED_OFF, 0);
+            self.send_packet8(dispenser, PACKET_LED_OFF, 0)
         return True
 
     def led_idle(self):
         # TODO: use broadcast
         self.sync(0)
         for dispenser in xrange(self.num_dispensers):
-            self.select(dispenser)
-            self.send_packet8(dispenser, PACKET_LED_IDLE, 0);
+            self.send_packet8(dispenser, PACKET_LED_IDLE, 0)
         sleep(.01)
         self.sync(1)
         return True
@@ -238,8 +234,7 @@ class MasterDriver(object):
         # TODO: use broadcast
         self.sync(0)
         for dispenser in xrange(self.num_dispensers):
-            self.select(dispenser)
-            self.send_packet8(dispenser, PACKET_LED_DISPENSE, 0);
+            self.send_packet8(dispenser, PACKET_LED_DISPENSE, 0)
         sleep(.01)
         self.sync(1)
         return True
@@ -248,19 +243,18 @@ class MasterDriver(object):
         # TODO: use broadcast
         self.sync(0)
         for dispenser in xrange(self.num_dispensers):
-            self.select(dispenser)
-            self.send_packet8(dispenser, PACKET_LED_DRINK_DONE, 0);
+            self.send_packet8(dispenser, PACKET_LED_DRINK_DONE, 0)
         sleep(.01)
         self.sync(1)
         return True
 
     def comm_test(self):
         self.sync(0)
-        self.select(0)
-        return self.send_packet8(0, PACKET_COMM_TEST, 0);
+        return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
-        return False
+        if self.send_packet8(0, PACKET_COMM_TEST, 0):
+            self.receive_packet()
 
     def get_liquid_level(self, dispenser):
         return 80
@@ -311,7 +305,7 @@ def comm_test(md):
         sleep(1)
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyAMA0", 0);
+    md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
 #    ping_test(md)
     led_test(md)

@@ -32,8 +32,7 @@ void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
 uint8_t get_pin_state(uint8_t port, uint8_t pin);
 
-// TODO:
-// check for COLLISIONS in name assignment
+// TODO: test collision support 
 
 /*  For use with the production board
     { 'D', 3 }, // 0 - pcint19
@@ -316,7 +315,6 @@ void flash_led(uint8_t fast)
     }
 }
 
-// TODO: test collision support 
 uint8_t setup_ids(void)
 {
     uint8_t  i, j, state, count = 0, single_pass_count;
@@ -363,7 +361,7 @@ uint8_t setup_ids(void)
             reset_dispensers();
             continue;
         }
-#if 0
+#if 1
         flash_led(count == 2); //MAX_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {

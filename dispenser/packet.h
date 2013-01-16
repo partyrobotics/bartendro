@@ -12,9 +12,11 @@
 #define PACKET_LED_IDLE        8
 #define PACKET_LED_DISPENSE    9
 #define PACKET_LED_DRINK_DONE  10
-#define PACKET_IS_DISPENSING   11
+#define PACKET_IS_DISPENSING   11  // requires response
+#define PACKET_LIQUID_LEVEL    12  // requires response
 #define PACKET_COMM_TEST       0xFE
-#define PACKET_BROADCAST       0xFF
+
+#define DEST_BROADCAST         0xFF
 
 #define PACKET_ACK_OK          0
 #define PACKET_ACK_CRC_FAIL    1

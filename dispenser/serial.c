@@ -81,7 +81,8 @@ uint8_t check_reset(void)
 {
     return 0;
 }
-#endif
+
+#else
 
 uint8_t receive_packet(packet_t *p)
 {
@@ -198,6 +199,17 @@ uint8_t send_packet8(uint8_t type, uint8_t data)
     return send_packet(&p);
 }
 
+uint8_t send_packet16(uint8_t type, uint16_t data)
+{
+    packet_t p;
+    
+    memset(&p, 0, sizeof(packet_t));
+    p.type = type;
+    p.p.uint16[0] = data;
+
+    return send_packet(&p);
+}
+
 uint8_t send_packet(packet_t *p)
 {
     uint16_t crc = 0;
@@ -240,3 +252,4 @@ uint8_t send_packet(packet_t *p)
     return COMM_SEND_FAIL;
 }
 
+#endif
