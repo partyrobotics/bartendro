@@ -361,7 +361,7 @@ uint8_t setup_ids(void)
             reset_dispensers();
             continue;
         }
-#if 1
+#if 0
         flash_led(count == 2); //MAX_DISPENSERS);
         for(i = 0; i < min(count, 10); i++)
         {

@@ -73,7 +73,4 @@ void unpack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out
         if (in_count == 0)
             break;
     }
-
-    *out = buffer;
-    (*out_count)++;
 }

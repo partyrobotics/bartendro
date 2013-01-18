@@ -30,8 +30,8 @@
 
 #define NUM_PACKET_SEND_TRIES  3
 
-#define COMM_OK           0
-#define COMM_CRC_FAIL     1
+#define COMM_OK           0 
+#define COMM_CRC_FAIL     1 
 #define COMM_RESET        2
 #define COMM_SEND_FAIL    3
 
