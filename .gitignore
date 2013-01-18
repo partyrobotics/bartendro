@@ -8,3 +8,5 @@
 *.map
 *.hex
 ui/logs
+dispenser/old
+master/old
