@@ -130,8 +130,7 @@ class MasterDriver(object):
 
         self.reset()
         sleep(3)
-
-#self.led_idle()
+        self.led_idle()
 
     def close(self):
         if self.software_only: return
@@ -203,6 +202,59 @@ class MasterDriver(object):
     def send_packet32(self, dest, type, val):
         return self.send_packet(dest, pack("<BBI", dest, type, val))
 
+    def receive_packet(self):
+        if self.software_only: return True
+
+        # If there are any spurious characters, nuke em!
+#        self.ser.flushInput()
+#        self.ser.flushOutput()
+
+        print "receive"
+        header = 0
+        while True:
+            # TODO: Add timeout support
+            ch = self.ser.read(1)
+            if (ord(ch) == 0xFF):
+                header += 1
+            else:
+                header = 0;
+
+            if header == 2:
+                break
+
+        print "got header"
+
+        # TODO fix this
+        size = ord(self.ser.read(1))
+        print "to be received: %d" % size
+        encoded = self.ser.read(size)
+        print "encoded", len(encoded)
+        for c in encoded:
+            print " - %X" % ord(c)
+        packet = unpack_7bit(encoded)
+        print "packet", len(packet)
+        for c in packet:
+            print " - %X" % ord(c)
+        received_crc = unpack("<H", packet[6:8])[0]
+        packet = packet[0:6]
+
+        crc = 0
+        for ch in packet:
+            crc = self.crc16_update(crc, ord(ch))
+
+        print received_crc
+        print "r: %0x c: %0x" % (received_crc, crc)
+        if received_crc != crc:
+            print "CRC fail"
+            return False
+
+        return packet[0:-2]
+
+    def receive_packet8(self):
+        packet = self.receive_packet()
+        data = unpack("BBBBBB", packet)
+        return (data[1], data[3])
+
     def make_shot(self):
         self.send_packet32(0, PACKET_TICK_DISPENSE, 80)
         return True
@@ -253,9 +305,8 @@ class MasterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
-        return False
-#        if self.send_packet8(0, PACKET_COMM_TEST, 0):
-#            self.receive_packet()
+        if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
+            self.receive_packet()
 
     def get_liquid_level(self, dispenser):
         return 80
@@ -296,8 +347,12 @@ def comm_test(md):
     while not md.comm_test():
         sleep(1)
 
+def is_dispensing_test(md):
+    print md.is_dispensing(0)
+
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
 #    ping_test(md, int(sys.argv[1]))
-    led_test(md)
+#    led_test(md)
+    dispense_test()

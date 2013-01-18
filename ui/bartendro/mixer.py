@@ -39,7 +39,6 @@ class Mixer(object):
         self.mc = local.application.mc
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
-        self.led_idle()
 
     def get_error(self):
         return self.err
