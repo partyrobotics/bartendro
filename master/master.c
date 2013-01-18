@@ -502,7 +502,7 @@ ISR(TWI_vect)
                break;
            }
 
-           if (data < g_dispenser_count)
+           if (data < MAX_DISPENSERS)
            {
                g_dispenser = data;
                break;

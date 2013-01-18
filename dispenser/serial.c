@@ -161,8 +161,6 @@ uint8_t receive_packet(packet_t *p)
         if (restart)
             continue;
 
-        tbi(PORTB, 5);
-
         unpack_7bit(size, data, &unpacked_size, (uint8_t *)p);
 
         crc = 0;
@@ -174,15 +172,17 @@ uint8_t receive_packet(packet_t *p)
         else
             ack = PACKET_ACK_OK;
 
-        for(;;)
-        {
-            ret = serial_tx_nb(ack);
-            if (check_reset())
-                return COMM_RESET;
-            if (ret)
-                break;
-            idle();
-        }
+        // send response, unless this is a broadcast packet
+        if (p->dest != DEST_BROADCAST)
+            for(;;)
+            {
+                ret = serial_tx_nb(ack);
+                if (check_reset())
+                    return COMM_RESET;
+                if (ret)
+                    break;
+                idle();
+            }
         return (ack == PACKET_ACK_OK) ? COMM_OK : COMM_CRC_FAIL;
     }
     return COMM_RESET;

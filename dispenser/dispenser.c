@@ -412,10 +412,25 @@ uint8_t get_address(void)
         if (id == old_id)
             my_new_id = new_id;
     }
+
     if (my_new_id == 0xFF || my_new_id > 14 || my_new_id == id)
         set_led_rgb(255, 0, 0);
     else
+    {
+#if 0
+        set_led_rgb(0,0,0);
+        _delay_ms(500);
+        for(ch = 0; ch < my_new_id + 1; ch++)
+        {
+            set_led_rgb(255,0,0);
+            _delay_ms(500);
+            set_led_rgb(0,0,0);
+            _delay_ms(500);
+        }
+        _delay_ms(500);
+#endif
         set_led_rgb(0, 255, 0);
+    }
 
     // Switch to using sending serial data
     serial_enable(1, 1);
@@ -487,13 +502,13 @@ int main(void)
             if (rec == COMM_RESET)
                 break;
 
-            if (rec == COMM_OK && p.dest == id)
+            if (rec == COMM_OK && (p.dest == DEST_BROADCAST || p.dest == id))
             {
                 switch(p.type)
                 {
                     case PACKET_PING:
                         set_led_rgb(0, 0, 255);
-                        _delay_ms(200);
+                        _delay_ms(250);
                         set_led_rgb(0, 255, 0);
                         break;
 
