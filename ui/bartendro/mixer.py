@@ -31,37 +31,36 @@ class Mixer(object):
         # not in use yet
         # BUSTED = object()          # out of all booze, can't make ANY drinks
 
-    def __init__(self, driver):
+    def __init__(self, driver, status):
         self.driver = driver
+        self.status = status
         self.err = ""
         self.disp_count = self.driver.count()
         self.mc = local.application.mc
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
+        self.led_idle()
 
     def get_error(self):
         return self.err
 
     def led_idle(self):
-        #self.driver.led_idle()
-        pass
+        self.driver.led_idle()
 
     def led_dispense(self):
-        #self.driver.led_dispense()
-        pass
+        self.driver.led_dispense()
 
     def led_complete(self):
-        #self.driver.led_complete()
-        pass
+        self.driver.led_complete()
 
     def led_status_out_of_booze(self):
-        pass
+        self.status.set_color(1, 0, 0)
 
     def led_status_warning(self):
-        pass
+        self.status.set_color(1, 1, 0)
 
     def led_status_all_good(self):
-        pass
+        self.status.set_color(0, 1, 0)
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
