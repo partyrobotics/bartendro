@@ -108,7 +108,7 @@ static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
 
        PD2 -> RESET
        PD1 -> TX
-       PD4 -> RX (pcint20)
+       PD5 -> RX (pcint21)
        PC3 -> SYNC
 
 */
@@ -128,7 +128,7 @@ void setup(void)
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT0);
-    PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) ;
+    PCMSK2 |= (1 << PCINT19) | (1 << PCINT21) ;
     PCICR |=  (1 << PCIE0) | (1 << PCIE2);
 
     // Timer setup for reset pulse width measuring
@@ -163,7 +163,7 @@ ISR(PCINT0_vect)
 
 // variables related to PCINT2
 static volatile uint8_t  pcint19 = 0;
-static volatile uint8_t  pcint20 = 0;
+static volatile uint8_t  pcint21 = 0;
 static volatile uint32_t g_rx_pcint_fe_time[MAX_DISPENSERS];
 
 void id_assignment_fe(uint8_t state, uint8_t disp)
@@ -188,11 +188,11 @@ void id_assignment_isr_pcint0(void)
         id_assignment_fe(state, 0);
         pcint19 = state;
     }
-    state = PIND & (1<<PIND4);
-    if (state != pcint20)
+    state = PIND & (1<<PIND5);
+    if (state != pcint21)
     {
         id_assignment_fe(state, 1);
-        pcint20 = state;
+        pcint21 = state;
     }
 }
 
@@ -225,7 +225,7 @@ ISR(PCINT2_vect)
         case 1:
             // Check for RX for Dispenser 1
             state = PIND & (1<<PIND4);
-            if (state != pcint20)
+            if (state != pcint21)
             {
                 if (g_dispenser == 1)
                 {
@@ -234,7 +234,7 @@ ISR(PCINT2_vect)
                     else
                         cbi(PORTB, 1);
                 }
-                pcint20 = state;
+                pcint21 = state;
             }
             break;
     }
