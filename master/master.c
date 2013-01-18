@@ -92,8 +92,8 @@ static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
    RPI:
 
        PD0 -> RESET input
-       PB0 -> RX (pcint0)
-       PB1 -> TX
+       PB0 -> TX
+       PB1 -> RX (pcint1)
        A4  -> SDA red wire
        A5  -> SCL green wire
 
@@ -119,7 +119,7 @@ void setup(void)
     DDRB |= (1<< PORTB5);
 
     // TX to RPI
-    DDRB |= (1<< PORTB1);
+    DDRB |= (1<< PORTB0);
     // TX to dispensers
     DDRD |= (1<< PORTD2);
 
@@ -127,7 +127,7 @@ void setup(void)
     DDRC |= (1<< PORTC3);
 
     // PCINT setup
-    PCMSK0 |= (1 << PCINT0);
+    PCMSK0 |= (1 << PCINT1);
     PCMSK2 |= (1 << PCINT19) | (1 << PCINT21) ;
     PCICR |=  (1 << PCIE0) | (1 << PCIE2);
 
@@ -144,20 +144,20 @@ void setup(void)
     sei();
 }
 
-static volatile uint8_t g_pcint0 = 0;
+static volatile uint8_t g_pcint1 = 0;
 ISR(PCINT0_vect)
 {
     uint8_t      state;
 
     // Check for RX from the RPI
-    state = PINB & (1<<PINB0);
-    if (state != g_pcint0)
+    state = PINB & (1<<PINB1);
+    if (state != g_pcint1)
     {
         if (state)
             sbi(PORTD, 1);
         else
             cbi(PORTD, 1);
-        g_pcint0 = state;
+        g_pcint1 = state;
     }
 }
 
@@ -215,9 +215,9 @@ ISR(PCINT2_vect)
                 if (g_dispenser == 0)
                 {
                     if (state)
-                        sbi(PORTB, 1);
+                        sbi(PORTB, 0);
                     else
-                        cbi(PORTB, 1);
+                        cbi(PORTB, 0);
                 }
                 pcint19 = state;
             }
@@ -230,9 +230,9 @@ ISR(PCINT2_vect)
                 if (g_dispenser == 1)
                 {
                     if (state)
-                        sbi(PORTB, 1);
+                        sbi(PORTB, 0);
                     else
-                        cbi(PORTB, 1);
+                        cbi(PORTB, 0);
                 }
                 pcint21 = state;
             }
@@ -317,7 +317,7 @@ void flash_led(uint8_t fast)
 
 uint8_t setup_ids(void)
 {
-    uint8_t  i, j, state, count = 0, single_pass_count;
+    uint8_t  i, j, state, count = 0, single_pass_count = 0;
     uint8_t  dispensers_found[MAX_DISPENSERS];
 
     serial_init();
