@@ -347,7 +347,7 @@ void is_dispensing(void)
 
 uint8_t read_pump_id_from_eeprom(void)
 {
-    return eeprom_read_byte((uint8_t)0);
+    return eeprom_read_byte((uint8_t *)0);
 }
 
 uint8_t get_address(void)
@@ -355,7 +355,15 @@ uint8_t get_address(void)
     uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
+    set_led_rgb(0, 0, 255);
     id = read_pump_id_from_eeprom();
+    if (id == 0 || id == 255)
+    {
+        // we failed to get a unique number for the pump. just stop.
+        set_led_rgb(255, 255, 0);
+        for(;;);
+    }
+
 #if 0
     set_led_rgb(0,0,255);
     _delay_ms(500);
@@ -374,7 +382,6 @@ uint8_t get_address(void)
     serial_enable(1, 0);
     DDRD |= (1 << PORTD1);
 
-    set_led_rgb(0, 0, 255);
     for(;;)
     {
         for(;;)
@@ -418,7 +425,10 @@ uint8_t get_address(void)
     }
 
     if (my_new_id == 0xFF || my_new_id > 14)
+    {
         set_led_rgb(255, 0, 0);
+        return 0xFF;
+    }
     else
     {
 #if 0
@@ -475,7 +485,13 @@ int main(void)
 
         id = get_address();
         if (id == 0xFF)
+        {
+            set_led_rgb(255, 255, 255);
+            // we failed to get an address. stop and wait for a reset
+            for(; !check_reset();)
+                ;
             continue;
+        }
 
         for(; !check_reset();)
         {
