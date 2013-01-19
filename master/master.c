@@ -31,6 +31,7 @@
 void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
 uint8_t get_pin_state(uint8_t port, uint8_t pin);
+void    flash_led(uint8_t fast);
 
 // TODO: test collision support 
 
@@ -94,11 +95,13 @@ void setup(void)
 
     // SYNC to dispensers
     DDRC |= (1<< PORTC3);
+    DDRC |= (1<< PORTC2);
+
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT3) | (1 << PCINT4) | 
               (1 << PCINT5) | (1 << PCINT6) | (1 << PCINT7);
-    PCMSK1 |= (1 << PCINT8) | (1 << PCINT9) | (1 << PCINT10);
+    PCMSK1 |= (1 << PCINT8) | (1 << PCINT9); // for testing! | (1 << PCINT10);
     PCMSK2 |= (1 << PCINT16) | (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21) | 
               (1 << PCINT22) | (1 << PCINT23);
     PCICR |=  (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2);
@@ -296,12 +299,12 @@ void id_assignment_isr_pcint1(void)
         id_assignment_fe(state, 6);
         g_pcint9 = state;
     }
-    state = PINC & (1<<PINC2);
-    if (state != g_pcint10)
-    {
-        id_assignment_fe(state, 14);
-        g_pcint10 = state;
-    }
+//    state = PINC & (1<<PINC2);
+//    if (state != g_pcint10)
+//    {
+//        id_assignment_fe(state, 14);
+//        g_pcint10 = state;
+//    }
 }
 
 ISR(PCINT1_vect)
@@ -577,14 +580,26 @@ uint8_t setup_ids(void)
         // If we did get a collision, reset the dispensers and try the process again
         if (single_pass_count > 1)
         {
+            flash_led(0);
             reset_dispensers();
             continue;
         }
         if (count >= 0)
             break;
 
+        flash_led(1);
         reset_dispensers();
     }
+#if 0
+    _delay_ms(1000);
+    for(i = 0; i < count; i++)
+    {
+        sbi(PORTC, 2);
+        _delay_ms(500);
+        cbi(PORTC, 2);
+        _delay_ms(500);
+    }
+#endif
     _delay_ms(5);
     serial_tx(255);
     _delay_ms(5);
@@ -617,9 +632,30 @@ uint8_t setup_ids(void)
     return count;
 }
 
+void flash_led(uint8_t fast)
+{
+    uint8_t i;
+
+    for(i = 0; i < 5; i++)
+    {
+        sbi(PORTC, 2);
+        if (fast)
+            _delay_ms(100);
+        else
+            _delay_ms(200);
+        cbi(PORTC, 2);
+        if (fast)
+            _delay_ms(100);
+        else
+            _delay_ms(200);
+    }
+}
+
 int main (void)
 {
     uint8_t reset = 0, count;
+
+    flash_led(1);
 
     for(;;)
     {
