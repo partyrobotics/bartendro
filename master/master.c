@@ -631,7 +631,7 @@ uint8_t setup_ids(void)
 
     // start by pulling D1 & B1 high, since serial lines when idle are high
     sbi(PORTD, 1);
-    sbi(PORTB, 1);
+    sbi(PORTB, 0);
 
     cli();
     g_in_id_assignment = 0;

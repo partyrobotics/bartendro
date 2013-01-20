@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "defs.h"
+#include "i2cmaster.h"
 
 #include "packet.h"
 #include "serial.h"
@@ -342,7 +343,6 @@ void is_dispensing(void)
     dispensing = g_is_dispensing;
     sei();
 
-    set_led_rgb(255, 0, 0);
     send_packet8(PACKET_IS_DISPENSING, dispensing);
 }
 
@@ -451,6 +451,10 @@ uint8_t get_address(void)
     // Switch to using sending serial data
     serial_enable(1, 1);
 
+    serial_tx('A');
+    serial_tx('A');
+    serial_tx('A');
+
     return my_new_id;
 }
 
@@ -475,7 +479,22 @@ int main(void)
 
     setup();
     set_motor_speed(0);
-
+    sei();
+//    comm_test();
+#if 0
+    set_led_rgb(255, 0, 0);
+    i2c_init(); 
+    set_led_rgb(0, 255, 0);
+    i2c_start_wait(8+I2C_WRITE);
+    set_led_rgb(0, 0, 255);
+    for(;;)
+    {
+        i2c_write('A');
+//        iprintf("Pierre is a douche.\n");
+        _delay_ms(30);
+    }
+    i2c_stop();
+#endif
     for(i = 0; i < 5; i++)
     {
         set_led_rgb(255, 0, 255);
@@ -483,6 +502,8 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
+//    for(;;)
+//        iprintf("Pierre is a douche.\n");
     for(;;)
     {
         cli();
@@ -516,9 +537,9 @@ int main(void)
                 switch(p.type)
                 {
                     case PACKET_PING:
-                        set_led_rgb(0, 0, 255);
-                        _delay_ms(250);
-                        set_led_rgb(0, 255, 0);
+//                        set_led_rgb(0, 0, 255);
+//                        _delay_ms(250);
+//                        set_led_rgb(0, 255, 0);
                         break;
 
                     case PACKET_SET_MOTOR_SPEED:

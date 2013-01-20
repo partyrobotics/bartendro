@@ -1,6 +1,7 @@
 #include <string.h>
 #include <avr/io.h>
 #include <util/crc16.h>
+#include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -8,6 +9,9 @@
 #include "serial.h"
 #include "pack7.h"
 #include "led.h"
+#ifndef ROUTER
+#include "i2cmaster.h"
+#endif
 
 #define BAUD             9600
 #define UBBR             (F_CPU / 16 / BAUD - 1)
@@ -89,14 +93,41 @@ uint8_t check_reset(void)
 uint8_t receive_packet(packet_t *p)
 {
     uint16_t crc = 0;
-    uint8_t  i, ret, ack, header, restart, ch, *ptr;
+    uint8_t  i, j, ret, ack, header, ch, *ptr;
     uint8_t  unpacked_size;
     uint8_t  data[RAW_PACKET_SIZE];
+    uint8_t  err = 0;
+    uint8_t  rec_count = 0;
 
+    memset(data, 0, sizeof(data));
     for(;!check_reset();)
     {
+#if 1        
+        if (err)
+        {
+            set_led_rgb(255,255,255);
+            _delay_ms(500);
+            for(ch = 0; ch < err; ch++)
+            {
+                set_led_rgb(255,0,0);
+                _delay_ms(500);
+                set_led_rgb(0,0,0);
+                _delay_ms(500);
+            }
+            _delay_ms(500);
+            for(ch = 0; ch < rec_count; ch++)
+            {
+                set_led_rgb(255,0,255);
+                _delay_ms(500);
+                set_led_rgb(0,0,0);
+                _delay_ms(500);
+            }
+            _delay_ms(500);
+        }
+#endif
+
         header = 0;
-        restart = 0;
+        ack = PACKET_ACK_OK;
         for(;;)
         {
             ret = serial_rx_nb(&ch);
@@ -108,7 +139,13 @@ uint8_t receive_packet(packet_t *p)
                 if (ch == 0xFF)
                     header++;
                 else 
-                    header = 0;
+                {
+                    if (header > 0)
+                    {
+                        ack = PACKET_ACK_INVALID_HEADER;
+                        break;
+                    }
+                }
 
                 if (header == 2)
                     break;
@@ -116,39 +153,46 @@ uint8_t receive_packet(packet_t *p)
             idle();
         }
 
-        for(i = 0; i < RAW_PACKET_SIZE; i++)
+        if (ack == PACKET_ACK_OK)
         {
-            for(;;)
+            for(i = 0; i < RAW_PACKET_SIZE; i++)
             {
-                ret = serial_rx_nb(&ch);
-                if (check_reset())
-                    return COMM_RESET;
-
-                if (ret)
+                for(;;)
                 {
-                    if (ch == 0xFF)
+                    ret = serial_rx_nb(&ch);
+                    if (check_reset())
+                        return COMM_RESET;
+
+                    if (ret)
                     {
-                        restart = 1;
+                        if (ch == 0xFF)
+                        {
+                            ack = PACKET_ACK_HEADER_IN_PACKET;
+                            break;
+                        }
+                        if (err == 0)
+                            rec_count++;
+
+                        data[i] = ch;
                         break;
                     }
-                    data[i] = ch;
-                    break;
+                    idle();
                 }
-                idle();
+                if (ack != PACKET_ACK_OK)
+                    break;
             }
-            if (restart)
-                break;
         }
-        if (restart)
-            continue;
 
-        ack = PACKET_ACK_OK;
-        unpack_7bit(RAW_PACKET_SIZE, data, &unpacked_size, (uint8_t *)p);
-        if (unpacked_size != PACKET_SIZE)
+        if (ack == PACKET_ACK_OK)
         {
-            iprintf("Decoded packet size assert fail: %d vs %d\n", PACKET_SIZE, unpacked_size);
-            set_led_rgb(255, 0, 0);
-            ack = PACKET_ACK_INVALID;
+            unpack_7bit(RAW_PACKET_SIZE, data, &unpacked_size, (uint8_t *)p);
+            if (unpacked_size != PACKET_SIZE)
+            {
+                iprintf("Decoded packet size assert fail: %d vs %d\n", PACKET_SIZE, unpacked_size);
+                set_led_rgb(255, 0, 0);
+                ack = PACKET_ACK_INVALID;
+                err = 3;
+            }
         }
 
         if (ack == PACKET_ACK_OK)
@@ -163,20 +207,38 @@ uint8_t receive_packet(packet_t *p)
 
         // send response, unless this is a broadcast packet
         if (p->dest != DEST_BROADCAST)
+        {
             for(;;)
             {
                 ret = serial_tx_nb(ack);
                 if (check_reset())
                     return COMM_RESET;
                 if (ret)
+                {
+                    set_led_rgb(255, 255, 0);
                     break;
+                }
                 idle();
             }
+            for(;;)
+            {
+                ret = serial_tx_nb(ack);
+                if (check_reset())
+                    return COMM_RESET;
+                if (ret)
+                {
+                    set_led_rgb(255, 255, 0);
+                    break;
+                }
+                idle();
+            }
+        }
         if (ack != PACKET_ACK_OK)
         {
             iprintf("Bad packet received: %d\n", ack);
             continue; 
         }
+#if 0
         else
         {
             iprintf("received:\n");
@@ -184,7 +246,7 @@ uint8_t receive_packet(packet_t *p)
                 iprintf("  %02X\n", *ptr);
             iprintf("ack: %d\n\n", ack);
         }
-
+#endif
         return COMM_OK;
     }
     iprintf("reach end of loop. bad!\n");
@@ -226,7 +288,6 @@ uint8_t send_packet(packet_t *p)
     crc = _crc16_update(crc, p->p.uint8[2]);
     p->crc = _crc16_update(crc, p->p.uint8[3]);
 
-    // CHECK: is the last arg correct?
     pack_7bit(sizeof(packet_t), (uint8_t *)p, &packed_size, &packed[2]);
     if (packed_size != RAW_PACKET_SIZE)
     {
@@ -274,12 +335,6 @@ uint8_t send_packet(packet_t *p)
     return COMM_SEND_FAIL;
 }
 
-#endif
-
-void i2c_tx(uint8_t ch)
-{
-    // TODO: implement TWI send here!
-}
 
 #define MAX 80
 void iprintf(const char *fmt, ...)
@@ -292,9 +347,14 @@ void iprintf(const char *fmt, ...)
     vsnprintf(buffer, MAX, fmt, va);
     va_end (va);
 
+    i2c_init();
+    i2c_start_wait(8+I2C_WRITE);     // set device address and write mode
     for(ptr = buffer; *ptr; ptr++)
     {
-        if (*ptr == '\n') i2c_tx('\r');
-        i2c_tx(*ptr);
+        if (*ptr == '\n') i2c_write('\r');
+        i2c_write(*ptr);
     }
+    i2c_stop(); 
 }
+
+#endif
