@@ -342,6 +342,7 @@ void is_dispensing(void)
     dispensing = g_is_dispensing;
     sei();
 
+    set_led_rgb(255, 0, 0);
     send_packet8(PACKET_IS_DISPENSING, dispensing);
 }
 
