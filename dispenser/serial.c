@@ -96,36 +96,10 @@ uint8_t receive_packet(packet_t *p)
     uint8_t  i, j, ret, ack, header, ch, *ptr;
     uint8_t  unpacked_size;
     uint8_t  data[RAW_PACKET_SIZE];
-    uint8_t  err = 0;
-    uint8_t  rec_count = 0;
 
     memset(data, 0, sizeof(data));
     for(;!check_reset();)
     {
-#if 1        
-        if (err)
-        {
-            set_led_rgb(255,255,255);
-            _delay_ms(500);
-            for(ch = 0; ch < err; ch++)
-            {
-                set_led_rgb(255,0,0);
-                _delay_ms(500);
-                set_led_rgb(0,0,0);
-                _delay_ms(500);
-            }
-            _delay_ms(500);
-            for(ch = 0; ch < rec_count; ch++)
-            {
-                set_led_rgb(255,0,255);
-                _delay_ms(500);
-                set_led_rgb(0,0,0);
-                _delay_ms(500);
-            }
-            _delay_ms(500);
-        }
-#endif
-
         header = 0;
         ack = PACKET_ACK_OK;
         for(;;)
@@ -170,8 +144,6 @@ uint8_t receive_packet(packet_t *p)
                             ack = PACKET_ACK_HEADER_IN_PACKET;
                             break;
                         }
-                        if (err == 0)
-                            rec_count++;
 
                         data[i] = ch;
                         break;
@@ -187,12 +159,7 @@ uint8_t receive_packet(packet_t *p)
         {
             unpack_7bit(RAW_PACKET_SIZE, data, &unpacked_size, (uint8_t *)p);
             if (unpacked_size != PACKET_SIZE)
-            {
-                iprintf("Decoded packet size assert fail: %d vs %d\n", PACKET_SIZE, unpacked_size);
-                set_led_rgb(255, 0, 0);
                 ack = PACKET_ACK_INVALID;
-                err = 3;
-            }
         }
 
         if (ack == PACKET_ACK_OK)
@@ -214,10 +181,7 @@ uint8_t receive_packet(packet_t *p)
                 if (check_reset())
                     return COMM_RESET;
                 if (ret)
-                {
-                    set_led_rgb(255, 255, 0);
                     break;
-                }
                 idle();
             }
             for(;;)
@@ -226,30 +190,14 @@ uint8_t receive_packet(packet_t *p)
                 if (check_reset())
                     return COMM_RESET;
                 if (ret)
-                {
-                    set_led_rgb(255, 255, 0);
                     break;
-                }
                 idle();
             }
         }
         if (ack != PACKET_ACK_OK)
-        {
-            iprintf("Bad packet received: %d\n", ack);
             continue; 
-        }
-#if 0
-        else
-        {
-            iprintf("received:\n");
-            for(i = 0, ptr = (uint8_t *)p; i < unpacked_size - 2; i++, ptr++)
-                iprintf("  %02X\n", *ptr);
-            iprintf("ack: %d\n\n", ack);
-        }
-#endif
         return COMM_OK;
     }
-    iprintf("reach end of loop. bad!\n");
     return COMM_PANIC;
 }
 
@@ -281,6 +229,7 @@ uint8_t send_packet(packet_t *p)
     uint8_t i, *ch, ret, ack, tries, packed_size;
     uint8_t packed[RAW_PACKET_SIZE + 2]; // +2 for the header
 
+
     crc = _crc16_update(crc, p->dest);
     crc = _crc16_update(crc, p->type);
     crc = _crc16_update(crc, p->p.uint8[0]);
@@ -290,11 +239,7 @@ uint8_t send_packet(packet_t *p)
 
     pack_7bit(sizeof(packet_t), (uint8_t *)p, &packed_size, &packed[2]);
     if (packed_size != RAW_PACKET_SIZE)
-    {
-        iprintf("Encode packet size assert fail: %d vs %d\n", RAW_PACKET_SIZE, packed_size);
-        set_led_rgb(255, 0, 0);
         ack = PACKET_ACK_INVALID;
-    }
 
     packed[0] = 0xFF;
     packed[1] = 0xFF;

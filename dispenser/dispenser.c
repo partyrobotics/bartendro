@@ -48,6 +48,7 @@ static volatile uint32_t g_reset = 0;
 static volatile uint32_t g_ticks = 0;
 static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
+static volatile uint16_t g_liquid_level = 0;
 
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
@@ -432,21 +433,7 @@ uint8_t get_address(void)
         return 0xFF;
     }
     else
-    {
-#if 0
-        set_led_rgb(0,0,0);
-        _delay_ms(500);
-        for(ch = 0; ch < my_new_id + 1; ch++)
-        {
-            set_led_rgb(255,0,0);
-            _delay_ms(500);
-            set_led_rgb(0,0,0);
-            _delay_ms(500);
-        }
-        _delay_ms(500);
-#endif
         set_led_rgb(0, 255, 0);
-    }
 
     // Switch to using sending serial data
     serial_enable(1, 1);
@@ -480,21 +467,6 @@ int main(void)
     setup();
     set_motor_speed(0);
     sei();
-//    comm_test();
-#if 0
-    set_led_rgb(255, 0, 0);
-    i2c_init(); 
-    set_led_rgb(0, 255, 0);
-    i2c_start_wait(8+I2C_WRITE);
-    set_led_rgb(0, 0, 255);
-    for(;;)
-    {
-        i2c_write('A');
-//        iprintf("Pierre is a douche.\n");
-        _delay_ms(30);
-    }
-    i2c_stop();
-#endif
     for(i = 0; i < 5; i++)
     {
         set_led_rgb(255, 0, 255);
@@ -502,8 +474,6 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
-//    for(;;)
-//        iprintf("Pierre is a douche.\n");
     for(;;)
     {
         cli();
@@ -537,9 +507,6 @@ int main(void)
                 switch(p.type)
                 {
                     case PACKET_PING:
-//                        set_led_rgb(0, 0, 255);
-//                        _delay_ms(250);
-//                        set_led_rgb(0, 255, 0);
                         break;
 
                     case PACKET_SET_MOTOR_SPEED:
