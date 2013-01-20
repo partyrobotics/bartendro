@@ -482,7 +482,6 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
-
     for(;;)
     {
         cli();

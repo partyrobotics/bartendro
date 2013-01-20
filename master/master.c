@@ -670,8 +670,8 @@ int main (void)
     {
         g_sync = 0;
 
-        reset_dispensers();
         setup();
+        reset_dispensers();
         count = setup_ids();
         cli();
         g_dispenser_count = count;
