@@ -7,17 +7,23 @@ from time import sleep, localtime, time
 import smbus
 import serial
 import random
-from struct import pack
+from struct import pack, unpack
 import pack7
 
-BAUD_RATE = 38400
+BAUD_RATE = 9600
 
 MAX_DISPENSERS = 15
 SHOT_TICKS     = 20
 
+RAW_PACKET_SIZE      = 10
+PACKET_SIZE          =  8
+
 PACKET_ACK_OK      = 0
 PACKET_CRC_FAIL    = 1
 PACKET_ACK_TIMEOUT = 2
+PACKET_ACK_INVALID = 3
+PACKET_ACK_INVALID_HEADER = 4
+PACKET_ACK_HEADER_IN_PACKET = 5
 
 PACKET_PING            = 3
 PACKET_SET_MOTOR_SPEED = 4
@@ -27,6 +33,8 @@ PACKET_LED_OFF         = 7
 PACKET_LED_IDLE        = 8
 PACKET_LED_DISPENSE    = 9
 PACKET_LED_DRINK_DONE  = 10
+PACKET_IS_DISPENSING   = 11
+PACKET_LIQUID_LEVEL    = 12
 PACKET_COMM_TEST       = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -67,7 +75,7 @@ class MasterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
-        self.num_dispensers = 15 
+        self.num_dispensers = 7 
         self.selected = 0
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
@@ -152,45 +160,56 @@ class MasterDriver(object):
     def send_packet(self, dest, packet):
         if self.software_only: return True
 
-        crc = 0
-        for ch in packet:
-            crc = self.crc16_update(crc, ord(ch))
+        for attempt in xrange(3):
+            self.ser.flushInput()
+            self.ser.flushOutput()
 
-        encoded = pack7.pack_7bit(packet + pack("<H", crc))
-        if len(encoded) != RAW_PACKET_SIZE:
-            print "ERROR: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE)
-            return False
+            crc = 0
+            for ch in packet:
+                crc = self.crc16_update(crc, ord(ch))
 
-        t0 = time()
-        written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
-        if written != RAW_PACKET_SIZE:
-            print "ERROR: Send timeout"
-            return False
+            encoded = pack7.pack_7bit(packet + pack("<H", crc))
+            if len(encoded) != RAW_PACKET_SIZE:
+                print "ERROR: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE)
+                return False
 
-        if dest == DEST_BROADCAST:
-            return True
+            t0 = time()
+            written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
+            if written != RAW_PACKET_SIZE + 2:
+                print "ERROR: Send timeout"
+                continue
 
-        ch = self.ser.read(1)
-        t1 = time()
-        print "packet time: %f" % (t1 - t0)
-        if len(ch) < 1:
-            print "  * read timeout"
-            return False
+            if dest == DEST_BROADCAST:
+                return True
 
-        ack = ord(ch)
-        if ack == PACKET_ACK_OK: return True
-        if ack == PACKET_CRC_FAIL: 
-            print "  * crc fail"
-            return False
-        if ack == PACKET_ACK_TIMEOUT: 
-            print "  * ack timeout"
-            return False
-        if ack == PACKET_ACK_INVALID: 
-            print "  * dispenser received invalid packet"
-            return False
+            ch = self.ser.read(1)
+            t1 = time()
+            print "packet time: %f" % (t1 - t0)
+            if len(ch) < 1:
+                print "  * read timeout"
+                continue
 
-        # if we get an invalid ack code, it might be ok. 
-        print "  * Invalid ACK code %d" % ord(ch)
+            ack = ord(ch)
+            if ack == PACKET_ACK_OK: return True
+            if ack == PACKET_CRC_FAIL: 
+                print "  * crc fail"
+                continue
+            if ack == PACKET_ACK_TIMEOUT: 
+                print "  * ack timeout"
+                continue
+            if ack == PACKET_ACK_INVALID: 
+                print "  * dispenser received invalid packet"
+                continue
+            if ack == PACKET_ACK_INVALID_HEADER: 
+                print "  * dispenser received invalid header"
+                continue
+            if ack == PACKET_ACK_HEADER_IN_PACKET:
+                print "  * header in packet error"
+                continue
+
+
+            # if we get an invalid ack code, it might be ok. 
+            print "  * Invalid ACK code %d" % ord(ch)
         return False
 
     def send_packet8(self, dest, type, val):
@@ -205,14 +224,14 @@ class MasterDriver(object):
     def receive_packet(self):
         if self.software_only: return True
 
-        print "receive"
         header = 0
         while True:
             ch = self.ser.read(1)
-            if len(ch) < 1 and header > 0:
-                print "receive header timeout"
-                header = 0
-                continue
+            if len(ch) < 1:
+                print "receive packet response timeout"
+                return (PACKET_ACK_TIMEOUT, "")
+            else:
+                print "header received: %02X" % ord(ch)
 
             if (ord(ch) == 0xFF):
                 header += 1
@@ -225,28 +244,18 @@ class MasterDriver(object):
         print "received header"
 
         ack = PACKET_ACK_OK
-
-        # TODO fix this
-        raw_packet = self.ser.read(RAW_PACKET_SIZE))
+        raw_packet = self.ser.read(RAW_PACKET_SIZE)
         if len(raw_packet) != RAW_PACKET_SIZE:
             print "receive packet timeout"
             ack = PACKET_ACK_TIMEOUT
 
         if ack == PACKET_ACK_OK:
-            print "raw packet:"
-            for c in raw_packet:
-                print " - %X" % ord(c)
-
-            packet = unpack_7bit(raw_packet)
-            if len(packet) != PACKET_LEN:
+            packet = pack7.unpack_7bit(raw_packet)
+            if len(packet) != PACKET_SIZE:
                 ack = PACKET_ACK_INVALID
                 print "ERROR: Unpacked length incorrect"
 
             if ack == PACKET_ACK_OK:
-                print "packet:"
-                for c in packet:
-                    print " - %X" % ord(c)
-
                 received_crc = unpack("<H", packet[6:8])[0]
                 packet = packet[0:6]
 
@@ -254,7 +263,6 @@ class MasterDriver(object):
                 for ch in packet:
                     crc = self.crc16_update(crc, ord(ch))
 
-                print "r: %0x c: %0x" % (received_crc, crc)
                 if received_crc != crc:
                     print "CRC fail"
                     ack = PACKET_ACK_CRC_FAIL
@@ -265,14 +273,25 @@ class MasterDriver(object):
             ack = PACKET_ACK_TIMEOUT
 
         if ack == PACKET_ACK_OK:
-            return (ack, packet[0:-2])
+            return (ack, packet)
         else:
             return (ack, "")
 
     def receive_packet8(self):
-        packet = self.receive_packet()
+        ack, packet = self.receive_packet()
         data = unpack("BBBBBB", packet)
-        return (data[1], data[3])
+        if ack == PACKET_ACK_OK:
+            return (ack, data[2])
+        else:
+            return (ack, 0)
+
+    def receive_packet16(self):
+        ack, packet = self.receive_packet()
+        if ack == PACKET_ACK_OK:
+            data = unpack("<BBHH", packet)
+            return (ack, data[2])
+        else:
+            return (ack, 0)
 
     def make_shot(self):
         self.send_packet32(0, PACKET_TICK_DISPENSE, 80)
@@ -324,22 +343,30 @@ class MasterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
-        return False
-        if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
-            self.receive_packet()
+        while True:
+            if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
+                ack, value = self.receive_packet8()
+                if ack == PACKET_ACK_OK:
+                    return value
 
     def get_liquid_level(self, dispenser):
-        return 80
+        return 100
+        while True:
+            if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
+                ack, value = self.receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    print "received packet ok"
+                    return value
 
     def get_dispense_stats(self, dispenser):
         return (0, 0)
 
 def ping_test(md):
     while True:
-        for disp in xrange(7):
-            print "ping %d:" % disp
-            md.ping(disp)
-            sleep(1)
+        disp = 0
+        print "ping %d:" % disp
+        md.ping(disp)
+        sleep(1)
 
 def led_test(md):
     while True:
@@ -364,13 +391,32 @@ def comm_test(md):
     while not md.comm_test():
         sleep(1)
 
-def is_dispensing_test(md):
-    print md.is_dispensing(0)
-
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
-    sleep(10)
-    ping_test(md)
+    sleep(3)
+    print "Ping:"
+    while not md.ping(0):
+        pass
+
+    val = md.is_dispensing(0)
+    print "is dispensing: %d\n" % val
+
+    sleep(2)
+
+    print "Ping:"
+    md.ping(0)
+    print
+
+#    val = md.get_liquid_level(1)
+#    print "liquid level: %d\n" % val
+    val = md.is_dispensing(0)
+    print "is dispensing: %d\n" % val
+
+    sleep(2)
+
+    md.ping(0);
+
 #    led_test(md)
+#    comm_test(md)
 #    dispense_test()
