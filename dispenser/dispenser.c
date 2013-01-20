@@ -352,8 +352,16 @@ uint8_t read_pump_id_from_eeprom(void)
 
 uint8_t get_address(void)
 {
-    uint8_t  ch;
+    uint8_t  ch, i;
     uint8_t  id, old_id, new_id, my_new_id = 255;
+
+        for(i = 0; i < 5; i++)
+        {
+            set_led_rgb(255, 0, 255);
+            _delay_ms(50);
+            set_led_rgb(255, 255, 0);
+            _delay_ms(50);
+        }
 
     set_led_rgb(0, 0, 255);
     id = read_pump_id_from_eeprom();
@@ -468,8 +476,12 @@ void comm_test(void)
 
 int main(void)
 {
-    uint8_t id, rec;
+    uint8_t id, rec, i;
     packet_t p;
+
+    // A CRC fail causes an actual mcu reset!
+    // Implement a visual indicator of this!
+    // Adjust timing of the master to account for this
 
     for(;;)
     {
@@ -479,14 +491,13 @@ int main(void)
         setup();
         set_motor_speed(0);
         serial_init();
-        set_led_rgb(0, 0, 0);
+        set_led_rgb(0, 0, 255);
 
         sei();
 
         id = get_address();
         if (id == 0xFF)
         {
-            set_led_rgb(255, 255, 255);
             // we failed to get an address. stop and wait for a reset
             for(; !check_reset();)
                 ;

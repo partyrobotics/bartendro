@@ -6,7 +6,7 @@
 #include "serial.h"
 #include "pack7.h"
 
-#define BAUD 38400
+#define BAUD 9600
 #define UBBR (F_CPU / 16 / BAUD - 1)
 #define RECEIVE_TIMEOUT  100
 #define MAX_PACKET_LEN 16
