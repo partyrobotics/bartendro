@@ -581,11 +581,11 @@ uint8_t setup_ids(void)
         // If we did get a collision, reset the dispensers and try the process again
         if (single_pass_count > 1)
         {
-            sbi(PORTC, 2);
-            _delay_ms(1000);
-            _delay_ms(1000);
-            cbi(PORTC, 2);
-            _delay_ms(500);
+//            sbi(PORTC, 2);
+//            _delay_ms(1000);
+//            _delay_ms(1000);
+//            cbi(PORTC, 2);
+//            _delay_ms(500);
             reset_dispensers();
             continue;
         }
@@ -631,7 +631,7 @@ uint8_t setup_ids(void)
 
     // start by pulling D1 & B1 high, since serial lines when idle are high
     sbi(PORTD, 1);
-    sbi(PORTB, 0);
+    sbi(PORTB, 1);
 
     cli();
     g_in_id_assignment = 0;
@@ -664,7 +664,7 @@ int main (void)
     uint8_t reset = 0, count;
 
     DDRC |= (1 << PORTC2);
-    flash_led(1);
+//    flash_led(1);
 
     for(;;)
     {
