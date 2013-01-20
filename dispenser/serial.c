@@ -2,14 +2,16 @@
 #include <avr/io.h>
 #include <util/crc16.h>
 #include <avr/interrupt.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "defs.h"
 #include "serial.h"
 #include "pack7.h"
+#include "led.h"
 
-#define BAUD 9600
-#define UBBR (F_CPU / 16 / BAUD - 1)
+#define BAUD             9600
+#define UBBR             (F_CPU / 16 / BAUD - 1)
 #define RECEIVE_TIMEOUT  100
-#define MAX_PACKET_LEN 16
 
 extern uint8_t check_reset(void);
 extern volatile uint32_t g_time;
@@ -88,8 +90,8 @@ uint8_t receive_packet(packet_t *p)
 {
     uint16_t crc = 0;
     uint8_t  i, ret, ack, header, restart, ch, *ptr;
-    uint8_t  size, unpacked_size;
-    uint8_t  data[MAX_PACKET_LEN];
+    uint8_t  unpacked_size;
+    uint8_t  data[RAW_PACKET_SIZE];
 
     for(;!check_reset();)
     {
@@ -114,28 +116,7 @@ uint8_t receive_packet(packet_t *p)
             idle();
         }
 
-        for(;;)
-        {
-            ret = serial_rx_nb(&ch);
-            if (check_reset())
-                return COMM_RESET;
-
-            if (ret)
-            {
-                if (ch == 0xFF)
-                {
-                    restart = 1;
-                    break;
-                }
-                size = ch;
-                break;
-            }
-            idle();
-        }
-        if (restart)
-            continue;
-
-        for(i = 0; i < size; i++)
+        for(i = 0; i < RAW_PACKET_SIZE; i++)
         {
             for(;;)
             {
@@ -161,16 +142,24 @@ uint8_t receive_packet(packet_t *p)
         if (restart)
             continue;
 
-        unpack_7bit(size, data, &unpacked_size, (uint8_t *)p);
+        ack = PACKET_ACK_OK;
+        unpack_7bit(RAW_PACKET_SIZE, data, &unpacked_size, (uint8_t *)p);
+        if (unpacked_size != PACKET_SIZE)
+        {
+            iprintf("Decoded packet size assert fail: %d vs %d\n", PACKET_SIZE, unpacked_size);
+            set_led_rgb(255, 0, 0);
+            ack = PACKET_ACK_INVALID;
+        }
 
-        crc = 0;
-        for(i = 0, ptr = (uint8_t *)p; i < unpacked_size - 2; i++, ptr++)
-            crc = _crc16_update(crc, *ptr);
+        if (ack == PACKET_ACK_OK)
+        {
+            crc = 0;
+            for(i = 0, ptr = (uint8_t *)p; i < unpacked_size - 2; i++, ptr++)
+                crc = _crc16_update(crc, *ptr);
 
-        if (crc != p->crc)
-            ack = PACKET_ACK_CRC_FAIL;
-        else
-            ack = PACKET_ACK_OK;
+            if (crc != p->crc)
+                ack = PACKET_ACK_CRC_FAIL;
+        }
 
         // send response, unless this is a broadcast packet
         if (p->dest != DEST_BROADCAST)
@@ -183,9 +172,23 @@ uint8_t receive_packet(packet_t *p)
                     break;
                 idle();
             }
-        return (ack == PACKET_ACK_OK) ? COMM_OK : COMM_CRC_FAIL;
+        if (ack != PACKET_ACK_OK)
+        {
+            iprintf("Bad packet received: %d\n", ack);
+            continue; 
+        }
+        else
+        {
+            iprintf("received:\n");
+            for(i = 0, ptr = (uint8_t *)p; i < unpacked_size - 2; i++, ptr++)
+                iprintf("  %02X\n", *ptr);
+            iprintf("ack: %d\n\n", ack);
+        }
+
+        return COMM_OK;
     }
-    return COMM_RESET;
+    iprintf("reach end of loop. bad!\n");
+    return COMM_PANIC;
 }
 
 uint8_t send_packet8(uint8_t type, uint8_t data)
@@ -213,8 +216,8 @@ uint8_t send_packet16(uint8_t type, uint16_t data)
 uint8_t send_packet(packet_t *p)
 {
     uint16_t crc = 0;
-    uint8_t i, *ch, ret, ack, tries, encoded_size;
-    uint8_t encoded[sizeof(packet_t) + ((sizeof(packet_t) + 7) / 8)];
+    uint8_t i, *ch, ret, ack, tries, packed_size;
+    uint8_t packed[RAW_PACKET_SIZE + 2]; // +2 for the header
 
     crc = _crc16_update(crc, p->dest);
     crc = _crc16_update(crc, p->type);
@@ -223,18 +226,36 @@ uint8_t send_packet(packet_t *p)
     crc = _crc16_update(crc, p->p.uint8[2]);
     p->crc = _crc16_update(crc, p->p.uint8[3]);
 
-    pack_7bit(sizeof(packet_t), (uint8_t *)p, &encoded_size, encoded);
+    // CHECK: is the last arg correct?
+    pack_7bit(sizeof(packet_t), (uint8_t *)p, &packed_size, &packed[2]);
+    if (packed_size != RAW_PACKET_SIZE)
+    {
+        iprintf("Encode packet size assert fail: %d vs %d\n", RAW_PACKET_SIZE, packed_size);
+        set_led_rgb(255, 0, 0);
+        ack = PACKET_ACK_INVALID;
+    }
+
+    packed[0] = 0xFF;
+    packed[1] = 0xFF;
     for(tries = 0; tries < NUM_PACKET_SEND_TRIES; tries++)
     {
-        // If we have any characters pending, nuke 'em
-        serial_rx_nb(&ack);
+        // Send the packet data
+        for(i = 0, ch = packed; i < RAW_PACKET_SIZE + 2; i++, ch++)
+        {
+            for(;;)
+            {
+                ret = serial_tx_nb(*ch);
+                if (check_reset())
+                    return COMM_RESET;
 
-        serial_tx(0xFF);
-        serial_tx(0xFF);
-        serial_tx(encoded_size);
-        for(i = 0, ch = (uint8_t *)encoded; i < encoded_size; i++, ch++)
-            serial_tx(*ch);
+                if (ret)
+                    break;
 
+                idle();
+            }
+        }
+
+        // Wait for the ACK
         for(;;)
         {
             ret = serial_rx_nb(&ack);
@@ -243,6 +264,7 @@ uint8_t send_packet(packet_t *p)
 
             if (ret)
                 break;
+            idle();
         }
         if (ack == PACKET_ACK_OK)
             return COMM_OK;
@@ -253,3 +275,26 @@ uint8_t send_packet(packet_t *p)
 }
 
 #endif
+
+void i2c_tx(uint8_t ch)
+{
+    // TODO: implement TWI send here!
+}
+
+#define MAX 80
+void iprintf(const char *fmt, ...)
+{
+    va_list va;
+    va_start (va, fmt);
+
+    char buffer[MAX];
+    char *ptr = buffer;
+    vsnprintf(buffer, MAX, fmt, va);
+    va_end (va);
+
+    for(ptr = buffer; *ptr; ptr++)
+    {
+        if (*ptr == '\n') i2c_tx('\r');
+        i2c_tx(*ptr);
+    }
+}

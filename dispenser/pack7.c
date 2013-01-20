@@ -19,7 +19,7 @@ const char *b2b(int x)
 void pack_7bit(uint8_t in_count, uint8_t *in, uint8_t *out_count, uint8_t *out)
 {
     uint16_t buffer = 0;
-    uint8_t  bitcount = 0, i;
+    uint8_t  bitcount = 0;
 
     *out_count = 0;
     for(;;)

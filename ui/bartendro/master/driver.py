@@ -152,25 +152,20 @@ class MasterDriver(object):
     def send_packet(self, dest, packet):
         if self.software_only: return True
 
-        self.select(dest)
-
-        # If there are any spurious characters, nuke em!
-        self.ser.flushInput()
-        self.ser.flushOutput()
-
-        # Write the header signature FF FF
-        self.ser.write(chr(0xFF))
-        self.ser.write(chr(0xFF))
-
         crc = 0
         for ch in packet:
             crc = self.crc16_update(crc, ord(ch))
 
         encoded = pack7.pack_7bit(packet + pack("<H", crc))
+        if len(encoded) != RAW_PACKET_SIZE:
+            print "ERROR: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE)
+            return False
 
         t0 = time()
-        self.ser.write(chr(len(encoded)))
-        self.ser.write(encoded)
+        written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
+        if written != RAW_PACKET_SIZE:
+            print "ERROR: Send timeout"
+            return False
 
         if dest == DEST_BROADCAST:
             return True
@@ -181,6 +176,7 @@ class MasterDriver(object):
         if len(ch) < 1:
             print "  * read timeout"
             return False
+
         ack = ord(ch)
         if ack == PACKET_ACK_OK: return True
         if ack == PACKET_CRC_FAIL: 
@@ -189,10 +185,13 @@ class MasterDriver(object):
         if ack == PACKET_ACK_TIMEOUT: 
             print "  * ack timeout"
             return False
+        if ack == PACKET_ACK_INVALID: 
+            print "  * dispenser received invalid packet"
+            return False
 
         # if we get an invalid ack code, it might be ok. 
         print "  * Invalid ACK code %d" % ord(ch)
-        return True
+        return False
 
     def send_packet8(self, dest, type, val):
         return self.send_packet(dest, pack("BBBBBB", dest, type, val, 0, 0, 0))
@@ -206,50 +205,69 @@ class MasterDriver(object):
     def receive_packet(self):
         if self.software_only: return True
 
-        # If there are any spurious characters, nuke em!
-#        self.ser.flushInput()
-#        self.ser.flushOutput()
-
         print "receive"
         header = 0
         while True:
-            # TODO: Add timeout support
             ch = self.ser.read(1)
+            if len(ch) < 1 and header > 0:
+                print "receive header timeout"
+                header = 0
+                continue
+
             if (ord(ch) == 0xFF):
                 header += 1
             else:
-                header = 0;
+                header = 0
 
             if header == 2:
                 break
 
-        print "got header"
+        print "received header"
+
+        ack = PACKET_ACK_OK
 
         # TODO fix this
-        size = ord(self.ser.read(1))
-        print "to be received: %d" % size
-        encoded = self.ser.read(size)
-        print "encoded", len(encoded)
-        for c in encoded:
-            print " - %X" % ord(c)
-        packet = unpack_7bit(encoded)
-        print "packet", len(packet)
-        for c in packet:
-            print " - %X" % ord(c)
-        received_crc = unpack("<H", packet[6:8])[0]
-        packet = packet[0:6]
+        raw_packet = self.ser.read(RAW_PACKET_SIZE))
+        if len(raw_packet) != RAW_PACKET_SIZE:
+            print "receive packet timeout"
+            ack = PACKET_ACK_TIMEOUT
 
-        crc = 0
-        for ch in packet:
-            crc = self.crc16_update(crc, ord(ch))
+        if ack == PACKET_ACK_OK:
+            print "raw packet:"
+            for c in raw_packet:
+                print " - %X" % ord(c)
 
-        print received_crc
-        print "r: %0x c: %0x" % (received_crc, crc)
-        if received_crc != crc:
-            print "CRC fail"
-            return False
+            packet = unpack_7bit(raw_packet)
+            if len(packet) != PACKET_LEN:
+                ack = PACKET_ACK_INVALID
+                print "ERROR: Unpacked length incorrect"
 
-        return packet[0:-2]
+            if ack == PACKET_ACK_OK:
+                print "packet:"
+                for c in packet:
+                    print " - %X" % ord(c)
+
+                received_crc = unpack("<H", packet[6:8])[0]
+                packet = packet[0:6]
+
+                crc = 0
+                for ch in packet:
+                    crc = self.crc16_update(crc, ord(ch))
+
+                print "r: %0x c: %0x" % (received_crc, crc)
+                if received_crc != crc:
+                    print "CRC fail"
+                    ack = PACKET_ACK_CRC_FAIL
+
+        # Send the response back to the dispenser
+        if self.ser.write(chr(ack)) != 1:
+            print "Send ack timeout!"
+            ack = PACKET_ACK_TIMEOUT
+
+        if ack == PACKET_ACK_OK:
+            return (ack, packet[0:-2])
+        else:
+            return (ack, "")
 
     def receive_packet8(self):
         packet = self.receive_packet()

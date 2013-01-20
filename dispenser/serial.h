@@ -16,4 +16,7 @@ uint8_t send_packet(packet_t *p);
 uint8_t send_packet8(uint8_t type, uint8_t data);
 uint8_t send_packet16(uint8_t type, uint16_t data);
 
+void i2c_tx(uint8_t ch);
+void iprintf(const char *fmt, ...);
+
 #endif
