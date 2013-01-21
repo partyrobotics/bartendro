@@ -1,7 +1,15 @@
-Programs for the various sub-systems of the Bartendro drink dispensing robot.
+Programs for the various systems of the Bartendro drink dispensing robot.
 
-Written by Robert Kaye
-Copyright (c) Party Robotics 2010
+Created by Pierre Michael and Robert Kaye
+Copyright (c) Party Robotics 2010-2012
 All Rights Reserved.
 
-dispenser: Firmware for the dispenser module of Bartendro 2.0
+The source tree is laid out as follows:
+
+hardware -- schematics and layouts for the dispenser and router hardware boards
+firmware -- source code (C) for the dispenser and router boards
+scripts  -- scripts to make running the bartendro software easier
+tsb      -- legacy code from our old skool drink bot prototyp Tequila Sunrise Bot
+ui       -- web interface for the bot, written in python.
+
+These various subdirectories may contain more README files.

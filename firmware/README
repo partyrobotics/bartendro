@@ -1,0 +1,6 @@
+The firmware consists of three parts:
+
+common    - a library that is common to both router and dispenser
+router    - source code for the router that controls the dispensers
+dispenser - source code for the dispensers
+

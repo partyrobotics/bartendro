@@ -1,6 +1,15 @@
 #ifndef __PACKET_H__
 #define __PACKET_H__
 
+/* IMPORTANT!! 
+
+This file defines the constants and packet structure for the communication
+between the router and the dispensers. These values are duplicated in
+the python code in ui/bartendro/router/driver.py. This should be improved
+at some point.
+
+*/
+
 #define RAW_PACKET_SIZE        10
 #define PACKET_SIZE            8
 
