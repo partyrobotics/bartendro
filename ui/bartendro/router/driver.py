@@ -25,17 +25,18 @@ PACKET_ACK_INVALID = 3
 PACKET_ACK_INVALID_HEADER = 4
 PACKET_ACK_HEADER_IN_PACKET = 5
 
-PACKET_PING            = 3
-PACKET_SET_MOTOR_SPEED = 4
-PACKET_TICK_DISPENSE   = 5
-PACKET_TIME_DISPENSE   = 6
-PACKET_LED_OFF         = 7
-PACKET_LED_IDLE        = 8
-PACKET_LED_DISPENSE    = 9
-PACKET_LED_DRINK_DONE  = 10
-PACKET_IS_DISPENSING   = 11
-PACKET_LIQUID_LEVEL    = 12
-PACKET_COMM_TEST       = 0xFE
+PACKET_PING                = 3
+PACKET_SET_MOTOR_SPEED     = 4
+PACKET_TICK_DISPENSE       = 5
+PACKET_TIME_DISPENSE       = 6
+PACKET_LED_OFF             = 7
+PACKET_LED_IDLE            = 8
+PACKET_LED_DISPENSE        = 9
+PACKET_LED_DRINK_DONE      = 10
+PACKET_IS_DISPENSING       = 11
+PACKET_LIQUID_LEVEL        = 12
+PACKET_UPDATE_LIQUID_LEVEL = 13
+PACKET_COMM_TEST           = 0xFE
 
 DEST_BROADCAST         = 0xFF
 
@@ -344,6 +345,9 @@ class RouterDriver(object):
                 ack, value = self.receive_packet8()
                 if ack == PACKET_ACK_OK:
                     return value
+
+    def update_liquid_levels(self):
+        self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0):
 
     def get_liquid_level(self, dispenser):
         while True:

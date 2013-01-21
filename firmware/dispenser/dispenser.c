@@ -28,13 +28,15 @@ uint32_t EEMEM _ee_run_time;
 #define NUM_ADC_SAMPLES 5
 #define NUM_CURRENT_SENSE_SAMPLES 10
 
+// this (non volatile) variable keeps the current liquid level
+static uint16_t g_liquid_level = 0;
+
 volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
 static volatile uint32_t g_ticks = 0;
 static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
-static volatile uint16_t g_liquid_level = 0;
 
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
@@ -269,7 +271,7 @@ uint16_t read_current_sense(void)
     return (uint16_t)(v / NUM_CURRENT_SENSE_SAMPLES);
 }
 
-uint16_t read_liquid_level_sensor(void)
+void update_liquid_level(void)
 {
     uint8_t  i;
     uint16_t v = 0;
@@ -279,12 +281,12 @@ uint16_t read_liquid_level_sensor(void)
         v += adc_read();
     adc_shutdown();
 
-    return (uint16_t)(v / NUM_ADC_SAMPLES);
+    g_liquid_level = (uint16_t)(v / NUM_ADC_SAMPLES);
 }
 
-void liquid_level(void)
+void get_liquid_level(void)
 {
-    send_packet16(PACKET_LIQUID_LEVEL, read_liquid_level_sensor());
+    send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level);
 }
 
 void set_motor_speed(uint8_t speed)
@@ -460,6 +462,10 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
+
+    // get the current liquid level 
+    update_liquid_level();
+
     for(;;)
     {
         cli();
@@ -512,7 +518,11 @@ int main(void)
                         break;
 
                     case PACKET_LIQUID_LEVEL:
-                        liquid_level();
+                        get_liquid_level();
+                        break;
+
+                    case PACKET_UPDATE_LIQUID_LEVEL:
+                        update_liquid_level();
                         break;
 
                     case PACKET_LED_OFF:

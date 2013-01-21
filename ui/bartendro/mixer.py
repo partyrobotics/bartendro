@@ -74,6 +74,13 @@ class Mixer(object):
     def check_liquid_levels(self):
         new_state = Mixer.MixerState.READY
 
+        # step 1: ask the dispensers to update their liquid levels
+        self.driver.update_liquid_levels()
+
+        # wait for the dispensers to determine the levels
+        sleep(.01)
+
+        # Now ask each dispenser for the actual level
         dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
         for i, dispenser in enumerate(dispensers):
             dispenser.out = DISPENSER_OK
@@ -89,11 +96,6 @@ class Mixer(object):
                     new_state = Mixer.MixerState.OUT_OF_BOOZE
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
-
-#            if dispenser.out == DISPENSER_OUT:
-#                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
-#            elif dispenser.out == DISPENSER_WARNING:
-#                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
 
         session.commit()
 

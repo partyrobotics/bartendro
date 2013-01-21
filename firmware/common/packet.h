@@ -13,20 +13,21 @@ at some point.
 #define RAW_PACKET_SIZE        10
 #define PACKET_SIZE            8
 
-#define PACKET_FIND_ID         0
-#define PACKET_ASSIGN_ID       1
-#define PACKET_START           2
-#define PACKET_PING            3
-#define PACKET_SET_MOTOR_SPEED 4
-#define PACKET_TICK_DISPENSE   5
-#define PACKET_TIME_DISPENSE   6
-#define PACKET_LED_OFF         7
-#define PACKET_LED_IDLE        8
-#define PACKET_LED_DISPENSE    9
-#define PACKET_LED_DRINK_DONE  10
-#define PACKET_IS_DISPENSING   11  // requires response
-#define PACKET_LIQUID_LEVEL    12  // requires response
-#define PACKET_COMM_TEST       0xFE
+#define PACKET_FIND_ID              0
+#define PACKET_ASSIGN_ID            1
+#define PACKET_START                2
+#define PACKET_PING                 3
+#define PACKET_SET_MOTOR_SPEED      4
+#define PACKET_TICK_DISPENSE        5
+#define PACKET_TIME_DISPENSE        6
+#define PACKET_LED_OFF              7
+#define PACKET_LED_IDLE             8
+#define PACKET_LED_DISPENSE         9
+#define PACKET_LED_DRINK_DONE       10
+#define PACKET_IS_DISPENSING        11  // requires response
+#define PACKET_LIQUID_LEVEL         12  // requires response
+#define PACKET_UPDATE_LIQUID_LEVEL  13 // requires a few ms of quiet time while measurements are taken
+#define PACKET_COMM_TEST            0xFE
 
 #define DEST_BROADCAST         0xFF
 
