@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import os
 from subprocess import call
 from time import sleep, localtime, time
@@ -29,7 +30,7 @@ PACKET_LED_DRINK_DONE  = 10
 PACKET_COMM_TEST       = 0xFE
 PACKET_BROADCAST       = 0xFF
 
-ROUTER_BUS              = 0
+ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
 ROUTER_SELECT_CMD_BEGIN = 0
 ROUTER_SELECT_CMD_END   = MAX_DISPENSERS
@@ -65,7 +66,7 @@ class MasterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
-        self.num_dispensers = 2
+        self.num_dispensers = 15 
         self.selected = 0
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
@@ -90,6 +91,7 @@ class MasterDriver(object):
         if dispenser < self.num_dispensers and self.selected != dispenser:
             self.selected = dispenser
             self.router.write_byte(ROUTER_ADDRESS, dispenser)
+            print "Selected dispenser %d" % dispenser
             sleep(.01)
 
     def sync(self, state):
@@ -127,6 +129,7 @@ class MasterDriver(object):
 
         self.reset()
         sleep(3)
+
 #self.led_idle()
 
     def close(self):
@@ -164,10 +167,11 @@ class MasterDriver(object):
             crc = self.crc16_update(crc, ord(ch))
 
         encoded = pack7.pack_7bit(packet + pack("<H", crc))
+
+        t0 = time()
         self.ser.write(chr(len(encoded)))
         self.ser.write(encoded)
 
-        t0 = time()
         ch = self.ser.read(1)
         t1 = time()
         print "packet time: %f" % (t1 - t0)
@@ -196,11 +200,11 @@ class MasterDriver(object):
         return self.send_packet(dest, pack("<BBI", dest, type, val))
 
     def make_shot(self):
-        self.send_packet32(0, 5, 80)
+        self.send_packet32(0, PACKET_TICK_DISPENSE, 80)
         return True
 
-    def ping(self):
-        return self.send_packet32(self.selected, PACKET_PING, 0)
+    def ping(self, dispenser):
+        return self.send_packet32(dispenser, PACKET_PING, 0)
 
     def start(self, dispenser):
         return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255)
@@ -262,23 +266,14 @@ class MasterDriver(object):
     def get_dispense_stats(self, dispenser):
         return (0, 0)
 
-def ping_test(md):
+def ping_test(md, disp):
     while True:
-        md.select(0)
         while True:
-            print "ping 0:"
-            ret = md.ping()
+            print "ping %d:" % disp
+            ret = md.ping(disp)
             if ret: break
             print "re-transmit"
             sleep(1)
-        sleep(1)
-
-        print "ping 1:"
-        md.select(1)
-        while True:
-            ret = md.ping()
-            if ret: break
-            print "re-transmit"
         sleep(1)
 
 def led_test(md):
@@ -307,5 +302,6 @@ def comm_test(md):
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
-#    ping_test(md)
-    led_test(md)
+    sleep(16);
+    ping_test(md, int(sys.argv[1]))
+#    led_test(md)

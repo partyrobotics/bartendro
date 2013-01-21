@@ -41,6 +41,5 @@ def unpack_7bit(data):
 
         if len(data) == 0: break
 
-    out += chr(buffer)
     return out
 
