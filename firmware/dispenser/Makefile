@@ -1,5 +1,5 @@
 CC=avr-gcc
-CFLAGS=-g -Os -Wall -I../include -I../mixer -mcall-prologues -mmcu=atmega168 -DF_CPU=8000000UL
+CFLAGS=-g -Os -Wall -I../common -mcall-prologues -mmcu=atmega168 -DF_CPU=8000000UL
 OBJ2HEX=avr-objcopy 
 TARGET=dispenser
 
@@ -9,8 +9,9 @@ program: $(TARGET).hex
 $(TARGET).hex: $(TARGET).obj
 	$(OBJ2HEX) -R .eeprom -O ihex $< $@
 
-$(TARGET).obj: $(TARGET).o serial.o led.o pack7.o 
-	$(CC) $(CFLAGS) -o $@ -Wl,-Map,$(TARGET).map $(TARGET).o serial.o led.o pack7.o
+$(TARGET).obj: $(TARGET).o led.o 
+	make -C ../common
+	$(CC) $(CFLAGS) -o $@ -Wl,-Map,$(TARGET).map $(TARGET).o led.o ../common/common.ar
 
 clean:
 	rm -f *.hex *.obj *.o *.map

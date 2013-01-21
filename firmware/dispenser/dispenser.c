@@ -16,21 +16,8 @@
 #include "serial.h"
 #include "led.h"
 
-#if F_CPU == 16000000UL
-#define    TIMER1_INIT      0xFFEF
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 16Mhz / 1024 / 16 = .001024 per tick
-#else
-#define    TIMER1_INIT      0xFFF7
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
-#endif
-
 // TODO
-// Re-add LED patterns & code LED patterns without floating point math
 // Add support for different animation speeds
-
-// Production TODO:
-// Hook up more RX pins
-// Move Sync to different pin
 
 // EEprom data 
 uint32_t EEMEM _ee_pump_id;
@@ -353,7 +340,7 @@ uint8_t read_pump_id_from_eeprom(void)
 
 uint8_t get_address(void)
 {
-    uint8_t  ch, i;
+    uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
     set_led_rgb(0, 0, 255);

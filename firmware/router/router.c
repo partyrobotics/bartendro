@@ -13,17 +13,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "../dispenser/defs.h"
-#include "../dispenser/serial.h"
-#include "../dispenser/packet.h"
-
-#if F_CPU == 16000000UL
-#define    TIMER1_INIT      0xFFEF
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 16Mhz / 1024 / 16 = .001024 per tick
-#else
-#define    TIMER1_INIT      0xFFF7
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
-#endif
+#include "defs.h"
+#include "serial.h"
+#include "packet.h"
 
 #define MAX_DISPENSERS   15 
 #define RESET_DURATION   1
@@ -659,12 +651,22 @@ void flash_led(uint8_t fast)
     }
 }
 
+// These functions are needed in the dispenser, but not the router.
+// So we just have empty functions here
+void idle()
+{
+
+}
+uint8_t check_reset(void)
+{
+    return 0;
+}
+
 int main (void)
 {
     uint8_t reset = 0, count;
 
     DDRC |= (1 << PORTC2);
-//    flash_led(1);
 
     for(;;)
     {

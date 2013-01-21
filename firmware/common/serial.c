@@ -8,7 +8,6 @@
 #include "defs.h"
 #include "serial.h"
 #include "pack7.h"
-#include "led.h"
 
 #define BAUD             9600
 #define UBBR             (F_CPU / 16 / BAUD - 1)
@@ -76,21 +75,12 @@ uint8_t serial_rx_nb(uint8_t *ch)
     return 0;
 }
 
-#ifdef ROUTER
-void idle()
-{
-}
-uint8_t check_reset(void)
-{
-    return 0;
-}
-
-#else
+#ifndef ROUTER
 
 uint8_t receive_packet(packet_t *p)
 {
     uint16_t crc = 0;
-    uint8_t  i, j, ret, ack, header, ch, *ptr;
+    uint8_t  i, ret, ack, header, ch, *ptr;
     uint8_t  unpacked_size;
     uint8_t  data[RAW_PACKET_SIZE];
 
