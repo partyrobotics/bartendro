@@ -9,8 +9,8 @@ from werkzeug import SharedDataMiddleware
 
 from bartendro.utils import session, metadata, local, local_manager, url_map, log, error
 from bartendro.views import view_map
-from bartendro.master import driver
-from bartendro.master import status_led
+from bartendro.router import driver
+from bartendro.router import status_led
 from bartendro import mixer
 import bartendro.models
 
@@ -41,7 +41,7 @@ class BartendroUIServer(object):
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
 
-        self.driver = driver.MasterDriver("/dev/ttyAMA0", self.software_only);
+        self.driver = driver.RouterDriver("/dev/ttyAMA0", self.software_only);
         self.driver.open()
         log("Found %d dispensers." % self.driver.count())
 

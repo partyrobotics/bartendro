@@ -67,8 +67,8 @@ class SerialIOError:
 class LogFileException:
     pass
 
-class MasterDriver(object):
-    '''This object interacts with the bartendro master controller.'''
+class RouterDriver(object):
+    '''This object interacts with the bartendro router controller.'''
 
     def __init__(self, device, software_only):
         self.device = device
@@ -115,7 +115,7 @@ class MasterDriver(object):
         return self.num_dispensers
 
     def open(self):
-        '''Open the serial connection to the master'''
+        '''Open the serial connection to the router'''
 
         if self.software_only: return
 
@@ -387,7 +387,7 @@ def comm_test(md):
         sleep(1)
 
 if __name__ == "__main__":
-    md = MasterDriver("/dev/ttyAMA0", 0)
+    md = RouterDriver("/dev/ttyAMA0", 0)
     md.open()
     sleep(3)
     print "Ping:"
