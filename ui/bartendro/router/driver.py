@@ -50,11 +50,6 @@ ROUTER_CMD_PING         = 253
 ROUTER_CMD_COUNT        = 254
 ROUTER_CMD_RESET        = 255
 
-# TODO 
-# NameError: global name 'I2CIOError' is not defined
-# CHeck timeout ACK that comes in less than timeout time
-# Improve error handling and repeating requests that failed
-# Hook up more LED algs & drive during drink making
 
 class SttyNotFoundException:
     pass
@@ -66,6 +61,9 @@ class SerialIOError:
     pass
 
 class LogFileException:
+    pass
+
+class I2CIOError:
     pass
 
 class RouterDriver(object):
