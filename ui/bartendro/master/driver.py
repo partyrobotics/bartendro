@@ -102,7 +102,6 @@ class MasterDriver(object):
         if dispenser < self.num_dispensers and self.selected != dispenser:
             self.selected = dispenser
             self.router.write_byte(ROUTER_ADDRESS, dispenser)
-            print "Selected dispenser %d" % dispenser
             sleep(.01)
 
     def sync(self, state):
@@ -209,7 +208,6 @@ class MasterDriver(object):
                 print "  * header in packet error"
                 continue
 
-
             # if we get an invalid ack code, it might be ok. 
             print "  * Invalid ACK code %d" % ord(ch)
         return False
@@ -232,8 +230,6 @@ class MasterDriver(object):
             if len(ch) < 1:
                 print "receive packet response timeout"
                 return (PACKET_ACK_TIMEOUT, "")
-            else:
-                print "header received: %02X" % ord(ch)
 
             if (ord(ch) == 0xFF):
                 header += 1
@@ -242,8 +238,6 @@ class MasterDriver(object):
 
             if header == 2:
                 break
-
-        print "received header"
 
         ack = PACKET_ACK_OK
         raw_packet = self.ser.read(RAW_PACKET_SIZE)
@@ -352,7 +346,6 @@ class MasterDriver(object):
                     return value
 
     def get_liquid_level(self, dispenser):
-        return 100
         while True:
             if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
                 ack, value = self.receive_packet16()
