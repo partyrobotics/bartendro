@@ -10,7 +10,7 @@ from bartendro.model import drink_booze
 from bartendro.model import booze
 from bartendro.model import drink_log
 
-TICKS_PER_ML = 1
+TICKS_PER_ML = 2.6
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 

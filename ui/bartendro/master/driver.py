@@ -94,6 +94,8 @@ class MasterDriver(object):
     def reset(self):
         if self.software_only: return
         self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
+        sleep(6)
+        self.led_idle()
 
     def select(self, dispenser):
         if self.software_only: return
@@ -137,8 +139,6 @@ class MasterDriver(object):
             raise I2CIOError
 
         self.reset()
-        sleep(3)
-        self.led_idle()
 
     def close(self):
         if self.software_only: return
@@ -159,6 +159,8 @@ class MasterDriver(object):
 
     def send_packet(self, dest, packet):
         if self.software_only: return True
+
+        self.select(dest);
 
         for attempt in xrange(3):
             self.ser.flushInput()
@@ -279,8 +281,8 @@ class MasterDriver(object):
 
     def receive_packet8(self):
         ack, packet = self.receive_packet()
-        data = unpack("BBBBBB", packet)
         if ack == PACKET_ACK_OK:
+            data = unpack("BBBBBB", packet)
             return (ack, data[2])
         else:
             return (ack, 0)
@@ -399,6 +401,7 @@ if __name__ == "__main__":
     while not md.ping(0):
         pass
 
+#    comm_test(md)
     val = md.is_dispensing(0)
     print "is dispensing: %d\n" % val
 
@@ -418,5 +421,4 @@ if __name__ == "__main__":
     md.ping(0);
 
 #    led_test(md)
-#    comm_test(md)
 #    dispense_test()
