@@ -11,7 +11,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "defs.h"
-#include "i2cmaster.h"
 
 #include "packet.h"
 #include "serial.h"

@@ -9,9 +9,6 @@
 #include "serial.h"
 #include "pack7.h"
 #include "led.h"
-#ifndef ROUTER
-#include "i2cmaster.h"
-#endif
 
 #define BAUD             9600
 #define UBBR             (F_CPU / 16 / BAUD - 1)
@@ -278,28 +275,6 @@ uint8_t send_packet(packet_t *p)
 
     // whoops, we didn't succesfully send the packet. :-(
     return COMM_SEND_FAIL;
-}
-
-
-#define MAX 80
-void iprintf(const char *fmt, ...)
-{
-    va_list va;
-    va_start (va, fmt);
-
-    char buffer[MAX];
-    char *ptr = buffer;
-    vsnprintf(buffer, MAX, fmt, va);
-    va_end (va);
-
-    i2c_init();
-    i2c_start_wait(8+I2C_WRITE);     // set device address and write mode
-    for(ptr = buffer; *ptr; ptr++)
-    {
-        if (*ptr == '\n') i2c_write('\r');
-        i2c_write(*ptr);
-    }
-    i2c_stop(); 
 }
 
 #endif
