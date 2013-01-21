@@ -2,7 +2,6 @@
 
 import RPi.GPIO as gpio
 
-
 class StatusLED(object):
 
     # pin definitions

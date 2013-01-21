@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import sleep, localtime
+from time import sleep, time
 from threading import Thread
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
@@ -8,6 +8,7 @@ from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
+from bartendro.model import drink_log
 
 TICKS_PER_ML = 1
 CALIBRATE_ML = 60 
@@ -228,13 +229,10 @@ class Mixer(object):
         self.led_complete()
         log("drink complete")
 
-        try:
-            t = localtime()
-            drinklog = open(local.application.drinks_log_file, "a")
-            drinklog.write("%d-%d-%d %d:%02d,%s,%d ml\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, drink.name.name, size))
-            drinklog.close()
-        except IOError:
-            pass
+        t = int(time())
+        log = drink_log.DrinkLog(drink.id, t, size)
+        session.add(log)
+        session.commit()
 
         if not self.check_liquid_levels():
             self.leds_panic()
