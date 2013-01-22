@@ -28,7 +28,8 @@ PACKET_LED_IDLE        = 8
 PACKET_LED_DISPENSE    = 9
 PACKET_LED_DRINK_DONE  = 10
 PACKET_COMM_TEST       = 0xFE
-PACKET_BROADCAST       = 0xFF
+
+DEST_BROADCAST         = 0xFF
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
@@ -172,6 +173,9 @@ class MasterDriver(object):
         self.ser.write(chr(len(encoded)))
         self.ser.write(encoded)
 
+        if dest == DEST_BROADCAST:
+            return True
+
         ch = self.ser.read(1)
         t1 = time()
         print "packet time: %f" % (t1 - t0)
@@ -219,35 +223,27 @@ class MasterDriver(object):
         return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
 
     def led_off(self):
-        # TODO: use broadcast
         self.sync(0)
-        for dispenser in xrange(self.num_dispensers):
-            self.send_packet8(dispenser, PACKET_LED_OFF, 0)
+        self.send_packet8(DEST_BROADCAST, PACKET_LED_OFF, 0)
         return True
 
     def led_idle(self):
-        # TODO: use broadcast
         self.sync(0)
-        for dispenser in xrange(self.num_dispensers):
-            self.send_packet8(dispenser, PACKET_LED_IDLE, 0)
+        self.send_packet8(DEST_BROADCAST, PACKET_LED_IDLE, 0)
         sleep(.01)
         self.sync(1)
         return True
 
     def led_dispense(self):
-        # TODO: use broadcast
         self.sync(0)
-        for dispenser in xrange(self.num_dispensers):
-            self.send_packet8(dispenser, PACKET_LED_DISPENSE, 0)
+        self.send_packet8(DEST_BROADCAST, PACKET_LED_DISPENSE, 0)
         sleep(.01)
         self.sync(1)
         return True
 
     def led_complete(self):
-        # TODO: use broadcast
         self.sync(0)
-        for dispenser in xrange(self.num_dispensers):
-            self.send_packet8(dispenser, PACKET_LED_DRINK_DONE, 0)
+        self.send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
         sleep(.01)
         self.sync(1)
         return True
@@ -257,8 +253,9 @@ class MasterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
-        if self.send_packet8(0, PACKET_COMM_TEST, 0):
-            self.receive_packet()
+        return False
+#        if self.send_packet8(0, PACKET_COMM_TEST, 0):
+#            self.receive_packet()
 
     def get_liquid_level(self, dispenser):
         return 80
@@ -302,6 +299,5 @@ def comm_test(md):
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
-    sleep(16);
-    ping_test(md, int(sys.argv[1]))
-#    led_test(md)
+#    ping_test(md, int(sys.argv[1]))
+    led_test(md)

@@ -39,21 +39,19 @@ class Mixer(object):
         self.mc = local.application.mc
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
+        self.led_idle()
 
     def get_error(self):
         return self.err
 
     def led_idle(self):
-        #self.driver.led_idle()
-        pass
+        self.driver.led_idle()
 
     def led_dispense(self):
-        #self.driver.led_dispense()
-        pass
+        self.driver.led_dispense()
 
     def led_complete(self):
-        #self.driver.led_complete()
-        pass
+        self.driver.led_complete()
 
     def led_status_out_of_booze(self):
         self.status.set_color(1, 0, 0)
