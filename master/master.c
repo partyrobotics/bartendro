@@ -90,13 +90,14 @@ void setup(void)
 {
     // TX to RPI
     DDRB |= (1<< PORTB0);
-    // TX to dispensers
+    // RST is output
     DDRD |= (1<< PORTD2);
-
     // SYNC to dispensers
     DDRC |= (1<< PORTC3);
-    DDRC |= (1<< PORTC2);
+    // Note: We dont turn PD1 (TX to dispensers) to output here, since
+    // at first we speak serial over that line
 
+    DDRC |= (1<< PORTC2);
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT3) | (1 << PCINT4) | 
@@ -535,6 +536,7 @@ void reset_dispensers(void)
     // Wait for dispensers to start up
     _delay_ms(500);
     _delay_ms(500);
+    _delay_ms(500);
 }
 
 uint8_t setup_ids(void)
@@ -580,14 +582,21 @@ uint8_t setup_ids(void)
         // If we did get a collision, reset the dispensers and try the process again
         if (single_pass_count > 1)
         {
-            flash_led(0);
+            sbi(PORTC, 2);
+            _delay_ms(1000);
+            _delay_ms(1000);
+            cbi(PORTC, 2);
+            _delay_ms(500);
             reset_dispensers();
             continue;
         }
-        if (count >= 0)
+        if (count > 0)
+        {
+//            flash_led(1);
             break;
+        }
 
-        flash_led(1);
+        _delay_ms(1000);
         reset_dispensers();
     }
 #if 0
@@ -619,7 +628,7 @@ uint8_t setup_ids(void)
 
     // Disable serial IO and put D2 back to output
     serial_enable(0, 0);
-    DDRD |= (1<< PORTD2) | (1<< PORTD1);
+    DDRD |= (1<< PORTD1);
 
     // start by pulling D1 & B1 high, since serial lines when idle are high
     sbi(PORTD, 1);
@@ -640,14 +649,14 @@ void flash_led(uint8_t fast)
     {
         sbi(PORTC, 2);
         if (fast)
-            _delay_ms(100);
+            _delay_ms(50);
         else
-            _delay_ms(200);
+            _delay_ms(250);
         cbi(PORTC, 2);
         if (fast)
-            _delay_ms(100);
+            _delay_ms(50);
         else
-            _delay_ms(200);
+            _delay_ms(250);
     }
 }
 
@@ -655,6 +664,7 @@ int main (void)
 {
     uint8_t reset = 0, count;
 
+    DDRC |= (1 << PORTC2);
     flash_led(1);
 
     for(;;)

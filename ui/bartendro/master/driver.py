@@ -190,8 +190,9 @@ class MasterDriver(object):
             print "  * ack timeout"
             return False
 
+        # if we get an invalid ack code, it might be ok. 
         print "  * Invalid ACK code %d" % ord(ch)
-        return False
+        return True
 
     def send_packet8(self, dest, type, val):
         return self.send_packet(dest, pack("BBBBBB", dest, type, val, 0, 0, 0))
@@ -316,13 +317,14 @@ class MasterDriver(object):
 
 def ping_test(md, disp):
     while True:
-        while True:
-            print "ping %d:" % disp
-            ret = md.ping(disp)
-            if ret: break
-            print "re-transmit"
+        for disp in xrange(7):
+            while True:
+                print "ping %d:" % disp
+                ret = md.ping(disp)
+                if ret: break
+                print "re-transmit"
+                sleep(1)
             sleep(1)
-        sleep(1)
 
 def led_test(md):
     while True:
@@ -353,6 +355,7 @@ def is_dispensing_test(md):
 if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
+    sleep(10)
 #    ping_test(md, int(sys.argv[1]))
-#    led_test(md)
-    dispense_test()
+    led_test(md)
+#    dispense_test()

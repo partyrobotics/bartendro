@@ -16,6 +16,7 @@ class StatusLED(object):
 
         # select the method by which we want to identify GPIO pins
         gpio.setmode(gpio.BOARD)
+        gpio.setwarnings(False)
 
         # set our gpio pins to OUTPUT
         gpio.setup(self.red, gpio.OUT)

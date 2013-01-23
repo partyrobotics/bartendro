@@ -80,9 +80,6 @@ void setup(void)
     // Set up LEDs & motor out
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
 
-    // Set up on board LED output
-    DDRB |= (1<<PB5);
-
     // pull ups
     sbi(PORTD, 6);
     sbi(PORTD, 7);
@@ -369,6 +366,7 @@ uint8_t get_address(void)
 
     // Pick a random 8-bit number
     id = random() % 255;
+    id = 7;
 
     set_led_rgb(0, 0, 255);
     for(;;)
@@ -413,7 +411,7 @@ uint8_t get_address(void)
             my_new_id = new_id;
     }
 
-    if (my_new_id == 0xFF || my_new_id > 14 || my_new_id == id)
+    if (my_new_id == 0xFF || my_new_id > 14)
         set_led_rgb(255, 0, 0);
     else
     {
@@ -436,25 +434,6 @@ uint8_t get_address(void)
     serial_enable(1, 1);
 
     return my_new_id;
-}
-
-void flash_led(uint8_t fast)
-{
-    int i;
-
-    for(i = 0; i < 5; i++)
-    {
-        sbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-        cbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-    }
 }
 
 void comm_test(void)
@@ -483,7 +462,6 @@ int main(void)
 
         setup();
         set_motor_speed(0);
-        flash_led(1);
         serial_init();
         set_led_rgb(0, 0, 0);
 
