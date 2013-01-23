@@ -11,7 +11,7 @@ if len(sys.argv) != 2:
 try:
     f = open(sys.argv[1], "w")
     t = int(time.time())
-    f.write(struct.pack("I", t))
+    f.write(struct.pack("<I", t))
     f.close()
 except IOError, e:
     print "Error: ", e

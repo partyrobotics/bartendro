@@ -306,6 +306,7 @@ class MasterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
+        return False
         if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
             self.receive_packet()
 
@@ -315,15 +316,11 @@ class MasterDriver(object):
     def get_dispense_stats(self, dispenser):
         return (0, 0)
 
-def ping_test(md, disp):
+def ping_test(md):
     while True:
         for disp in xrange(7):
-            while True:
-                print "ping %d:" % disp
-                ret = md.ping(disp)
-                if ret: break
-                print "re-transmit"
-                sleep(1)
+            print "ping %d:" % disp
+            md.ping(disp)
             sleep(1)
 
 def led_test(md):
@@ -356,6 +353,6 @@ if __name__ == "__main__":
     md = MasterDriver("/dev/ttyAMA0", 0)
     md.open()
     sleep(10)
-#    ping_test(md, int(sys.argv[1]))
-    led_test(md)
+    ping_test(md)
+#    led_test(md)
 #    dispense_test()

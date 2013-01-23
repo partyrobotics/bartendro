@@ -4,10 +4,7 @@ OBJ2HEX=avr-objcopy
 TARGET=dispenser
 
 program: $(TARGET).hex 
-	./timestamp.py timestamp.raw
 	sudo avrdude -p m168 -P usb -c avrispmkII -Uflash:w:$(TARGET).hex -B 1.0
-	sudo avrdude -p m168 -P usb -c avrispmkII -U eeprom:w:timestamp.raw:r -B 1.0
-	rm -f timestamp.raw
 
 $(TARGET).hex: $(TARGET).obj
 	$(OBJ2HEX) -R .eeprom -O ihex $< $@

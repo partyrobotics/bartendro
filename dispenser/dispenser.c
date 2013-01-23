@@ -33,7 +33,7 @@
 // Move Sync to different pin
 
 // EEprom data 
-uint32_t EEMEM _ee_random_number;
+uint32_t EEMEM _ee_pump_id;
 uint32_t EEMEM _ee_run_time;
 
 #define RESET_DURATION  1
@@ -345,12 +345,9 @@ void is_dispensing(void)
     send_packet8(PACKET_IS_DISPENSING, dispensing);
 }
 
-void set_random_seed_from_eeprom(void)
+uint8_t read_pump_id_from_eeprom(void)
 {
-    uint32_t r;
-
-    eeprom_read_block((void *)&r, &_ee_random_number, sizeof(uint32_t));
-    srandom(r);
+    return eeprom_read_byte((uint8_t)0);
 }
 
 uint8_t get_address(void)
@@ -358,15 +355,24 @@ uint8_t get_address(void)
     uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
-    set_random_seed_from_eeprom();
+    id = read_pump_id_from_eeprom();
+#if 0
+    set_led_rgb(0,0,255);
+    _delay_ms(500);
+    for(ch = 0; ch < id; ch++)
+    {
+        set_led_rgb(255,0,0);
+        _delay_ms(500);
+        set_led_rgb(0,0,0);
+        _delay_ms(500);
+    }
+    set_led_rgb(0,255,0);
+    _delay_ms(500);
+#endif
 
     // turn off serial TX and set the TX line to output
     serial_enable(1, 0);
     DDRD |= (1 << PORTD1);
-
-    // Pick a random 8-bit number
-    id = random() % 255;
-    id = 7;
 
     set_led_rgb(0, 0, 255);
     for(;;)
