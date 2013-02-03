@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 
-import RPi.GPIO as gpio
+import sys
+try:
+    import RPi.GPIO as gpio
+    gpio_missing = 0
+except ImportError, e:
+    if e.message != 'No module named RPi.GPIO':
+        raise
+    gpio_missing = 1
 
 class StatusLED(object):
 
@@ -12,6 +19,10 @@ class StatusLED(object):
     def __init__(self, software_only):
         self.software_only = software_only
         if self.software_only: return
+
+        if gpio_missing:
+            print "You must install the RPi.GPIO module"
+            sys.exit(-1)
 
         # select the method by which we want to identify GPIO pins
         gpio.setmode(gpio.BOARD)

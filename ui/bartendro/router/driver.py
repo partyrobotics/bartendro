@@ -4,11 +4,12 @@ import sys
 import os
 from subprocess import call
 from time import sleep, localtime, time
-import smbus
 import serial
 import random
 from struct import pack, unpack
 import pack7
+import dispenser_select
+import status_led
 
 BAUD_RATE = 9600
 
@@ -75,10 +76,10 @@ class RouterDriver(object):
         self.msg = ""
         self.ret = 0
         self.num_dispensers = 7 
-        self.selected = 0
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
-        self.router = None
+        self.dispenser_select = None
+        self.selected = 0
 
     def log(self, msg):
         return
@@ -89,19 +90,6 @@ class RouterDriver(object):
             self.cl.flush()
         except IOError:
             pass
-
-    def reset(self):
-        if self.software_only: return
-        self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
-        sleep(6)
-        self.led_idle()
-
-    def select(self, dispenser):
-        if self.software_only: return
-        if dispenser < self.num_dispensers and self.selected != dispenser:
-            self.selected = dispenser
-            self.router.write_byte(ROUTER_ADDRESS, dispenser)
-            sleep(.01)
 
     def sync(self, state):
         if self.software_only: return
@@ -131,12 +119,11 @@ class RouterDriver(object):
 
         self.log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
 
-        try:
-            self.router = smbus.SMBus(ROUTER_BUS)
-        except IOError:
-            raise I2CIOError
+        self.status = status_led.StatusLED(self.software_only)
+        self.status.set_color(0, 0, 1)
 
-        self.reset()
+        self.dispense_select = dispense_select.DispenserSelect(self.software_only)
+        self.dispense_select.reset()
 
     def close(self):
         if self.software_only: return
@@ -155,11 +142,14 @@ class RouterDriver(object):
 
         return crc
 
+    def select(self, dispenser):
+        if self.software_only: return True
+        self.dispense_select.select(dispenser)
+
     def send_packet(self, dest, packet):
         if self.software_only: return True
 
         self.select(dest);
-
         for attempt in xrange(3):
             self.ser.flushInput()
             self.ser.flushOutput()
@@ -289,30 +279,38 @@ class RouterDriver(object):
             return (ack, 0)
 
     def make_shot(self):
+        if self.software_only: return True
         self.send_packet32(0, PACKET_TICK_DISPENSE, 80)
         return True
 
     def ping(self, dispenser):
+        if self.software_only: return True
         return self.send_packet32(dispenser, PACKET_PING, 0)
 
     def start(self, dispenser):
+        if self.software_only: return True
         return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255)
 
     def stop(self, dispenser):
+        if self.software_only: return True
         return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
+        if self.software_only: return True
         return True
 
     def dispense_ticks(self, dispenser, ticks):
+        if self.software_only: return True
         return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
 
     def led_off(self):
+        if self.software_only: return True
         self.sync(0)
         self.send_packet8(DEST_BROADCAST, PACKET_LED_OFF, 0)
         return True
 
     def led_idle(self):
+        if self.software_only: return True
         self.sync(0)
         self.send_packet8(DEST_BROADCAST, PACKET_LED_IDLE, 0)
         sleep(.01)
@@ -320,6 +318,7 @@ class RouterDriver(object):
         return True
 
     def led_dispense(self):
+        if self.software_only: return True
         self.sync(0)
         self.send_packet8(DEST_BROADCAST, PACKET_LED_DISPENSE, 0)
         sleep(.01)
@@ -327,6 +326,7 @@ class RouterDriver(object):
         return True
 
     def led_complete(self):
+        if self.software_only: return True
         self.sync(0)
         self.send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
         sleep(.01)
@@ -338,6 +338,7 @@ class RouterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
+        if self.software_only: return True
         while True:
             if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
                 ack, value = self.receive_packet8()
@@ -345,9 +346,11 @@ class RouterDriver(object):
                     return value
 
     def update_liquid_levels(self):
-        self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0):
+        if self.software_only: return True
+        self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
 
     def get_liquid_level(self, dispenser):
+        if self.software_only: return 100
         while True:
             if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
                 ack, value = self.receive_packet16()
@@ -357,6 +360,11 @@ class RouterDriver(object):
 
     def get_dispense_stats(self, dispenser):
         return (0, 0)
+
+    def set_status_color(self, red, green, blue):
+        if self.software_only: return
+        if not self.status: return
+        self.status.set_color(red, green, blue)
 
 def ping_test(md):
     while True:

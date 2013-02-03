@@ -32,9 +32,8 @@ class Mixer(object):
         # not in use yet
         # BUSTED = object()          # out of all booze, can't make ANY drinks
 
-    def __init__(self, driver, status):
+    def __init__(self, driver):
         self.driver = driver
-        self.status = status
         self.err = ""
         self.disp_count = self.driver.count()
         self.mc = local.application.mc
@@ -52,15 +51,6 @@ class Mixer(object):
 
     def led_complete(self):
         self.driver.led_complete()
-
-    def led_status_out_of_booze(self):
-        self.status.set_color(1, 0, 0)
-
-    def led_status_warning(self):
-        self.status.set_color(1, 1, 0)
-
-    def led_status_all_good(self):
-        self.status.set_color(0, 1, 0)
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -100,11 +90,11 @@ class Mixer(object):
         session.commit()
 
         if new_state == Mixer.MixerState.OUT_OF_BOOZE:
-            self.led_status_out_of_booze()
+            self.driver.set_status_color(1, 0, 0)
         elif new_state == Mixer.MixerState.WARNING:
-            self.led_status_warning()
+            self.driver.set_status_color(1, 1, 0)
         else:
-            self.led_status_all_good()
+            self.driver.set_status_color(0, 1, 0)
 
         self.state = new_state
 
