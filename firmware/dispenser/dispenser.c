@@ -16,14 +16,17 @@
 #include "serial.h"
 #include "led.h"
 
-// EEprom data 
-uint32_t EEMEM _ee_pump_id;
-uint32_t EEMEM _ee_run_time;
+// EEprom data. 
+uint8_t  EEMEM _ee_pump_id;
+uint32_t EEMEM _ee_run_time_ticks;
+
+// TODO: fix up pump id script to not truncate this value
 
 #define RESET_DURATION           1
 #define SYNC_COUNT               10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES          5
 #define MAX_CURRENT_SENSE_CYCLES 3
+#define TICKS_SAVE_THRESHOLD     1000 // check this if this makes sense!
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -53,6 +56,7 @@ void set_motor_speed(uint8_t speed);
 void adc_shutdown(void);
 uint8_t check_reset(void);
 void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor);
+void is_dispensing(void);
 
 /*
    0  - PD0 - RX
@@ -229,8 +233,9 @@ uint8_t check_reset(void)
 void idle(void)
 {
     color_t c;
-    uint8_t animate = 0;
+    uint8_t animate = 0, is_dispensing;
     uint32_t t = 0;
+    uint32_t ticks_to_save = 0, ticks;
 
     cli();
     if (g_sync_count >= g_sync_divisor)
@@ -249,6 +254,56 @@ void idle(void)
         (*g_led_function)(t, &c);
         set_led_rgb_no_delay(c.red, c.green, c.blue);
     }
+
+    cli();
+    ticks = g_ticks;
+    is_dispensing = g_is_dispensing;
+    sei();
+
+    // If we're truly idle and not running the pump and we've exceeded
+    // the tick save threshold, save the updated tick count to eeprom.
+    if (!is_dispensing)
+    {
+        if (ticks > TICKS_SAVE_THRESHOLD)
+        {
+            ticks_to_save = ticks;
+            cli();
+            g_ticks = 0;
+            sei();
+
+            ticks_to_save += eeprom_read_dword((uint32_t *)1);
+            eeprom_update_dword((uint32_t *)1, ticks_to_save);
+        }
+    }
+}
+
+void reset_saved_tick_count(void)
+{
+    uint32_t dispensing;
+
+    // Don't reset the tick count while we're counting!
+    cli();
+    dispensing = g_is_dispensing;
+    sei();
+    if (dispensing)
+        return;
+
+    cli();
+    g_ticks = 0;
+    sei();
+
+    eeprom_update_dword((uint32_t *)1, 0);
+}
+
+void get_saved_tick_count(void)
+{
+    uint32_t ticks;
+
+    cli();
+    ticks = g_ticks;
+    sei();
+
+    send_packet16(PACKET_SAVED_TICK_COUNT, ticks + eeprom_read_dword((uint32_t *)1));
 }
 
 void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor)
@@ -331,8 +386,7 @@ void dispense_ticks(uint32_t ticks)
         return;
 
     cli();
-    g_dispense_target_ticks = ticks;
-    g_ticks = 0;
+    g_dispense_target_ticks = g_ticks + ticks;
     g_is_dispensing = 1;
     sei();
 
@@ -358,18 +412,13 @@ void is_dispensing(void)
     send_packet8(PACKET_IS_DISPENSING, dispensing);
 }
 
-uint8_t read_pump_id_from_eeprom(void)
-{
-    return eeprom_read_byte((uint8_t *)0);
-}
-
 uint8_t address_exchange(void)
 {
     uint8_t  ch;
     uint8_t  id;
 
     set_led_rgb(0, 0, 255);
-    id = read_pump_id_from_eeprom();
+    id = eeprom_read_byte((uint8_t *)0);
     if (id == 0 || id == 255)
     {
         // we failed to get a unique number for the pump. just stop.
@@ -535,6 +584,14 @@ int main(void)
 
                     case PACKET_SET_CS_THRESHOLD:
                         g_current_sense_threshold = p.p.uint16[0];
+                        break;
+
+                    case PACKET_SAVED_TICK_COUNT:
+                        get_saved_tick_count();
+                        break;
+
+                    case PACKET_RESET_SAVED_TICK_COUNT:
+                        reset_saved_tick_count();
                         break;
                 }
             }
