@@ -29,20 +29,26 @@ PACKET_ACK_HEADER_IN_PACKET = 5
 PACKET_ACK_CRC_FAIL         = 6
 PACKET_ACK_ALT_OK           = 0x80 # sometimes we get 1 bit errors and we get back 0x80 instead of 0 :(
 
-PACKET_PING                = 3
-PACKET_SET_MOTOR_SPEED     = 4
-PACKET_TICK_DISPENSE       = 5
-PACKET_TIME_DISPENSE       = 6
-PACKET_LED_OFF             = 7
-PACKET_LED_IDLE            = 8
-PACKET_LED_DISPENSE        = 9
-PACKET_LED_DRINK_DONE      = 10
-PACKET_IS_DISPENSING       = 11
-PACKET_LIQUID_LEVEL        = 12
-PACKET_UPDATE_LIQUID_LEVEL = 13
-PACKET_ID_CONFLICT         = 14
-PACKET_LED_CLEAN           = 15
-PACKET_COMM_TEST           = 0xFE
+PACKET_PING                   = 3
+PACKET_SET_MOTOR_SPEED        = 4
+PACKET_TICK_DISPENSE          = 5
+PACKET_TIME_DISPENSE          = 6
+PACKET_LED_OFF                = 7
+PACKET_LED_IDLE               = 8
+PACKET_LED_DISPENSE           = 9
+PACKET_LED_DRINK_DONE         = 10
+PACKET_IS_DISPENSING          = 11
+PACKET_LIQUID_LEVEL           = 12
+PACKET_UPDATE_LIQUID_LEVEL    = 13
+PACKET_ID_CONFLICT            = 14
+PACKET_LED_CLEAN              = 15
+PACKET_SET_CS_THRESHOLD       = 16
+PACKET_SAVED_TICK_COUNT       = 17
+PACKET_RESET_SAVED_TICK_COUNT = 18
+PACKET_GET_LIQUID_THRESHOLDS  = 19
+PACKET_SET_LIQUID_THRESHOLDS  = 20
+PACKET_FLUSH_SAVED_TICK_COUNT = 21
+PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
 
@@ -262,13 +268,13 @@ class RouterDriver(object):
 
         return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val, 0, 0, 0))
 
-    def send_packet16(self, dest, type, val):
+    def send_packet16(self, dest, type, val0, val1):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
-        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val, 0))
+        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
 
     def send_packet32(self, dest, type, val):
         if dest != DEST_BROADCAST: 
@@ -342,9 +348,9 @@ class RouterDriver(object):
         ack, packet = self.receive_packet()
         if ack == PACKET_ACK_OK:
             data = unpack("<BBHH", packet)
-            return (ack, data[2])
+            return (ack, data[2], data[3])
         else:
-            return (ack, 0)
+            return (ack, 0, 0)
 
     def make_shot(self):
         if self.software_only: return True
@@ -429,18 +435,38 @@ class RouterDriver(object):
         if self.software_only: return 100
         while True:
             if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
-                ack, value = self.receive_packet16()
+                ack, value, dummy = self.receive_packet16()
                 if ack == PACKET_ACK_OK:
-                    print "disp %d liquid level: %d" % (dispenser, value)
                     return value
 
-    def get_dispense_stats(self, dispenser):
-        return (0, 0)
+    def get_liquid_level_thresholds(self, dispenser):
+        if self.software_only: return True
+        while True:
+            if self.send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
+                ack, low, out = self.receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    return (low, out)
+                
+    def set_liquid_level_thresholds(self, dispenser, low, out):
+        if self.software_only: return True
+        self.send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
 
     def set_status_color(self, red, green, blue):
         if self.software_only: return
         if not self.status: return
         self.status.set_color(red, green, blue)
+
+    def get_saved_tick_count(self, dispenser):
+        if self.software_only: return True
+        while True:
+            if self.send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
+                ack, ticks, dummy = self.receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    return ticks
+
+    def flush_saved_tick_count(self):
+        if self.software_only: return True
+        self.send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
 
 def ping_test(md):
     while True:
@@ -475,7 +501,6 @@ def comm_test(md):
 if __name__ == "__main__":
     md = RouterDriver("/dev/ttyAMA0", 0)
     md.open()
-    led_test(md)
 
 #    sleep(3)
 #    print "Ping:"
