@@ -32,6 +32,9 @@ at some point.
 #define PACKET_SET_CS_THRESHOLD       16
 #define PACKET_SAVED_TICK_COUNT       17 // requires response
 #define PACKET_RESET_SAVED_TICK_COUNT 18 
+#define PACKET_GET_LIQUID_THRESHOLDS  19 // requires response
+#define PACKET_SET_LIQUID_THRESHOLDS  20
+#define PACKET_FLUSH_SAVED_TICK_COUNT 21
 #define PACKET_COMM_TEST              0xFE
 
 #define DEST_BROADCAST         0xFF

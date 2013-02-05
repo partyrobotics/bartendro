@@ -17,16 +17,20 @@
 #include "led.h"
 
 // EEprom data. 
-uint8_t  EEMEM _ee_pump_id;
-uint32_t EEMEM _ee_run_time_ticks;
+#define ee_pump_id_offset                0
+#define ee_run_time_ticks_offset         1
+#define ee_liquid_low_threshold_offset   5
+#define ee_liquid_out_threshold_offset   7 
 
 // TODO: fix up pump id script to not truncate this value
 
-#define RESET_DURATION           1
-#define SYNC_COUNT               10 // Every SYNC_INIT ms we will change the color animation
-#define NUM_ADC_SAMPLES          5
-#define MAX_CURRENT_SENSE_CYCLES 3
-#define TICKS_SAVE_THRESHOLD     1000 // check this if this makes sense!
+#define RESET_DURATION                   1
+#define SYNC_COUNT                      10 // Every SYNC_INIT ms we will change the color animation
+#define NUM_ADC_SAMPLES                  5
+#define MAX_CURRENT_SENSE_CYCLES         3
+#define TICKS_SAVE_THRESHOLD          1000
+#define DEFAULT_LIQUID_LOW_THRESHOLD   140
+#define DEFAULT_LIQUID_OUT_THRESHOLD    90
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -57,6 +61,7 @@ void adc_shutdown(void);
 uint8_t check_reset(void);
 void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor);
 void is_dispensing(void);
+void flush_saved_tick_count(uint8_t force);
 
 /*
    0  - PD0 - RX
@@ -233,9 +238,8 @@ uint8_t check_reset(void)
 void idle(void)
 {
     color_t c;
-    uint8_t animate = 0, is_dispensing;
+    uint8_t animate = 0;
     uint32_t t = 0;
-    uint32_t ticks_to_save = 0, ticks;
 
     cli();
     if (g_sync_count >= g_sync_divisor)
@@ -255,25 +259,30 @@ void idle(void)
         set_led_rgb_no_delay(c.red, c.green, c.blue);
     }
 
+    flush_saved_tick_count(0);
+}
+
+void flush_saved_tick_count(uint8_t force)
+{
+    uint8_t is_dispensing;
+    uint32_t ticks_to_save;
+
     cli();
-    ticks = g_ticks;
     is_dispensing = g_is_dispensing;
+    ticks_to_save = g_ticks;
     sei();
 
-    // If we're truly idle and not running the pump and we've exceeded
-    // the tick save threshold, save the updated tick count to eeprom.
-    if (!is_dispensing)
-    {
-        if (ticks > TICKS_SAVE_THRESHOLD)
-        {
-            ticks_to_save = ticks;
-            cli();
-            g_ticks = 0;
-            sei();
+    if (is_dispensing && !force)
+        return;
 
-            ticks_to_save += eeprom_read_dword((uint32_t *)1);
-            eeprom_update_dword((uint32_t *)1, ticks_to_save);
-        }
+    if (ticks_to_save > TICKS_SAVE_THRESHOLD || (force && ticks_to_save > 0))
+    {
+        cli();
+        g_ticks = 0;
+        sei();
+
+        ticks_to_save += eeprom_read_dword((uint32_t *)ee_run_time_ticks_offset);
+        eeprom_update_dword((uint32_t *)ee_run_time_ticks_offset, ticks_to_save);
     }
 }
 
@@ -292,7 +301,7 @@ void reset_saved_tick_count(void)
     g_ticks = 0;
     sei();
 
-    eeprom_update_dword((uint32_t *)1, 0);
+    eeprom_update_dword((uint32_t *)ee_run_time_ticks_offset, 0);
 }
 
 void get_saved_tick_count(void)
@@ -303,7 +312,29 @@ void get_saved_tick_count(void)
     ticks = g_ticks;
     sei();
 
-    send_packet16(PACKET_SAVED_TICK_COUNT, ticks + eeprom_read_dword((uint32_t *)1));
+    send_packet16(PACKET_SAVED_TICK_COUNT, ticks + eeprom_read_dword((uint32_t *)ee_run_time_ticks_offset), 0);
+}
+
+void get_liquid_thresholds(void)
+{
+    uint16_t low, out;
+
+    low = eeprom_read_word((uint16_t *)ee_liquid_low_threshold_offset);
+    out = eeprom_read_word((uint16_t *)ee_liquid_out_threshold_offset);
+
+    if (low == 0 || low == 0xFFFF)
+        low = DEFAULT_LIQUID_LOW_THRESHOLD; 
+
+    if (out == 0 || out == 0xFFFF)
+        out = DEFAULT_LIQUID_OUT_THRESHOLD;
+
+    send_packet16(PACKET_GET_LIQUID_THRESHOLDS, low, out);
+}
+
+void set_liquid_thresholds(uint16_t low, uint16_t out)
+{
+    eeprom_update_word((uint16_t *)ee_liquid_low_threshold_offset, low);
+    eeprom_update_word((uint16_t *)ee_liquid_out_threshold_offset, out);
 }
 
 void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor)
@@ -356,7 +387,7 @@ void update_liquid_level(void)
 
 void get_liquid_level(void)
 {
-    send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level);
+    send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level, 0);
 }
 
 void set_motor_speed(uint8_t speed)
@@ -418,7 +449,7 @@ uint8_t address_exchange(void)
     uint8_t  id;
 
     set_led_rgb(0, 0, 255);
-    id = eeprom_read_byte((uint8_t *)0);
+    id = eeprom_read_byte((uint8_t *)ee_pump_id_offset);
     if (id == 0 || id == 255)
     {
         // we failed to get a unique number for the pump. just stop.
@@ -525,16 +556,25 @@ int main(void)
                     case PACKET_SET_MOTOR_SPEED:
                         if (!cs)
                             set_motor_speed(p.p.uint8[0]);
+
+                        if (p.p.uint8[0] == 0)
+                            flush_saved_tick_count(0);
                         break;
 
                     case PACKET_TICK_DISPENSE:
                         if (!cs)
+                        {
                             dispense_ticks(p.p.uint32);
+                            flush_saved_tick_count(0);
+                        }
                         break;
 
                     case PACKET_TIME_DISPENSE:
                         if (!cs)
+                        {
                             run_motor_timed(p.p.uint32);
+                            flush_saved_tick_count(0);
+                        }
                         break;
 
                     case PACKET_IS_DISPENSING:
@@ -592,6 +632,18 @@ int main(void)
 
                     case PACKET_RESET_SAVED_TICK_COUNT:
                         reset_saved_tick_count();
+                        break;
+
+                    case PACKET_FLUSH_SAVED_TICK_COUNT:
+                        flush_saved_tick_count(1);
+                        break;
+
+                    case PACKET_GET_LIQUID_THRESHOLDS:
+                        get_liquid_thresholds();
+                        break;
+
+                    case PACKET_SET_LIQUID_THRESHOLDS:
+                        set_liquid_thresholds(p.p.uint16[0], p.p.uint16[1]);
                         break;
                 }
             }
