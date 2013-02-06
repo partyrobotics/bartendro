@@ -2,6 +2,17 @@
 
 import sys
 import os
+from time import sleep
+
+ROUTER_BUS              = 1
+ROUTER_ADDRESS          = 4
+ROUTER_SELECT_CMD_BEGIN = 0
+ROUTER_CMD_SYNC_ON      = 251
+ROUTER_CMD_SYNC_OFF     = 252
+ROUTER_CMD_PING         = 253
+ROUTER_CMD_COUNT        = 254
+ROUTER_CMD_RESET        = 255
+
 
 try:
     import smbus
@@ -11,18 +22,20 @@ except ImportError, e:
         raise
     smbus_missing = 1
 
-class RouterSelect(object):
+class DispenserSelect(object):
     '''This object interacts with the bartendro router controller to select dispensers'''
 
-    def __init__(self, software_only):
+    def __init__(self, max_dispensers, software_only):
         self.software_only = software_only
+        self.max_dispensers = max_dispensers
         self.router = None
+        self.num_dispensers = 3
+        self.selected = 0
 
     def reset(self):
         if self.software_only: return
         self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
         sleep(6)
-        self.led_idle()
 
     def select(self, dispenser):
         if self.software_only: return

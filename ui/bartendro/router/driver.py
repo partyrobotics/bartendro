@@ -41,17 +41,6 @@ PACKET_COMM_TEST           = 0xFE
 
 DEST_BROADCAST         = 0xFF
 
-ROUTER_BUS              = 1
-ROUTER_ADDRESS          = 4
-ROUTER_SELECT_CMD_BEGIN = 0
-ROUTER_SELECT_CMD_END   = MAX_DISPENSERS
-ROUTER_CMD_SYNC_ON      = 251
-ROUTER_CMD_SYNC_OFF     = 252
-ROUTER_CMD_PING         = 253
-ROUTER_CMD_COUNT        = 254
-ROUTER_CMD_RESET        = 255
-
-
 class SttyNotFoundException:
     pass
 
@@ -79,7 +68,6 @@ class RouterDriver(object):
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
         self.dispenser_select = None
-        self.selected = 0
 
     def log(self, msg):
         return
@@ -93,10 +81,7 @@ class RouterDriver(object):
 
     def sync(self, state):
         if self.software_only: return
-        if (state):
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
-        else:
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
+        self.dispenser_select.sync(state)
 
     def count(self):
         return self.num_dispensers
@@ -122,8 +107,10 @@ class RouterDriver(object):
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
 
-        self.dispense_select = dispense_select.DispenserSelect(self.software_only)
-        self.dispense_select.reset()
+        self.dispenser_select = dispenser_select.DispenserSelect(MAX_DISPENSERS, self.software_only)
+        self.dispenser_select.open()
+        self.dispenser_select.reset()
+        self.led_idle()
 
     def close(self):
         if self.software_only: return
@@ -144,7 +131,7 @@ class RouterDriver(object):
 
     def select(self, dispenser):
         if self.software_only: return True
-        self.dispense_select.select(dispenser)
+        self.dispenser_select.select(dispenser)
 
     def send_packet(self, dest, packet):
         if self.software_only: return True
