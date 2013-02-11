@@ -4,7 +4,7 @@ import sys
 import os
 from time import sleep
 
-ROUTER_BUS              = 1
+ROUTER_BUS              = 0
 ROUTER_ADDRESS          = 4
 ROUTER_SELECT_CMD_BEGIN = 0
 ROUTER_CMD_SYNC_ON      = 251
@@ -67,3 +67,9 @@ class DispenserSelect(object):
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
             raise I2CIOError
+
+
+if __name__ == "__main__":
+    ds = DispenserSelect(15, 0)
+    ds.open()
+    ds.reset()

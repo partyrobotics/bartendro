@@ -18,7 +18,8 @@
 #include "packet.h"
 
 #define MAX_DISPENSERS   15 
-#define RESET_DURATION   1
+#define RESET_DURATION   10
+#define PULSE_WIDTH      1
 
 void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
@@ -117,7 +118,7 @@ static volatile uint32_t g_rx_pcint_fe_time[MAX_DISPENSERS];
 void id_assignment_fe(uint8_t state, uint8_t disp)
 {
     if (state)
-        g_rx_pcint_fe_time[disp] = g_time + RESET_DURATION;
+        g_rx_pcint_fe_time[disp] = g_time + PULSE_WIDTH;
     else
     {
         if (g_rx_pcint_fe_time[disp] > 0 && g_time >= g_rx_pcint_fe_time[disp])
@@ -522,7 +523,7 @@ void reset_dispensers(void)
 {
     // Reset the dispensers
     sbi(PORTD, 2);
-    _delay_ms(RESET_DURATION + RESET_DURATION);
+    _delay_ms(RESET_DURATION);
     cbi(PORTD, 2);
 
     // Wait for dispensers to start up
@@ -573,11 +574,11 @@ uint8_t setup_ids(void)
         // If we did get a collision, reset the dispensers and try the process again
         if (single_pass_count > 1)
         {
-//            sbi(PORTC, 2);
-//            _delay_ms(1000);
-//            _delay_ms(1000);
-//            cbi(PORTC, 2);
-//            _delay_ms(500);
+            sbi(PORTC, 2);
+            _delay_ms(1000);
+            _delay_ms(1000);
+            cbi(PORTC, 2);
+            _delay_ms(500);
             reset_dispensers();
             continue;
         }
@@ -674,7 +675,14 @@ int main (void)
 
         setup();
         reset_dispensers();
-        count = setup_ids();
+        count = 4; //setup_ids();
+    // Disable serial IO and put D2 back to output
+    serial_enable(0, 0);
+    DDRD |= (1<< PORTD1);
+
+    // start by pulling D1 & B1 high, since serial lines when idle are high
+    sbi(PORTD, 1);
+    sbi(PORTB, 1);
         cli();
         g_dispenser_count = count;
         g_sync = 0;

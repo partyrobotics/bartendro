@@ -83,6 +83,10 @@ class RouterDriver(object):
         if self.software_only: return
         self.dispenser_select.sync(state)
 
+    def reset(self, state):
+        if self.software_only: return
+        self.dispenser_select.reset(state)
+
     def count(self):
         return self.num_dispensers
 
@@ -334,10 +338,12 @@ class RouterDriver(object):
 
     def update_liquid_levels(self):
         if self.software_only: return True
+        return 
         self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
 
     def get_liquid_level(self, dispenser):
         if self.software_only: return 100
+        return 100
         while True:
             if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
                 ack, value = self.receive_packet16()
@@ -387,11 +393,11 @@ if __name__ == "__main__":
     md = RouterDriver("/dev/ttyAMA0", 0)
     md.open()
     sleep(3)
-    print "Ping:"
-    while not md.ping(0):
-        pass
+#    print "Ping:"
+#    while not md.ping(0):
+#        pass
 
-#    comm_test(md)
+    comm_test(md)
     val = md.is_dispensing(0)
     print "is dispensing: %d\n" % val
 

@@ -342,6 +342,20 @@ uint8_t read_pump_id_from_eeprom(void)
 
 uint8_t get_address(void)
 {
+    set_led_rgb(0, 255, 0);
+
+    // Switch to using sending serial data
+    serial_enable(1, 1);
+
+    serial_tx('A');
+    serial_tx('A');
+    serial_tx('A');
+
+    return read_pump_id_from_eeprom();
+}
+
+uint8_t _get_address(void)
+{
     uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
@@ -482,6 +496,7 @@ int main(void)
             // we failed to get an address. stop and wait for a reset
             for(; !check_reset();)
                 ;
+            set_led_rgb(255, 255, 255);
             continue;
         }
 

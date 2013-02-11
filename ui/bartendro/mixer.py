@@ -222,8 +222,8 @@ class Mixer(object):
         log("drink complete")
 
         t = int(time())
-        log = drink_log.DrinkLog(drink.id, t, size)
-        session.add(log)
+        dlog = drink_log.DrinkLog(drink.id, t, size)
+        session.add(dlog)
         session.commit()
 
         if not self.check_liquid_levels():
