@@ -16,25 +16,11 @@
 #include "serial.h"
 #include "led.h"
 
-#if F_CPU == 16000000UL
-#define    TIMER1_INIT      0xFFEF
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 16Mhz / 1024 / 16 = .001024 per tick
-#else
-#define    TIMER1_INIT      0xFFF7
-#define    TIMER1_FLAGS     _BV(CS12)|(1<<CS10); // 8Mhz / 1024 / 8 = .001024 per tick
-#endif
-
 // TODO
-// Hook up more LED patterns.
-// Start with no patterns, sync off. Let bot start animations.
 // Add support for different animation speeds
 
-// Production TODO:
-// Hook up more RX pins
-// Move Sync to different pin
-
 // EEprom data 
-uint32_t EEMEM _ee_random_number;
+uint32_t EEMEM _ee_pump_id;
 uint32_t EEMEM _ee_run_time;
 
 #define RESET_DURATION  1
@@ -42,17 +28,26 @@ uint32_t EEMEM _ee_run_time;
 #define NUM_ADC_SAMPLES 5
 #define NUM_CURRENT_SENSE_SAMPLES 10
 
+// this (non volatile) variable keeps the current liquid level
+static uint16_t g_liquid_level = 0;
+
 volatile uint32_t g_time = 0;
 static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint32_t g_reset = 0;
 static volatile uint32_t g_ticks = 0;
+static volatile uint32_t g_dispense_target_ticks = 0;
+static volatile uint8_t g_is_dispensing = 0;
+
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
 static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
-static void (*g_led_function)(uint32_t, color_t *);
+static void (*g_led_function)(uint32_t, color_t *) = 0;
+
+void check_dispense_complete_isr(void);
+void set_motor_speed(uint8_t speed);
 
 /*
    0  - PD0 - RX
@@ -74,9 +69,6 @@ void setup(void)
 {
     // Set up LEDs & motor out
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
-
-    // Set up on board LED output
-    DDRB |= (1<<PB5);
 
     // pull ups
     sbi(PORTD, 6);
@@ -148,6 +140,7 @@ ISR(PCINT0_vect)
         g_hall3 = state;
         g_ticks++;
     }
+    check_dispense_complete_isr();
 
     state = PINB & (1<<PINB2);
     if (state != g_sync)
@@ -174,7 +167,18 @@ ISR(PCINT2_vect)
         g_hall1 = state;
         g_ticks++;
     }
+    check_dispense_complete_isr();
+}
 
+// this function is called from an ISR, so no need to turn off/on interrupts
+void check_dispense_complete_isr(void)
+{
+    if (g_dispense_target_ticks > 0 && g_ticks >= g_dispense_target_ticks)
+    {
+         g_dispense_target_ticks = 0;
+         g_is_dispensing = 0;
+         set_motor_speed(0);
+    }
 }
 
 uint8_t check_reset(void)
@@ -218,6 +222,9 @@ void set_led_pattern(void (*func)(uint32_t, color_t *))
     if (func == NULL)
         set_led_rgb(0, 0, 0);
 
+    cli();
+    g_pattern_t = 0;
+    sei();
     g_led_function = func;
 }
 
@@ -264,7 +271,7 @@ uint16_t read_current_sense(void)
     return (uint16_t)(v / NUM_CURRENT_SENSE_SAMPLES);
 }
 
-uint16_t read_liquid_level_sensor(void)
+void update_liquid_level(void)
 {
     uint8_t  i;
     uint16_t v = 0;
@@ -274,7 +281,12 @@ uint16_t read_liquid_level_sensor(void)
         v += adc_read();
     adc_shutdown();
 
-    return (uint16_t)(v / NUM_ADC_SAMPLES);
+    g_liquid_level = (uint16_t)(v / NUM_ADC_SAMPLES);
+}
+
+void get_liquid_level(void)
+{
+    send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level);
 }
 
 void set_motor_speed(uint8_t speed)
@@ -292,34 +304,40 @@ void run_motor_timed(uint32_t duration)
     set_motor_speed(0);
 }
 
-void run_motor_ticks(uint32_t ticks)
+void dispense_ticks(uint32_t ticks)
 {
-    uint32_t ticks_dest, ticks_now;
+    uint8_t dispensing;
 
     cli();
-    ticks_dest = g_ticks + ticks;
+    dispensing = g_is_dispensing;
+    sei();
+
+    if (dispensing)
+        return;
+
+    cli();
+    g_dispense_target_ticks = ticks;
+    g_ticks = 0;
+    g_is_dispensing = 1;
     sei();
 
     set_motor_speed(255);
-    for(; !check_reset();)
-    {
-        cli();
-        ticks_now = g_ticks;
-        sei();
-        if (ticks_now >= ticks_dest)
-            break;
-
-        idle();
-    }
-    set_motor_speed(0);
 }
 
-void set_random_seed_from_eeprom(void)
+void is_dispensing(void)
 {
-    uint32_t r;
+    uint8_t dispensing;
 
-    eeprom_read_block((void *)&r, &_ee_random_number, sizeof(uint32_t));
-    srandom(r);
+    cli();
+    dispensing = g_is_dispensing;
+    sei();
+
+    send_packet8(PACKET_IS_DISPENSING, dispensing);
+}
+
+uint8_t read_pump_id_from_eeprom(void)
+{
+    return eeprom_read_byte((uint8_t *)0);
 }
 
 uint8_t get_address(void)
@@ -327,16 +345,33 @@ uint8_t get_address(void)
     uint8_t  ch;
     uint8_t  id, old_id, new_id, my_new_id = 255;
 
-    set_random_seed_from_eeprom();
+    set_led_rgb(0, 0, 255);
+    id = read_pump_id_from_eeprom();
+    if (id == 0 || id == 255)
+    {
+        // we failed to get a unique number for the pump. just stop.
+        set_led_rgb(255, 255, 0);
+        for(;;);
+    }
+
+#if 0
+    set_led_rgb(0,0,255);
+    _delay_ms(500);
+    for(ch = 0; ch < id; ch++)
+    {
+        set_led_rgb(255,0,0);
+        _delay_ms(500);
+        set_led_rgb(0,0,0);
+        _delay_ms(500);
+    }
+    set_led_rgb(0,255,0);
+    _delay_ms(500);
+#endif
 
     // turn off serial TX and set the TX line to output
     serial_enable(1, 0);
     DDRD |= (1 << PORTD1);
 
-    // Pick a random 8-bit number
-    id = random() % 255;
-
-    set_led_rgb(0, 0, 255);
     for(;;)
     {
         for(;;)
@@ -356,6 +391,7 @@ uint8_t get_address(void)
         if (ch == 255)
             break;
     }
+    set_led_rgb(255,0,255);
     for(;;)
     {
         for(;;)
@@ -378,87 +414,115 @@ uint8_t get_address(void)
         if (id == old_id)
             my_new_id = new_id;
     }
-    if (my_new_id == 0xFF || my_new_id > 14 || my_new_id == id)
+
+    if (my_new_id == 0xFF || my_new_id > 14)
+    {
         set_led_rgb(255, 0, 0);
+        return 0xFF;
+    }
     else
         set_led_rgb(0, 255, 0);
 
     // Switch to using sending serial data
     serial_enable(1, 1);
 
+    serial_tx('A');
+    serial_tx('A');
+    serial_tx('A');
+
     return my_new_id;
 }
 
-void flash_led(uint8_t fast)
+void comm_test(void)
 {
-    int i;
+    uint8_t ch;
 
-    for(i = 0; i < 5; i++)
-    {
-        sbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-        cbi(PORTB, 5);
-        if (fast)
-            _delay_ms(50);
-        else
-            _delay_ms(250);
-    }
+    // disable all interrupts and just echo every character received.
+    cli();
+    set_led_rgb(0, 255, 255);
+    for(; !check_reset();)
+        if (serial_rx_nb(&ch))
+            for(; !serial_tx_nb(ch) && !check_reset();)
+                ;
+    sei();
 }
 
 int main(void)
 {
-    uint8_t id, rec;
+    uint8_t id, rec, i;
     packet_t p;
+
+    setup();
+    set_motor_speed(0);
+    sei();
+    for(i = 0; i < 5; i++)
+    {
+        set_led_rgb(255, 0, 255);
+        _delay_ms(50);
+        set_led_rgb(255, 255, 0);
+        _delay_ms(50);
+    }
+
+    // get the current liquid level 
+    update_liquid_level();
 
     for(;;)
     {
         cli();
         g_reset = 0;
-
         setup();
-        set_motor_speed(0);
-        flash_led(1);
         serial_init();
-        set_led_rgb(0, 0, 0);
+        set_motor_speed(0);
+        set_led_rgb(0, 0, 255);
 
         sei();
-
         id = get_address();
         if (id == 0xFF)
+        {
+            // we failed to get an address. stop and wait for a reset
+            for(; !check_reset();)
+                ;
             continue;
+        }
 
         for(; !check_reset();)
         {
             rec = receive_packet(&p);
-            if (rec == REC_CRC_FAIL)
+            if (rec == COMM_CRC_FAIL)
                 continue;
 
-            if (rec == REC_RESET)
+            if (rec == COMM_RESET)
                 break;
 
-            if (rec == REC_OK && p.dest == id)
+            if (rec == COMM_OK && (p.dest == DEST_BROADCAST || p.dest == id))
             {
-                tbi(PORTB, 5);
                 switch(p.type)
                 {
                     case PACKET_PING:
-                        set_led_rgb(0, 0, 255);
-                        _delay_ms(200);
-                        set_led_rgb(0, 255, 0);
                         break;
+
                     case PACKET_SET_MOTOR_SPEED:
                         set_motor_speed(p.p.uint8[0]);
                         break;
 
                     case PACKET_TICK_DISPENSE:
-                        run_motor_ticks(p.p.uint32);
+                        dispense_ticks(p.p.uint32);
                         break;
 
                     case PACKET_TIME_DISPENSE:
                         run_motor_timed(p.p.uint32);
+                        break;
+
+                    case PACKET_IS_DISPENSING:
+                        is_dispensing();
+                        break;
+
+                    case PACKET_LIQUID_LEVEL:
+                        get_liquid_level();
+                        break;
+
+                    case PACKET_UPDATE_LIQUID_LEVEL:
+                        update_liquid_level();
                         break;
 
                     case PACKET_LED_OFF:
@@ -475,6 +539,10 @@ int main(void)
 
                     case PACKET_LED_DRINK_DONE:
                         set_led_pattern(led_pattern_drink_done);
+                        break;
+
+                    case PACKET_COMM_TEST:
+                        comm_test();
                         break;
                 }
             }

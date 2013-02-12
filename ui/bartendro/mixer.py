@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import sleep, localtime
+from time import sleep, time
 from threading import Thread
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
@@ -8,8 +8,9 @@ from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
+from bartendro.model import drink_log
 
-TICKS_PER_ML = 1
+TICKS_PER_ML = 2.6
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
@@ -51,15 +52,6 @@ class Mixer(object):
     def led_complete(self):
         self.driver.led_complete()
 
-    def led_status_out_of_booze(self):
-        pass
-
-    def led_status_warning(self):
-        pass
-
-    def led_status_all_good(self):
-        pass
-
     def can_make_drink(self, boozes, booze_dict):
         ok = True
         for booze in boozes:
@@ -72,6 +64,13 @@ class Mixer(object):
     def check_liquid_levels(self):
         new_state = Mixer.MixerState.READY
 
+        # step 1: ask the dispensers to update their liquid levels
+        self.driver.update_liquid_levels()
+
+        # wait for the dispensers to determine the levels
+        sleep(.01)
+
+        # Now ask each dispenser for the actual level
         dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
         for i, dispenser in enumerate(dispensers):
             dispenser.out = DISPENSER_OK
@@ -88,19 +87,14 @@ class Mixer(object):
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
 
-#            if dispenser.out == DISPENSER_OUT:
-#                print "Dispenser %d is OUT! (%d)" % (i + 1, level)
-#            elif dispenser.out == DISPENSER_WARNING:
-#                print "Dispenser %d is WARNING! (%d)" % (i + 1, level)
-
         session.commit()
 
         if new_state == Mixer.MixerState.OUT_OF_BOOZE:
-            self.led_status_out_of_booze()
+            self.driver.set_status_color(1, 0, 0)
         elif new_state == Mixer.MixerState.WARNING:
-            self.led_status_warning()
+            self.driver.set_status_color(1, 1, 0)
         else:
-            self.led_status_all_good()
+            self.driver.set_status_color(0, 1, 0)
 
         self.state = new_state
 
@@ -227,13 +221,10 @@ class Mixer(object):
         self.led_complete()
         log("drink complete")
 
-        try:
-            t = localtime()
-            drinklog = open(local.application.drinks_log_file, "a")
-            drinklog.write("%d-%d-%d %d:%02d,%s,%d ml\n" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, drink.name.name, size))
-            drinklog.close()
-        except IOError:
-            pass
+        t = int(time())
+        log = drink_log.DrinkLog(drink.id, t, size)
+        session.add(log)
+        session.commit()
 
         if not self.check_liquid_levels():
             self.leds_panic()
