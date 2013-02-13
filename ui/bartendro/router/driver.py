@@ -126,6 +126,7 @@ class RouterDriver(object):
         self.ser.write(chr(170) + chr(170) + chr(170))
         sleep(.001)
 
+        self.num_dispensers = 0
         for disp in xrange(MAX_DISPENSERS):
             print "dispenser %d" % disp
             self.select(disp)
@@ -142,6 +143,7 @@ class RouterDriver(object):
                     id = ord(data[0])
                     self.dispenser_ids[disp] = id
                     print "Found dispenser %d with id %d" % (disp, id)
+                    self.num_dispensers += 1
                     break
                 elif len(data) > 1:
                     print "Did not receive 3 characters back. Trying again."
@@ -166,8 +168,8 @@ class RouterDriver(object):
                             sent = True
                         print "  dispenser %d has id %d" % (i, d)
                         self.dispenser_ids[i] = 255
+                        self.num_dispensers -= 1
 
-        self.num_dispensers = MAX_DISPENSERS
         self.led_idle()
 
     def close(self):
