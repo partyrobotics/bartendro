@@ -64,10 +64,11 @@ class RouterDriver(object):
         self.ser = None
         self.msg = ""
         self.ret = 0
-        self.num_dispensers = 7 
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
         self.dispenser_select = None
+        self.dispenser_ids = [i for i in xrange(MAX_DISPENSERS)]
+        self.num_dispensers = 0 
 
     def log(self, msg):
         return
@@ -83,9 +84,13 @@ class RouterDriver(object):
         if self.software_only: return
         self.dispenser_select.sync(state)
 
-    def reset(self, state):
+    def reset(self):
         if self.software_only: return
-        self.dispenser_select.reset(state)
+        self.dispenser_select.reset()
+
+    def select(self, dispenser):
+        if self.software_only: return True
+        self.dispenser_select.select(dispenser)
 
     def count(self):
         return self.num_dispensers
@@ -102,11 +107,11 @@ class RouterDriver(object):
                                      bytesize=serial.EIGHTBITS, 
                                      parity=serial.PARITY_NONE, 
                                      stopbits=serial.STOPBITS_ONE,
-                                     timeout=2)
+                                     timeout=.01)
         except serial.serialutil.SerialException:
             raise SerialIOError
 
-        self.log("Opened %s for %d baud N81" % (self.device, BAUD_RATE))
+        print "Opened %s for %d baud N81" % (self.device, BAUD_RATE)
 
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
@@ -114,6 +119,39 @@ class RouterDriver(object):
         self.dispenser_select = dispenser_select.DispenserSelect(MAX_DISPENSERS, self.software_only)
         self.dispenser_select.open()
         self.dispenser_select.reset()
+
+        # This primes the communication line. Really!
+        self.ser.write(chr(170) + chr(170) + chr(170))
+        sleep(.001)
+
+        for disp in xrange(MAX_DISPENSERS):
+            print "dispenser %d" % disp
+            self.select(disp)
+            sleep(.01)
+            while True:
+                self.ser.write("???") 
+                data = self.ser.read(3)
+                for ch in data:
+                    print "%02X " % ord(ch),
+                if len(data) == 3: 
+                    if data[0] != data[1] or data[0] != data[2]:
+                        print "inconsistent"
+                        continue
+                    id = ord(data[0])
+                    self.dispenser_ids[disp] = id
+                    self.num_dispensers = disp + 1
+                    print "Found dispenser %d with id %d" % (disp, id)
+                    break
+                elif len(data) > 1:
+                    print "Did not receive 3 characters back. Trying again."
+                    sleep(.5)
+                else:
+                    break
+
+        self.select(0)
+        self.ser.timeout = 2
+        self.ser.write(chr(255));
+        sleep(1)
         self.led_idle()
 
     def close(self):
@@ -132,10 +170,6 @@ class RouterDriver(object):
                 crc = (crc >> 1)
 
         return crc
-
-    def select(self, dispenser):
-        if self.software_only: return True
-        self.dispenser_select.select(dispenser)
 
     def send_packet(self, dest, packet):
         if self.software_only: return True
@@ -193,13 +227,25 @@ class RouterDriver(object):
         return False
 
     def send_packet8(self, dest, type, val):
-        return self.send_packet(dest, pack("BBBBBB", dest, type, val, 0, 0, 0))
+        if dest != DEST_BROADCAST: 
+            dispenser_id = self.dispenser_ids[dest]
+        else:
+            dispenser_id = dest
+        return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val, 0, 0, 0))
 
     def send_packet16(self, dest, type, val):
-        return self.send_packet(dest, pack("<BBHH", dest, type, val, 0))
+        if dest != DEST_BROADCAST: 
+            dispenser_id = self.dispenser_ids[dest]
+        else:
+            dispenser_id = dest
+        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val, 0))
 
     def send_packet32(self, dest, type, val):
-        return self.send_packet(dest, pack("<BBI", dest, type, val))
+        if dest != DEST_BROADCAST: 
+            dispenser_id = self.dispenser_ids[dest]
+        else:
+            dispenser_id = dest
+        return self.send_packet(dest, pack("<BBI", dispenser_id, type, val))
 
     def receive_packet(self):
         if self.software_only: return True
@@ -392,29 +438,30 @@ def comm_test(md):
 if __name__ == "__main__":
     md = RouterDriver("/dev/ttyAMA0", 0)
     md.open()
-    sleep(3)
+
+#    sleep(3)
 #    print "Ping:"
 #    while not md.ping(0):
 #        pass
 
-    comm_test(md)
-    val = md.is_dispensing(0)
-    print "is dispensing: %d\n" % val
+#    comm_test(md)
+#    val = md.is_dispensing(0)
+#    print "is dispensing: %d\n" % val
 
-    sleep(2)
+#    sleep(2)
 
-    print "Ping:"
-    md.ping(0)
-    print
+#    print "Ping:"
+#    md.ping(0)
+#    print
 
 #    val = md.get_liquid_level(1)
 #    print "liquid level: %d\n" % val
-    val = md.is_dispensing(0)
-    print "is dispensing: %d\n" % val
+#    val = md.is_dispensing(0)
+#    print "is dispensing: %d\n" % val
 
-    sleep(2)
+#    sleep(2)
 
-    md.ping(0);
+#    md.ping(0);
 
 #    led_test(md)
 #    dispense_test()

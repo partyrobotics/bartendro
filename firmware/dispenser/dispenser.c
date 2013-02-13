@@ -67,6 +67,8 @@ void set_motor_speed(uint8_t speed);
 */
 void setup(void)
 {
+    serial_init();
+
     // Set up LEDs & motor out
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
 
@@ -340,51 +342,19 @@ uint8_t read_pump_id_from_eeprom(void)
     return eeprom_read_byte((uint8_t *)0);
 }
 
-uint8_t get_address(void)
-{
-    set_led_rgb(0, 255, 0);
-
-    // Switch to using sending serial data
-    serial_enable(1, 1);
-
-    serial_tx('A');
-    serial_tx('A');
-    serial_tx('A');
-
-    return read_pump_id_from_eeprom();
-}
-
-uint8_t _get_address(void)
+uint8_t address_exchange(void)
 {
     uint8_t  ch;
-    uint8_t  id, old_id, new_id, my_new_id = 255;
+    uint8_t  id;
 
     set_led_rgb(0, 0, 255);
     id = read_pump_id_from_eeprom();
     if (id == 0 || id == 255)
     {
         // we failed to get a unique number for the pump. just stop.
-        set_led_rgb(255, 255, 0);
+        set_led_rgb(255, 0, 0);
         for(;;);
     }
-
-#if 0
-    set_led_rgb(0,0,255);
-    _delay_ms(500);
-    for(ch = 0; ch < id; ch++)
-    {
-        set_led_rgb(255,0,0);
-        _delay_ms(500);
-        set_led_rgb(0,0,0);
-        _delay_ms(500);
-    }
-    set_led_rgb(0,255,0);
-    _delay_ms(500);
-#endif
-
-    // turn off serial TX and set the TX line to output
-    serial_enable(1, 0);
-    DDRD |= (1 << PORTD1);
 
     for(;;)
     {
@@ -392,59 +362,18 @@ uint8_t _get_address(void)
         {
             if (serial_rx_nb(&ch))
                 break;
+
             if (check_reset())
                 return 0xFF;
         }
-
-        if (ch == id)
-        {
-            sbi(PORTD, 1);
-            _delay_ms(RESET_DURATION + RESET_DURATION);
-            cbi(PORTD, 1);
-        }
-        if (ch == 255)
+        if (ch == 0xFF)
             break;
+        if (ch == '?')
+            serial_tx(id);
     }
-    set_led_rgb(255,0,255);
-    for(;;)
-    {
-        for(;;)
-        {
-            if (serial_rx_nb(&old_id))
-                break;
-            if (check_reset())
-                return 0xFF;
-        }
-        if (old_id == 0xFF)
-            break;
+    set_led_rgb(0, 255, 0);
 
-        for(;;)
-        {
-            if (serial_rx_nb(&new_id))
-                break;
-            if (check_reset())
-                return 0xFF;
-        }
-        if (id == old_id)
-            my_new_id = new_id;
-    }
-
-    if (my_new_id == 0xFF || my_new_id > 14)
-    {
-        set_led_rgb(255, 0, 0);
-        return 0xFF;
-    }
-    else
-        set_led_rgb(0, 255, 0);
-
-    // Switch to using sending serial data
-    serial_enable(1, 1);
-
-    serial_tx('A');
-    serial_tx('A');
-    serial_tx('A');
-
-    return my_new_id;
+    return id;
 }
 
 void comm_test(void)
@@ -490,13 +419,12 @@ int main(void)
         set_led_rgb(0, 0, 255);
 
         sei();
-        id = get_address();
+        id = address_exchange();
         if (id == 0xFF)
         {
             // we failed to get an address. stop and wait for a reset
             for(; !check_reset();)
                 ;
-            set_led_rgb(255, 255, 255);
             continue;
         }
 
