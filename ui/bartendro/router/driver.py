@@ -2,6 +2,7 @@
 
 import sys
 import os
+import collections
 from subprocess import call
 from time import sleep, localtime, time
 import serial
@@ -37,6 +38,7 @@ PACKET_LED_DRINK_DONE      = 10
 PACKET_IS_DISPENSING       = 11
 PACKET_LIQUID_LEVEL        = 12
 PACKET_UPDATE_LIQUID_LEVEL = 13
+PACKET_ID_CONFLICT         = 14
 PACKET_COMM_TEST           = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -67,7 +69,7 @@ class RouterDriver(object):
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
         self.dispenser_select = None
-        self.dispenser_ids = [i for i in xrange(MAX_DISPENSERS)]
+        self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
         self.num_dispensers = 0 
 
     def log(self, msg):
@@ -120,7 +122,7 @@ class RouterDriver(object):
         self.dispenser_select.open()
         self.dispenser_select.reset()
 
-        # This primes the communication line. Really!
+        # This primes the communication line. 
         self.ser.write(chr(170) + chr(170) + chr(170))
         sleep(.001)
 
@@ -139,7 +141,6 @@ class RouterDriver(object):
                         continue
                     id = ord(data[0])
                     self.dispenser_ids[disp] = id
-                    self.num_dispensers = disp + 1
                     print "Found dispenser %d with id %d" % (disp, id)
                     break
                 elif len(data) > 1:
@@ -151,7 +152,22 @@ class RouterDriver(object):
         self.select(0)
         self.ser.timeout = 2
         self.ser.write(chr(255));
-        sleep(1)
+
+        duplicate_ids = [x for x, y in collections.Counter(self.dispenser_ids).items() if y > 1]
+        if len(duplicate_ids):
+            for dup in duplicate_ids:
+                if dup == 255: continue
+                print "ERROR: Dispenser id conflict!"
+                sent = False
+                for i, d in enumerate(self.dispenser_ids):
+                    if d == dup: 
+                        if not sent: 
+                            self.send_packet8(i, PACKET_ID_CONFLICT, 0)
+                            sent = True
+                        print "  dispenser %d has id %d" % (i, d)
+                        self.dispenser_ids[i] = 255
+
+        self.num_dispensers = MAX_DISPENSERS
         self.led_idle()
 
     def close(self):

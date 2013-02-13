@@ -26,8 +26,6 @@ void    clear_pin(uint8_t port, uint8_t pin);
 uint8_t get_pin_state(uint8_t port, uint8_t pin);
 void    flash_led(uint8_t fast);
 
-// TODO: test collision support 
-
 /*  For use with the production board
     { 'D', 3 }, // 0 - pcint19
     { 'D', 5 }, // 1 - pcint21

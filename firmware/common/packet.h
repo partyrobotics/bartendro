@@ -27,6 +27,7 @@ at some point.
 #define PACKET_IS_DISPENSING        11  // requires response
 #define PACKET_LIQUID_LEVEL         12  // requires response
 #define PACKET_UPDATE_LIQUID_LEVEL  13 // requires a few ms of quiet time while measurements are taken
+#define PACKET_ID_CONFLICT          14
 #define PACKET_COMM_TEST            0xFE
 
 #define DEST_BROADCAST         0xFF

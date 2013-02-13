@@ -390,6 +390,14 @@ void comm_test(void)
     sei();
 }
 
+void id_conflict(void)
+{
+    // we failed to get an address. stop and wait for a reset
+    set_led_rgb(255, 0, 0);
+    for(; !check_reset();)
+        ;
+}
+
 int main(void)
 {
     uint8_t id, rec, i;
@@ -420,13 +428,6 @@ int main(void)
 
         sei();
         id = address_exchange();
-        if (id == 0xFF)
-        {
-            // we failed to get an address. stop and wait for a reset
-            for(; !check_reset();)
-                ;
-            continue;
-        }
 
         for(; !check_reset();)
         {
@@ -486,6 +487,10 @@ int main(void)
 
                     case PACKET_COMM_TEST:
                         comm_test();
+                        break;
+
+                    case PACKET_ID_CONFLICT:
+                        id_conflict();
                         break;
                 }
             }
