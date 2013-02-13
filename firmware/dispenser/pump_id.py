@@ -3,15 +3,18 @@
 import sys
 import struct
 import subprocess
+import random
+import argparse
 
-if len(sys.argv) != 3:
-    print "%s <output file> <id>\n" % (sys.argv[0])
-    sys.exit(-1)
+random.seed()
+parser = argparse.ArgumentParser()
+parser.add_argument("file", help="The filename to write the pump id to")
+parser.add_argument("id", nargs='?', help="The pump id to write to the file.", type=int, default=random.randint(0, 254))
+args = parser.parse_args()
 
-id = int(sys.argv[2])
 try:
-    f = open(sys.argv[1], "w")
-    f.write(struct.pack("b", id))
+    f = open(args.file, "w")
+    f.write(struct.pack("B", args.id))
     f.close()
 except IOError, e:
     print "Error: ", e
@@ -19,5 +22,5 @@ except IOError, e:
 
 #cmd = "sudo avrdude -p m168 -P usb -c avrispmkII -U eeprom:w:%s:r -B 1.0" % sys.argv[1]
 #subprocess.check_output(cmd)
-print "Pump id %d written to %s" % (id, sys.argv[1])
+print "Pump id %d written to %s" % (args.id, sys.argv[1])
 sys.exit(0)
