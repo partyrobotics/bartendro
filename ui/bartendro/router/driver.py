@@ -132,6 +132,7 @@ class RouterDriver(object):
             self.select(disp)
             sleep(.01)
             while True:
+                self.ser.flushInput()
                 self.ser.write("???") 
                 data = self.ser.read(3)
                 for ch in data:
@@ -170,6 +171,7 @@ class RouterDriver(object):
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
+        self.num_dispensers = 7
         self.led_idle()
 
     def close(self):
@@ -456,6 +458,7 @@ def comm_test(md):
 if __name__ == "__main__":
     md = RouterDriver("/dev/ttyAMA0", 0)
     md.open()
+    led_test(md)
 
 #    sleep(3)
 #    print "Ping:"
