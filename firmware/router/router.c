@@ -90,6 +90,9 @@ void setup(void)
     TWDR = 0x0;  
     TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWEA);  
 
+    // Turn sync off to start with
+    g_sync = 0;
+
     sei();
 }
 
@@ -400,18 +403,20 @@ uint8_t check_reset(void)
 
 int main (void)
 {
-    uint8_t reset = 0;
+    uint8_t reset = 0, i;
 
     for(;;)
     {
-        g_sync = 0;
-
         setup();
+        for(i = 0; i < 5; i++)
+        {
+            sbi(PORTC, 3);
+            _delay_ms(10);
+            cbi(PORTC, 3);
+            _delay_ms(10);
+        }
         reset_dispensers();
 
-        cli();
-        g_sync = 0;
-        sei();
         for(;;)
         {
             cli();
