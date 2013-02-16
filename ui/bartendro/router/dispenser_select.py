@@ -30,7 +30,7 @@ class DispenserSelect(object):
         self.max_dispensers = max_dispensers
         self.router = None
         self.num_dispensers = 3
-        self.selected = 0
+        self.selected = 255 
 
     def reset(self):
         if self.software_only: return
