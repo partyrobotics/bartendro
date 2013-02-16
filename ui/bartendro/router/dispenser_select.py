@@ -4,7 +4,7 @@ import sys
 import os
 from time import sleep
 
-ROUTER_BUS              = 0
+ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
 ROUTER_SELECT_CMD_BEGIN = 0
 ROUTER_CMD_SYNC_ON      = 251

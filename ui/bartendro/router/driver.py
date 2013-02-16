@@ -88,7 +88,8 @@ class RouterDriver(object):
 
     def reset(self):
         if self.software_only: return
-        self.dispenser_select.reset()
+        self.close()
+        self.open()
 
     def select(self, dispenser):
         if self.software_only: return True
@@ -175,9 +176,9 @@ class RouterDriver(object):
     def close(self):
         if self.software_only: return
         self.ser.close()
-        self.bus.close()
         self.ser = None
-        self.bus = None
+        self.status = None
+        self.dispenser_select = None
 
     def crc16_update(self, crc, a):
         crc ^= a
