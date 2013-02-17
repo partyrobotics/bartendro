@@ -1,8 +1,8 @@
 html, body {
     height: 100%;
     margin: 0;
-    background-color: #DADADA;
     font-family: sans-serif;
+    background-color: #DADADA;
 }
 
 #content {
@@ -19,6 +19,7 @@ html, body {
 .fill { 
     min-height: 100%;
     height: 100%;
+    background-color: #DADADA;
 }
 
 #orange-border {
