@@ -1,13 +1,12 @@
 {% extends 'layout' %}
 {% block body %}
-<div>
+<div id="scroll-pane">
     {% if top_drinks or other_drinks %}
-        <div class="home_section_header">THE ESSENTIALS</div>
+        <h1>essentials</h1>
         {{ drink_table(top_drinks) }}
-        <div class="home_section_header">THE WILD SIDE</div>
+        <h1>speshulties</h1>
         {{ drink_table(other_drinks) }}
     {% else %}
-        <br/> <br/> <br/>
         <div class="out-of-booze">
             Bartendro can make no drinks at this time. We're sorry!
         </div>
@@ -45,32 +44,23 @@ $(document).ready(function() {
 </script>
 {% endblock %}
 {% macro drink_table(drinks) -%}
-    <table class="home_table">
     {% for drink in drinks %}
       {% if (loop.index0 % 2) == 0 %}
-         <tr> 
+         <div class="row-fluid">
       {% endif %}
-      <td class="drink" >
-      	<a href="/drink/{{ drink.id }}">
-            <div class="sub">
-                <div class="home_drink_name">{{ drink.name.name }}</div>
-                </br> 
-                <div class="home_drink_ingredients">
-                {% for ing in drink.ingredients %}
-                   {{ ing.name }}{% if not loop.last %}, {% endif %}
-                   
-                {% endfor %}
-                </div>
-                <div class="home_drink_desc">{{ drink.desc }}</div>
-            </div>
-      	<a>
-      </td>
-     
+      <div class="span6 menuitem">
+        <button class="btn btn-large btn-warning btn-block" style="margin-bottom: 8px;" 
+                type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</button>
+        <div class="ingredients">
+            {% for ing in drink.ingredients %}
+               {{ ing.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+       </div>
       {% if (loop.index0 % 2) == 1 %}
-         </tr> 
+         </div> 
       {% endif %}
     {% else %}
-        <tr><td class="out-of-booze">No drinks from this section can currently be made.</td></tr>
+        <div>No drinks from this section can currently be made.</div>
     {% endfor %}
     </table>
 {% endmacro %}
