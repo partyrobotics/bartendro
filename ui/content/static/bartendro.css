@@ -75,9 +75,19 @@ h3 {
 }
 
 .btn-large {
-    font-size: 15pt;
     border-width: 2px;
     border-color: #4788BF;
+}
+
+.drink-btn {
+    font-size: 15pt;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.drink-plus-minus {
+    font-size: 25pt;
+    font-weight: bold;
     text-align: left;
     padding-left: 20px;
 }
@@ -95,6 +105,36 @@ h3 {
     font-size: 15pt;
 }
 
-table.ing-table{
+.dispense-stack-element {
+    padding-top: 20px;
+}
+
+table {
     width: 100%;
+}
+
+.margin-td {
+    width: 5%;
+}
+
+.main-td {
+    width: 90%;
+    text-align: center;
+}
+
+.margin-td-label {
+    font-weight: bold;
+    text-align: center;
+}
+
+.adjust-middle {
+    font-size: 15pt;
+    font-weight: bold;
+}
+
+.stack-element-title {
+    color: #005991;
+    font-weight: normal;
+    font-size: 22pt;
+    padding-left: 10px;
 }

@@ -23,52 +23,68 @@
           </div>
       </div>
       <div class="span7">
-          <div class="dispense_stack">
-            {% if is_custom %}
-                <div class="dispense_stack_element dispense_stack_booze">
-                  <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
-                  <select class="dispense_stack_booze_select" id="booze_select" onchange="change_alcohol()">
-                  {% for bgb in booze_group.booze_group_boozes %}
-                    <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-            {% endif %}
-
+          <div class="dispense-stack">
             {% if show_size %}
-                <div class="dispense_stack_element dispense_stack_size">
-                  <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
-                  <table class="dispense_stack_table">
+                <div class="dispense-stack-element">
+                  <table>
                   <tr>
-                     <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
-                     <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
-                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+                     <td></td>
+                     <td><div class="stack-element-title">size</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="size_smaller()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle">4 fluid ounces</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="size_bigger()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">smaller</td>
+                     <td></td>
+                     <td class="margin-td-label">bigger</td>
                   </tr>
                   </table>
                 </div>
             {% endif %}
 
             {% if show_strength %}
-                <div class="dispense_stack_element dispense_stack_strength">
-                  <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
-                  <table class="dispense_stack_table">
+                <div class="dispense-stack-element">
+                  <table>
                   <tr>
-                     <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
-                     <td style="text-align: center"><p id="strength_text">normal</p></td>
-                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
+                     <td></td>
+                     <td><div class="stack-element-title">strength</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_weaker()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle">normal</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_stronger()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">weaker</td>
+                     <td></td>
+                     <td class="margin-td-label">stronger</td>
                   </tr>
                   </table>
                 </div>
             {% endif %}
 
             {% if show_sweet_tart %}
-                <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
-                  <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
-                  <table class="dispense_stack_table">
+                <div class="dispense-stack-element">
+                  <table>
                   <tr>
-                     <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
-                     <td style="text-align: center"><p id="tartness_text">normal</p></td>
-                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
+                     <td></td>
+                     <td><div class="stack-element-title">sweet/tart</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_sweeter()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle">normal</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_tarter()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">sweeter</td>
+                     <td></td>
+                     <td class="margin-td-label">tarter</td>
                   </tr>
                   </table>
                 </div>
