@@ -1,8 +1,7 @@
 {% extends 'layout' %}
 {% block body %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', file='sobriety.css') }}">
-<div class="drink_content">
-  <div class="drink_heading">Make: {{ drink.name.name }}</div>
+<div class="drink-content">
+  <div class="drink-heading">Make: {{ drink.name.name }}</div>
   <div>
       <div class="dispense_drink_detail">
          <div class="pour_desc">
@@ -77,33 +76,6 @@
       </div>
   </div>
 </div>
-<div class="sobriety">
-    <div class="instructions">
-        <p>
-        The drink you want contains expensive booze.
-        As Lunarvillian, we understand that you're a professional,
-        but we have to require you to prove that you are sober
-        enough to appreciate good booze.
-        </p>
-        <p>
-        A few seconds after you press the start button, another button
-        will appear in a randomly spot on the screen. Click it as fast as 
-        you can. If you can't click it fast enough, <em><b>no good
-        booze for you</b></em>!
-        </p>
-        <p style="text-align: center; width: 100%">
-           <button class="start_button" onclick="start_me()">start!</button>
-        </p>
-    </div>
-    <div class="clickme">
-        <button class="clickme_button" onclick="click_me()">CLICK ME</button>
-    </div>    
-    <div class="result">
-        <b>Your time: <span id="result_time"></span> milliseconds.</b></br>
-        <p id="result_message"></p></br>
-        <button class="result_button" id="onward" onclick="onward()">try again</button>
-    </div>    
-</div>    
 <script type="text/javascript">
 
 var taster_size = 1;
@@ -274,16 +246,7 @@ function back()
     window.location = "/";
 }
 
-{% if show_sobriety %}
-    function make_drink(drink, is_taster)
-    {
-        drink_to_make = drink;
-        sobriety_test();
-    }
-    function make_drink_passed(drink, is_taster)
-{% else %}
-   function make_drink(drink, is_taster)
-{% endif %}
+function make_drink(drink, is_taster)
 {
     for(i = 0; i < ing.length; i++)
     {
@@ -312,57 +275,6 @@ function back()
                     window.location = "/";
             }
     });
-}
-
-function sobriety_test()
-{
-    $(".drink_content").hide();
-    $(".bottom_row").hide();
-    $(".sobriety").show();
-    $(".instructions").show();
-}
-
-function start_me()
-{
-    var date = new Date();
-    start_time = date.getTime();
-    x = Math.floor(Math.random() * max_x);
-    y = Math.floor(Math.random() * max_y);
-
-    $(".instructions").hide();
-    $(".clickme").show();
-    $(".clickme_button").css({left : x, top : y});
-}
-function click_me()
-{
-    var date = new Date();
-    elapsed = date.getTime() - start_time;
-    $("#result_time").text(elapsed+'');
-    if (elapsed > acceptable_speed)
-    {
-        $("#onward").text("no booze for you!");
-        $("#result_message").text("You suck! You're too drunk to get good booze!");
-    }
-    else
-    {
-        $("#onward").text("booze me up!");
-        $("#result_message").text("Good job! You can haz good booze!");
-    }
-        
-    $(".clickme").hide();
-    $(".result").show();
-}
-function onward()
-{
-    if (elapsed > acceptable_speed)
-    {
-        window.location = "/";
-        return;
-    }
-    $(".result").hide();
-    $(".drink_content").show();
-    $(".bottom_row").show();
-    make_drink_passed(drink_to_make, 0);
 }
 </script>
 <script type="text/javascript" src="{{ url_for('static', file='js/jquery.simplemodal.1.4.2.min.js') }}"></script>

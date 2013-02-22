@@ -35,11 +35,12 @@ html, body {
     border-style: solid;
     border-width: 2px;
     border-color: #B98160;
-    padding: 25px;
+    padding: 4px;
     background-color: white;
 }
 
 #scroll-pane {
+    padding: 20px;
 }
 
 .menuitem
@@ -72,3 +73,12 @@ h1 {
     text-align: left;
     padding-left: 20px;
 }
+
+.drink-heading {
+    color: white;
+    background-color: #005991;
+    border-radius: 5px;
+    font-size: 30pt;
+    padding: 25px;
+}
+
