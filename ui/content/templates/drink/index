@@ -34,7 +34,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="size_smaller()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle">4 fluid ounces</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">4 fluid ounces</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
@@ -56,7 +56,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_weaker()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle">normal</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="strength-text">normal</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_stronger()">+</a> </td>
                   </tr>
                   <tr>
@@ -78,7 +78,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_sweeter()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle">normal</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="tartness-text">normal</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_tarter()">+</a> </td>
                   </tr>
                   <tr>
@@ -89,10 +89,19 @@
                   </table>
                 </div>
             {% endif %}
+
+              <table class="dispense-buttons">
+              <tr>
+                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button" onclick="back()">Back</a></td>
+                <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
+                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
+              </tr>
+              </table>
           </div>
       </div>
   </div>
 </div>
+<script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
 <script type="text/javascript">
 
 var taster_size = 1;
@@ -182,7 +191,7 @@ function size_bigger()
         return;
 
     drink_size += 1;
-    $("#size_text").text(drink_size + " fluid ounces");
+    $("#size-text").text(drink_size + " fluid ounces");
     update_volumes();
 }
 
@@ -192,7 +201,7 @@ function size_smaller()
         return;
 
     drink_size -= 1;
-    $("#size_text").text(drink_size + " fluid ounces");
+    $("#size-text").text(drink_size + " fluid ounces");
     update_volumes();
 }
 
@@ -207,7 +216,7 @@ function set_strength_text()
         case 1: t = "stronger"; break;
         case 2: t = "really strong!"; break;
     }
-    $("#strength_text").text(t);
+    $("#strength-text").text(t);
 }
 function strength_stronger()
 {
@@ -238,7 +247,7 @@ function set_tartness_text()
         case 1: t = "tarter"; break;
         case 2: t = "really tart!"; break;
     }
-    $("#tartness_text").text(t);
+    $("#tartness-text").text(t);
 }
 function tartness_tarter()
 {
@@ -274,13 +283,13 @@ function make_drink(drink, is_taster)
         args += "booze" + ing[i].id + "=";
         args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
     }
-    lb = '<div class="lb_box"> <p class="lb_heading">';
+    lb = '<div class="lb-box"><h1>';
     if (is_taster)
-        lb += 'Serving a taste of'
+        lb += 'Now serving a taste of'
     else
-        lb += 'Serving Your'
-    lb += '</p></br><p class="lb_drink">{{ drink.name.name }}</p>';
-    lb += "</p></div>";
+        lb += 'Now serving your'
+    lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
+    lb += "</div>";
     $.modal(lb, { 'escClose' : false });
     $.ajax({
             url: "/ws/drink/" + drink + args,
@@ -295,15 +304,4 @@ function make_drink(drink, is_taster)
 }
 </script>
 <script type="text/javascript" src="{{ url_for('static', file='js/jquery.simplemodal.1.4.2.min.js') }}"></script>
-{% endblock %}
-{% block footer %}
-<table class="bottom_row"> 
-<tr>
-   <td><button type="button" class="bottom_row_button" onclick="back()">back</button></td>
-   {% if show_taster %}
-      <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id}}, 1)">taster</button></td>
-   {% endif %}
-   <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }}, 0)">pour!</button></td>
-</tr>
-</table>
 {% endblock %}

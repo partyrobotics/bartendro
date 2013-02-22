@@ -12,8 +12,8 @@
       <div class="container-fluid fill">
         <div id="moar">
             <div id="content">
-                <div id="orange-border">
-                    <div id="dark-border">
+                <div class="orange-border">
+                    <div class="dark-border">
                        {% block body %}{% endblock %}
                     </div>
                 </div>
