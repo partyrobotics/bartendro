@@ -71,7 +71,10 @@ class RouterDriver(object):
         self.software_only = software_only
         self.dispenser_select = None
         self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
-        self.num_dispensers = 0 
+        if software_only:
+            self.num_dispensers = MAX_DISPENSERS
+        else:
+            self.num_dispensers = 0 
 
     def log(self, msg):
         return
@@ -173,7 +176,7 @@ class RouterDriver(object):
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
-        self.num_dispensers = 7
+        #self.num_dispensers = 7
         self.led_idle()
 
     def close(self):

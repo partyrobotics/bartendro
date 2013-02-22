@@ -1,109 +1,107 @@
 {% extends 'layout' %}
 {% block body %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', file='sobriety.css') }}">
-<div class="drink_content">
-  <div class="drink_heading">Make: {{ drink.name.name }}</div>
-  <div>
-      <div class="dispense_drink_detail">
-         <div class="pour_desc">
-            <p>{{ drink.desc }}</p>
-         </div>
-         <div class="pour_ing">
-            <br/>
-            ingredients:
-            <table class="ing_table">
-              {% for ing in drink.ingredients %}
-                  <tr>
-                     <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
-                     <td id="booze{{ ing.id }}" style="text-align: right"></td>
-                     <td>fl oz</td>
-                  </tr>
-              {% endfor %}
-            </table>
-         </div>
+<div class="drink-content">
+  <div class="drink-heading">Make: {{ drink.name.name }}</div>
+  <div class="row-fluid">
+      <div class="span5">
+          <div class="dispense-drink-detail">
+             <div class="pour-desc">
+                {{ drink.desc }}
+             </div>
+             <h3>ingredients:</h3>
+             <div class="pour-ing">
+                <table class="ing-table">
+                  {% for ing in drink.ingredients %}
+                      <tr>
+                         <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
+                         <td id="booze{{ ing.id }}" style="text-align: right"></td>
+                         <td>fl oz</td>
+                      </tr>
+                  {% endfor %}
+                </table>
+             </div>
+          </div>
       </div>
+      <div class="span7">
+          <div class="dispense-stack">
+            {% if show_size %}
+                <div class="dispense-stack-element">
+                  <table>
+                  <tr>
+                     <td></td>
+                     <td><div class="stack-element-title">size</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="size_smaller()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">4 fluid ounces</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="size_bigger()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">smaller</td>
+                     <td></td>
+                     <td class="margin-td-label">bigger</td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
 
-      <div class="dispense_stack">
-        {% if is_custom %}
-            <div class="dispense_stack_element dispense_stack_booze">
-              <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
-              <select class="dispense_stack_booze_select" id="booze_select" onchange="change_alcohol()">
-              {% for bgb in booze_group.booze_group_boozes %}
-                <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
-              {% endfor %}
-              </select>
-            </div>
-        {% endif %}
+            {% if show_strength %}
+                <div class="dispense-stack-element">
+                  <table>
+                  <tr>
+                     <td></td>
+                     <td><div class="stack-element-title">strength</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_weaker()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle" id="strength-text">normal</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_stronger()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">weaker</td>
+                     <td></td>
+                     <td class="margin-td-label">stronger</td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
 
-        {% if show_size %}
-            <div class="dispense_stack_element dispense_stack_size">
-              <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
-              <table class="dispense_stack_table">
+            {% if show_sweet_tart %}
+                <div class="dispense-stack-element">
+                  <table>
+                  <tr>
+                     <td></td>
+                     <td><div class="stack-element-title">sweet/tart</div></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_sweeter()">-</a> </td>
+                     <td class="main-td"><div class="adjust-middle" id="tartness-text">normal</div></td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_tarter()">+</a> </td>
+                  </tr>
+                  <tr>
+                     <td class="margin-td-label">sweeter</td>
+                     <td></td>
+                     <td class="margin-td-label">tarter</td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
+
+              <table class="dispense-buttons">
               <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
-                 <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button" onclick="back()">Back</a></td>
+                <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
+                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
               </tr>
               </table>
-            </div>
-        {% endif %}
-
-        {% if show_strength %}
-            <div class="dispense_stack_element dispense_stack_strength">
-              <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
-              <table class="dispense_stack_table">
-              <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
-                 <td style="text-align: center"><p id="strength_text">normal</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
-              </tr>
-              </table>
-            </div>
-        {% endif %}
-
-        {% if show_sweet_tart %}
-            <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
-              <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
-              <table class="dispense_stack_table">
-              <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
-                 <td style="text-align: center"><p id="tartness_text">normal</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
-              </tr>
-              </table>
-            </div>
-        {% endif %}
-
+          </div>
       </div>
   </div>
 </div>
-<div class="sobriety">
-    <div class="instructions">
-        <p>
-        The drink you want contains expensive booze.
-        As Lunarvillian, we understand that you're a professional,
-        but we have to require you to prove that you are sober
-        enough to appreciate good booze.
-        </p>
-        <p>
-        A few seconds after you press the start button, another button
-        will appear in a randomly spot on the screen. Click it as fast as 
-        you can. If you can't click it fast enough, <em><b>no good
-        booze for you</b></em>!
-        </p>
-        <p style="text-align: center; width: 100%">
-           <button class="start_button" onclick="start_me()">start!</button>
-        </p>
-    </div>
-    <div class="clickme">
-        <button class="clickme_button" onclick="click_me()">CLICK ME</button>
-    </div>    
-    <div class="result">
-        <b>Your time: <span id="result_time"></span> milliseconds.</b></br>
-        <p id="result_message"></p></br>
-        <button class="result_button" id="onward" onclick="onward()">try again</button>
-    </div>    
-</div>    
+<script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
 <script type="text/javascript">
 
 var taster_size = 1;
@@ -193,7 +191,7 @@ function size_bigger()
         return;
 
     drink_size += 1;
-    $("#size_text").text(drink_size + " fluid ounces");
+    $("#size-text").text(drink_size + " fluid ounces");
     update_volumes();
 }
 
@@ -203,7 +201,7 @@ function size_smaller()
         return;
 
     drink_size -= 1;
-    $("#size_text").text(drink_size + " fluid ounces");
+    $("#size-text").text(drink_size + " fluid ounces");
     update_volumes();
 }
 
@@ -218,7 +216,7 @@ function set_strength_text()
         case 1: t = "stronger"; break;
         case 2: t = "really strong!"; break;
     }
-    $("#strength_text").text(t);
+    $("#strength-text").text(t);
 }
 function strength_stronger()
 {
@@ -249,7 +247,7 @@ function set_tartness_text()
         case 1: t = "tarter"; break;
         case 2: t = "really tart!"; break;
     }
-    $("#tartness_text").text(t);
+    $("#tartness-text").text(t);
 }
 function tartness_tarter()
 {
@@ -274,16 +272,7 @@ function back()
     window.location = "/";
 }
 
-{% if show_sobriety %}
-    function make_drink(drink, is_taster)
-    {
-        drink_to_make = drink;
-        sobriety_test();
-    }
-    function make_drink_passed(drink, is_taster)
-{% else %}
-   function make_drink(drink, is_taster)
-{% endif %}
+function make_drink(drink, is_taster)
 {
     for(i = 0; i < ing.length; i++)
     {
@@ -294,13 +283,13 @@ function back()
         args += "booze" + ing[i].id + "=";
         args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
     }
-    lb = '<div class="lb_box"> <p class="lb_heading">';
+    lb = '<div class="lb-box"><h1>';
     if (is_taster)
-        lb += 'Serving a taste of'
+        lb += 'Now serving a taste of'
     else
-        lb += 'Serving Your'
-    lb += '</p></br><p class="lb_drink">{{ drink.name.name }}</p>';
-    lb += "</p></div>";
+        lb += 'Now serving your'
+    lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
+    lb += "</div>";
     $.modal(lb, { 'escClose' : false });
     $.ajax({
             url: "/ws/drink/" + drink + args,
@@ -313,68 +302,6 @@ function back()
             }
     });
 }
-
-function sobriety_test()
-{
-    $(".drink_content").hide();
-    $(".bottom_row").hide();
-    $(".sobriety").show();
-    $(".instructions").show();
-}
-
-function start_me()
-{
-    var date = new Date();
-    start_time = date.getTime();
-    x = Math.floor(Math.random() * max_x);
-    y = Math.floor(Math.random() * max_y);
-
-    $(".instructions").hide();
-    $(".clickme").show();
-    $(".clickme_button").css({left : x, top : y});
-}
-function click_me()
-{
-    var date = new Date();
-    elapsed = date.getTime() - start_time;
-    $("#result_time").text(elapsed+'');
-    if (elapsed > acceptable_speed)
-    {
-        $("#onward").text("no booze for you!");
-        $("#result_message").text("You suck! You're too drunk to get good booze!");
-    }
-    else
-    {
-        $("#onward").text("booze me up!");
-        $("#result_message").text("Good job! You can haz good booze!");
-    }
-        
-    $(".clickme").hide();
-    $(".result").show();
-}
-function onward()
-{
-    if (elapsed > acceptable_speed)
-    {
-        window.location = "/";
-        return;
-    }
-    $(".result").hide();
-    $(".drink_content").show();
-    $(".bottom_row").show();
-    make_drink_passed(drink_to_make, 0);
-}
 </script>
 <script type="text/javascript" src="{{ url_for('static', file='js/jquery.simplemodal.1.4.2.min.js') }}"></script>
-{% endblock %}
-{% block footer %}
-<table class="bottom_row"> 
-<tr>
-   <td><button type="button" class="bottom_row_button" onclick="back()">back</button></td>
-   {% if show_taster %}
-      <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id}}, 1)">taster</button></td>
-   {% endif %}
-   <td><button type="button" class="bottom_row_button" onclick="make_drink({{ drink.id }}, 0)">pour!</button></td>
-</tr>
-</table>
 {% endblock %}
