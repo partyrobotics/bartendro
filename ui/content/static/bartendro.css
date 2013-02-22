@@ -1,7 +1,7 @@
 html, body {
     height: 100%;
     margin: 0;
-    font-family: sans-serif;
+    font-family: Verdana, Geneva, sans-serif;
     background-color: #DADADA;
 }
 
@@ -54,10 +54,20 @@ html, body {
 }
 
 h1 {
-    color: #005C97;
+    color: #005991;
+    font-weight: normal;
+    font-size: 24pt;
 }
 
 .ingredients {
     font-weight: bold;
     margin-bottom: 8px;
+}
+
+.btn-large {
+    font-size: 15pt;
+    border-width: 2px;
+    border-color: #4788BF;
+    text-align: left;
+    padding-left: 20px;
 }

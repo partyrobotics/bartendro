@@ -2,10 +2,10 @@
 {% block body %}
 <div id="scroll-pane">
     {% if top_drinks or other_drinks %}
-        <h1>essentials</h1>
+        <h1>the essentials</h1>
         {{ drink_table(top_drinks) }}
         <div style=="clear: both"/>
-        <h1>speshulties</h1>
+        <h1>the wild side</h1>
 
         {{ drink_table(other_drinks) }}
     {% else %}
