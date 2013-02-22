@@ -4,9 +4,8 @@
     {% if top_drinks or other_drinks %}
         <h1>the essentials</h1>
         {{ drink_table(top_drinks) }}
-        <div style=="clear: both"/>
+        <div style="clear: both"/>
         <h1>the wild side</h1>
-
         {{ drink_table(other_drinks) }}
     {% else %}
         <div class="out-of-booze">
@@ -51,14 +50,16 @@ $(document).ready(function() {
          <div class="row-fluid">
       {% endif %}
       <div class="span6 menuitem">
-         <a class="btn btn-large btn-warning btn-block" style="margin-bottom: 8px;" 
-                type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
-         <div class="ingredients">
-            {% for ing in drink.ingredients %}
-               {{ ing.name }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-         </div>
-         <div>{{ drink.desc }}</div>
+         {% if not loop.last %}
+             <a class="btn btn-large btn-warning btn-block" style="margin-bottom: 8px;" 
+                    type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
+             <div class="ingredients">
+                {% for ing in drink.ingredients %}
+                   {{ ing.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+             </div>
+             <div>{{ drink.desc }}</div>
+         {% endif %}
       </div>
       {% if (loop.index0 % 2) == 1 %}
          </div> 
