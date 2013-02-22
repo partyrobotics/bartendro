@@ -175,7 +175,7 @@ class RouterDriver(object):
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
-        self.num_dispensers = 7
+        #self.num_dispensers = 7
         self.led_idle()
 
     def close(self):
