@@ -1,18 +1,19 @@
 {% extends 'layout' %}
 {% block body %}
-<div>
+<div id="scroll-pane">
     {% if top_drinks or other_drinks %}
-        <div class="home_section_header">THE ESSENTIALS</div>
+        <h1>the essentials</h1>
         {{ drink_table(top_drinks) }}
-        <div class="home_section_header">THE WILD SIDE</div>
+        <div style="clear: both"/>
+        <h1>the wild side</h1>
         {{ drink_table(other_drinks) }}
     {% else %}
-        <br/> <br/> <br/>
         <div class="out-of-booze">
             Bartendro can make no drinks at this time. We're sorry!
         </div>
     {% endif %}
 </div>
+<script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
 <script type="text/javascript">
 // defining flags
 var isCtrl = false;
@@ -45,32 +46,27 @@ $(document).ready(function() {
 </script>
 {% endblock %}
 {% macro drink_table(drinks) -%}
-    <table class="home_table">
     {% for drink in drinks %}
       {% if (loop.index0 % 2) == 0 %}
-         <tr> 
+         <div class="row-fluid">
       {% endif %}
-      <td class="drink" >
-      	<a href="/drink/{{ drink.id }}">
-            <div class="sub">
-                <div class="home_drink_name">{{ drink.name.name }}</div>
-                </br> 
-                <div class="home_drink_ingredients">
+      <div class="span6 menuitem">
+         {% if not loop.last %}
+             <a class="btn btn-large btn-warning btn-block drink-btn" style="margin-bottom: 8px;" 
+                    type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
+             <div class="ingredients">
                 {% for ing in drink.ingredients %}
                    {{ ing.name }}{% if not loop.last %}, {% endif %}
-                   
                 {% endfor %}
-                </div>
-                <div class="home_drink_desc">{{ drink.desc }}</div>
-            </div>
-      	<a>
-      </td>
-     
+             </div>
+             <div>{{ drink.desc }}</div>
+         {% endif %}
+      </div>
       {% if (loop.index0 % 2) == 1 %}
-         </tr> 
+         </div> 
       {% endif %}
     {% else %}
-        <tr><td class="out-of-booze">No drinks from this section can currently be made.</td></tr>
+        <div>No drinks from this section can currently be made.</div>
     {% endfor %}
     </table>
 {% endmacro %}

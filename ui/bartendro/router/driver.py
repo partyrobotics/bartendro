@@ -70,7 +70,10 @@ class RouterDriver(object):
         self.software_only = software_only
         self.dispenser_select = None
         self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
-        self.num_dispensers = 0 
+        if software_only:
+            self.num_dispensers = MAX_DISPENSERS
+        else:
+            self.num_dispensers = 0 
 
     def log(self, msg):
         return

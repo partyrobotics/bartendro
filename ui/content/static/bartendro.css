@@ -1,0 +1,186 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Verdana, Geneva, sans-serif;
+    background-color: #DADADA;
+}
+
+#content {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    display: block;
+}
+
+#moar {
+    padding: 20px;
+}
+
+.fill { 
+    min-height: 100%;
+    height: 100%;
+    background-color: #DADADA;
+}
+
+.orange-border {
+    border-radius: 15px;
+    border-style: solid;
+    border-width: 12px;
+    border-color: #D9A180;
+    background-color: #D9A180;
+}
+
+.dark-border {
+    border-radius: 7px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #B98160;
+    padding: 4px;
+    background-color: white;
+}
+
+#scroll-pane {
+    padding: 20px;
+}
+
+.menuitem
+{
+    padding: 8px;
+    font-size: 15pt;
+}
+
+.menuitem-button {
+    display: block;
+    margin-bottom: 8px;
+}
+
+h1 {
+    color: #005991;
+    font-weight: normal;
+    font-size: 24pt;
+    padding-left: 10px;
+}
+
+h3 {
+    color: #005991;
+    font-weight: normal;
+    font-size: 16pt;
+    margin: 0px;
+    padding: 20px 0 0 0;
+}
+
+.ingredients {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.btn-large {
+    border-width: 2px;
+    border-color: #4788BF;
+}
+
+.drink-btn {
+    font-size: 15pt;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.drink-plus-minus {
+    font-size: 25pt;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.drink-heading {
+    color: white;
+    background-color: #005991;
+    border-radius: 5px;
+    font-size: 30pt;
+    padding: 25px;
+}
+
+.dispense-drink-detail {
+    padding: 20px 0 20px 20px; 
+    font-size: 15pt;
+}
+
+.dispense-stack {
+    padding: 0 20px 0 20px;
+}
+
+.dispense-stack-element {
+    padding-top: 20px;
+}
+
+table {
+    width: 100%;
+}
+
+.margin-td {
+    width: 5%;
+}
+
+.main-td {
+    width: 90%;
+    text-align: center;
+}
+
+.margin-td-label {
+    font-weight: bold;
+    text-align: center;
+}
+
+.adjust-middle {
+    font-size: 15pt;
+    font-weight: bold;
+}
+
+.stack-element-title {
+    color: #005991;
+    font-weight: normal;
+    font-size: 22pt;
+    padding-left: 10px;
+}
+
+.dispense-button {
+    width: 100px;
+}
+
+.dispense-buttons {
+    margin: 40px 0 20px 0;
+}
+
+.dispense-buttons-left {
+}
+
+.dispense-buttons-middle {
+    text-align: center;
+}
+
+.dispense-buttons-right {
+    font-weight: bold;
+    text-align: right;
+}
+
+.lb-box {
+    background-color: white;
+    float: center;
+    height:250px;   
+    width: 500px;
+    border-radius: 15px;
+    border-style: solid;
+    border-width: 12px;
+    border-color: #D9A180;
+    text-align: center;
+    overflow: hidden;
+    padding: 20px;
+    background-color: white;
+}
+
+.lb-drink {
+    padding-top: 50px;
+    font-weight: bold;
+    font-size: 35pt;
+    text-align: center;
+}
