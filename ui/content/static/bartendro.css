@@ -61,6 +61,14 @@ h1 {
     padding-left: 10px;
 }
 
+h3 {
+    color: #005991;
+    font-weight: normal;
+    font-size: 16pt;
+    margin: 0px;
+    padding: 20px 0 0 0;
+}
+
 .ingredients {
     font-weight: bold;
     margin-bottom: 8px;
@@ -82,3 +90,11 @@ h1 {
     padding: 25px;
 }
 
+.dispense-drink-detail {
+    padding: 20px;
+    font-size: 15pt;
+}
+
+table.ing-table{
+    width: 100%;
+}

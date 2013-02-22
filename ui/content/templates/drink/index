@@ -2,77 +2,78 @@
 {% block body %}
 <div class="drink-content">
   <div class="drink-heading">Make: {{ drink.name.name }}</div>
-  <div>
-      <div class="dispense_drink_detail">
-         <div class="pour_desc">
-            <p>{{ drink.desc }}</p>
-         </div>
-         <div class="pour_ing">
-            <br/>
-            ingredients:
-            <table class="ing_table">
-              {% for ing in drink.ingredients %}
-                  <tr>
-                     <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
-                     <td id="booze{{ ing.id }}" style="text-align: right"></td>
-                     <td>fl oz</td>
-                  </tr>
-              {% endfor %}
-            </table>
-         </div>
+  <div class="row-fluid">
+      <div class="span5">
+          <div class="dispense-drink-detail">
+             <div class="pour-desc">
+                {{ drink.desc }}
+             </div>
+             <h3>ingredients:</h3>
+             <div class="pour-ing">
+                <table class="ing-table">
+                  {% for ing in drink.ingredients %}
+                      <tr>
+                         <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
+                         <td id="booze{{ ing.id }}" style="text-align: right"></td>
+                         <td>fl oz</td>
+                      </tr>
+                  {% endfor %}
+                </table>
+             </div>
+          </div>
       </div>
+      <div class="span7">
+          <div class="dispense_stack">
+            {% if is_custom %}
+                <div class="dispense_stack_element dispense_stack_booze">
+                  <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
+                  <select class="dispense_stack_booze_select" id="booze_select" onchange="change_alcohol()">
+                  {% for bgb in booze_group.booze_group_boozes %}
+                    <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
+            {% endif %}
 
-      <div class="dispense_stack">
-        {% if is_custom %}
-            <div class="dispense_stack_element dispense_stack_booze">
-              <p>Select the {{ booze_group.name }} you'd like in your {{ custom_drink.name }}:</p>
-              <select class="dispense_stack_booze_select" id="booze_select" onchange="change_alcohol()">
-              {% for bgb in booze_group.booze_group_boozes %}
-                <option value="{{ bgb.booze_id }}">{{ bgb.booze.name }}</option>
-              {% endfor %}
-              </select>
-            </div>
-        {% endif %}
+            {% if show_size %}
+                <div class="dispense_stack_element dispense_stack_size">
+                  <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
+                  <table class="dispense_stack_table">
+                  <tr>
+                     <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
+                     <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
+                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
 
-        {% if show_size %}
-            <div class="dispense_stack_element dispense_stack_size">
-              <p>Suggested drink size is {{ drink.sugg_size }} fluid ounces:</p>
-              <table class="dispense_stack_table">
-              <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="size_smaller()">smaller</button></td>
-                 <td style="text-align: center"><p id="size_text">4 fluid ounces</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="size_bigger()">bigger</button></td>
-              </tr>
-              </table>
-            </div>
-        {% endif %}
+            {% if show_strength %}
+                <div class="dispense_stack_element dispense_stack_strength">
+                  <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
+                  <table class="dispense_stack_table">
+                  <tr>
+                     <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
+                     <td style="text-align: center"><p id="strength_text">normal</p></td>
+                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
 
-        {% if show_strength %}
-            <div class="dispense_stack_element dispense_stack_strength">
-              <p>Select your drink strength: <span id="dispense_stack_strength_text"></span></p>
-              <table class="dispense_stack_table">
-              <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="strength_weaker()">weaker</button></td>
-                 <td style="text-align: center"><p id="strength_text">normal</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="strength_stronger()">stronger</button></td>
-              </tr>
-              </table>
-            </div>
-        {% endif %}
-
-        {% if show_sweet_tart %}
-            <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
-              <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
-              <table class="dispense_stack_table">
-              <tr>
-                 <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
-                 <td style="text-align: center"><p id="tartness_text">normal</p></td>
-                 <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
-              </tr>
-              </table>
-            </div>
-        {% endif %}
-
+            {% if show_sweet_tart %}
+                <div class="dispense_stack_element dispense_stack_tartness" style="border-bottom: none">
+                  <p>Select how sweet or tart you like your drink: <span id="dispense_stack_tartness_text"></span></p>
+                  <table class="dispense_stack_table">
+                  <tr>
+                     <td><button type="button" class="biggersmaller small_button" onclick="tartness_sweeter()">sweeter</button></td>
+                     <td style="text-align: center"><p id="tartness_text">normal</p></td>
+                     <td style="text-align: right"><button type="button" class="biggersmaller small_button" onclick="tartness_tarter()">tarter</button></td>
+                  </tr>
+                  </table>
+                </div>
+            {% endif %}
+          </div>
       </div>
   </div>
 </div>
