@@ -51,16 +51,14 @@ $(document).ready(function() {
          <div class="row-fluid">
       {% endif %}
       <div class="span6 menuitem">
-         {% if not loop.last %}
-             <a class="btn btn-large btn-warning btn-block drink-btn" style="margin-bottom: 8px;" 
-                    type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
-             <div class="ingredients">
-                {% for ing in drink.ingredients %}
-                   {{ ing.name }}{% if not loop.last %}, {% endif %}
-                {% endfor %}
-             </div>
-             <div>{{ drink.desc }}</div>
-         {% endif %}
+         <a class="btn btn-large btn-warning btn-block drink-btn" style="margin-bottom: 8px;" 
+                type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
+         <div class="ingredients">
+            {% for ing in drink.ingredients %}
+               {{ ing.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+         </div>
+         <div>{{ drink.desc }}</div>
       </div>
       {% if (loop.index0 % 2) == 1 %}
          </div> 
@@ -68,5 +66,9 @@ $(document).ready(function() {
     {% else %}
         <div>No drinks from this section can currently be made.</div>
     {% endfor %}
-    </table>
+    {% if (drinks|count % 2 == 1) %}
+       <div class="row-fluid">
+          <div class="span6">&nbsp;</div>
+       </div>
+    {% endif %}
 {% endmacro %}
