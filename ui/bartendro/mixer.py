@@ -5,14 +5,12 @@ from flask import Flask, current_app
 from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
+from bartendro import db
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 from bartendro.model import drink_log
-
-app = Flask(__name__)
-db = SQLAlchemy(app)
 
 TICKS_PER_ML = 2.6
 CALIBRATE_ML = 60 

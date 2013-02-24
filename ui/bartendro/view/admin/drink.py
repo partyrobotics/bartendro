@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from operator import itemgetter
-from werkzeug.utils import redirect
+from bartendro import app, db
+from flask import Flask, request, redirect, render_template
 from wtforms import Form, TextField, SelectField, DecimalField, validators, HiddenField
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
@@ -13,14 +13,14 @@ from bartendro import constant
 
 MAX_BOOZES_PER_DRINK = 8
 
-@expose('/admin/drink')
-def view(request):
-    drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
+@app.route('/admin/drink')
+def admin_drink():
+    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
     class F(DrinkForm):
         pass
 
-    boozes = session.query(Booze).order_by(Booze.id).all()
+    boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
     fields = []
@@ -44,14 +44,14 @@ def view(request):
 
     return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Drinks")
 
-@expose('/admin/drink/edit/<id>')
-def edit(request, id):
+@app.route('/admin/drink/edit/<id>')
+def admin_drink_edit(id):
 
     saved = int(request.args.get('saved', "0"))
     class F(DrinkForm):
         pass
 
-    boozes = session.query(Booze).order_by(Booze.id).all()
+    boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
@@ -85,14 +85,14 @@ def edit(request, id):
     form = F(obj=drink, drink_name=drink.name.name, **kwargs)
     for i, booze in enumerate(drink.drink_boozes):
         form["booze_name_%d" % i].data = "%d" % booze_list[booze.booze_id - 1][0]
-    drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
+    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
     return render_template("admin/drink", drinks=drinks, form=form, fields=fields, 
                            title="Drinks", saved=saved)
 
 
-@expose('/admin/drink/save')
-def save(request):
+@app.route('/admin/drink/save', methods=['POST'])
+def admin_drink_save():
 
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/drink')
@@ -104,7 +104,7 @@ def save(request):
             drink = Drink.query.filter_by(id=int(id)).first()
         else:
             drink = Drink()
-            session.add(drink)
+            db.session.add(drink)
 
         drink.name.name = form.data['drink_name']
         drink.desc = form.data['desc']
@@ -135,7 +135,7 @@ def save(request):
                 if dbi != 0:
                     for i, db in enumerate(drink.drink_boozes):
                         if db.id == dbi:
-                            session.delete(drink.drink_boozes[i])
+                            db.session.delete(drink.drink_boozes[i])
                             break
                 continue
 
@@ -152,13 +152,13 @@ def save(request):
                 booze = Booze.query.filter_by(id=dbn).first()
                 DrinkBooze(drink, booze, parts, 0)
 
-        session.commit()
-        mc = local.application.mc
+        db.session.commit()
+        mc = app.mc
         mc.delete("top_drinks")
         mc.delete("other_drinks")
         mc.delete("available_drink_list")
         return redirect('/admin/drink/edit/%d?saved=1' % drink.id)
 
-    drinks = session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
+    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
     return render_template("admin/drink", drinks=drinks, form=form, title="")

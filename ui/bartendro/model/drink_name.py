@@ -3,7 +3,6 @@ from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, UnicodeText, UniqueConstraint, Text
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, Base
 
 class DrinkName(db.Model):
     """

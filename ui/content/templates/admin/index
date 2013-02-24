@@ -10,8 +10,6 @@
         <li><a class="admin" href="admin/dispenser">Manage Dispensers</a></li>
         <li><a class="admin" href="admin/liquidout">Test liquid out sensors</a></li>
         <li><a class="admin" href="admin/report">Drink reports</a></li>
-        <li><a class="admin" href="admin/log/debug">Debug log</a></li>
-        <li><a class="admin" href="admin/log/comms">Comms log</a></li>
     </ul>
 </div>
 {% endblock %}

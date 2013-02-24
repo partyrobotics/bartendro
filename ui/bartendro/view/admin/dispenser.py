@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-from operator import itemgetter
 import memcache
-from werkzeug.utils import redirect
-from bartendro.utils import session, render_template, local, render_json, expose, validate_url, url_for, local
+from bartendro import app, db
+from flask import Flask, request, redirect, render_template
 from wtforms import Form, SelectField, IntegerField, validators
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.dispenser import Dispenser
 from bartendro.form.dispenser import DispenserForm
 from bartendro.mixer import CALIBRATE_ML
+from operator import itemgetter
 
-@expose('/admin/dispenser')
-def view(request):
-    driver = local.application.driver
+@app.route('/admin/dispenser')
+def dispenser():
+    driver = app.driver
     count = driver.count()
 
     saved = int(request.args.get('saved', "0"))
@@ -20,8 +20,8 @@ def view(request):
     class F(DispenserForm):
         pass
 
-    dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
-    boozes = session.query(Booze).order_by(Booze.id).all()
+    dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
+    boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
     states = [dispenser.out for dispenser in dispensers]
@@ -50,24 +50,23 @@ def view(request):
                            saved=saved,
                            states=states)
 
-@expose('/admin/dispenser/save')
-def save(request):
-
+@app.route('/admin/dispenser/save')
+def save():
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/dispenser')
 
     form = DispenserForm(request.form)
     if request.method == 'POST' and form.validate():
-        dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
+        dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
         for dispenser in dispensers:
             try:
                 dispenser.booze_id = request.form['dispenser%d' % dispenser.id]
                 dispenser.actual = request.form['actual%d' % dispenser.id]
             except KeyError:
                 continue
-        session.commit()
+        db.session.commit()
 
-    mc = local.application.mc
+    mc = app.mc
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")

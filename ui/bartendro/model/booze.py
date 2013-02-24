@@ -3,7 +3,6 @@ from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, UnicodeText, UniqueConstraint, Text, Index
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, Base
 
 BOOZE_TYPE_UNKNOWN = 0
 BOOZE_TYPE_ALCOHOL = 1

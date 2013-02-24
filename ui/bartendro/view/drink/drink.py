@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from werkzeug.utils import redirect
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for
 from bartendro.model.drink import Drink
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.custom_drink import CustomDrink
@@ -12,8 +10,8 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.dispenser import Dispenser
 from bartendro import constant 
 
-@expose('/drink/<id>')
-def view(request, id):
+@app.route('/drink/<id>')
+def drink(id):
     drink = session.query(Drink) \
                           .filter(Drink.id == id) \
                           .first() 
@@ -93,6 +91,6 @@ def view(request, id):
                            show_taster=show_taster,
                            show_sobriety=show_sobriety)
 
-@expose('/drink/sobriety')
-def sobriety(request):
+@app.route('/drink/sobriety')
+def drink_sobriety():
     return render_template("drink/sobriety")
