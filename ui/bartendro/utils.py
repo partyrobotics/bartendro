@@ -63,13 +63,13 @@ def validate_url(url):
     return urlparse(url)[0] in ALLOWED_SCHEMES
 
 def log(msg):
-    print msg
-    application.log.info(msg)
+    print msg.encode('utf-8')
+    application.log.info(msg.encode('utf-8'))
 
 def error(msg):
-    print msg
-    application.log.error(msg)
+    print msg.encode('utf-8')
+    application.log.error(msg.encode('utf-8'))
 
 def warn(msg):
-    print msg
-    application.log.warn(msg)
+    print msg.encode('utf-8')
+    application.log.warn(msg.encode('utf-8'))
