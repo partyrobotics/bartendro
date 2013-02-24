@@ -184,3 +184,15 @@ table {
     font-size: 35pt;
     text-align: center;
 }
+
+.dispenser-out {
+    display: inline;
+}
+
+.dispenser-warning {
+    display: inline;
+}
+
+.dispenser-ok {
+    display: inline;
+}

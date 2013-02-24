@@ -2,22 +2,29 @@
 <html>
 <head>
   <title>{{ title }}</title>
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <link rel="stylesheet" type="text/css" href="/static/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/static/bartendro.css">
   <link rel="icon" type="image/vnd.microsoft.icon" href="/static/images/icon.ico">
-  <script type="text/javascript" src="/static/js/jquery.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.tmpl.min.js"></script>
 </head>
-<body>
-<div class="admin_top_bar"><p>Admin</p></div>
-  <div class="admin_body">
+<body style="background-color: white">
+<div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+        <a class="brand" href="#">admin</a>
+        <ul class="nav">
+            <li><a href="/">menu</a></li>
+            <li><a href="/admin">admin</a></li>
+            <li><a href="/admin/dispenser">dispensers</a></li>
+            <li><a href="/admin/drink">drinks</a></li>
+            <li><a href="/admin/booze">booze</a></li>
+            <li><a href="/admin/report">report</a></li>
+        </ul>
+    </div>
+</div>
+<div class="container-fluid">
     {% block body %}{% endblock %}
-    <div class="body_push"></div>
-  </div>
 </div>
-<div class="bottom_row"> 
-     <button type="button" class="admin_button small_button" onclick="home()">main</button>
-     <button type="button" class="admin_button small_button" onclick="admin()">admin</button>
-</div>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/jquery.tmpl.min.js"></script>
 <script type="text/javascript">
 function home()
 {
