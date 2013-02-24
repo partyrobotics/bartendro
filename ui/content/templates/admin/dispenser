@@ -12,7 +12,7 @@
           </br>
           <p><button type="button" class="small_button" onclick="reset()">reset chain</button></p>
           </br>
-          <p><button type="button" class="small_button" id="test_chain" onclick="test_chain()">test chain</button></p>
+          <p><button type="button" class="small_button" id="test_dispensers" onclick="test_dispensers()">test dispensers</button></p>
           </br>
           <p><button type="button" class="small_button" id="check_levels" onclick="check_levels()">check liquid levels</button></p>
         </div>
@@ -91,16 +91,19 @@ function reset()
             }
     });
 }
-function test_chain()
+function test_dispensers()
 {
-    $("#test_chain").text('testing...');
-    $("#test_chain").attr('disabled', true);
+    $("#test_dispensers").text('testing...');
+    $("#test_dispensers").attr('disabled', true);
     $.ajax({
             url: "/ws/test" ,
             success: function(html)
             {
-                $("#test_chain").text('test chain');
-                $("#test_chain").attr('disabled', false);
+                if (html != "")
+                    alert(html);
+
+                $("#test_dispensers").text('test dispensers');
+                $("#test_dispensers").attr('disabled', false);
             }
     });
 }
