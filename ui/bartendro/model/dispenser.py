@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from bartendro.utils import session, Base
 
-class Dispenser(Base):
+class Dispenser(db.Model):
     """
     Information about a dispenser
     """
@@ -15,7 +16,7 @@ class Dispenser(Base):
     actual = Column(Integer, default = 0)
     out = Column(Integer, default=0)
 
-    query = session.query_property()
+    query = db.session.query_property()
     def __init__(self, booze, actual):
         self.booze = booze
         self.booze_id = booze.id

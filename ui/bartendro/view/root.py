@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import memcache
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
+
+app = Flask(__name__)
 
 def process_ingredients(drinks):
     for drink in drinks:
@@ -18,7 +20,7 @@ def filter_drink_list(can_make_dict, drinks):
             pass
     return filtered
 
-@expose('/')
+@app.route('/')
 def index(request):
     mixer = local.application.mixer
 
