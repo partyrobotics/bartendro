@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from bartendro import app, db
+from flask import Flask, request, render_template
 from bartendro.model.drink import Drink
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.custom_drink import CustomDrink
@@ -12,15 +14,15 @@ from bartendro import constant
 
 @app.route('/drink/<id>')
 def drink(id):
-    drink = session.query(Drink) \
+    drink = db.session.query(Drink) \
                           .filter(Drink.id == id) \
                           .first() 
 
-    boozes = session.query(Booze) \
+    boozes = db.session.query(Booze) \
                           .join(DrinkBooze.booze) \
                           .filter(DrinkBooze.drink_id == drink.id)
 
-    custom_drink = session.query(CustomDrink) \
+    custom_drink = db.session.query(CustomDrink) \
                           .filter(drink.id == CustomDrink.drink_id) \
                           .first()
     drink.process_ingredients()
@@ -56,14 +58,14 @@ def drink(id):
                                show_taster=show_taster,
                                show_sobriety=show_sobriety)
 
-    dispensers = session.query(Dispenser).all()
+    dispensers = db.session.query(Dispenser).all()
     disp_boozes = {}
     for dispenser in dispensers:
         disp_boozes[dispenser.booze_id] = 1
 
     print disp_boozes
 
-    booze_group = session.query(BoozeGroup) \
+    booze_group = db.session.query(BoozeGroup) \
                           .join(DrinkBooze, DrinkBooze.booze_id == BoozeGroup.abstract_booze_id) \
                           .join(BoozeGroupBooze) \
                           .filter(Drink.id == id) \

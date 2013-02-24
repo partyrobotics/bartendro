@@ -25,7 +25,7 @@ class DrinkBooze(db.Model):
         self.booze_id = booze.id
         self.value = value
         self.unit = unit
-        db.session.add(self)
+#        db.session.add(self)
 
     def json(self):
         return { 

@@ -133,19 +133,19 @@ def admin_drink_save():
 
             if parts == 0:
                 if dbi != 0:
-                    for i, db in enumerate(drink.drink_boozes):
-                        if db.id == dbi:
+                    for i, dbooze in enumerate(drink.drink_boozes):
+                        if dbooze.id == dbi:
                             db.session.delete(drink.drink_boozes[i])
                             break
                 continue
 
             if dbi > 0:
-                for db in drink.drink_boozes:
-                    if dbi == db.id:
-                        db.value = parts
+                for dbooze in drink.drink_boozes:
+                    if dbi == dbooze.id:
+                        dbooze.value = parts
                         newid = dbn
-                        if (newid != db.booze_id):
-                            db.booze = Booze.query.filter_by(id=newid).first()
+                        if (newid != dbooze.booze_id):
+                            dbooze.booze = Booze.query.filter_by(id=newid).first()
                         break
 
             else:

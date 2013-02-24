@@ -50,7 +50,7 @@ def dispenser():
                            saved=saved,
                            states=states)
 
-@app.route('/admin/dispenser/save')
+@app.route('/admin/dispenser/save', methods=['POST'])
 def save():
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/dispenser')

@@ -88,7 +88,6 @@ function reset()
             url: "/ws/reset" ,
             success: function(html)
             {
-		alert("Bartendro chain is resetting. Please give it 10 seconds.");
             }
     });
 }
@@ -97,7 +96,7 @@ function test_chain()
     $("#test_chain").text('testing...');
     $("#test_chain").attr('disabled', true);
     $.ajax({
-            url: "/ws/testchain" ,
+            url: "/ws/test" ,
             success: function(html)
             {
                 $("#test_chain").text('test chain');

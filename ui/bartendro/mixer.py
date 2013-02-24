@@ -5,7 +5,7 @@ from flask import Flask, current_app
 from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
-from bartendro import db
+from bartendro import db, app
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -195,7 +195,7 @@ class Mixer(object):
                 return False
             recipe.append(r)
         
-        log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
+        app.log.info("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
         self.led_dispense()
         dur = 0
         active_disp = []
@@ -205,7 +205,7 @@ class Mixer(object):
             else:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
             self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms']))
-            log("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
+            app.log.info("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
 
@@ -221,7 +221,7 @@ class Mixer(object):
             if done: break
 
         self.led_complete()
-        log("drink complete")
+        app.log.info("drink complete")
 
         t = int(time())
         dlog = drink_log.DrinkLog(drink.id, t, size)

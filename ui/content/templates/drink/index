@@ -101,7 +101,7 @@
       </div>
   </div>
 </div>
-<script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 
 var taster_size = 1;
@@ -303,5 +303,5 @@ function make_drink(drink, is_taster)
     });
 }
 </script>
-<script type="text/javascript" src="{{ url_for('static', file='js/jquery.simplemodal.1.4.2.min.js') }}"></script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.2.min.js"></script>
 {% endblock %}

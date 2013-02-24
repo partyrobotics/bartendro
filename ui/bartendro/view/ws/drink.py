@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 from bartendro import app, db
-from flask import Flask, request, render_text
+from flask import Flask, request
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
@@ -16,7 +16,7 @@ def ws_drink(drink):
         recipe[arg] = float(request.args.get(arg)) * constant.ML_PER_FL_OZ
 
     if mixer.make_drink(drink, recipe):
-        return render_text("ok\n")
+        return "ok\n"
     else:
         raise ServiceUnavailable("Error: %s (%d)" % (mixer.get_error(), ret))
 
@@ -24,9 +24,9 @@ def ws_drink(drink):
 def ws_drink_available(drink, state):
 
     if not drink:
-        session.query(Drink).update({'available' : state})
+        db.session.query(Drink).update({'available' : state})
     else:
-        session.query(Drink).filter(Drink.id==drink).update({'available' : state})
-    session.flush()
-    session.commit()
-    return render_text("ok\n")
+        db.session.query(Drink).filter(Drink.id==drink).update({'available' : state})
+    db.session.flush()
+    db.session.commit()
+    return "ok\n"

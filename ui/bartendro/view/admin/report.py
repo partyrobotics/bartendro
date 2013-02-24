@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 import time
 from bartendro import app, db
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template
+from flask import Flask, request, render_template
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.form.booze import BoozeForm
 
 @app.route('/admin/report')
-def report_index(request):
+def report_index():
     return render_template("admin/report", title="Top drinks report")
 
 @app.route('/admin/report/<begin>/<end>')
-def report_view(request, begin, end):
+def report_view(begin, end):
     begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
     enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
 
