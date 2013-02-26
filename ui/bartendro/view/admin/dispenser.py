@@ -10,7 +10,7 @@ from bartendro.form.dispenser import DispenserForm
 from bartendro.mixer import CALIBRATE_ML
 from operator import itemgetter
 
-@app.route('/admin/dispenser')
+@app.route('/admin')
 def dispenser():
     driver = app.driver
     count = driver.count()
@@ -50,7 +50,7 @@ def dispenser():
                            saved=saved,
                            states=states)
 
-@app.route('/admin/dispenser/save', methods=['POST'])
+@app.route('/admin/save', methods=['POST'])
 def save():
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/dispenser')
@@ -70,4 +70,4 @@ def save():
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
-    return redirect('/admin/dispenser?saved=1')
+    return redirect('/admin?saved=1')

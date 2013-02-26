@@ -33,9 +33,9 @@
                      <td></td>
                   </tr>
                   <tr>
-                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="size_smaller()">-</a> </td>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_smaller()">-</a> </td>
                      <td class="main-td"><div class="adjust-middle" id="size-text">4 fluid ounces</div></td>
-                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="size_bigger()">+</a> </td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
                      <td class="margin-td-label">smaller</td>
@@ -55,9 +55,9 @@
                      <td></td>
                   </tr>
                   <tr>
-                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_weaker()">-</a> </td>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_weaker()">-</a> </td>
                      <td class="main-td"><div class="adjust-middle" id="strength-text">normal</div></td>
-                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="strength_stronger()">+</a> </td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_stronger()">+</a> </td>
                   </tr>
                   <tr>
                      <td class="margin-td-label">weaker</td>
@@ -77,9 +77,9 @@
                      <td></td>
                   </tr>
                   <tr>
-                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_sweeter()">-</a> </td>
+                     <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="tartness_sweeter()">-</a> </td>
                      <td class="main-td"><div class="adjust-middle" id="tartness-text">normal</div></td>
-                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus" onclick="tartness_tarter()">+</a> </td>
+                     <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="tartness_tarter()">+</a> </td>
                   </tr>
                   <tr>
                      <td class="margin-td-label">sweeter</td>
@@ -92,9 +92,9 @@
 
               <table class="dispense-buttons">
               <tr>
-                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button" onclick="back()">Back</a></td>
-                <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
-                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
+                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button button-border" onclick="back()">Back</a></td>
+                <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
+                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
               </tr>
               </table>
           </div>

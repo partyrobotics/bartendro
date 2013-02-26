@@ -74,7 +74,7 @@ h3 {
     margin-bottom: 8px;
 }
 
-.btn-large {
+.button-border {
     border-width: 2px;
     border-color: #4788BF;
 }
@@ -187,6 +187,7 @@ table {
 
 .dispenser-out {
     display: inline;
+
 }
 
 .dispenser-warning {
@@ -195,4 +196,15 @@ table {
 
 .dispenser-ok {
     display: inline;
+}
+
+.dispenser-select {
+    height: 44px;
+    vertical-align: top !important;
+}
+
+.dispenser-edit {
+    width: 30px;
+    height: 35px !important;
+    vertical-align: top !important;
 }

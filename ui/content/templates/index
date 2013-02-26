@@ -52,7 +52,7 @@ $(document).ready(function() {
       {% endif %}
       <div class="span6 menuitem">
          {% if not loop.last %}
-             <a class="btn btn-large btn-warning btn-block drink-btn" style="margin-bottom: 8px;" 
+             <a class="btn btn-large btn-warning btn-block drink-btn button-border" style="margin-bottom: 8px;" 
                     type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
              <div class="ingredients">
                 {% for ing in drink.ingredients %}
