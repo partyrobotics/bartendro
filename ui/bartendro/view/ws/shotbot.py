@@ -6,7 +6,7 @@ from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
 
 @app.route('/ws/shotbot')
-def ws_reset():
+def ws_shotbot():
     driver = app.driver
     driver.make_shot()
     return "ok\n"
