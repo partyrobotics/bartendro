@@ -1,37 +1,36 @@
 # -*- coding: utf-8 -*-
-from werkzeug.utils import redirect
-from werkzeug.exceptions import BadRequest, ServiceUnavailable
-from bartendro.utils import session, local, expose, validate_url, url_for, render_text
+from bartendro import app, db
+from flask import Flask, request
+from werkzeug.exceptions import ServiceUnavailable
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
 
-@expose('/ws/reset')
-def ws_reset(request):
-    driver = local.application.driver
-    mc = local.application.mc
+@app.route('/ws/reset')
+def ws_reset():
+    driver = app.driver
+    mc = app.mc
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
     driver.reset()
-    return render_text("ok\n")
+    return "ok\n"
 
-@expose('/ws/testchain')
-def ws_test_chain(request):
-    driver = local.application.driver
+@app.route('/ws/test')
+def ws_test_chain():
+    driver = app.driver
     for disp in xrange(driver.count()):
-        print "test %d" % disp
 	if not driver.ping(disp):
-	    raise ServiceUnavailable("Error: Dispenser %d failed ping." % disp)
-    return render_text("ok\n")
+	    return "Error: Dispenser %d failed ping." % disp
+    return ""
 
-@expose('/ws/checklevels')
-def ws_check_levels(request):
-    mixer = local.application.mixer
+@app.route('/ws/checklevels')
+def ws_check_levels():
+    mixer = app.mixer
     if not mixer.check_liquid_levels():
         raise ServiceUnavailable("Error: Checking dispenser levels failed.")
-    mc = local.application.mc
+    mc = app.mc
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
-    return render_text("ok\n")
+    return "ok\n"

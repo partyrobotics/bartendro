@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, UnicodeText, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, Base
 from bartendro.model.drink_name import DrinkName
 from operator import attrgetter
 
 DEFAULT_SUGGESTED_DRINK_SIZE = 118 #ml (4 oz)
 
-class Drink(Base):
+class Drink(db.Model):
     """
     Defintion of a drink. Pretty bare since name is in drink_name and drink details are in drink_liquid
     """
@@ -21,7 +21,7 @@ class Drink(Base):
     popular = Column(Boolean)
     available = Column(Boolean)
 
-    query = session.query_property()
+    query = db.session.query_property()
 
     def __init__(self, desc = u'', data = None, size = DEFAULT_SUGGESTED_DRINK_SIZE, popular = False, available = True):
         self.name = DrinkName()
@@ -32,7 +32,7 @@ class Drink(Base):
         self.size = size
         self.popular = popular
         self.available = available
-        session.add(self)
+        db.session.add(self)
     
     def process_ingredients(self):
         ing = []

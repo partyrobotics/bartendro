@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 import time
-from werkzeug.utils import redirect
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
+from bartendro import app, db
+from flask import Flask, request, render_template
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.form.booze import BoozeForm
 
-@expose('/admin/report')
-def report_index(request):
+@app.route('/admin/report')
+def report_index():
     return render_template("admin/report", title="Top drinks report")
 
-@expose('/admin/report/<begin>/<end>')
-def report_view(request, begin, end):
+@app.route('/admin/report/<begin>/<end>')
+def report_view(begin, end):
     begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
     enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
 

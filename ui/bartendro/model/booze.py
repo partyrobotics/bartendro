@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, Unicode, UnicodeText, UniqueConstraint, Text, Index
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, Base
 
 BOOZE_TYPE_UNKNOWN = 0
 BOOZE_TYPE_ALCOHOL = 1
@@ -15,7 +15,7 @@ booze_types = [
                (3, "Sweet")
               ]
 
-class Booze(Base):
+class Booze(db.Model):
     """
     Information about a booze. e.g. water, vodka, grandine, bailies, oj 
     """
@@ -31,7 +31,7 @@ class Booze(Base):
     # add unique constraint for name
     UniqueConstraint('name', name='booze_name_undx')
  
-    query = session.query_property()
+    query = db.session.query_property()
     def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, out = 0, data = None):
         if data: 
             self.update(data)

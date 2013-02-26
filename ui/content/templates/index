@@ -13,7 +13,7 @@
         </div>
     {% endif %}
 </div>
-<script type="text/javascript" src="{{ url_for('static', file='js/jquery.js') }}"></script>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 // defining flags
 var isCtrl = false;
@@ -51,7 +51,7 @@ $(document).ready(function() {
          <div class="row-fluid">
       {% endif %}
       <div class="span6 menuitem">
-         <a class="btn btn-large btn-warning btn-block drink-btn" style="margin-bottom: 8px;" 
+         <a class="btn btn-large btn-warning btn-block drink-btn button-border" style="margin-bottom: 8px;" 
                 type="button" href="/drink/{{ drink.id }}">{{ drink.name.name }}</a>
          <div class="ingredients">
             {% for ing in drink.ingredients %}

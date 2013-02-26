@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import memcache
-from bartendro.utils import session, render_template, render_json, expose, validate_url, url_for, local
+from bartendro import app, db
+from flask import Flask, request, render_template
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 
@@ -18,16 +19,14 @@ def filter_drink_list(can_make_dict, drinks):
             pass
     return filtered
 
-@expose('/')
-def index(request):
-    mixer = local.application.mixer
-
-    can_make = mixer.get_available_drink_list()
+@app.route('/')
+def index():
+    can_make = app.mixer.get_available_drink_list()
     can_make_dict = {}
     for drink in can_make:
         can_make_dict[drink] = 1
 
-    top_drinks = session.query(Drink) \
+    top_drinks = db.session.query(Drink) \
                         .join(DrinkName) \
                         .filter(Drink.name_id == DrinkName.id)  \
                         .filter(Drink.popular == 1)  \
@@ -36,7 +35,7 @@ def index(request):
     top_drinks = filter_drink_list(can_make_dict, top_drinks)
     process_ingredients(top_drinks)
 
-    other_drinks = session.query(Drink) \
+    other_drinks = db.session.query(Drink) \
                         .join(DrinkName) \
                         .filter(Drink.name_id == DrinkName.id)  \
                         .filter(Drink.popular == 0)  \

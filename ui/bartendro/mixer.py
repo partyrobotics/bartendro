@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from time import sleep, time
 from threading import Thread
+from flask import Flask, current_app
+from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
-from bartendro.utils import session, local, log, error
+from bartendro import db, app
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -32,11 +34,11 @@ class Mixer(object):
         # not in use yet
         # BUSTED = object()          # out of all booze, can't make ANY drinks
 
-    def __init__(self, driver):
+    def __init__(self, driver, mc):
         self.driver = driver
+        self.mc = mc
         self.err = ""
         self.disp_count = self.driver.count()
-        self.mc = local.application.mc
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
 
@@ -71,7 +73,7 @@ class Mixer(object):
         sleep(.01)
 
         # Now ask each dispenser for the actual level
-        dispensers = session.query(Dispenser).order_by(Dispenser.id).all()
+        dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
         for i, dispenser in enumerate(dispensers):
             dispenser.out = DISPENSER_OK
             level = self.driver.get_liquid_level(i)
@@ -87,7 +89,7 @@ class Mixer(object):
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
 
-        session.commit()
+        db.session.commit()
 
         if new_state == Mixer.MixerState.OUT_OF_BOOZE:
             self.driver.set_status_color(1, 0, 0)
@@ -129,7 +131,7 @@ class Mixer(object):
         if can_make: 
             return can_make
 
-        add_boozes = session.query("abstract_booze_id") \
+        add_boozes = db.session.query("abstract_booze_id") \
                             .from_statement("""SELECT bg.abstract_booze_id 
                                                  FROM booze_group bg 
                                                 WHERE id 
@@ -137,7 +139,7 @@ class Mixer(object):
                                                          FROM booze_group_booze bgb, dispenser 
                                                         WHERE bgb.booze_id = dispenser.booze_id)""")
 
-        boozes = session.query("booze_id") \
+        boozes = db.session.query("booze_id") \
                         .from_statement("SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d") \
                         .params(d=self.disp_count).all()
         boozes.extend(add_boozes)
@@ -146,7 +148,7 @@ class Mixer(object):
         for booze_id in boozes:
             booze_dict[booze_id[0]] = 1
 
-        drinks = session.query("drink_id", "booze_id") \
+        drinks = db.session.query("drink_id", "booze_id") \
                         .from_statement("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id") \
                         .all()
         last_drink = -1
@@ -193,7 +195,7 @@ class Mixer(object):
                 return False
             recipe.append(r)
         
-        log("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
+        app.log.info("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
         self.led_dispense()
         dur = 0
         active_disp = []
@@ -203,7 +205,7 @@ class Mixer(object):
             else:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
             self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms']))
-            log("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
+            app.log.info("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
 
@@ -219,12 +221,12 @@ class Mixer(object):
             if done: break
 
         self.led_complete()
-        log("drink complete")
+        app.log.info("drink complete")
 
         t = int(time())
         dlog = drink_log.DrinkLog(drink.id, t, size)
-        session.add(dlog)
-        session.commit()
+        db.session.add(dlog)
+        db.session.commit()
 
         if not self.check_liquid_levels():
             self.leds_panic()

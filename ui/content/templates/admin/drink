@@ -1,92 +1,88 @@
 {% extends 'admin/layout' %}
 {% block body %}
-<div class="main">
-    <div class="content">	
+<div class="row-fluid">
+    <div class="span6">
         <h2>{{ title }}</h2>
         {% if saved %}
            <p>Your changes have been saved.</p>
         {% endif %}
         <div class="forms">
-		<form method="POST" action="/admin/drink/save">
-	            <div class="forminput">
-                        {{ form.drink_name.label }}:<br/> 
-                        {{ form.drink_name(class="form") }}
-                    </div>
-	            {% if form.drink_name.errors %}
-	                <div class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</div>
-	            {% endif %}
-	            <div class="forminput">
-                        {{ form.desc.label }}:<br/> 
-                        {{ form.desc(class="form") }}
-                    </div>
-	            {% if form.desc.errors %}
-	                <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
-	            {% endif %}
+            <form method="POST" action="/admin/drink/save">
+                <div>
+                    {{ form.drink_name.label }}:<br/> 
+                    {{ form.drink_name(class="form-element") }}
+                </div>
+                {% if form.drink_name.errors %}
+                    <div class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</div>
+                {% endif %}
+                <div>
+                    {{ form.desc.label }}:<br/> 
+                    {{ form.desc(class="form-element") }}
+                </div>
+                {% if form.desc.errors %}
+                    <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
+                {% endif %}
 
-	            <div class="forminput">
-                        {{ form.sugg_size.label }}:<br/> 
-                        {{ form.sugg_size(class="form") }}
-                    </div>
-	            {% if form.sugg_size.errors %}
-	                <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
-	            {% endif %}
+                <div>
+                    {{ form.sugg_size.label }}:
+                    {{ form.sugg_size(class="form-element") }}
+                </div>
+                {% if form.sugg_size.errors %}
+                    <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
+                {% endif %}
 
-	            <div class="forminput">
-                        {{ form.popular.label }}:<br/> 
-                        {{ form.popular(class="form") }}
-                    </div>
-	            {% if form.popular.errors %}
-	                <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
-	            {% endif %}
+                <div style="padding-bottom: 20px">
+                    {{ form.popular(class="checkbox") }}
+                    {{ form.popular.label }}
+                </div>
+                {% if form.popular.errors %}
+                    <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
+                {% endif %}
 
-	            <div class="forminput">
-                        {{ form.available.label }}:<br/> 
-                        {{ form.available(class="form") }}
-                    </div>
-	            {% if form.available.errors %}
-	                <div class="errors">{% for error in form.available.errors %}<li>{{ error }}</li>{% endfor %}</div>
-	            {% endif %}
-    
-                    {% for name, parts, id, show in fields %}
-                        {% if show %}
-                            <div class="booze_line" id="bl_{{ loop.index0 }}">
-                        {% else %}
-                            <div class="booze_line_hidden" id="bl_{{ loop.index0 }}">
-                        {% endif %}
-                            <div class="forminput">
-                                {{ form[id]() }}
-                                {{ form[name](class="desc") }}
-                                {{ form[parts](class="desc") }}
-                                {% if form[parts].errors %}
-                                    <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
-                                {% endif %}
-                            </div>
+                <div style="padding-bottom: 20px">
+                    {{ form.available(class="checkbox-large") }}
+                    {{ form.available.label }}
+                </div>
+                {% if form.available.errors %}
+                    <div class="errors">{% for error in form.available.errors %}<li>{{ error }}</li>{% endfor %}</div>
+                {% endif %}
+
+                {% for name, parts, id, show in fields %}
+                    {% if show %}
+                        <div class="booze-line" id="bl_{{ loop.index0 }}">
+                    {% else %}
+                        <div class="booze-line-hidden" id="bl_{{ loop.index0 }}">
+                    {% endif %}
+                        <div>
+                            {{ form[id]() }}
+                            {{ form[name](class="select-field", style="width:75%") }}
+                            {{ form[parts](class="edit-field") }}
+                            {% if form[parts].errors %}
+                                <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
+                            {% endif %}
                         </div>
-                    {% endfor %}
-
-                    {{ form.id() }}
-	            <div class="button">
-                        <button type="button" class="small_button" onclick="add_booze()">add booze</button>
-                        {{ form.cancel(class="small_button") }}
-                        {{ form.save(class="small_button") }}
                     </div>
-	        </form>
+                {% endfor %}
+
+                {{ form.id() }}
+                <div>
+                    <a class="btn btn-large" onclick="add_booze()">add booze</a>
+                    {{ form.cancel(class="btn btn-large") }}
+                    {{ form.save(class="btn btn-large btn-primary") }}
+                </div>
+            </form>
 	</div>
     </div>
-
-    <div class="side_bar">
-        <div class="boozeheading">Drink List</div>
-        <a href="/admin/drink">add new</a>
-        drinks avail:
-        <button onclick="available(1)">all</button>
-        <button onclick="available(0)">none</button>
-	<div class="boozelist">
-	<ul class="booze">
+    <div class="span6">
+        <div style="float: right; padding-top: 10px">
+        <a href="/admin/drink" class="btn btn-large">add new drink</a>
+        </div>
+        <h2>drink List</h2>
+	<table class="table table-striped table-bordered">
             {% for drink in drinks %}
-              <li class="booze"><a class="booze" href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></li>
+              <tr><td><a href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></td></tr>
             {% endfor %}
-        </ul>
-	</div>
+        </table>
     </div>
 </div>
 <script type="text/javascript">
@@ -97,10 +93,10 @@ function add_booze()
 
     for(i = 0; i < max_boozes; i++)
     {
-        if ( $("#bl_" + i).attr("class") == "booze_line_hidden" )
+        if ( $("#bl_" + i).attr("class") == "booze-line-hidden" )
         {
-            $("#bl_" + i).toggleClass("booze_line_hidden");
-            $("#bl_" + i).toggleClass("booze_line");
+            $("#bl_" + i).toggleClass("booze-line-hidden");
+            $("#bl_" + i).toggleClass("booze-line");
             return;
         }
     }

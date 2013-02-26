@@ -403,7 +403,7 @@ class RouterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
-        if self.software_only: return True
+        if self.software_only: return False
         while True:
             if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
                 ack, value = self.receive_packet8()

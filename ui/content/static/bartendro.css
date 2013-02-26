@@ -74,7 +74,7 @@ h3 {
     margin-bottom: 8px;
 }
 
-.btn-large {
+.button-border {
     border-width: 2px;
     border-color: #4788BF;
 }
@@ -183,4 +183,43 @@ table {
     font-weight: bold;
     font-size: 35pt;
     text-align: center;
+}
+
+label {
+    display: inline;
+    font-size: 13pt;
+}
+
+.dispenser-out {
+    display: inline;
+}
+
+.dispenser-warning {
+    display: inline;
+}
+
+.dispenser-ok {
+    display: inline;
+}
+
+.select-field {
+    height: 44px;
+    vertical-align: top !important;
+}
+
+.edit-field {
+    width: 30px;
+    height: 35px !important;
+    vertical-align: top !important;
+}
+
+.form-element {
+    width: 80%;
+}
+
+.booze-line {
+}
+
+.booze-line-hidden {
+    visibility: hidden;
 }

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, String, MetaData, UnicodeText, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from bartendro.utils import session, Base
 
-class DrinkBooze(Base):
+class DrinkBooze(db.Model):
     """
     Join between the Drink table and the Booze table for 1:n relationship
     """
@@ -16,7 +16,7 @@ class DrinkBooze(Base):
     value = Column(Integer, default=1)
     unit = Column(Integer, default=1)
  
-    query = session.query_property()
+    query = db.session.query_property()
 
     def __init__(self, drink, booze, value, unit):
         self.drink = drink
@@ -25,7 +25,7 @@ class DrinkBooze(Base):
         self.booze_id = booze.id
         self.value = value
         self.unit = unit
-        session.add(self)
+#        db.session.add(self)
 
     def json(self):
         return { 
