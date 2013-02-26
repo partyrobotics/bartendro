@@ -77,10 +77,10 @@
         <div style="float: right; padding-top: 10px">
         <a href="/admin/drink" class="btn btn-large">add new drink</a>
         </div>
-        <h2>Drink List</h2>
+        <h2>drink List</h2>
 	<table class="table table-striped table-bordered">
             {% for drink in drinks %}
-              <tr><td><a class="booze" href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></td></tr>
+              <tr><td><a href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></td></tr>
             {% endfor %}
         </table>
     </div>
