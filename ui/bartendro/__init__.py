@@ -2,6 +2,7 @@
 
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.login import LoginManager
 from sqlalchemy.orm import mapper, relationship, backref
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///../bartendro.db'
@@ -16,6 +17,9 @@ app = Flask(__name__,
             template_folder = "../content/templates")
 app.config.from_object(__name__)
 db = SQLAlchemy(app)
+
+login_manager = LoginManager()
+login_manager.setup_app(app)
 
 # Import models
 from bartendro.model.drink import Drink
@@ -50,7 +54,7 @@ DrinkLog.drink = relationship(Drink)
 # Import views
 from bartendro.view import root
 from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \
-                                 dispenser as admin_dispenser, report, liquidout
+                                 dispenser as admin_dispenser, report, liquidout, user
 from bartendro.view.drink import drink
 from bartendro.view.ws import booze as ws_booze, dispenser as ws_dispenser, drink as ws_drink, \
                               misc as ws_misc, shotbot as ws_shotbot

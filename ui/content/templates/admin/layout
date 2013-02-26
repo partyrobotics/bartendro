@@ -19,7 +19,7 @@
         </ul>
     </div>
 </div>
-<div class="container-fluid" style="background-color: white">
+<div class="container-fluid">
     {% block body %}{% endblock %}
 </div>
 <script type="text/javascript" src="/static/js/jquery.js"></script>

@@ -2,6 +2,7 @@
 import memcache
 from bartendro import app, db
 from flask import Flask, request, redirect, render_template
+from flask.ext.login import login_required
 from wtforms import Form, SelectField, IntegerField, validators
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
@@ -11,6 +12,7 @@ from bartendro.mixer import CALIBRATE_ML
 from operator import itemgetter
 
 @app.route('/admin')
+@login_required
 def dispenser():
     driver = app.driver
     count = driver.count()
@@ -51,6 +53,7 @@ def dispenser():
                            states=states)
 
 @app.route('/admin/save', methods=['POST'])
+@login_required
 def save():
     cancel = request.form.get("cancel")
     if cancel: return redirect('/admin/dispenser')
