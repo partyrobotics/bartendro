@@ -185,9 +185,13 @@ table {
     text-align: center;
 }
 
+label {
+    display: inline;
+    font-size: 13pt;
+}
+
 .dispenser-out {
     display: inline;
-
 }
 
 .dispenser-warning {
@@ -198,13 +202,24 @@ table {
     display: inline;
 }
 
-.dispenser-select {
+.select-field {
     height: 44px;
     vertical-align: top !important;
 }
 
-.dispenser-edit {
+.edit-field {
     width: 30px;
     height: 35px !important;
     vertical-align: top !important;
+}
+
+.form-element {
+    width: 80%;
+}
+
+.booze-line {
+}
+
+.booze-line-hidden {
+    visibility: hidden;
 }

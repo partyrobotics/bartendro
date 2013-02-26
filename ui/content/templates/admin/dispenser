@@ -30,15 +30,15 @@
                 {% else %}
                       {{ form["dispenser%s" % i].label(class="dispenser-ok")}}: 
                 {% endif %}
-                {{ form["dispenser%s" % i](class="form dispenser-select") }}
+                {{ form["dispenser%s" % i](class="form select-field") }}
                 <a class="btn btn-large" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
                 <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</a>
-                {{ form["actual%s" % i](class="dispenser-edit") }}
+                {{ form["actual%s" % i](class="edit-field") }}
             </div>
         {% endfor %}
         <div>
-            {{ form.cancel(class="btn") }}
-            {{ form.save(class="btn btn-primary") }}
+            {{ form.cancel(class="btn btn-large") }}
+            {{ form.save(class="btn btn-large btn-primary") }}
         </div>
      </form>
    </div>
