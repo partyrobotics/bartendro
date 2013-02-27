@@ -16,8 +16,8 @@ TICKS_PER_ML = 2.6
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
-LIQUID_OUT_THRESHOLD       = 40
-LIQUID_WARNING_THRESHOLD   = 60
+LIQUID_OUT_THRESHOLD       = 75
+LIQUID_WARNING_THRESHOLD   = 120 
 
 DISPENSER_OUT     = 1
 DISPENSER_OK      = 0
@@ -75,6 +75,8 @@ class Mixer(object):
         # Now ask each dispenser for the actual level
         dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
         for i, dispenser in enumerate(dispensers):
+            if i >= self.disp_count: break
+
             dispenser.out = DISPENSER_OK
             level = self.driver.get_liquid_level(i)
             if level <= LIQUID_WARNING_THRESHOLD:
@@ -99,12 +101,16 @@ class Mixer(object):
             self.driver.set_status_color(0, 1, 0)
 
         self.state = new_state
+        print "Checking levels done"
 
         return new_state
 
     def liquid_level_test(self, dispenser, threshold):
 
         print "Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold)
+
+        self.driver.update_liquid_levels()
+        sleep(.01)
 
         level = self.driver.get_liquid_level(dispenser)
 	print "initial reading: %d" % level
@@ -115,6 +121,8 @@ class Mixer(object):
         last = -1
         self.driver.start(dispenser)
         while level > threshold:
+            self.driver.update_liquid_levels()
+            sleep(.01)
             level = self.driver.get_liquid_level(dispenser)
             if level != last:
                  print "  %d" % level

@@ -9,6 +9,7 @@ DEBUG = True
 SECRET_KEY = 'let our bot get you drunk!'
 USERNAME = 'admin'
 PASSWORD = '!freedrinks'
+#SERVER_NAME = '10.1.1.138:8080'
 
 app = Flask(__name__,
             static_url_path = "/static",

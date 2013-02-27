@@ -192,10 +192,12 @@ label {
 
 .dispenser-out {
     display: inline;
+    color: red;
 }
 
 .dispenser-warning {
     display: inline;
+    color: orange;
 }
 
 .dispenser-ok {

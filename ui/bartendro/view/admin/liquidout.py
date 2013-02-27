@@ -11,7 +11,7 @@ def admin_liquidout():
     form = LiquidOutTestForm(request.form)
     return render_template("admin/liquidout", form=form, title="Liquid out test")
 
-@app.route('/admin/liquidout/test')
+@app.route('/admin/liquidout/test', methods=['POST'])
 def admin_liquidout_save():
 
     form = LiquidOutTestForm(request.form)

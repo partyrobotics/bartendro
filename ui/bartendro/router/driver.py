@@ -412,17 +412,15 @@ class RouterDriver(object):
 
     def update_liquid_levels(self):
         if self.software_only: return True
-        return 
         self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
 
     def get_liquid_level(self, dispenser):
         if self.software_only: return 100
-        return 100
         while True:
             if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
                 ack, value = self.receive_packet16()
                 if ack == PACKET_ACK_OK:
-                    print "received packet ok"
+                    print "disp %d liquid level: %d" % (dispenser, value)
                     return value
 
     def get_dispense_stats(self, dispenser):
