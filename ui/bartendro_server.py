@@ -8,7 +8,9 @@ import sys
 from bartendro.router import driver
 from bartendro import mixer
 
-if sys.argv[1] == "--debug":
+liquid_out = False
+
+if len(sys.argv) > 1 and sys.argv[1] == "--debug":
     debug = True
 else:
     debug = False
@@ -29,7 +31,7 @@ app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
 app.driver.open()
 app.log.info("Found %d dispensers." % app.driver.count())
 
-app.mixer = mixer.Mixer(app.driver, app.mc)
+app.mixer = mixer.Mixer(app.driver, app.mc, liquid_out)
 
 if app.software_only:
     app.log.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")

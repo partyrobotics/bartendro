@@ -34,12 +34,13 @@ class Mixer(object):
         # not in use yet
         # BUSTED = object()          # out of all booze, can't make ANY drinks
 
-    def __init__(self, driver, mc):
+    def __init__(self, driver, mc, liquid_out):
         self.driver = driver
         self.mc = mc
         self.err = ""
         self.disp_count = self.driver.count()
         self.state = Mixer.MixerState.INIT
+        self.use_liquid_out = liquid_out
         self.check_liquid_levels()
 
     def get_error(self):
@@ -64,6 +65,11 @@ class Mixer(object):
         return ok
 
     def check_liquid_levels(self):
+        if not self.use_liquid_out: 
+            self.driver.set_status_color(0, 0, 1)
+            state = Mixer.MixerState.READY
+            return
+
         new_state = Mixer.MixerState.READY
 
         # step 1: ask the dispensers to update their liquid levels
@@ -106,6 +112,7 @@ class Mixer(object):
         return new_state
 
     def liquid_level_test(self, dispenser, threshold):
+        if not self.use_liquid_out: return
 
         print "Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold)
 
@@ -236,7 +243,7 @@ class Mixer(object):
         db.session.add(dlog)
         db.session.commit()
 
-        if not self.check_liquid_levels():
+        if self.use_liquid_out and not self.check_liquid_levels():
             self.leds_panic()
             return False
 
