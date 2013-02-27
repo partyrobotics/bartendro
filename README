@@ -1,8 +1,11 @@
 Programs for the various systems of the Bartendro drink dispensing robot.
 
 Created by Pierre Michael and Robert Kaye
-Copyright (c) Party Robotics 2010-2012
-All Rights Reserved.
+Copyright (c) Party Robotics 2010-2013
+
+All of the soruce code in this repository is licensed under the GNU Public License 2.0.
+The hardware schematic and layouts are licensed using the Creative Commons 
+Attribution-ShareAlike 3.0 Unported license.
 
 The source tree is laid out as follows:
 
@@ -12,4 +15,4 @@ scripts  -- scripts to make running the bartendro software easier
 tsb      -- legacy code from our old skool drink bot prototyp Tequila Sunrise Bot
 ui       -- web interface for the bot, written in python.
 
-These various subdirectories may contain more README files.
+These various subdirectories may contain more README and COPYING files.
