@@ -10,7 +10,7 @@
     <div class="span6">
        <div>
           <a onclick="reset()" class="btn btn-danger">reset</a>
-          <a onclick="test_dispensers()" class="btn btn-warning">test dispensers</a>
+          <a onclick="test_dispensers()" class="btn btn-warning" id="test-dispensers">test dispensers</a>
           <a onclick="check_levels()" class="btn btn-info">liquid levels</a>
        </div>
        <div>
@@ -71,13 +71,19 @@ function test_dispense(disp)
         return;
 
     $("#test" + disp).text('dispensing');
-    $("#test" + disp).attr('disabled', true);
+    $("#test" + disp).toggleClass('disabled');
     $.ajax({
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
                 $("#test" + disp).text('dispense {{ calibrate_ml }}ml');
-                $("#test" + disp).attr('disabled', false);
+                $("#test" + disp).toggleClass('disabled');
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                 $("#test" + disp).text('dispense {{ calibrate_ml }}ml');
+                 $("#test" + disp).toggleClass('disabled');
+                 alert("Failed test dispense.");
             }
     });
 }
@@ -92,8 +98,8 @@ function reset()
 }
 function test_dispensers()
 {
-    $("#test_dispensers").text('testing...');
-    $("#test_dispensers").attr('disabled', true);
+    $("#test-dispensers").text('testing...');
+    $("#test-dispensers").toggleClass('disabled');
     $.ajax({
             url: "/ws/test" ,
             success: function(html)
@@ -101,8 +107,14 @@ function test_dispensers()
                 if (html != "")
                     alert(html);
 
-                $("#test_dispensers").text('test dispensers');
-                $("#test_dispensers").attr('disabled', false);
+                $("#test-dispensers").text('test dispensers');
+                $("#test-dispensers").toggleClass('disabled');
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                $("#test-dispensers").text('test dispensers');
+                $("#test-dispensers").toggleClass('disabled');
+                alert("Failed to test dispensers.");
             }
     });
 }

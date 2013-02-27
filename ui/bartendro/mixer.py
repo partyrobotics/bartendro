@@ -12,7 +12,7 @@ from bartendro.model import drink_booze
 from bartendro.model import booze
 from bartendro.model import drink_log
 
-TICKS_PER_ML = 2.6
+TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
@@ -98,7 +98,7 @@ class Mixer(object):
         elif new_state == Mixer.MixerState.WARNING:
             self.driver.set_status_color(1, 1, 0)
         else:
-            self.driver.set_status_color(0, 1, 0)
+            self.driver.set_status_color(0, 0, 1)
 
         self.state = new_state
         print "Checking levels done"
