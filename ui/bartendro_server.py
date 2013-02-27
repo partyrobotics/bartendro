@@ -4,8 +4,14 @@ from bartendro import app
 import logging
 import os
 import memcache
+import sys
 from bartendro.router import driver
 from bartendro import mixer
+
+if sys.argv[1] == "--debug":
+    debug = True
+else:
+    debug = False
 
 try: 
     app.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
@@ -30,4 +36,5 @@ if app.software_only:
 
 app.log.info("Bartendro starting")
 
+app.debug = debug
 app.run(host='0.0.0.0', port=8080)

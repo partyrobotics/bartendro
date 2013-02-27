@@ -5,7 +5,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import mapper, relationship, backref
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///../bartendro.db'
-DEBUG = True
 SECRET_KEY = 'let our bot get you drunk!'
 USERNAME = 'admin'
 PASSWORD = '!freedrinks'
