@@ -1,46 +1,100 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: Verdana, Geneva, sans-serif;
-    background-color: #DADADA;
+
+
+/* For mobile phone screens */
+@media (max-width: 767px) {
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: Verdana, Geneva, sans-serif;
+        background-color: #DADADA;
+        padding: 0px;
+    }
+    #content {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        display: block;
+    }
+    .fill { 
+        min-height: 100%;
+        height: 100%;
+        background-color: #DADADA;
+    }
+    #moar {
+        padding: 5px;
+    }
+
+    .orange-border {
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 6px;
+        border-color: #D9A180;
+        background-color: #D9A180;
+    }
+
+    .dark-border {
+        border-radius: 7px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #B98160;
+        padding: 2px;
+        background-color: white;
+    }
+
+    #scroll-pane {
+        padding: 5px;
+    }
+    .dispense-stack {
+        padding: 0 5px 0 5px;
+    }
 }
 
-#content {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    display: block;
-}
+@media (min-width: 768px) {
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: Verdana, Geneva, sans-serif;
+        background-color: #DADADA;
+    }
+    #content {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        display: block;
+    }
+    .fill { 
+        min-height: 100%;
+        height: 100%;
+        background-color: #DADADA;
+    }
+    #moar {
+        padding: 20px;
+    }
 
-#moar {
-    padding: 20px;
-}
+    .orange-border {
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        background-color: #D9A180;
+    }
 
-.fill { 
-    min-height: 100%;
-    height: 100%;
-    background-color: #DADADA;
-}
+    .dark-border {
+        border-radius: 7px;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #B98160;
+        padding: 4px;
+        background-color: white;
+    }
 
-.orange-border {
-    border-radius: 15px;
-    border-style: solid;
-    border-width: 12px;
-    border-color: #D9A180;
-    background-color: #D9A180;
-}
+    #scroll-pane {
+        padding: 20px;
+    }
 
-.dark-border {
-    border-radius: 7px;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #B98160;
-    padding: 4px;
-    background-color: white;
-}
-
-#scroll-pane {
-    padding: 20px;
+    .dispense-stack {
+        padding: 0 20px 0 20px;
+    }
 }
 
 .menuitem
@@ -104,10 +158,6 @@ h3 {
 .dispense-drink-detail {
     padding: 20px 0 20px 20px; 
     font-size: 15pt;
-}
-
-.dispense-stack {
-    padding: 0 20px 0 20px;
 }
 
 .dispense-stack-element {
