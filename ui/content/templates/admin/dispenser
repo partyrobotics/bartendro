@@ -2,6 +2,15 @@
 {% block body %}
 <div class="row-fluid">
     <div class="span6">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     <h2>Dispensers</h2>
       {% if saved %}
          <p>Your changes have been saved.</p>
