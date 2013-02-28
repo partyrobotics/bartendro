@@ -1,5 +1,3 @@
-
-
 /* For mobile phone screens */
 @media (max-width: 767px) {
     html, body {
@@ -46,6 +44,29 @@
     }
     .dispense-stack {
         padding: 0 5px 0 5px;
+    }
+
+    .lb-box {
+        background-color: white;
+        float: center;
+        height:250px;   
+        width: 250;
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        text-align: center;
+        overflow: hidden;
+        padding: 10px;
+        background-color: white;
+    }
+
+    .lb-drink {
+        padding-top: 10px;
+        font-weight: bold;
+        font-size: 20pt;
+        line-height: 20pt;
+        text-align: center;
     }
 }
 
@@ -94,6 +115,29 @@
 
     .dispense-stack {
         padding: 0 20px 0 20px;
+    }
+
+    .lb-box {
+        background-color: white;
+        float: center;
+        height:250px;   
+        width: 500px;
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        text-align: center;
+        overflow: hidden;
+        padding: 20px;
+        background-color: white;
+    }
+
+    .lb-drink {
+        padding-top: 50px;
+        font-weight: bold;
+        font-size: 35pt;
+        line-height: 35pt;
+        text-align: center;
     }
 }
 
@@ -213,27 +257,6 @@ table {
     text-align: right;
 }
 
-.lb-box {
-    background-color: white;
-    float: center;
-    height:250px;   
-    width: 500px;
-    border-radius: 15px;
-    border-style: solid;
-    border-width: 12px;
-    border-color: #D9A180;
-    text-align: center;
-    overflow: hidden;
-    padding: 20px;
-    background-color: white;
-}
-
-.lb-drink {
-    padding-top: 50px;
-    font-weight: bold;
-    font-size: 35pt;
-    text-align: center;
-}
 
 label {
     display: inline;
