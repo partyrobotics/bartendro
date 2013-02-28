@@ -12,15 +12,18 @@
         <a class="brand" href="#">admin</a>
         <ul class="nav">
             <li><a href="/">menu</a></li>
-            <li><a href="/admin">dispensers</a></li>
-            <li><a href="/admin/drink">drinks</a></li>
-            <li><a href="/admin/booze">booze</a></li>
-            <li><a href="/admin/liquidout">liquid out</a></li>
-            <li><a href="/admin/report">report</a></li>
+            {% if current_user.is_authenticated() %}
+                <li><a href="/admin">dispensers</a></li>
+                <li><a href="/admin/drink">drinks</a></li>
+                <li><a href="/admin/booze">booze</a></li>
+                <li><a href="/admin/report">report</a></li>
+                <li><a href="/admin/liquidout">liquid out</a></li>
+                <li><a href="/admin/logout">logout</a></li>
+            {% endif %}
         </ul>
     </div>
 </div>
-<div class="container-fluid" style="background-color: white">
+<div class="container-fluid">
     {% block body %}{% endblock %}
 </div>
 <script type="text/javascript" src="/static/js/jquery.js"></script>

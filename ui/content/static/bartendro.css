@@ -275,3 +275,12 @@ label {
 .booze-line-hidden {
     visibility: hidden;
 }
+
+.login-box {
+    border-radius: 7px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #bbb;;
+    padding: 20px;
+    background-color: white;
+}

@@ -1,0 +1,40 @@
+{% extends 'admin/layout' %}
+{% block body %}
+    <div class="row-fluid">
+        <div class="span3"></div>
+        <div class="span6 login-box">
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
+          <form method="POST" action="/admin/login" class="form-horizontal">
+             <div class="control-group">
+                {{ form["user"].label(class="control-label")}} 
+                <div class="controls">
+                    {{ form["user"](class="user") }}
+                </div>
+             </div>
+             <div class="control-group">
+                {{ form["password"].label(class="control-label")}}
+                <div class="controls">
+                   {{ form["password"](class="password") }}
+                </div>
+             </div>
+             <div class="control-group">
+                <div class="controls">
+                    {{ form.login(class="btn btn-large btn-primary") }}
+                </div>
+             </div>
+          </form>
+        </div>
+        <div class="span3"></div>
+    </div>
+</div>
+{% endblock %}

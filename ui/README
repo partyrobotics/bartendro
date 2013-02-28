@@ -9,8 +9,13 @@ If you're installing into raspian then you can get all the dependencies in one g
 apt-get install nginx daemontools daemontools-run 
 apt-get install python-werkzeug python-jinja2 python-setuptools \
         python-wtforms python-serial python-smbus python-sqlite python-sqlalchemy \
-        python-cherrypy3 memcached python-memcache python-rpi.gpio
+        python-cherrypy3 memcached python-memcache python-rpi.gpio python-flask 
 
 If you'd like to have python dependencies installed with pip:
 
 pip install flask flask-sqlalchemy wtforms python-memcached pyserial
+
+Also you need to install flask-sqlalchemy & flask-login:
+
+   https://pypi.python.org/packages/source/F/Flask-SQLAlchemy/Flask-SQLAlchemy-0.16.tar.gz
+   https://pypi.python.org/packages/source/F/Flask-Login/Flask-Login-0.1.3.tar.gz

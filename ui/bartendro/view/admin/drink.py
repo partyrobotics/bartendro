@@ -2,6 +2,7 @@
 from operator import itemgetter
 from bartendro import app, db
 from flask import Flask, request, redirect, render_template
+from flask.ext.login import login_required
 from wtforms import Form, TextField, SelectField, DecimalField, validators, HiddenField
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
@@ -14,6 +15,7 @@ from bartendro import constant
 MAX_BOOZES_PER_DRINK = 8
 
 @app.route('/admin/drink')
+@login_required
 def admin_drink():
     drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
@@ -45,6 +47,7 @@ def admin_drink():
     return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Drinks")
 
 @app.route('/admin/drink/edit/<id>')
+@login_required
 def admin_drink_edit(id):
 
     saved = int(request.args.get('saved', "0"))
@@ -92,6 +95,7 @@ def admin_drink_edit(id):
 
 
 @app.route('/admin/drink/save', methods=['POST'])
+@login_required
 def admin_drink_save():
 
     cancel = request.form.get("cancel")
