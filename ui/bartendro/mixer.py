@@ -154,8 +154,13 @@ class Mixer(object):
                                                          FROM booze_group_booze bgb, dispenser 
                                                         WHERE bgb.booze_id = dispenser.booze_id)""")
 
+        if self.use_liquid_out: 
+            sql = "SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d"
+        else:
+            sql = "SELECT booze_id FROM dispenser ORDER BY id LIMIT :d"
+
         boozes = db.session.query("booze_id") \
-                        .from_statement("SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d") \
+                        .from_statement(sql) \
                         .params(d=self.disp_count).all()
         boozes.extend(add_boozes)
 
