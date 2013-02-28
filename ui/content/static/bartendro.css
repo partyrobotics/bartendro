@@ -98,6 +98,7 @@ h3 {
     border-radius: 5px;
     font-size: 30pt;
     padding: 25px;
+    line-height: 30pt;
 }
 
 .dispense-drink-detail {
@@ -144,7 +145,6 @@ table {
 }
 
 .dispense-button {
-    width: 100px;
 }
 
 .dispense-buttons {
