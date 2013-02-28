@@ -272,36 +272,43 @@ function back()
     window.location = "/";
 }
 
+{% if current_user.is_authenticated() %}
 function make_drink(drink, is_taster)
 {
-    for(i = 0; i < ing.length; i++)
-    {
-        if (i == 0)
-            args = "?";
-        else 
-            args += "&";
-        args += "booze" + ing[i].id + "=";
-        args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
-    }
-    lb = '<div class="lb-box"><h1>';
-    if (is_taster)
-        lb += 'Now serving a taste of'
-    else
-        lb += 'Now serving your'
-    lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
-    lb += "</div>";
-    $.modal(lb, { 'escClose' : false });
-    $.ajax({
-            url: "/ws/drink/" + drink + args,
-            success: function(html)
-            {
-                if (is_taster)
-                    $.modal.close();
-                else
-                    window.location = "/";
-            }
-    });
+        for(i = 0; i < ing.length; i++)
+        {
+            if (i == 0)
+                args = "?";
+            else 
+                args += "&";
+            args += "booze" + ing[i].id + "=";
+            args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
+        }
+        lb = '<div class="lb-box"><h1>';
+        if (is_taster)
+            lb += 'Now serving a taste of'
+        else
+            lb += 'Now serving your'
+        lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
+        lb += "</div>";
+        $.modal(lb, { 'escClose' : false });
+        $.ajax({
+                url: "/ws/drink/" + drink + args,
+                success: function(html)
+                {
+                    if (is_taster)
+                        $.modal.close();
+                    else
+                        window.location = "/";
+                }
+        });
 }
+{% else %}
+function make_drink(drink, is_taster)
+{
+    alert("Please make your drinks selection from the tablet attached to the bot. Thank you!");
+}
+{% endif %}
 </script>
 <script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.2.min.js"></script>
 {% endblock %}
