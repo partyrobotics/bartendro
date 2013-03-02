@@ -9,7 +9,7 @@
                Total volume of drinks: {{ total_volume / 1000 }} L
             </div>
             <br/>
-            <table>
+            <table class="table table-striped table-bordered">
                <tr><th>drink</th><th>number</th><th>volume (L)</th></tr>
                {% for name, number, volume in top_drinks %}
                     <tr><td>{{ name }}</td><td>{{ number }}</td><td>{{ volume / 1000 }}</td></tr>

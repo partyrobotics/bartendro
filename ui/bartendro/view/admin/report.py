@@ -19,21 +19,21 @@ def report_view(begin, end):
     begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
     enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
 
-    total_number = session.query("number")\
+    total_number = db.session.query("number")\
                  .from_statement("""SELECT count(*) as number
                                       FROM drink_log 
                                      WHERE drink_log.time >= :begin 
                                        AND drink_log.time <= :end""")\
                  .params(begin=begindate, end=enddate).first()
 
-    total_volume = session.query("volume")\
+    total_volume = db.session.query("volume")\
                  .from_statement("""SELECT sum(drink_log.size) as volume 
                                       FROM drink_log 
                                      WHERE drink_log.time >= :begin 
                                        AND drink_log.time <= :end""")\
                  .params(begin=begindate, end=enddate).first()
 
-    top_drinks = session.query("name", "number", "volume")\
+    top_drinks = db.session.query("name", "number", "volume")\
                  .from_statement("""SELECT drink_name.name,
                                            count(drink_log.drink_id) AS number, 
                                            sum(drink_log.size) AS volume 
