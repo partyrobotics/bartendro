@@ -141,6 +141,12 @@
     }
 }
 
+.trending-drinks {
+    text-align: right;
+    font-size: 16pt;
+    padding-top: 25px;
+}
+
 .menuitem
 {
     padding: 8px;
