@@ -34,7 +34,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_smaller()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="size-text">4 fluid ounces</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink.sugg_size }} fluid ounces</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
