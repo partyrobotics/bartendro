@@ -53,7 +53,7 @@ CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
 DrinkLog.drink = relationship(Drink)
 
 # Import views
-from bartendro.view import root
+from bartendro.view import root, trending
 from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \
                                  dispenser as admin_dispenser, report, liquidout, user
 from bartendro.view.drink import drink
