@@ -7,8 +7,8 @@ from sqlalchemy.orm import mapper, relationship, backref
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///../bartendro.db'
 SECRET_KEY = 'let our bot get you drunk!'
-USERNAME = 'admin'
-PASSWORD = '!freedrinks'
+#USERNAME = 'admin'
+#PASSWORD = '!freedrinks'
 #SERVER_NAME = '10.1.1.138:8080'
 
 app = Flask(__name__,
