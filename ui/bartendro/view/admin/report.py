@@ -16,8 +16,23 @@ def report_index():
 @app.route('/admin/report/<begin>/<end>')
 @login_required
 def report_view(begin, end):
-    begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
-    enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
+    try:
+        begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d %H:%M")))
+    except ValueError:
+        try:
+            begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d")))
+            print begindate
+        except ValueError:
+            return render_template("admin/report", error="Invalid begin date")
+
+    try:
+        enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
+    except ValueError:
+        try:
+            enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d")))
+            print enddate
+        except ValueError:
+            return render_template("admin/report", error="Invalid end date")
 
     total_number = db.session.query("number")\
                  .from_statement("""SELECT count(*) as number

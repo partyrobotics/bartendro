@@ -4,6 +4,7 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" type="text/css" href="/static/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="/static/bartendro.css">
+  <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.24/themes/base/jquery-ui.css" />
   <link rel="icon" type="image/vnd.microsoft.icon" href="/static/images/icon.ico">
 </head>
 <body>
