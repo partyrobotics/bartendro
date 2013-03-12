@@ -9,6 +9,7 @@ from bartendro.router import driver
 from bartendro import mixer
 
 liquid_out = False
+mini_router = True
 
 if len(sys.argv) > 1 and sys.argv[1] == "--debug":
     debug = True
@@ -27,7 +28,7 @@ app.mc.flush_all()
 
 app.log = logging.getLogger('bartendro')
 
-app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
+app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only, mini_router);
 app.driver.open()
 app.log.info("Found %d dispensers." % app.driver.count())
 

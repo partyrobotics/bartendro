@@ -62,13 +62,14 @@ class I2CIOError:
 class RouterDriver(object):
     '''This object interacts with the bartendro router controller.'''
 
-    def __init__(self, device, software_only):
+    def __init__(self, device, software_only, use_mini_router_mapping = False):
         self.device = device
         self.ser = None
         self.msg = ""
         self.ret = 0
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
+        self.use_mini_router_mapping = use_mini_router_mapping
         self.dispenser_select = None
         self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
         if software_only:
@@ -147,9 +148,9 @@ class RouterDriver(object):
                         print "inconsistent"
                         continue
                     id = ord(data[0])
-                    self.dispenser_ids[disp] = id
-                    print "Found dispenser %d with id %d" % (disp, id)
+                    self.dispenser_ids[self.num_dispensers] = id
                     self.num_dispensers += 1
+                    print "Found dispenser %d with pump id %d -- assigned dispenser %d" % (disp, id, self.num_dispensers)
                     break
                 elif len(data) > 1:
                     print "Did not receive 3 characters back. Trying again."
@@ -175,6 +176,13 @@ class RouterDriver(object):
                         print "  dispenser %d has id %d" % (i, d)
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
+
+        if self.use_mini_router_mapping and self.num_dispensers == 3:
+            print "Remapping to compensate for MiniRouter board"
+            t = self.dispenser_ids[2]
+            self.dispenser_ids[2] = self.dispenser_ids[1]
+            self.dispenser_ids[1] = self.dispenser_ids[0]
+            self.dispenser_ids[0] = t
 
         #self.num_dispensers = 1
         self.led_idle()
