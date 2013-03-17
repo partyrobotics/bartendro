@@ -177,13 +177,6 @@ class RouterDriver(object):
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
-        if self.use_mini_router_mapping and self.num_dispensers == 3:
-            print "Remapping to compensate for MiniRouter board"
-            t = self.dispenser_ids[2]
-            self.dispenser_ids[2] = self.dispenser_ids[1]
-            self.dispenser_ids[1] = self.dispenser_ids[0]
-            self.dispenser_ids[0] = t
-
         #self.num_dispensers = 1
         self.led_idle()
 
