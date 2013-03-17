@@ -24,3 +24,8 @@ def ws_dispenser_test(disp):
 	sleep(.1)
     t, ticks = app.driver.get_dispense_stats(disp - 1)
     return "ok\n"
+
+@app.route('/ws/clean')
+def ws_dispenser_clean():
+    app.mixer.clean()
+    return "ok\n"

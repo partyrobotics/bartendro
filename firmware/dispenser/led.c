@@ -101,9 +101,20 @@ void set_led_rgb_no_delay(uint8_t red, uint8_t green, uint8_t blue)
     delay_us(COLOR_LATCH_DURATION);
 }
 
-void color_hue(uint8_t h, color_t *c) 
+void led_pattern_hue(uint32_t t, color_t *c) 
 {
-    uint8_t s = h % (252 / 6);
+    uint8_t s, h;
+
+    h = (uint8_t)(t & 0xFF);
+    if (h >= HUE_MAX)
+    {
+        c->red = HUE_MAX;
+        c->green = 0;
+        c->blue = 0;
+
+        return;
+    }
+    s = h % (252 / 6);
     switch(h / STEPS_PER_HEXTET) 
     {
         case 0:  // from 255, 0, 0 to 255, 255, 0
@@ -189,6 +200,23 @@ void led_pattern_drink_done(uint32_t t, color_t *c)
         c->green = 255 - (2 * (t - 128));
     c->blue = 0;
     c->red = 0;
+}
+
+void led_pattern_clean(uint32_t t, color_t *c)
+{
+    uint8_t t8 = t & 0xFF;
+
+    if (t8 < 128)
+    {
+        c->red = t * 2;
+        c->green = t * 2;
+    }
+    else
+    {
+        c->red = 255 - (2 * (t - 128));
+        c->green = 255 - (2 * (t - 128));
+    }
+    c->blue = 0;
 }
 
 #if 0

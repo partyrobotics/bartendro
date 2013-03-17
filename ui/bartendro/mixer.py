@@ -23,6 +23,9 @@ DISPENSER_OUT     = 1
 DISPENSER_OK      = 0
 DISPENSER_WARNING = 2
 
+CLEAN_CYCLE_MAX_PUMPS = 3   # The maximum number of pups to run at any one time
+CLEAN_CYCLE_DURATION  = 10  # in seconds for each pump
+
 class Mixer(object):
     '''This is where the magic happens!'''
 
@@ -54,6 +57,9 @@ class Mixer(object):
 
     def led_complete(self):
         self.driver.led_complete()
+
+    def led_clean(self):
+        self.driver.led_clean()
 
     def can_make_drink(self, boozes, booze_dict):
         ok = True
@@ -254,6 +260,34 @@ class Mixer(object):
 
         FlashGreenLeds(self).start()
         return True 
+
+    def clean(self):
+        CleanCycle(self).start()
+
+class CleanCycle(Thread):
+    def __init__(self, mixer):
+        Thread.__init__(self)
+        self.mixer = mixer
+
+    def run(self):
+        disp_on_times = []
+        disp_off_times = []
+        for i in xrange(self.mixer.disp_count):
+            disp_on_times.append(((i / CLEAN_CYCLE_MAX_PUMPS) * CLEAN_CYCLE_DURATION) + (i % CLEAN_CYCLE_MAX_PUMPS))
+            disp_off_times.append(disp_on_times[-1] + CLEAN_CYCLE_DURATION)
+
+        self.mixer.led_clean()
+        for t in xrange(disp_off_times[-1] + 1):
+            for i, off in enumerate(disp_off_times):
+                if t == off: 
+                    self.mixer.driver.stop(i)
+                    print "[%d] %d: off" % (t, i)
+            for i, on in enumerate(disp_on_times):
+                if t == on: 
+                    self.mixer.driver.start(i)
+                    print "[%d] %d: on" % (t, i)
+            sleep(1)
+        self.mixer.led_idle()
 
 class FlashGreenLeds(Thread):
     def __init__(self, mixer):

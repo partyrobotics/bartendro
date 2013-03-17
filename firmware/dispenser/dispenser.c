@@ -44,6 +44,7 @@ static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
+static volatile uint8_t g_sync_divisor = 0;
 static void (*g_led_function)(uint32_t, color_t *) = 0;
 
 void check_dispense_complete_isr(void);
@@ -201,7 +202,7 @@ void idle(void)
     uint32_t t = 0;
 
     cli();
-    if (g_sync_count >= SYNC_COUNT)
+    if (g_sync_count >= g_sync_divisor)
     {
         g_sync_count = 0;
         animate = 1;
@@ -219,13 +220,14 @@ void idle(void)
     }
 }
 
-void set_led_pattern(void (*func)(uint32_t, color_t *))
+void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor)
 {
     if (func == NULL)
         set_led_rgb(0, 0, 0);
 
     cli();
     g_pattern_t = 0;
+    g_sync_divisor = sync_divisor;
     sei();
     g_led_function = func;
 }
@@ -470,19 +472,23 @@ int main(void)
                         break;
 
                     case PACKET_LED_OFF:
-                        set_led_pattern(NULL);
+                        set_led_pattern(NULL, 255);
                         break;
 
                     case PACKET_LED_IDLE:
-                        set_led_pattern(led_pattern_idle);
+                        set_led_pattern(led_pattern_hue, 20);
                         break;
 
                     case PACKET_LED_DISPENSE:
-                        set_led_pattern(led_pattern_dispense);
+                        set_led_pattern(led_pattern_dispense, 5);
                         break;
 
                     case PACKET_LED_DRINK_DONE:
-                        set_led_pattern(led_pattern_drink_done);
+                        set_led_pattern(led_pattern_drink_done, 10);
+                        break;
+
+                    case PACKET_LED_CLEAN:
+                        set_led_pattern(led_pattern_clean, 10);
                         break;
 
                     case PACKET_COMM_TEST:

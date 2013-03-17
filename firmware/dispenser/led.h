@@ -13,5 +13,7 @@ void set_led_rgb_no_delay(uint8_t red, uint8_t green, uint8_t blue);
 void led_pattern_idle(uint32_t t, color_t *c);
 void led_pattern_dispense(uint32_t t, color_t *c);
 void led_pattern_drink_done(uint32_t t, color_t *c);
+void led_pattern_clean(uint32_t t, color_t *c);
+void led_pattern_hue(uint32_t t, color_t *c);
 
 #endif

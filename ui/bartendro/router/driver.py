@@ -40,6 +40,7 @@ PACKET_IS_DISPENSING       = 11
 PACKET_LIQUID_LEVEL        = 12
 PACKET_UPDATE_LIQUID_LEVEL = 13
 PACKET_ID_CONFLICT         = 14
+PACKET_LED_CLEAN           = 15
 PACKET_COMM_TEST           = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -395,6 +396,14 @@ class RouterDriver(object):
         if self.software_only: return True
         self.sync(0)
         self.send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
+        sleep(.01)
+        self.sync(1)
+        return True
+
+    def led_clean(self):
+        if self.software_only: return True
+        self.sync(0)
+        self.send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
         self.sync(1)
         return True
