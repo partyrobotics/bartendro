@@ -18,9 +18,10 @@
     </div>
     <div class="span6">
        <div>
-          <a onclick="reset()" class="btn btn-danger">reset</a>
-          <a onclick="test_dispensers()" class="btn btn-warning" id="test-dispensers">test dispensers</a>
-          <a onclick="check_levels()" class="btn btn-info">liquid levels</a>
+          <a onclick="reset()" class="btn">reset</a>
+          <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
+          <a onclick="check_levels()" class="btn">liquid levels</a>
+          <a onclick="clean()" class="btn btn-danger">clean</a>
        </div>
        <div>
            There are {{ count }} dispensers available. 
@@ -143,6 +144,21 @@ function check_levels()
                  location.reload();
             }
     });
+}
+function clean()
+{
+    if (window.confirm("Remove all the hoses from the bottles. No alcohol fouls!"))
+    {
+        $.ajax({
+                url: "/ws/clean",
+                success: function(html)
+                {
+                },
+                error: function(xhr, txtStatus, errorThrown)
+                {
+                }
+        });
+    }
 }
 </script>
 {% endblock %}

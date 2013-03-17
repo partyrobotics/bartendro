@@ -23,8 +23,8 @@ DISPENSER_OUT     = 1
 DISPENSER_OK      = 0
 DISPENSER_WARNING = 2
 
-CLEAN_CYCLE_MAX_PUMPS = 3   # The maximum number of pups to run at any one time
-CLEAN_CYCLE_DURATION  = 10  # in seconds for each pump
+CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
+CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
 
 class Mixer(object):
     '''This is where the magic happens!'''
@@ -281,11 +281,9 @@ class CleanCycle(Thread):
             for i, off in enumerate(disp_off_times):
                 if t == off: 
                     self.mixer.driver.stop(i)
-                    print "[%d] %d: off" % (t, i)
             for i, on in enumerate(disp_on_times):
                 if t == on: 
                     self.mixer.driver.start(i)
-                    print "[%d] %d: on" % (t, i)
             sleep(1)
         self.mixer.led_idle()
 

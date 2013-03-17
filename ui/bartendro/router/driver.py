@@ -226,27 +226,27 @@ class RouterDriver(object):
 
             ch = self.ser.read(1)
             t1 = time()
-            print "packet time: %f" % (t1 - t0)
+            #print "packet time: %f" % (t1 - t0)
             if len(ch) < 1:
-                print "  * read timeout"
+                print "*** read timeout"
                 continue
 
             ack = ord(ch)
             if ack == PACKET_ACK_OK: return True
             if ack == PACKET_CRC_FAIL: 
-                print "  * crc fail"
+                print "*** crc fail"
                 continue
             if ack == PACKET_ACK_TIMEOUT: 
-                print "  * ack timeout"
+                print "*** ack timeout"
                 continue
             if ack == PACKET_ACK_INVALID: 
-                print "  * dispenser received invalid packet"
+                print "*** dispenser received invalid packet"
                 continue
             if ack == PACKET_ACK_INVALID_HEADER: 
-                print "  * dispenser received invalid header"
+                print "*** dispenser received invalid header"
                 continue
             if ack == PACKET_ACK_HEADER_IN_PACKET:
-                print "  * header in packet error"
+                print "*** header in packet error"
                 continue
 
             # if we get an invalid ack code, it might be ok. 
