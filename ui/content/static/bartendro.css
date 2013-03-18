@@ -313,3 +313,11 @@ label {
     padding: 20px;
     background-color: white;
 }
+
+.shotbot-button {
+    width: 50%;
+    height: 200px;
+    font-size: 30pt;
+    line-height: 30pt;
+    border-radius: 1em;
+}

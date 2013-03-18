@@ -347,7 +347,7 @@ class RouterDriver(object):
 
     def make_shot(self):
         if self.software_only: return True
-        self.send_packet32(0, PACKET_TICK_DISPENSE, 80)
+        self.send_packet32(0, PACKET_TICK_DISPENSE, 90)
         return True
 
     def ping(self, dispenser):

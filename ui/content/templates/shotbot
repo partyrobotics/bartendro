@@ -1,9 +1,10 @@
 {% extends 'layout' %}
 {% block body %}
-<div style="font-size: 25pt; font-weight: bold; text-align: center; margin-bottom: 20px">ShotBot</div>
-<div style="text-align: center">
-<button style="width: 50%; height: 200px; font-size: 30pt; border-radius: 1em;" onclick="make_drink()">I want a shot!</button>
+<div style="text-align: center; padding-bottom: 10px;">
+<h1>ShotBot is dispensing: {{ booze }}</h1>
+<button class="btn btn-warning button-border shotbot-button" onclick="make_drink()">I want a shot!</button>
 </div>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 function make_drink()
 {

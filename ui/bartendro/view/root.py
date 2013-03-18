@@ -2,6 +2,7 @@
 import memcache
 from bartendro import app, db
 from flask import Flask, request, render_template
+from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 
@@ -21,6 +22,12 @@ def filter_drink_list(can_make_dict, drinks):
 
 @app.route('/')
 def index():
+    if app.mixer.disp_count == 1:
+        disp = db.session.query(Dispenser) \
+                          .filter(Dispenser.id == 1) \
+                          .one()
+        return render_template("shotbot", booze=disp.booze.name, title="ShotBot")
+
     can_make = app.mixer.get_available_drink_list()
     can_make_dict = {}
     for drink in can_make:
