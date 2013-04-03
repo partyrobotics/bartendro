@@ -34,3 +34,9 @@ def ws_check_levels():
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
     return "ok\n"
+
+@app.route('/ws/mintest')
+def ws_min_test():
+    mixer = app.mixer
+    mixer.min_dispense_test()
+    return "ok\n"

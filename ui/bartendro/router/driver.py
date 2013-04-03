@@ -261,13 +261,13 @@ class RouterDriver(object):
             dispenser_id = dest
         return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val, 0, 0, 0))
 
-    def send_packet16(self, dest, type, val):
+    def send_packet16(self, dest, type, val1, val2):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
-        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val, 0))
+        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val1, val2))
 
     def send_packet32(self, dest, type, val):
         if dest != DEST_BROADCAST: 
@@ -366,9 +366,9 @@ class RouterDriver(object):
         if self.software_only: return True
         return True
 
-    def dispense_ticks(self, dispenser, ticks):
+    def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only: return True
-        return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
+        return self.send_packet16(dispenser, PACKET_TICK_DISPENSE, ticks, speed)
 
     def led_off(self):
         if self.software_only: return True

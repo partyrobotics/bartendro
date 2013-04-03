@@ -308,7 +308,7 @@ void run_motor_timed(uint32_t duration)
     set_motor_speed(0);
 }
 
-void dispense_ticks(uint32_t ticks)
+void dispense_ticks(uint16_t ticks, uint16_t speed)
 {
     uint8_t dispensing;
 
@@ -325,7 +325,7 @@ void dispense_ticks(uint32_t ticks)
     g_is_dispensing = 1;
     sei();
 
-    set_motor_speed(255);
+    set_motor_speed(speed);
 }
 
 void is_dispensing(void)
@@ -452,7 +452,7 @@ int main(void)
                         break;
 
                     case PACKET_TICK_DISPENSE:
-                        dispense_ticks(p.p.uint32);
+                        dispense_ticks(p.p.uint16[0], p.p.uint16[1]);
                         break;
 
                     case PACKET_TIME_DISPENSE:

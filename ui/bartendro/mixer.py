@@ -117,6 +117,9 @@ class Mixer(object):
 
         return new_state
 
+    def min_dispense_test(self):
+        self.driver.dispense_ticks(0, 2, 96)
+
     def liquid_level_test(self, dispenser, threshold):
         if not self.use_liquid_out: return
 
