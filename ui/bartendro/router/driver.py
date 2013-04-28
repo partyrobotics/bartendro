@@ -10,7 +10,7 @@ import random
 from struct import pack, unpack
 import pack7
 import dispenser_select
-import status_led
+from bartendro.errors import SerialIOError
 
 BAUD_RATE = 9600
 
@@ -44,21 +44,6 @@ PACKET_LED_CLEAN           = 15
 PACKET_COMM_TEST           = 0xFE
 
 DEST_BROADCAST         = 0xFF
-
-class SttyNotFoundException:
-    pass
-
-class SerialPortException:
-    pass
-
-class SerialIOError:
-    pass
-
-class LogFileException:
-    pass
-
-class I2CIOError:
-    pass
 
 class RouterDriver(object):
     '''This object interacts with the bartendro router controller.'''
@@ -120,8 +105,10 @@ class RouterDriver(object):
         except serial.serialutil.SerialException:
             raise SerialIOError
 
-        print "Opened %s for %d baud N81" % (self.device, BAUD_RATE)
+        print "Done."
+        print
 
+        import status_led
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
 

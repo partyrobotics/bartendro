@@ -3,6 +3,7 @@
 import sys
 import os
 from time import sleep
+from bartendro.errors import I2CIOError
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
@@ -12,7 +13,6 @@ ROUTER_CMD_SYNC_OFF     = 252
 ROUTER_CMD_PING         = 253
 ROUTER_CMD_COUNT        = 254
 ROUTER_CMD_RESET        = 255
-
 
 try:
     import smbus
@@ -63,10 +63,13 @@ class DispenserSelect(object):
             print "You must install the smbus module!"
             sys.exit(-1)
 
+        print "Opening I2C bus to router"
         try:
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
             raise I2CIOError
+        print "Done."
+        print
 
 
 if __name__ == "__main__":
