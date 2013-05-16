@@ -57,7 +57,14 @@ class RouterDriver(object):
         self.software_only = software_only
         self.use_mini_router_mapping = use_mini_router_mapping
         self.dispenser_select = None
+
+        # dispenser_ids are the ids the dispensers have been assigned. These are logical ids 
+        # used for dispenser communication.
         self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
+
+        # dispenser_ports are the ports the dispensers have been plugged into.
+        self.dispenser_ports = [255 for i in xrange(MAX_DISPENSERS)]
+
         if software_only:
             self.num_dispensers = MAX_DISPENSERS
         else:
@@ -84,7 +91,12 @@ class RouterDriver(object):
 
     def select(self, dispenser):
         if self.software_only: return True
-        self.dispenser_select.select(dispenser)
+
+        # If for broadcast, then ignore this select
+        if dispenser == 255: return
+
+        port = self.dispenser_ports[dispenser]
+        self.dispenser_select.select(port)
 
     def count(self):
         return self.num_dispensers
@@ -121,9 +133,9 @@ class RouterDriver(object):
         sleep(.001)
 
         self.num_dispensers = 0
-        for disp in xrange(MAX_DISPENSERS):
-            print "dispenser %d" % disp
-            self.select(disp)
+        for port in xrange(MAX_DISPENSERS):
+            print "port %d" % port
+            self.dispenser_select.select(port)
             sleep(.01)
             while True:
                 self.ser.flushInput()
@@ -137,8 +149,9 @@ class RouterDriver(object):
                         continue
                     id = ord(data[0])
                     self.dispenser_ids[self.num_dispensers] = id
+                    self.dispenser_ports[self.num_dispensers] = port
                     self.num_dispensers += 1
-                    print "Found dispenser %d with pump id %d -- assigned dispenser %d" % (disp, id, self.num_dispensers)
+                    print "Found dispenser %d with pump id %d -- assigned dispenser %d" % (port, id, self.num_dispensers)
                     break
                 elif len(data) > 1:
                     print "Did not receive 3 characters back. Trying again."
@@ -246,6 +259,7 @@ class RouterDriver(object):
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
+
         return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val, 0, 0, 0))
 
     def send_packet16(self, dest, type, val):
