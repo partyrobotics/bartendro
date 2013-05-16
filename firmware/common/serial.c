@@ -213,7 +213,7 @@ uint8_t send_packet16(uint8_t type, uint16_t data)
 uint8_t send_packet(packet_t *p)
 {
     uint16_t crc = 0;
-    uint8_t i, *ch, ret, ack, tries, packed_size;
+    uint8_t i, *ch, ret, ack, packed_size;
     uint8_t packed[RAW_PACKET_SIZE + 2]; // +2 for the header
 
 
@@ -230,38 +230,36 @@ uint8_t send_packet(packet_t *p)
 
     packed[0] = 0xFF;
     packed[1] = 0xFF;
-    for(tries = 0; tries < NUM_PACKET_SEND_TRIES; tries++)
+
+    // Send the packet data
+    for(i = 0, ch = packed; i < RAW_PACKET_SIZE + 2; i++, ch++)
     {
-        // Send the packet data
-        for(i = 0, ch = packed; i < RAW_PACKET_SIZE + 2; i++, ch++)
-        {
-            for(;;)
-            {
-                ret = serial_tx_nb(*ch);
-                if (check_reset())
-                    return COMM_RESET;
-
-                if (ret)
-                    break;
-
-                idle();
-            }
-        }
-
-        // Wait for the ACK
         for(;;)
         {
-            ret = serial_rx_nb(&ack);
+            ret = serial_tx_nb(*ch);
             if (check_reset())
                 return COMM_RESET;
 
             if (ret)
                 break;
+
             idle();
         }
-        if (ack == PACKET_ACK_OK)
-            return COMM_OK;
     }
+
+    // Wait for the ACK
+    for(;;)
+    {
+        ret = serial_rx_nb(&ack);
+        if (check_reset())
+            return COMM_RESET;
+
+        if (ret)
+            break;
+        idle();
+    }
+    if (ack == PACKET_ACK_OK)
+        return COMM_OK;
 
     // whoops, we didn't succesfully send the packet. :-(
     return COMM_SEND_FAIL;

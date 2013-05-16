@@ -20,13 +20,14 @@ SHOT_TICKS     = 20
 RAW_PACKET_SIZE      = 10
 PACKET_SIZE          =  8
 
-PACKET_ACK_OK      = 0
-PACKET_CRC_FAIL    = 1
-PACKET_ACK_TIMEOUT = 2
-PACKET_ACK_INVALID = 3
-PACKET_ACK_INVALID_HEADER = 4
+PACKET_ACK_OK               = 0
+PACKET_CRC_FAIL             = 1
+PACKET_ACK_TIMEOUT          = 2
+PACKET_ACK_INVALID          = 3
+PACKET_ACK_INVALID_HEADER   = 4
 PACKET_ACK_HEADER_IN_PACKET = 5
-PACKET_ACK_CRC_FAIL = 6
+PACKET_ACK_CRC_FAIL         = 6
+PACKET_ACK_ALT_OK           = 0x80 # sometimes we get 1 bit errors and we get back 0x80 instead of 0 :(
 
 PACKET_PING                = 3
 PACKET_SET_MOTOR_SPEED     = 4
@@ -202,55 +203,54 @@ class RouterDriver(object):
         if self.software_only: return True
 
         self.select(dest);
-        for attempt in xrange(3):
-            self.ser.flushInput()
-            self.ser.flushOutput()
+        self.ser.flushInput()
+        self.ser.flushOutput()
 
-            crc = 0
-            for ch in packet:
-                crc = self.crc16_update(crc, ord(ch))
+        crc = 0
+        for ch in packet:
+            crc = self.crc16_update(crc, ord(ch))
 
-            encoded = pack7.pack_7bit(packet + pack("<H", crc))
-            if len(encoded) != RAW_PACKET_SIZE:
-                print "ERROR: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE)
-                return False
+        encoded = pack7.pack_7bit(packet + pack("<H", crc))
+        if len(encoded) != RAW_PACKET_SIZE:
+            print "ERROR: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE)
+            return False
 
-            t0 = time()
-            written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
-            if written != RAW_PACKET_SIZE + 2:
-                print "ERROR: Send timeout"
-                continue
+        t0 = time()
+        written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
+        if written != RAW_PACKET_SIZE + 2:
+            print "ERROR: Send timeout"
+            return False
 
-            if dest == DEST_BROADCAST:
-                return True
+        if dest == DEST_BROADCAST:
+            return True
 
-            ch = self.ser.read(1)
-            t1 = time()
-            #print "packet time: %f" % (t1 - t0)
-            if len(ch) < 1:
-                print "*** read timeout"
-                continue
+        ch = self.ser.read(1)
+        t1 = time()
+        #print "packet time: %f" % (t1 - t0)
+        if len(ch) < 1:
+            print "*** read timeout"
+            return False
 
-            ack = ord(ch)
-            if ack == PACKET_ACK_OK: return True
-            if ack == PACKET_CRC_FAIL: 
-                print "*** crc fail"
-                continue
-            if ack == PACKET_ACK_TIMEOUT: 
-                print "*** ack timeout"
-                continue
-            if ack == PACKET_ACK_INVALID: 
-                print "*** dispenser received invalid packet"
-                continue
-            if ack == PACKET_ACK_INVALID_HEADER: 
-                print "*** dispenser received invalid header"
-                continue
-            if ack == PACKET_ACK_HEADER_IN_PACKET:
-                print "*** header in packet error"
-                continue
+        ack = ord(ch)
+        if ack == PACKET_ACK_OK or ack == PACKET_ACK_ALT_OK: return True
+        if ack == PACKET_CRC_FAIL: 
+            print "*** crc fail"
+            return False
+        if ack == PACKET_ACK_TIMEOUT: 
+            print "*** ack timeout"
+            return False
+        if ack == PACKET_ACK_INVALID: 
+            print "*** dispenser received invalid packet"
+            return False
+        if ack == PACKET_ACK_INVALID_HEADER: 
+            print "*** dispenser received invalid header"
+            return False
+        if ack == PACKET_ACK_HEADER_IN_PACKET:
+            print "*** header in packet error"
+            return False
 
-            # if we get an invalid ack code, it might be ok. 
-            print "  * Invalid ACK code %d" % ord(ch)
+        # if we get an invalid ack code, it might be ok. 
+        print "  * Invalid ACK code %d" % ord(ch)
         return False
 
     def send_packet8(self, dest, type, val):
