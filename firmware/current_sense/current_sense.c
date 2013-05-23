@@ -46,6 +46,17 @@ void setup(void)
     sbi(PORTD, 7);
     sbi(PORTB, 0);
     sbi(PORTB, 1);
+
+    // Set to Phase correct PWM, compare output mode
+    TCCR0A |= _BV(WGM00) | _BV(COM0B1);
+
+    // Set the clock source
+    TCCR0B |= (0 << CS00) | (1 << CS01);
+
+    // Reset timers and comparators
+    OCR0B = 0;
+    TCNT0 = 0;
+
 }
 
 void set_motor_speed(uint8_t speed)
@@ -103,13 +114,15 @@ int main(void)
     set_motor_speed(0);
     sei();
 
+    dprintf("Starting current sense test\n");
+    set_motor_speed(255);
     for(;;)
     {
-        set_motor_speed(255);
         l = read_current_sense();
         dprintf("%d\n", l);
-        if (l < 500)
+        if (l > 500)
         {
+            dprintf("Under threshold. stopping\n");
             set_motor_speed(0);
             break;
         }

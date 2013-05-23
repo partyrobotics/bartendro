@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 
-#define BAUD 38400
+#define BAUD 9600
 #define UBBR (F_CPU / 16 / BAUD - 1)
 
 #define _UBRRH UBRR0H
