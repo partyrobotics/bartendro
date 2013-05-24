@@ -45,11 +45,9 @@ void    flash_led(uint8_t fast);
 */
 
 // global variables that actually control states
-volatile uint32_t        g_time = 0;
 volatile uint8_t         g_sync = 0;
 
 // reset related variables
-static volatile uint32_t g_reset_fe_time = 0;
 static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_reset = 0;
 
@@ -68,9 +66,24 @@ void setup(void)
     // TX to dispensers
     DDRD |= (1<< PORTD1);
 
-    // start by pulling D1 & B1 high, since serial lines when idle are high
-    sbi(PORTD, 1);
-    sbi(PORTB, 1);
+    // By default, select the first dispenser
+    g_dispenser = 0;
+
+    // Check the state of the lines that we are routing and repeat that on 
+    // our output lines.
+    if (PINB & (1<<PINB1))
+        sbi(PORTD, 1);
+    else
+        cbi(PORTD, 1);
+
+    if (PIND & (1<<PIND3))
+        sbi(PORTB, 0);
+    else
+        cbi(PORTB, 0);
+    
+    // TODO: Check to see if we really want this statement. This enables
+    // the pull up on B1, which we should not need.
+    //sbi(PORTB, 1);
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT3) | (1 << PCINT4) | 
@@ -80,7 +93,7 @@ void setup(void)
               (1 << PCINT22) | (1 << PCINT23);
     PCICR |=  (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2);
 
-    // Timer setup for reset pulse width measuring
+    // Timer setup for SYNC signal
     TCCR1B |= TIMER1_FLAGS;
     TCNT1 = TIMER1_INIT;
     TIMSK1 |= (1<<TOIE1);
@@ -336,7 +349,6 @@ ISR(PCINT2_vect)
 
 ISR (TIMER1_OVF_vect)
 {
-    g_time++;
     if (g_sync)
         tbi(PORTC, 3);
     TCNT1 = TIMER1_INIT;
