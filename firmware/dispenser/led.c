@@ -166,6 +166,19 @@ int main(int argc, char *argv[])
     }
 }
 #endif
+
+void led_pattern_current_sense(uint32_t t, color_t *c)
+{
+    uint8_t t8 = t & 0xFF;
+
+    if (((t >> 2) % 2) == 0)
+        c->red = 255;
+    else
+        c->red = 0;
+    c->blue = 0;
+    c->green = 0;
+}
+
 void led_pattern_idle(uint32_t t, color_t *c)
 {
     uint8_t t8 = t & 0xFF;

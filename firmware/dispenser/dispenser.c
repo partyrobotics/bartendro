@@ -16,17 +16,14 @@
 #include "serial.h"
 #include "led.h"
 
-// TODO
-// Add support for different animation speeds
-
 // EEprom data 
 uint32_t EEMEM _ee_pump_id;
 uint32_t EEMEM _ee_run_time;
 
-#define RESET_DURATION  1
-#define SYNC_COUNT      10 // Every SYNC_INIT ms we will change the color animation
-#define NUM_ADC_SAMPLES 5
-#define NUM_CURRENT_SENSE_SAMPLES 10
+#define RESET_DURATION           1
+#define SYNC_COUNT               10 // Every SYNC_INIT ms we will change the color animation
+#define NUM_ADC_SAMPLES          5
+#define MAX_CURRENT_SENSE_CYCLES 3
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -47,8 +44,15 @@ static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
 static volatile uint8_t g_sync_divisor = 0;
 static void (*g_led_function)(uint32_t, color_t *) = 0;
 
+static uint8_t  g_current_sense_num_cycles = 0;
+static uint16_t g_current_sense_threshold = 465;
+static volatile uint8_t g_current_sense_detected = 0;
+
 void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed);
+void adc_shutdown(void);
+uint8_t check_reset(void);
+void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor);
 
 /*
    0  - PD0 - RX
@@ -173,6 +177,32 @@ ISR(PCINT2_vect)
     check_dispense_complete_isr();
 }
 
+ISR(ADC_vect)
+{
+    uint8_t low, hi;
+    uint16_t data;
+
+    low = ADCL;
+    hi = ADCH;
+    data = (hi << 8) | low;
+
+    if (data >= g_current_sense_threshold)
+        g_current_sense_num_cycles++;
+
+    if (g_current_sense_num_cycles >= MAX_CURRENT_SENSE_CYCLES)
+    {
+        set_motor_speed(0);
+        g_is_dispensing = 0;
+        g_dispense_target_ticks = 0;
+        set_led_pattern(led_pattern_current_sense, 20);
+        g_current_sense_detected = 1;
+    }
+
+    // If we're still dispensing, then start another ADC conversion
+    if (g_is_dispensing)
+        ADCSRA |= (1<<ADSC);
+}
+
 // this function is called from an ISR, so no need to turn off/on interrupts
 void check_dispense_complete_isr(void)
 {
@@ -181,6 +211,7 @@ void check_dispense_complete_isr(void)
          g_dispense_target_ticks = 0;
          g_is_dispensing = 0;
          set_motor_speed(0);
+         adc_shutdown();
     }
 }
 
@@ -239,13 +270,6 @@ void adc_liquid_level_setup(void)
     ADCSRA |= (1<<ADEN);
 }
 
-void adc_current_sense_setup(void)
-{
-    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2);
-    ADMUX = (1<<REFS0) | (0 << REFS1);
-    ADCSRA |= (1<<ADEN);
-}
-
 void adc_shutdown(void)
 {
     ADCSRA &= ~(1<<ADEN);
@@ -260,19 +284,6 @@ uint16_t adc_read()
     low = ADCL;
     hi = ADCH;
     return (hi << 8) | low;
-}
-
-uint16_t read_current_sense(void)
-{
-    uint8_t  i;
-    uint16_t v = 0;
-
-    adc_current_sense_setup();
-    for(i = 0; i < NUM_CURRENT_SENSE_SAMPLES; i++)
-        v += adc_read();
-    adc_shutdown();
-
-    return (uint16_t)(v / NUM_CURRENT_SENSE_SAMPLES);
 }
 
 void update_liquid_level(void)
@@ -324,6 +335,14 @@ void dispense_ticks(uint32_t ticks)
     g_ticks = 0;
     g_is_dispensing = 1;
     sei();
+
+    // Set up ADC conversion with interrupt enable
+    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2) | (1 << ADIE);
+    ADMUX = (1<<REFS0) | (0 << REFS1);
+    ADCSRA |= (1<<ADEN);
+
+    // Start a conversion
+    ADCSRA |= (1<<ADSC);
 
     set_motor_speed(255);
 }
@@ -402,7 +421,7 @@ void id_conflict(void)
 
 int main(void)
 {
-    uint8_t id, rec, i;
+    uint8_t id, rec, i, cs;
     packet_t p;
 
     setup();
@@ -423,6 +442,8 @@ int main(void)
     {
         cli();
         g_reset = 0;
+        g_current_sense_detected = 0;
+        g_current_sense_num_cycles = 0;
         setup();
         serial_init();
         set_motor_speed(0);
@@ -442,21 +463,29 @@ int main(void)
 
             if (rec == COMM_OK && (p.dest == DEST_BROADCAST || p.dest == id))
             {
+                // If we've detected a over current sitatuion, ignore all comamnds until reset
+                cli();
+                cs = g_current_sense_detected;
+                sei();
+
                 switch(p.type)
                 {
                     case PACKET_PING:
                         break;
 
                     case PACKET_SET_MOTOR_SPEED:
-                        set_motor_speed(p.p.uint8[0]);
+                        if (!cs)
+                            set_motor_speed(p.p.uint8[0]);
                         break;
 
                     case PACKET_TICK_DISPENSE:
-                        dispense_ticks(p.p.uint32);
+                        if (!cs)
+                            dispense_ticks(p.p.uint32);
                         break;
 
                     case PACKET_TIME_DISPENSE:
-                        run_motor_timed(p.p.uint32);
+                        if (!cs)
+                            run_motor_timed(p.p.uint32);
                         break;
 
                     case PACKET_IS_DISPENSING:
@@ -472,23 +501,28 @@ int main(void)
                         break;
 
                     case PACKET_LED_OFF:
+
                         set_led_pattern(NULL, 255);
                         break;
 
                     case PACKET_LED_IDLE:
-                        set_led_pattern(led_pattern_hue, 20);
+                        if (!cs)
+                            set_led_pattern(led_pattern_hue, 20);
                         break;
 
                     case PACKET_LED_DISPENSE:
-                        set_led_pattern(led_pattern_dispense, 5);
+                        if (!cs)
+                            set_led_pattern(led_pattern_dispense, 5);
                         break;
 
                     case PACKET_LED_DRINK_DONE:
-                        set_led_pattern(led_pattern_drink_done, 10);
+                        if (!cs)
+                            set_led_pattern(led_pattern_drink_done, 10);
                         break;
 
                     case PACKET_LED_CLEAN:
-                        set_led_pattern(led_pattern_clean, 10);
+                        if (!cs)
+                            set_led_pattern(led_pattern_clean, 10);
                         break;
 
                     case PACKET_COMM_TEST:
@@ -497,6 +531,10 @@ int main(void)
 
                     case PACKET_ID_CONFLICT:
                         id_conflict();
+                        break;
+
+                    case PACKET_SET_CS_THRESHOLD:
+                        g_current_sense_threshold = p.p.uint16[0];
                         break;
                 }
             }

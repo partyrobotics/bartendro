@@ -15,5 +15,6 @@ void led_pattern_dispense(uint32_t t, color_t *c);
 void led_pattern_drink_done(uint32_t t, color_t *c);
 void led_pattern_clean(uint32_t t, color_t *c);
 void led_pattern_hue(uint32_t t, color_t *c);
+void led_pattern_current_sense(uint32_t t, color_t *c);
 
 #endif

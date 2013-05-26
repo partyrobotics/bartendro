@@ -29,6 +29,7 @@ at some point.
 #define PACKET_UPDATE_LIQUID_LEVEL  13 // requires a few ms of quiet time while measurements are taken
 #define PACKET_ID_CONFLICT          14
 #define PACKET_LED_CLEAN            15
+#define PACKET_SET_CS_THRESHOLD     16
 #define PACKET_COMM_TEST            0xFE
 
 #define DEST_BROADCAST         0xFF
