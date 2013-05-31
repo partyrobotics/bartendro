@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+from time import sleep
 try:
     import RPi.GPIO as gpio
     gpio_missing = 0
@@ -13,8 +14,8 @@ class StatusLED(object):
 
     # pin definitions
     red = 18
-    green = 22
-    blue = 16
+    green = 16 
+    blue = 22
 
     def __init__(self, software_only):
         self.software_only = software_only
