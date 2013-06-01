@@ -72,7 +72,7 @@ class Mixer(object):
 
     def check_liquid_levels(self):
         if not self.use_liquid_out: 
-            self.driver.set_status_color(0, 0, 1)
+            self.driver.set_status_color(0, 1, 0)
             state = Mixer.MixerState.READY
             return
 
@@ -110,7 +110,7 @@ class Mixer(object):
         elif new_state == Mixer.MixerState.WARNING:
             self.driver.set_status_color(1, 1, 0)
         else:
-            self.driver.set_status_color(0, 0, 1)
+            self.driver.set_status_color(0, 1, 0)
 
         self.state = new_state
         print "Checking levels done"
