@@ -6,6 +6,9 @@ TARGET=dispenser
 program: $(TARGET).hex 
 	sudo avrdude -p m168 -P usb -c avrispmkII -Uflash:w:$(TARGET).hex -B 1.0
 
+fuses:
+	sudo avrdude -p m168 -P usb -c avrispmkII -U lfuse:w:0xe2:m -U hfuse:w:0xd7:m -U efuse:w:0x03:m -B 8
+
 $(TARGET).hex: $(TARGET).obj
 	$(OBJ2HEX) -R .eeprom -O ihex $< $@
 
