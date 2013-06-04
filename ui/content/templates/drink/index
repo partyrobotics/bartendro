@@ -15,7 +15,7 @@
                       <tr>
                          <td id="booze_name{{ ing.id }}">{{ ing.name }}</td>
                          <td id="booze{{ ing.id }}" style="text-align: right"></td>
-                         <td>fl oz</td>
+                         <td id="booze_unit{{ ing.id }}"></td>
                       </tr>
                   {% endfor %}
                 </table>
@@ -34,7 +34,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_smaller()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink.sugg_size }} fluid ounces</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink.sugg_size }}</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
@@ -106,9 +106,17 @@
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 
-var taster_size = 1;
+var taster_size = 30;
 var max_drink_size_multiplier = 2;
-var drink_size = {{ drink.sugg_size }};
+{% if metric %}
+    var size_increment = 30;
+    var drink_size = {{ drink.sugg_size }};
+{% else %}
+    var size_increment = 1;
+    var drink_size = {{ drink.sugg_size / 30 }};
+{% endif %}
+var max_drink_size = drink_size * max_drink_size_multiplier;
+
 var drink_strength = 0;
 var drink_tartness = 0;
 var ing = [ 
@@ -131,10 +139,22 @@ var width, height;
 var elapsed;
 var max_x, max_y;
 var drink_to_make;
+var unit_name, unit_name_short;
 
 $(document).ready(function() 
 {
-    $("#size_text").text(drink_size + " fluid ounces");
+    if ({{ metric }})
+    {
+        unit_name = "milliliters"
+        unit_name_short = "ml"
+    }
+    else
+    {
+        unit_name = "fluid ounces"
+        unit_name_short = "fl oz"
+    }
+
+    $("#size_text").text(drink_size + " " + unit_name);
     {% if is_custom %}
         change_alcohol();
     {% endif %}
@@ -165,9 +185,14 @@ function update_volumes()
     {
         ing[i].volume = drink_size * ing[i].newparts / total;
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
-        $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
+        if ({{ metric }})
+            $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
+        else
+            $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
         $("#booze_type" + ing[i].id).text(ing[i].type);
+        $("#booze_unit" + ing[i].id).text(unit_name_short);
     } 
+    $("#size-text").text(drink_size + " " + unit_name);
 }
 
 function change_alcohol()
@@ -189,21 +214,19 @@ function change_alcohol()
 
 function size_bigger()
 {
-    if (drink_size >= {{ drink.sugg_size }} * max_drink_size_multiplier)
+    if (drink_size >= max_drink_size)
         return;
 
-    drink_size += 1;
-    $("#size-text").text(drink_size + " fluid ounces");
+    drink_size += size_increment;
     update_volumes();
 }
 
 function size_smaller()
 {
-    if (drink_size <= 1)
+    if (drink_size <= size_increment)
         return;
 
-    drink_size -= 1;
-    $("#size-text").text(drink_size + " fluid ounces");
+    drink_size -= size_increment;
     update_volumes();
 }
 
@@ -284,7 +307,7 @@ function make_drink(drink, is_taster)
             else 
                 args += "&";
             args += "booze" + ing[i].id + "=";
-            args += is_taster ? ing[i].taster_volume.toFixed(3) : ing[i].volume.toFixed(3);
+            args += is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
         }
         lb = '<div class="lb-box"><h1>';
         if (is_taster)

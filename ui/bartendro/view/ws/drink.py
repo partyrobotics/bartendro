@@ -14,7 +14,7 @@ def ws_drink(drink):
 
     recipe = {}
     for arg in request.args:
-        recipe[arg] = float(request.args.get(arg)) * constant.ML_PER_FL_OZ
+        recipe[arg] = int(request.args.get(arg))
 
     if mixer.make_drink(drink, recipe):
         return "ok\n"

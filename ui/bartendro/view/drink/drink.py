@@ -26,8 +26,6 @@ def drink(id):
                           .filter(drink.id == CustomDrink.drink_id) \
                           .first()
     drink.process_ingredients()
-    # convert size to fl oz
-    drink.sugg_size = drink.sugg_size / constant.ML_PER_FL_OZ
 
     has_non_alcohol = False
     has_alcohol = False
@@ -51,6 +49,7 @@ def drink(id):
         return render_template("drink/index", 
                                drink=drink, 
                                title=drink.name.name,
+                               metric=1,
                                is_custom=0,
                                show_sweet_tart=show_sweet_tart,
                                show_strength=show_strength,
@@ -85,6 +84,7 @@ def drink(id):
                            drink=drink, 
                            title=drink.name.name,
                            is_custom=1,
+                           metric=1,
                            custom_drink=drink.custom_drink[0],
                            booze_group=booze_group,
                            show_sweet_tart=show_sweet_tart,
