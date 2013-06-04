@@ -2,6 +2,7 @@
 from time import sleep
 from bartendro import app, db
 from flask import Flask, request
+from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
@@ -11,6 +12,9 @@ from bartendro import constant
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
     mixer = app.mixer
+
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
 
     recipe = {}
     for arg in request.args:
