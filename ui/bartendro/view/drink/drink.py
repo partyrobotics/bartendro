@@ -27,6 +27,7 @@ def drink(id):
                           .first()
     drink.process_ingredients()
 
+    drink_size = 90
     has_non_alcohol = False
     has_alcohol = False
     has_sweet = False
@@ -51,6 +52,7 @@ def drink(id):
                                title=drink.name.name,
                                metric=1,
                                is_custom=0,
+                               drink_size=drink_size,
                                show_sweet_tart=show_sweet_tart,
                                show_strength=show_strength,
                                show_size=show_size,
@@ -85,6 +87,7 @@ def drink(id):
                            title=drink.name.name,
                            is_custom=1,
                            metric=1,
+                           drink_size=drink_size,
                            custom_drink=drink.custom_drink[0],
                            booze_group=booze_group,
                            show_sweet_tart=show_sweet_tart,

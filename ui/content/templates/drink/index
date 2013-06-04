@@ -34,7 +34,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_smaller()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink.sugg_size }}</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink_size }}</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
@@ -110,10 +110,10 @@ var taster_size = 30;
 var max_drink_size_multiplier = 2;
 {% if metric %}
     var size_increment = 30;
-    var drink_size = {{ drink.sugg_size }};
+    var drink_size = {{ drink_size }};
 {% else %}
     var size_increment = 1;
-    var drink_size = {{ drink.sugg_size / 30 }};
+    var drink_size = {{ drink_size / 30 }};
 {% endif %}
 var max_drink_size = drink_size * max_drink_size_multiplier;
 
