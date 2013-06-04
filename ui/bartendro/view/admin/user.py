@@ -36,7 +36,7 @@ def login():
     if request.method == 'POST' and form.validate():
         user = request.form.get("user" or '')
         password = request.form.get("password" or '')
-        if (user == 'scotty' and password == 'boozemeup'):
+        if (user == app.options.login_name and password == app.options.login_passwd):
             login_user(User(user))
             flash("Logged in successfully.")
             return redirect(request.args.get("next") or url_for("dispenser"))

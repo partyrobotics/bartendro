@@ -297,7 +297,12 @@ function back()
     window.location = "/";
 }
 
-{% if current_user.is_authenticated() %}
+{% if options.must_login_to_dispense and not current_user.is_authenticated() %}
+function make_drink(drink, is_taster)
+{
+    alert("Please make your drinks selection from the tablet attached to the bot. Thank you!");
+}
+{% else %}
 function make_drink(drink, is_taster)
 {
         for(i = 0; i < ing.length; i++)
@@ -327,11 +332,6 @@ function make_drink(drink, is_taster)
                         window.location = "/";
                 }
         });
-}
-{% else %}
-function make_drink(drink, is_taster)
-{
-    alert("Please make your drinks selection from the tablet attached to the bot. Thank you!");
 }
 {% endif %}
 </script>
