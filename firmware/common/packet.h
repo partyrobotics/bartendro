@@ -13,9 +13,6 @@ at some point.
 #define RAW_PACKET_SIZE        10
 #define PACKET_SIZE            8
 
-#define PACKET_FIND_ID                0
-#define PACKET_ASSIGN_ID              1
-#define PACKET_START                  2
 #define PACKET_PING                   3
 #define PACKET_SET_MOTOR_SPEED        4
 #define PACKET_TICK_DISPENSE          5
@@ -41,7 +38,6 @@ at some point.
 
 #define PACKET_ACK_OK          0
 #define PACKET_ACK_CRC_FAIL    1
-#define PACKET_ACK_TIMEOUT     2
 #define PACKET_ACK_INVALID     3
 #define PACKET_ACK_INVALID_HEADER 4
 #define PACKET_ACK_HEADER_IN_PACKET 5
