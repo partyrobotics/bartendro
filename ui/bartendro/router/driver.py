@@ -55,14 +55,13 @@ DEST_BROADCAST         = 0xFF
 class RouterDriver(object):
     '''This object interacts with the bartendro router controller.'''
 
-    def __init__(self, device, software_only, use_mini_router_mapping = False):
+    def __init__(self, device, software_only):
         self.device = device
         self.ser = None
         self.msg = ""
         self.ret = 0
         self.cl = None #open("logs/comm.log", "a")
         self.software_only = software_only
-        self.use_mini_router_mapping = use_mini_router_mapping
         self.dispenser_select = None
 
         # dispenser_ids are the ids the dispensers have been assigned. These are logical ids 

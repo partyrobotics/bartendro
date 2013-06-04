@@ -24,7 +24,7 @@
       </div>
       <div class="span7">
           <div class="dispense-stack">
-            {% if show_size %}
+            {% if options.show_size %}
                 <div class="dispense-stack-element">
                   <table>
                   <tr>
@@ -34,7 +34,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_smaller()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ drink_size }}</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="size-text">{{ options.drink_size }}</div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
@@ -46,7 +46,7 @@
                 </div>
             {% endif %}
 
-            {% if show_strength %}
+            {% if options.show_strength %}
                 <div class="dispense-stack-element">
                   <table>
                   <tr>
@@ -93,7 +93,7 @@
               <table class="dispense-buttons">
               <tr>
                 <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button button-border" onclick="back()">Back</a></td>
-                {% if show_taster %}
+                {% if options.show_taster %}
                     <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
                 {% endif %}
                 <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
@@ -108,12 +108,12 @@
 
 var taster_size = 30;
 var max_drink_size_multiplier = 2;
-{% if metric %}
+{% if options.metric %}
     var size_increment = 30;
-    var drink_size = {{ drink_size }};
+    var drink_size = {{ options.drink_size }};
 {% else %}
     var size_increment = 1;
-    var drink_size = {{ drink_size / 30 }};
+    var drink_size = {{ options.drink_size / 30 }};
 {% endif %}
 var max_drink_size = drink_size * max_drink_size_multiplier;
 
@@ -143,7 +143,7 @@ var unit_name, unit_name_short;
 
 $(document).ready(function() 
 {
-    if ({{ metric }})
+    if ({{ options.metric }})
     {
         unit_name = "milliliters"
         unit_name_short = "ml"
@@ -185,7 +185,7 @@ function update_volumes()
     {
         ing[i].volume = drink_size * ing[i].newparts / total;
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
-        if ({{ metric }})
+        if ({{ options.metric }})
             $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
         else
             $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
@@ -236,7 +236,7 @@ function set_strength_text()
     switch(drink_strength)
     {
         case -2: t = "really weak!"; break;
-        case -1: t = "weak"; break;
+        case -1: t = "weaker"; break;
         case 0: t = "normal"; break;
         case 1: t = "stronger"; break;
         case 2: t = "really strong!"; break;
@@ -245,7 +245,7 @@ function set_strength_text()
 }
 function strength_stronger()
 {
-    if (drink_strength >= 2)
+    if (drink_strength >= {{ options.strength_steps }})
         return;
 
     drink_strength++;
@@ -254,7 +254,7 @@ function strength_stronger()
 }
 function strength_weaker()
 {
-    if (drink_strength <= -2)
+    if (drink_strength <= -{{ options.strength_steps }})
         return;
 
     drink_strength--;

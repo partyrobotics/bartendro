@@ -20,8 +20,14 @@ try again:
 
 """
 
-liquid_out = False
-mini_router = True
+try:
+    import config
+except ImportError:
+    print "You need to create a configuration file called config.py by copying"
+    print "config.py.default to config.py . Edit the configuration options in that"
+    print "file to tune bartendro to your needs, then start the server again."
+    sys.exit(-1)
+app.options = config
 
 if len(sys.argv) > 1 and sys.argv[1] == "--debug":
     debug = True
@@ -40,7 +46,7 @@ app.mc.flush_all()
 
 app.log = logging.getLogger('bartendro')
 try:
-    app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only, mini_router);
+    app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()
 except I2CIOError:
     print
@@ -57,7 +63,7 @@ except SerialIOError:
 
 app.log.info("Found %d dispensers." % app.driver.count())
 
-app.mixer = mixer.Mixer(app.driver, app.mc, liquid_out)
+app.mixer = mixer.Mixer(app.driver, app.mc)
 
 if app.software_only:
     app.log.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")

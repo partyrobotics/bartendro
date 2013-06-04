@@ -27,7 +27,6 @@ def drink(id):
                           .first()
     drink.process_ingredients()
 
-    drink_size = 90
     has_non_alcohol = False
     has_alcohol = False
     has_sweet = False
@@ -43,20 +42,14 @@ def drink(id):
 
     show_sweet_tart = has_sweet and has_tart
     show_strength = has_alcohol and has_non_alcohol
-    show_size = 1
-    show_taster = 0 #not show_sobriety
 
     if not custom_drink:
         return render_template("drink/index", 
                                drink=drink, 
+                               options=app.options,
                                title=drink.name.name,
-                               metric=1,
                                is_custom=0,
-                               drink_size=drink_size,
                                show_sweet_tart=show_sweet_tart,
-                               show_strength=show_strength,
-                               show_size=show_size,
-                               show_taster=show_taster,
                                show_sobriety=show_sobriety)
 
     dispensers = db.session.query(Dispenser).all()
@@ -84,16 +77,12 @@ def drink(id):
     booze_group.booze_group_boozes = sorted(filtered, key=lambda booze: booze.sequence ) 
     return render_template("drink/index", 
                            drink=drink, 
+                           options=app.options,
                            title=drink.name.name,
                            is_custom=1,
-                           metric=1,
-                           drink_size=drink_size,
                            custom_drink=drink.custom_drink[0],
                            booze_group=booze_group,
                            show_sweet_tart=show_sweet_tart,
-                           show_strength=show_strength,
-                           show_size=show_size,
-                           show_taster=show_taster,
                            show_sobriety=show_sobriety)
 
 @app.route('/drink/sobriety')

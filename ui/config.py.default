@@ -1,0 +1,10 @@
+# General bartendro options
+use_liquid_out_sensors = False
+
+# Drink screen options
+metric         = 0
+drink_size     = 150   # in ml
+show_strength  = True
+show_size      = True
+show_taster    = False
+strength_steps = 2     # 1 or 2
