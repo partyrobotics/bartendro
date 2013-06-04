@@ -1,7 +1,7 @@
 {% extends 'layout' %}
 {% block body %}
 <div class="drink-content">
-  <div class="drink-heading">Make: {{ drink.name.name }}</div>
+  <div class="drink-heading">Make / hacer: {{ drink.name.name }}</div>
   <div class="row-fluid">
       <div class="span5">
           <div class="dispense-drink-detail">
@@ -29,7 +29,7 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">size</div></td>
+                     <td><div class="stack-element-title">size / tamaño</div></td>
                      <td></td>
                   </tr>
                   <tr>
@@ -38,9 +38,9 @@
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="size_bigger()">+</a> </td>
                   </tr>
                   <tr>
-                     <td class="margin-td-label">smaller</td>
+                     <td class="margin-td-label">smaller menor</td>
                      <td></td>
-                     <td class="margin-td-label">bigger</td>
+                     <td class="margin-td-label">bigger mayor</td>
                   </tr>
                   </table>
                 </div>
@@ -51,7 +51,7 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">strength</div></td>
+                     <td><div class="stack-element-title">strength / fuerza</div></td>
                      <td></td>
                   </tr>
                   <tr>
@@ -60,9 +60,9 @@
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_stronger()">+</a> </td>
                   </tr>
                   <tr>
-                     <td class="margin-td-label">weaker</td>
+                     <td class="margin-td-label">weaker débil</td>
                      <td></td>
-                     <td class="margin-td-label">stronger</td>
+                     <td class="margin-td-label">stronger fuerte</td>
                   </tr>
                   </table>
                 </div>
@@ -73,7 +73,7 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">sweet/tart</div></td>
+                     <td><div class="stack-element-title">sweet-tart / dolce-agrio</div></td>
                      <td></td>
                   </tr>
                   <tr>
@@ -82,9 +82,9 @@
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="tartness_tarter()">+</a> </td>
                   </tr>
                   <tr>
-                     <td class="margin-td-label">sweeter</td>
+                     <td class="margin-td-label">sweeter dolce</td>
                      <td></td>
-                     <td class="margin-td-label">tarter</td>
+                     <td class="margin-td-label">tarter agrio</td>
                   </tr>
                   </table>
                 </div>
@@ -92,11 +92,11 @@
 
               <table class="dispense-buttons">
               <tr>
-                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button button-border" onclick="back()">Back</a></td>
+                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button button-border" onclick="back()">Back / menú</a></td>
                 {% if options.show_taster %}
                     <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
                 {% endif %}
-                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
+                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour / derramar</a></td>
               </tr>
               </table>
           </div>
@@ -300,7 +300,8 @@ function back()
 {% if options.must_login_to_dispense and not current_user.is_authenticated() %}
 function make_drink(drink, is_taster)
 {
-    alert("Please make your drinks selection from the tablet attached to the bot. Thank you!");
+    alert("Please make your drink selection from the Bartendro tablet. Thank you!\n" +
+          "Por favor haga su selección de bebidas de la tableta Bartendro. Gracias!");
 }
 {% else %}
 function make_drink(drink, is_taster)
