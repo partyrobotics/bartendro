@@ -4,19 +4,20 @@
     {% if top_drinks or other_drinks %}
         <div class="row-fluid">
            <div class="span6">
-                <h1>the essentials</h1>
+                <h1>the essentials / lo esencial</h1>
            </div>
            <div class="span6 trending-drinks">
-                <a href="/trending">What's popular now?</a>
+                <a href="/trending">What's popular? / Lo que es popular?</a>
            </div>
         </div>
         {{ drink_table(top_drinks) }}
         <div style="clear: both"/>
-        <h1>the wild side</h1>
+        <h1>the wild side / el lado salvaje</h1>
         {{ drink_table(other_drinks) }}
     {% else %}
         <div class="out-of-booze">
-            Bartendro can make no drinks at this time. We're sorry!
+            Bartendro can make no drinks at this time. We're sorry!<br/>
+            Bartendro no puede hacer no bebidas en este momento. ¡Lo sentimos!
         </div>
     {% endif %}
 </div>
@@ -74,7 +75,8 @@ $(document).ready(function() {
          </div> 
       {% endif %}
     {% else %}
-        <div>No drinks from this section can currently be made.</div>
+        <div>No drinks from this section can currently be made.<br/>
+             No bebe de esta sección actualmente se pueden hacer.</div>
     {% endfor %}
     {% if (drinks|count % 2 == 1) %}
        <div class="row-fluid">

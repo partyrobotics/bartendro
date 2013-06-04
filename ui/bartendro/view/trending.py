@@ -44,7 +44,7 @@ def trending_drinks_detail(hours):
                                   ORDER BY count(drink_log.drink_id) desc;""")\
                  .params(begin=begindate, end=enddate).all()
 
-    return render_template("trending", top_drinks = top_drinks, 
+    return render_template("trending", top_drinks = top_drinks, options=app.options,
                                        title="Trending drinks in the last %s hours" % hours,
                                        total_number=total_number[0],
                                        total_volume=total_volume[0],
