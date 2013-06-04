@@ -321,7 +321,7 @@ function make_drink(drink, is_taster)
         if (is_taster)
             lb += 'Now serving a taste of'
         else
-            lb += 'Now serving your / Serviendo tu'
+            lb += 'Now serving your /</br>Serviendo tu'
         lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
         lb += "</div>";
         $.modal(lb, { 'escClose' : false });
