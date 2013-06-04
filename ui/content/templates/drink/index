@@ -1,7 +1,7 @@
 {% extends 'layout' %}
 {% block body %}
 <div class="drink-content">
-  <div class="drink-heading">Make / hacer: {{ drink.name.name }}</div>
+  <div class="drink-heading">Make / Preparar: {{ drink.name.name }}</div>
   <div class="row-fluid">
       <div class="span5">
           <div class="dispense-drink-detail">
@@ -40,7 +40,7 @@
                   <tr>
                      <td class="margin-td-label">smaller menor</td>
                      <td></td>
-                     <td class="margin-td-label">bigger mayor</td>
+                     <td class="margin-td-label">bigger grande</td>
                   </tr>
                   </table>
                 </div>
@@ -51,7 +51,7 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">strength / fuerza</div></td>
+                     <td><div class="stack-element-title">strength / intensidad</div></td>
                      <td></td>
                   </tr>
                   <tr>
@@ -60,7 +60,7 @@
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_stronger()">+</a> </td>
                   </tr>
                   <tr>
-                     <td class="margin-td-label">weaker débil</td>
+                     <td class="margin-td-label">weaker flojo</td>
                      <td></td>
                      <td class="margin-td-label">stronger fuerte</td>
                   </tr>
@@ -96,7 +96,7 @@
                 {% if options.show_taster %}
                     <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
                 {% endif %}
-                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour / derramar</a></td>
+                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour / servir</a></td>
               </tr>
               </table>
           </div>
@@ -237,8 +237,8 @@ function set_strength_text()
     t = "";
     switch(drink_strength)
     {
-        case -2: t = "really weak! / ¡muy débil!"; break;
-        case -1: t = "weaker / más débil"; break;
+        case -2: t = "really weak! / ¡muy flojo!"; break;
+        case -1: t = "weaker / más flojo"; break;
         case 0: t = "normal"; break;
         case 1: t = "stronger / más fuerte "; break;
         case 2: t = "really strong! / ¡muy fuerte!"; break;
@@ -303,7 +303,7 @@ function back()
 function make_drink(drink, is_taster)
 {
     alert("Please make your drink selection from the Bartendro tablet. Thank you!\n" +
-          "Por favor haga su selección de bebidas de la tableta Bartendro. Gracias!");
+          "Por favor haga su selección de bebidas de la tablet Bartendro. Gracias!");
 }
 {% else %}
 function make_drink(drink, is_taster)
@@ -321,7 +321,7 @@ function make_drink(drink, is_taster)
         if (is_taster)
             lb += 'Now serving a taste of'
         else
-            lb += 'Now serving your'
+            lb += 'Now serving your / Serviendo tu'
         lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
         lb += "</div>";
         $.modal(lb, { 'escClose' : false });

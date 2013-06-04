@@ -20,7 +20,7 @@
     {% else %}
         <div class="out-of-booze">
             Bartendro can make no drinks at this time. We're sorry!<br/>
-            Bartendro no puede hacer ningunas bebidas en este momento. ¡Lo sentimos!
+            Bartendro no puede preparar bebidas en este momento. ¡Lo sentimos!
         </div>
     {% endif %}
 </div>
