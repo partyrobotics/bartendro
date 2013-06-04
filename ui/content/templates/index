@@ -3,8 +3,9 @@
 <div id="scroll-pane">
     {% if top_drinks or other_drinks %}
         <div class="row-fluid">
-           <div class="span6">
-                <h1>the essentials / lo esencial</h1>
+           <div class="span6" style="padding-left: 10px">
+              <img width="150" src="/static/images/partyrobotics.gif">
+              <img style="float: right; padding-right: 10px;" width="110" src="/static/images/sonar-2013.png">
            </div>
            <div class="span6 trending-drinks">
                 <a href="/trending">What's popular? / ¿Qué es popular?</a>
