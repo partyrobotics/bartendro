@@ -262,8 +262,32 @@ how you plan to use the pressure sensors we encourage you to read the pressure s
 readings at different liquid levels to get acquainted with how the sensor works.
 
 Over current protection
+=======================
 
-Color Error codes
+Each dispenser also comes equipped with an "over current sense" circuit. This
+circuit estimates the amount of current that the motor in the dispenser consumes. If for
+some reason the motor binds up and consumes large amounts of current, the dispenser
+stops the motor and flashes the red LEDs quickly. At this point the dispenser refuses
+to engage the motor again until the dispense has been reset. 
 
-- Solid RED at startup: id conflict
-- Solid 
+Empirical testing has shown that the default value of 465 works well for the motor
+running at full speed. You can provide different current sense threshold values
+using the PACKET_SET_CS_THRESHOLD command.
+
+Color error codes
+=================
+
+The dispenser's only real form of end-user feedback is the color of the dispenser. The
+following colors/animations are programmed into the stock dispenser:
+
+* Solid RED at startup: id conflict
+* Solid BLUE at startup: ready for communication, waiting for user to initiate 
+  communication.
+* Solid GREEN: A 0xFF character has been received after communication startup. The
+  dispenser is now waiting for the first command from the user.
+* Rainbox color animaion: idle mode. The dispenser is waiting for commands from the user.
+* Red <-> blue color animation: Dispsenser is dispensing liquids.
+* Pulsing green color animation: Dispsener is done dispensing liquids.
+* Pulsing purple color animation: Dispenser is currently being cleaned. This mode really
+  only has significance in the context of a larger setup where the RPI can execute
+  a clean cycle using multiple dispensers.
