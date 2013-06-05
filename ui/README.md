@@ -23,16 +23,32 @@ Also you need to install flask-sqlalchemy & flask-login:
 Starting Bartendro UI for the first time
 ========================================
 
+Database
+--------
+
 To start Bartendro for the first time, you'll need to copy the bartendro.db.default
 file to bartendro.db in the ui directory. This provides a clean database with all
 the required tables for you to start playing with.
 
+Configuration
+-------------
+
+You'll need to copy the config.py.default file to config.py . This will assume
+the basic sane setting for your Bartendro configuration. These settings will be migrated
+to the DB soon, so please take a look at the file to see what can be changed.
+
+Starting
+--------
+
 Then, once you're ready, run:
 
-   # ./bartendro_server --debug
+   # sudo ./bartendro_server --debug
 
 That should start the server on all interfaces on your machine. Before we start shipping
 the actual complete bots, we're going to tighten this up to only run on localhost.
+
+Software only mode
+------------------
 
 If you're running the code on anything but an RPI connected to full Bartendro hardware,
 you'll need to do:
@@ -41,4 +57,6 @@ you'll need to do:
 
 Otherwise the software will attempt to communicate with the hardware that isn't present
 and fail. In the software only mode the bartendro UI will run an attempt to do everything
-it can, short of actually communicating with the hardware.
+it can, short of actually communicating with the hardware. If you are running in
+software only mode, you do no need to run the bartendro_server.py program under sudo. Sudo
+rights are only needed to communicate with the hardware.

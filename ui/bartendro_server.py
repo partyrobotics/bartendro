@@ -40,6 +40,11 @@ try:
 except KeyError:
     app.software_only = 0
 
+if not os.path.exists("bartendro.db"):
+    print "bartendro.db file not found. Please copy bartendro.db.default to "
+    print "bartendro.db in order to provide Bartendro with a starting database."
+    sys.exit(-1)
+
 # Create a memcache connection and flush everything
 app.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 app.mc.flush_all()
