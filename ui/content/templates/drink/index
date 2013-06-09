@@ -29,7 +29,7 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">size / tamaño</div></td>
+                     <td><div class="stack-element-title">size / volumen</div></td>
                      <td></td>
                   </tr>
                   <tr>
@@ -56,7 +56,7 @@
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_weaker()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="strength-text">normal</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="strength-text"></div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="strength_stronger()">+</a> </td>
                   </tr>
                   <tr>
@@ -73,16 +73,16 @@
                   <table>
                   <tr>
                      <td></td>
-                     <td><div class="stack-element-title">sweet-tart / dolce-agrio</div></td>
+                     <td><div class="stack-element-title">sweet-tart / dulce-agrio</div></td>
                      <td></td>
                   </tr>
                   <tr>
                      <td class="margin-td"> <a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="tartness_sweeter()">-</a> </td>
-                     <td class="main-td"><div class="adjust-middle" id="tartness-text">normal</div></td>
+                     <td class="main-td"><div class="adjust-middle" id="tartness-text"></div></td>
                      <td class="margin-td"><a class="btn btn-large btn-warning drink-plus-minus button-border" onclick="tartness_tarter()">+</a> </td>
                   </tr>
                   <tr>
-                     <td class="margin-td-label">sweeter dolce</td>
+                     <td class="margin-td-label">sweeter dulce</td>
                      <td></td>
                      <td class="margin-td-label">tarter agrio</td>
                   </tr>
@@ -145,7 +145,7 @@ $(document).ready(function()
 {
     if ({{ options.metric }})
     {
-        unit_name = "milliliters"
+        unit_name = "ml"
         unit_name_short = "ml"
     }
     else
@@ -159,6 +159,8 @@ $(document).ready(function()
         change_alcohol();
     {% endif %}
     update_volumes();
+    set_strength_text();
+    set_tartness_text();
     max_x = $(".sobriety").width() - $(".clickme_button").width();
     max_y = $(".sobriety").height() - $(".clickme_button").height();
 });
@@ -235,11 +237,11 @@ function set_strength_text()
     t = "";
     switch(drink_strength)
     {
-        case -2: t = "really weak!"; break;
-        case -1: t = "weaker"; break;
+        case -2: t = "really weak! / ¡muy débil!"; break;
+        case -1: t = "weaker / más débil"; break;
         case 0: t = "normal"; break;
-        case 1: t = "stronger"; break;
-        case 2: t = "really strong!"; break;
+        case 1: t = "stronger / más fuerte "; break;
+        case 2: t = "really strong! / ¡muy fuerte!"; break;
     }
     $("#strength-text").text(t);
 }
@@ -266,11 +268,11 @@ function set_tartness_text()
     t = "";
     switch(drink_tartness)
     {
-        case -2: t = "really sweet!"; break;
-        case -1: t = "sweeter"; break;
+        case -2: t = "really sweet! / ¡muy dulce!"; break;
+        case -1: t = "sweeter / más dulce"; break;
         case 0: t = "normal"; break;
-        case 1: t = "tarter"; break;
-        case 2: t = "really tart!"; break;
+        case 1: t = "tarter / más agrio"; break;
+        case 2: t = "really tart! / ¡muy agrio!"; break;
     }
     $("#tartness-text").text(t);
 }

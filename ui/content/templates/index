@@ -7,7 +7,7 @@
                 <h1>the essentials / lo esencial</h1>
            </div>
            <div class="span6 trending-drinks">
-                <a href="/trending">What's popular? / Qué es popular?</a>
+                <a href="/trending">What's popular? / ¿Qué es popular?</a>
            </div>
         </div>
         {{ drink_table(top_drinks) }}
