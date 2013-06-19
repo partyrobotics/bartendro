@@ -8,7 +8,7 @@ class Option(db.Model):
     Configuration options for Bartendro
     """
 
-    __tablename__ = 'options'
+    __tablename__ = 'option'
     id = Column(Integer, primary_key=True)
     key = Column(UnicodeText, nullable=False)
     value = Column(UnicodeText)

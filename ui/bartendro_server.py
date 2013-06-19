@@ -9,6 +9,7 @@ import sys
 from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
+from bartendro.options import setup_options_table
 import argparse
 
 LOG_SIZE = 1024 * 500  # 500k maximum log file size
@@ -76,6 +77,19 @@ try again:
 
 """
 
+# Set up logging
+if not os.path.exists("logs"):
+    os.mkdir("logs")
+
+handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.log"), 
+                                               maxBytes=LOG_SIZE, 
+                                               backupCount=LOG_FILES_SAVED)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger('bartendro')
+logger.addHandler(handler)
+
+setup_options_table()
+
 try:
     import config
 except ImportError:
@@ -84,6 +98,7 @@ except ImportError:
     print "file to tune bartendro to your needs, then start the server again."
     sys.exit(-1)
 app.options = config
+
 
 try: 
     app.software_only = args.software_only or int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
@@ -102,17 +117,6 @@ app.mc.flush_all()
 
 # Create the Bartendro lock to prevent multiple people from using it at the same time.
 app.lock = BartendroLock()
-
-# Set up logging
-if not os.path.exists("logs"):
-    os.mkdir("logs")
-
-handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.log"), 
-                                               maxBytes=LOG_SIZE, 
-                                               backupCount=LOG_FILES_SAVED)
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-logger = logging.getLogger('bartendro')
-logger.addHandler(handler)
 
 # Start the driver, which talks to the hardware
 try:
