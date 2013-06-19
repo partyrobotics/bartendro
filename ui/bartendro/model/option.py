@@ -14,7 +14,7 @@ class Option(db.Model):
     value = Column(UnicodeText)
 
     query = db.session.query_property()
-    def __init__(self, key='', value='')
+    def __init__(self, key='', value=''):
         self.key = key
         self.value = value
 

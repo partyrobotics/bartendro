@@ -13,7 +13,7 @@ def admin_options():
     options = Option.query.order_by(asc(func.lower(Option.key)))
     options_and_type = []
     for option in options:
-        if option.value is in ['true', 'false']:
+        if option.value in ['true', 'false']:
             type = 'boolean'
         else:
             type = 'text'
