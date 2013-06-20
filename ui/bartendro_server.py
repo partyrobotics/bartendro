@@ -9,7 +9,7 @@ import sys
 from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
-from bartendro.options import setup_options_table
+from bartendro.options import load_options
 import argparse
 
 LOG_SIZE = 1024 * 500  # 500k maximum log file size
@@ -88,17 +88,7 @@ logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger('bartendro')
 logger.addHandler(handler)
 
-setup_options_table()
-
-try:
-    import config
-except ImportError:
-    print "You need to create a configuration file called config.py by copying"
-    print "config.py.default to config.py . Edit the configuration options in that"
-    print "file to tune bartendro to your needs, then start the server again."
-    sys.exit(-1)
-app.options = config
-
+app.options = load_options()
 
 try: 
     app.software_only = args.software_only or int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
