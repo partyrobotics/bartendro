@@ -32,6 +32,7 @@ at some point.
 #define PACKET_GET_LIQUID_THRESHOLDS  19 // requires response
 #define PACKET_SET_LIQUID_THRESHOLDS  20
 #define PACKET_FLUSH_SAVED_TICK_COUNT 21
+#define PACKET_TICK_SPEED_DISPENSE    22
 #define PACKET_COMM_TEST              0xFE
 
 #define DEST_BROADCAST         0xFF

@@ -48,6 +48,7 @@ PACKET_RESET_SAVED_TICK_COUNT = 18
 PACKET_GET_LIQUID_THRESHOLDS  = 19
 PACKET_SET_LIQUID_THRESHOLDS  = 20
 PACKET_FLUSH_SAVED_TICK_COUNT = 21
+PACKET_TICK_SPEED_DISPENSE    = 22
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -372,9 +373,9 @@ class RouterDriver(object):
         if self.software_only: return True
         return True
 
-    def dispense_ticks(self, dispenser, ticks):
+    def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only: return True
-        return self.send_packet32(dispenser, PACKET_TICK_DISPENSE, ticks)
+        return self.send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
 
     def led_off(self):
         if self.software_only: return True

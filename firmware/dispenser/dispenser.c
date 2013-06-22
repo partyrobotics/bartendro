@@ -405,7 +405,7 @@ void run_motor_timed(uint32_t duration)
     set_motor_speed(0);
 }
 
-void dispense_ticks(uint32_t ticks)
+void dispense_ticks(uint32_t ticks, uint16_t speed)
 {
     uint8_t dispensing;
 
@@ -429,7 +429,7 @@ void dispense_ticks(uint32_t ticks)
     // Start a conversion
     ADCSRA |= (1<<ADSC);
 
-    set_motor_speed(255);
+    set_motor_speed(speed);
 }
 
 void is_dispensing(void)
@@ -564,7 +564,7 @@ int main(void)
                     case PACKET_TICK_DISPENSE:
                         if (!cs)
                         {
-                            dispense_ticks(p.p.uint32);
+                            dispense_ticks((uint16_t)p.p.uint32, 255);
                             flush_saved_tick_count(0);
                         }
                         break;
@@ -645,6 +645,16 @@ int main(void)
                     case PACKET_SET_LIQUID_THRESHOLDS:
                         set_liquid_thresholds(p.p.uint16[0], p.p.uint16[1]);
                         break;
+
+                    case PACKET_TICK_SPEED_DISPENSE:
+                        if (!cs)
+                        {
+                            dispense_ticks(p.p.uint16[0], (uint8_t)p.p.uint16[1]);
+                            flush_saved_tick_count(0);
+                        }
+                        break;
+
+
                 }
             }
         }
