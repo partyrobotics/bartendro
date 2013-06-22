@@ -8,8 +8,11 @@
            <div class="span6">
                Total number of drinks: {{ total_number }}<br>
                Total volume of drinks: 
-                   {{ "%.2f" | format((total_volume / 1000) / 3.78|float) }} Gallons 
-                   ({{ "%.2f" | format(total_volume / 1000|float) }} Liters)
+               {% if options.metric %}
+                   {{ "%.2f" | format(total_volume / 1000|float) }} liters
+               {% else %}
+                   {{ "%.2f" | format((total_volume / 1000) / 3.78|float) }} gallons 
+               {% endif %}
            </div>
            <div class="span6" style="text-align: right">
                <a href="/" class="btn btn-large btn-warning button-border">Main menu</a>
@@ -20,8 +23,11 @@
            {% for name, number, volume in top_drinks %}
                 <tr><td>{{ name }}</td><td>{{ number }}</td>
                 <td>
-                    {{ "%.2f" | format((volume / 1000) / 3.81|float) }} Gallons
-                    ({{ "%.2f" | format((volume / 1000)|float) }} Liters)</td></tr>
+                    {% if options.metric %}
+                        {{ "%.2f" | format((volume / 1000)|float) }} liters
+                    {% else %}
+                        {{ "%.2f" | format((volume / 1000) / 3.81|float) }} gallons
+                    {% endif %}
            {% endfor %}
         </table>
         <hr/>
