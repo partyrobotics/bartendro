@@ -23,8 +23,7 @@ DISPENSER_OUT     = 1
 DISPENSER_OK      = 0
 DISPENSER_WARNING = 2
 
-CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
-CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
+CLEAN_MAX_PUMPS = 8
 
 class Mixer(object):
     '''This is where the magic happens!'''
@@ -269,21 +268,14 @@ class CleanCycle(Thread):
         self.mixer = mixer
 
     def run(self):
-        disp_on_times = []
-        disp_off_times = []
-        for i in xrange(self.mixer.disp_count):
-            disp_on_times.append(((i / CLEAN_CYCLE_MAX_PUMPS) * CLEAN_CYCLE_DURATION) + (i % CLEAN_CYCLE_MAX_PUMPS))
-            disp_off_times.append(disp_on_times[-1] + CLEAN_CYCLE_DURATION)
-
         self.mixer.led_clean()
-        for t in xrange(disp_off_times[-1] + 1):
-            for i, off in enumerate(disp_off_times):
-                if t == off: 
-                    self.mixer.driver.stop(i)
-            for i, on in enumerate(disp_on_times):
-                if t == on: 
-                    self.mixer.driver.start(i)
-            sleep(1)
+        if self.mixer.disp_count <= 7:
+            for d in xrange(self.mixer.disp_count):
+                self.mixer.driver.start(d)
+            sleep(app.options.clean_duration) 
+            for d in xrange(self.mixer.disp_count):
+                self.mixer.driver.stop(d)
+
         self.mixer.led_idle()
 
 class FlashGreenLeds(Thread):

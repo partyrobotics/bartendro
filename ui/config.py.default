@@ -11,3 +11,6 @@ show_strength  = True
 show_size      = True
 show_taster    = False
 strength_steps = 2     # 1 or 2
+
+# Admin options
+clean_duration = 15    # in seconds
