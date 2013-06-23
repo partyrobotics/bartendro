@@ -399,6 +399,9 @@ void run_motor_timed(uint32_t duration)
 {
     uint32_t t;
 
+    if (duration == 0)
+        return;
+
     set_motor_speed(255);
     for(t = 0; t < duration && !check_reset(); t++)
         _delay_ms(1);
@@ -413,7 +416,7 @@ void dispense_ticks(uint32_t ticks, uint16_t speed)
     dispensing = g_is_dispensing;
     sei();
 
-    if (dispensing)
+    if (dispensing || ticks == 0)
         return;
 
     cli();
