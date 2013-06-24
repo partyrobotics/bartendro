@@ -593,7 +593,7 @@ int main(void)
 
                     case PACKET_LED_IDLE:
                         if (!cs)
-                            set_led_pattern(LED_PATTERN_CLEAN);
+                            set_led_pattern(LED_PATTERN_IDLE);
                         break;
 
                     case PACKET_LED_DISPENSE:
