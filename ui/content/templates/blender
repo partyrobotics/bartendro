@@ -11,7 +11,7 @@
                      {% for i in range(1, count + 1) %}
                         <div style="padding-bottom: 30px">
                             <div class="blender-title">{{ dispensers[i - 1].booze.name }}</div>
-                            <div id="dispenser_info{{ i }}" class="blender-info">0 %</div>
+                            <div id="blender_info{{ i }}" class="blender-info">0 %</div>
                             <div id="slider{{ i }}" class="blender-slider"></div>
                         </div>
                     {% endfor %}
@@ -32,8 +32,16 @@
 $(document).ready(function() 
 {
     for(i = 0; i < {{ count }}; i++)
-        $( "#slider" + (i + 1)).slider();
+        $( "#slider" + (i + 1)).slider({
+            stop: function(event, ui) { slider_change(event.target, ui.value); }
+        });
 });
+
+function slider_change(element, value)
+{
+    disp = element.id.substring(6);
+    $("#blender_info" + disp).text(value + " %");
+}
 
 function set_message(txt)
 {
