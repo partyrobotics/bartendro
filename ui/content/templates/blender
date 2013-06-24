@@ -106,7 +106,6 @@ function pour()
         }
     }
 
-    console.log(args);
     $.ajax({
         url: "/ws/blender-log/assign" + args,
         dataType : "json",
@@ -139,32 +138,38 @@ function pour_callback(id)
         }
     }
 
-    console.log(args);
     lb = '<div class="lb-box"><h1>';
-    lb += '<h1>Now serving blend ' + id + '</h1>'
+    lb += '<h1>Now serving:<br/><b>Blend ' + id + '</b></h1>'
+    lb += '<a id="done-button" onclick="pour_complete()" class="btn btn-warning btn-large"';
+    lb += 'style="margin-top: 40px">I wrote the number on the glass!</a>'
     lb += "</div>";
     $.modal(lb);
-        $.ajax({
-                url: "/ws/drink/82" + args,
-                success: function(html)
-                {
-                    //$.modal.close();
-                },
-                error: function(xmlhttp, textStatus, error)
-                {
-                    $.modal.close();
-                    if (xmlhttp.status == 500)
-                        $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
-                    else
-                    if (xmlhttp.status == 503)
-                        $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
-                    else
-                    if (xmlhttp.status == 400)
-                        $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
-                    else
-                        $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
-                }
-        });
+    $.ajax({
+        url: "/ws/drink/82" + args,
+        success: function(html)
+        {
+            $("#done-button").removeProp('disabled');
+        },
+        error: function(xmlhttp, textStatus, error)
+        {
+            $.modal.close();
+            if (xmlhttp.status == 500)
+                $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+            else
+            if (xmlhttp.status == 503)
+                $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+            else
+            if (xmlhttp.status == 400)
+                $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+            else
+                $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+        }
+    });
+}
+function pour_complete()
+{
+    $.modal.close();
+    window.location = "/blender";
 }
 </script>
 <script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
