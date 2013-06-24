@@ -77,8 +77,8 @@ static color_segment_t current_sense_segments[LED_CURRENT_SENSE_NUM_SEGMENTS] =
 };
 
 static color_segment_t *g_cur_segment = NULL;
-static uint8_t          g_num_segments = 1;
-static uint8_t          g_segment_index = 1;
+static uint8_t          g_num_segments = 0;
+static uint8_t          g_segment_index = 0;
 static uint8_t          g_segment_step = 255;
 
 // some delay helper functions
@@ -137,46 +137,45 @@ void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
     delay_us(COLOR_LATCH_DURATION);
 }
 
-
 void led_pattern_init(uint8_t pattern)
 {
     switch(pattern)
     {
         case LED_PATTERN_OFF:
             g_cur_segment = NULL;
-            g_segment_step = 255;
+            g_num_segments = 0;
             break;
 
         case LED_PATTERN_IDLE:
             g_cur_segment = idle_segments;
             g_num_segments = LED_IDLE_NUM_SEGMENTS;
-            g_segment_step = 255;
             break;
 
         case LED_PATTERN_DISPENSE:
             g_cur_segment = dispense_segments;
             g_num_segments = LED_DISPENSE_NUM_SEGMENTS;
-            g_segment_step = 255;
             break;
 
         case LED_PATTERN_DRINK_DONE:
             g_cur_segment = drink_done_segments;
             g_num_segments = LED_DRINK_DONE_NUM_SEGMENTS;
-            g_segment_step = 255;
             break;
 
         case LED_PATTERN_CLEAN:
             g_cur_segment = clean_segments;
             g_num_segments = LED_CLEAN_NUM_SEGMENTS;
-            g_segment_step = 255;
             break;
 
         case LED_PATTERN_CURRENT_SENSE:
             g_cur_segment = current_sense_segments;
             g_num_segments = LED_CURRENT_SENSE_NUM_SEGMENTS;
-            g_segment_step = 255;
             break;
+
+        default:
+            return;
     }
+    g_segment_step = 255;
+    g_segment_index = 0;
 }
 
 void led_pattern_next(uint32_t t, color_t *c)

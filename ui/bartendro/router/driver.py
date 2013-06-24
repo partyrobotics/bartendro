@@ -259,14 +259,14 @@ class RouterDriver(object):
         print "  * Invalid ACK code %d" % ord(ch)
         return False
 
-    def send_packet8(self, dest, type, val):
+    def send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
 
-        return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val, 0, 0, 0))
+        return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
 
     def send_packet16(self, dest, type, val0, val1):
         if dest != DEST_BROADCAST: 
@@ -363,7 +363,7 @@ class RouterDriver(object):
 
     def start(self, dispenser):
         if self.software_only: return True
-        return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255)
+        return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
 
     def stop(self, dispenser):
         if self.software_only: return True
