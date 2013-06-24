@@ -15,8 +15,9 @@
                             <div id="slider{{ i }}" class="blender-slider"></div>
                         </div>
                     {% endfor %}
-                    <div class="div-spacer" style="float: right">
-                      <a onclick="pour()" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
+                    <div class="div-spacer">
+                      <a onclick="pour()" style="float: right" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
+                      <a href="/blender/log" class="btn btn-large btn-warning">see past blends</a>
                     </div>
                    </form>
                 </div>
@@ -37,7 +38,10 @@ $(document).ready(function()
     load_values = [];
     {% for i in range(1, count + 1) %}
         booze_ids[{{ i - 1 }}] = {{ dispensers[i - 1].booze.id }};
-        load_values[{{ i - 1 }}] = {{ recipe[ dispensers[i - 1].booze.id ] or 50 }};
+        if ({{ recipe|length }})
+            load_values[{{ i - 1 }}] = {{ recipe[ dispensers[i - 1].booze.id ] or 0 }};
+        else
+            load_values[{{ i - 1 }}] = 50;
     {% endfor %}
 
     for(i = 0; i < {{ count }}; i++)
