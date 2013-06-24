@@ -27,7 +27,7 @@
 #define RESET_DURATION                   1
 #define SYNC_COUNT                      10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES                  5
-#define MAX_CURRENT_SENSE_CYCLES         3
+#define MAX_CURRENT_SENSE_CYCLES        10
 #define TICKS_SAVE_THRESHOLD          1000
 #define DEFAULT_LIQUID_LOW_THRESHOLD   140
 #define DEFAULT_LIQUID_OUT_THRESHOLD    90
@@ -48,8 +48,7 @@ static volatile uint8_t g_hall2 = 0;
 static volatile uint8_t g_hall3 = 0;
 static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
-static volatile uint8_t g_sync_divisor = 0;
-static void (*g_led_function)(uint32_t, color_t *) = 0;
+static volatile uint8_t g_sync_divisor = 10;
 
 static uint8_t  g_current_sense_num_cycles = 0;
 static uint16_t g_current_sense_threshold = 465;
@@ -59,9 +58,9 @@ void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed);
 void adc_shutdown(void);
 uint8_t check_reset(void);
-void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor);
 void is_dispensing(void);
 void flush_saved_tick_count(uint8_t force);
+void set_led_pattern(uint8_t pattern);
 
 /*
    0  - PD0 - RX
@@ -203,7 +202,7 @@ ISR(ADC_vect)
         set_motor_speed(0);
         g_is_dispensing = 0;
         g_dispense_target_ticks = 0;
-        set_led_pattern(led_pattern_current_sense, 20);
+        set_led_pattern(LED_PATTERN_CURRENT_SENSE);
         g_current_sense_detected = 1;
     }
 
@@ -249,14 +248,14 @@ void idle(void)
     }
     sei();
 
-    if (animate && g_led_function)
+    if (animate)
     {
         cli();
         t = g_pattern_t++;
         sei();
         // do some animation!
-        (*g_led_function)(t, &c);
-        set_led_rgb_no_delay(c.red, c.green, c.blue);
+        led_pattern_next(t, &c);
+        set_led_rgb(c.red, c.green, c.blue);
     }
 
     flush_saved_tick_count(0);
@@ -337,16 +336,12 @@ void set_liquid_thresholds(uint16_t low, uint16_t out)
     eeprom_update_word((uint16_t *)ee_liquid_out_threshold_offset, out);
 }
 
-void set_led_pattern(void (*func)(uint32_t, color_t *), uint8_t sync_divisor)
+void set_led_pattern(uint8_t pattern)
 {
-    if (func == NULL)
-        set_led_rgb(0, 0, 0);
-
+    led_pattern_init(pattern);
     cli();
     g_pattern_t = 0;
-    g_sync_divisor = sync_divisor;
     sei();
-    g_led_function = func;
 }
 
 void adc_liquid_level_setup(void)
@@ -593,28 +588,27 @@ int main(void)
                         break;
 
                     case PACKET_LED_OFF:
-
-                        set_led_pattern(NULL, 255);
+                        set_led_pattern(LED_PATTERN_OFF);
                         break;
 
                     case PACKET_LED_IDLE:
                         if (!cs)
-                            set_led_pattern(led_pattern_hue, 20);
+                            set_led_pattern(LED_PATTERN_CLEAN);
                         break;
 
                     case PACKET_LED_DISPENSE:
                         if (!cs)
-                            set_led_pattern(led_pattern_dispense, 5);
+                            set_led_pattern(LED_PATTERN_DISPENSE);
                         break;
 
                     case PACKET_LED_DRINK_DONE:
                         if (!cs)
-                            set_led_pattern(led_pattern_drink_done, 10);
+                            set_led_pattern(LED_PATTERN_DRINK_DONE);
                         break;
 
                     case PACKET_LED_CLEAN:
                         if (!cs)
-                            set_led_pattern(led_pattern_clean, 10);
+                            set_led_pattern(LED_PATTERN_CLEAN);
                         break;
 
                     case PACKET_COMM_TEST:

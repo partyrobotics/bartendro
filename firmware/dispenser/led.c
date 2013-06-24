@@ -12,12 +12,10 @@
 #include <stdlib.h>
 
 #include "defs.h"
+#include "led.h"
 
 #define NUM_LED 1
 #define NUM_DATA (NUM_LED * 3)
-
-#define HUE_MAX           252 
-#define STEPS_PER_HEXTET   42
 
 #define COLOR_LATCH_DURATION 501 
 #define CLOCK_PERIOD         1
@@ -26,10 +24,62 @@
 #define CLOCK_PORT           PORTD
 #define DATA_PORT            PORTD
 
+/*
+PACKET_DEFINE_LED_SEQUENCE ?    args: sequence, divisor
+PACKET_ADD_LED_SEGMENT     ?    args: r,g,b,steps
+PACKET_END_LED_SEQUENCE    ?    args: none
+*/
+
 typedef struct
 {
-        uint8_t red, green, blue;
-} color_t;
+    color_t color;
+    uint8_t steps;
+} color_segment_t;
+
+#define LED_IDLE_NUM_SEGMENTS 3
+static color_segment_t idle_segments[LED_IDLE_NUM_SEGMENTS] =
+{
+    { { 255,  0, 0},  100 },
+    { { 0,  255, 0},  100 },
+    { { 0,  0, 255},  100 }
+};
+
+#define LED_DISPENSE_NUM_SEGMENTS 2
+static color_segment_t dispense_segments[LED_DISPENSE_NUM_SEGMENTS] =
+{
+    { { 255,  0, 0},  50 },
+    { { 0,  0, 255},  50 }
+};
+
+#define LED_DRINK_DONE_NUM_SEGMENTS 2
+static color_segment_t drink_done_segments[LED_DRINK_DONE_NUM_SEGMENTS] =
+{
+    { { 0,  255, 0},  75 },
+    { { 0,  90, 0},  75 }
+};
+
+#define LED_CLEAN_NUM_SEGMENTS 4
+static color_segment_t clean_segments[LED_CLEAN_NUM_SEGMENTS] =
+{
+    { { 150,   14, 235},  40 },
+    { {  85,    8, 133},  40 },
+    { {  85,   64,  64},  40 },
+    { { 255,  128,   0},  40 }
+};
+
+#define LED_CURRENT_SENSE_NUM_SEGMENTS 4
+static color_segment_t current_sense_segments[LED_CURRENT_SENSE_NUM_SEGMENTS] =
+{
+    { { 255, 0, 0},  15 },
+    { { 255, 0, 0},  0 },
+    { { 0,   0, 0},  15 },
+    { { 0,   0, 0},  0 }
+};
+
+static color_segment_t *g_cur_segment = NULL;
+static uint8_t          g_num_segments = 1;
+static uint8_t          g_segment_index = 1;
+static uint8_t          g_segment_step = 255;
 
 // some delay helper functions
 void delay_ms(int ms) 
@@ -77,8 +127,6 @@ void set_led_color(color_t *color)
 }
 
 // This function is for setting the LED to one solid color. 
-// This function should not be used for color animations since it
-// includes the 500us rest period for the WS2801 to latch the results.
 void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
 {
     uint8_t led[3];
@@ -89,168 +137,90 @@ void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
     delay_us(COLOR_LATCH_DURATION);
 }
 
-// Same as the above, but without the delay
-// to be used by color animation functions which must heed the 500us reset period
-void set_led_rgb_no_delay(uint8_t red, uint8_t green, uint8_t blue)
+
+void led_pattern_init(uint8_t pattern)
 {
-    uint8_t led[3];
-    led[0] = blue;
-    led[1] = red;
-    led[2] = green;
-    set_led_bytes(led);
-    delay_us(COLOR_LATCH_DURATION);
+    switch(pattern)
+    {
+        case LED_PATTERN_OFF:
+            g_cur_segment = NULL;
+            g_segment_step = 255;
+            break;
+
+        case LED_PATTERN_IDLE:
+            g_cur_segment = idle_segments;
+            g_num_segments = LED_IDLE_NUM_SEGMENTS;
+            g_segment_step = 255;
+            break;
+
+        case LED_PATTERN_DISPENSE:
+            g_cur_segment = dispense_segments;
+            g_num_segments = LED_DISPENSE_NUM_SEGMENTS;
+            g_segment_step = 255;
+            break;
+
+        case LED_PATTERN_DRINK_DONE:
+            g_cur_segment = drink_done_segments;
+            g_num_segments = LED_DRINK_DONE_NUM_SEGMENTS;
+            g_segment_step = 255;
+            break;
+
+        case LED_PATTERN_CLEAN:
+            g_cur_segment = clean_segments;
+            g_num_segments = LED_CLEAN_NUM_SEGMENTS;
+            g_segment_step = 255;
+            break;
+
+        case LED_PATTERN_CURRENT_SENSE:
+            g_cur_segment = current_sense_segments;
+            g_num_segments = LED_CURRENT_SENSE_NUM_SEGMENTS;
+            g_segment_step = 255;
+            break;
+    }
 }
 
-void led_pattern_hue(uint32_t t, color_t *c) 
+void led_pattern_next(uint32_t t, color_t *c)
 {
-    uint8_t s, h;
+    static color_t  *from;
+    static float     rstep, gstep, bstep;
+    color_t         *to;
 
-    h = (uint8_t)(t & 0xFF);
-    if (h >= HUE_MAX)
+    if (!g_cur_segment)
     {
-        c->red = HUE_MAX;
-        c->green = 0;
+        c->red = 0;
         c->blue = 0;
-
+        c->green = 0;
         return;
     }
-    s = h % (252 / 6);
-    switch(h / STEPS_PER_HEXTET) 
+
+    if (g_segment_step == 255)
     {
-        case 0:  // from 255, 0, 0 to 255, 255, 0
-            c->red = HUE_MAX;
-            c->green = s * 6;
-            c->blue = 0;
-            break;
-        case 1: 
-            c->red = HUE_MAX - (s * 6);
-            c->green = HUE_MAX;
-            c->blue = 0;
-            break;
-        case 2: 
-            c->red = 0;
-            c->green = HUE_MAX;
-            c->blue = s * 6;
-            break;
-        case 3: 
-            c->red = 0;
-            c->green = HUE_MAX - (s * 6);
-            c->blue = HUE_MAX;
-            break;
-        case 4: 
-            c->red = (s * 6);
-            c->green = 0;
-            c->blue = HUE_MAX;
-            break;
-        case 5: 
-            c->red = HUE_MAX;
-            c->green = 0;
-            c->blue = HUE_MAX - (s * 6);
-            break;
+        from = &g_cur_segment[g_segment_index].color;
+        to = &g_cur_segment[(g_segment_index + 1) % g_num_segments].color;
+        g_segment_step = 0;
+
+        if (g_cur_segment[g_segment_index].steps == 0)
+        {
+            rstep = 0;
+            gstep = 0;
+            bstep = 0;
+        }
+        else
+        {
+            rstep = ((float)to->red - (float)from->red) / g_cur_segment[g_segment_index].steps;
+            gstep = ((float)to->green - (float)from->green) / g_cur_segment[g_segment_index].steps;
+            bstep = ((float)to->blue - (float)from->blue) / g_cur_segment[g_segment_index].steps;
+        }
     }
-    c->red += 3;
-    c->green += 3;
-    c->blue += 3;
-}
+    c->red = from->red + (int16_t)(g_segment_step * rstep);
+    c->green = from->green + (int16_t)(g_segment_step * gstep);
+    c->blue = from->blue + (int16_t)(g_segment_step * bstep);
 
-#if 0
-int main(int argc, char *argv[])
-{
-    uint8_t i;
-    color_t c;
-
-    for(i = 0; i < HUE_MAX; i++)
+    g_segment_step++;
+    if (g_cur_segment[g_segment_index].steps == g_segment_step ||
+        g_cur_segment[g_segment_index].steps == 0)
     {
-        color_hue(i, &c);
-        printf("%d: %d, %d, %d\n", i, c.red, c.green, c.blue);
+        g_segment_step = 255;
+        g_segment_index = (g_segment_index + 1) % g_num_segments;
     }
 }
-#endif
-
-void led_pattern_current_sense(uint32_t t, color_t *c)
-{
-    uint8_t t8 = t & 0xFF;
-
-    if (((t >> 2) % 2) == 0)
-        c->red = 255;
-    else
-        c->red = 0;
-    c->blue = 0;
-    c->green = 0;
-}
-
-void led_pattern_idle(uint32_t t, color_t *c)
-{
-    uint8_t t8 = t & 0xFF;
-
-    if (t8 < 128)
-        c->blue = t * 2;
-    else
-        c->blue = 255 - (2 * (t - 128));
-    c->red = 0;
-    c->green = 0;
-}
-
-void led_pattern_dispense(uint32_t t, color_t *c)
-{
-    uint8_t t8 = t & 0xFF;
-
-    if (t8 < 128)
-        c->blue = t * 2;
-    else
-        c->blue = 255 - (2 * (t - 128));
-    c->red = 255 - c->blue;
-    c->green = 0;
-}
-
-void led_pattern_drink_done(uint32_t t, color_t *c)
-{
-    uint8_t t8 = t & 0xFF;
-
-    if (t8 < 128)
-        c->green = t * 2;
-    else
-        c->green = 255 - (2 * (t - 128));
-    c->blue = 0;
-    c->red = 0;
-}
-
-void led_pattern_clean(uint32_t t, color_t *c)
-{
-    uint8_t t8 = t & 0xFF;
-
-    if (t8 < 128)
-    {
-        c->red = t * 2;
-        c->green = t * 2;
-    }
-    else
-    {
-        c->red = 255 - (2 * (t - 128));
-        c->green = 255 - (2 * (t - 128));
-    }
-    c->blue = 0;
-}
-
-#if 0
-// fade from one color to another colors in steps with a delay of delay
-void fade(uint16_t steps, uint16_t delay, color_t *from, color_t *to)
-{
-    float    rstep, gstep, bstep;
-    uint16_t i;
-    color_t  c;
-
-    rstep = ((float)to->red - (float)from->red) / steps;
-    gstep = ((float)to->green - (float)from->green) / steps;
-    bstep = ((float)to->blue - (float)from->blue) / steps;
-
-    for(i = 0; i < steps; i++)
-    {
-        c.red = from->red + (int16_t)(i * rstep);
-        c.green = from->green + (int16_t)(i * gstep);
-        c.blue = from->blue + (int16_t)(i * bstep);
-        set_led_rgb_no_delay(c.red, c.green, c.blue);
-        delay_ms(delay);
-    }
-}
-#endif
