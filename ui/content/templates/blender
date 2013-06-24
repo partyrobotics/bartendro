@@ -17,7 +17,8 @@
                     {% endfor %}
                     <div class="div-spacer">
                       <a onclick="pour()" style="float: right" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
-                      <a href="/blender/log" class="btn btn-large btn-warning">see past blends</a>
+                      <a href="/blender/log" style="float: left" class="btn btn-large btn-warning">see past blends</a>
+                      <a onclick="zero()" class="btn btn-large btn-warning" style="margin-left: 15px">zero all</a>
                     </div>
                    </form>
                 </div>
@@ -71,6 +72,13 @@ function update_percentages()
 
         volumes[i] = Math.round({{ options.drink_size }} * value / 100);
     }
+}
+
+function zero()
+{
+    for(i = 0; i < {{ count }}; i++)
+        $("#slider" + (i + 1)).slider("value", 0);
+    update_percentages();
 }
 
 function set_message(txt)
