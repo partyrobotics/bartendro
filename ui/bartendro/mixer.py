@@ -236,14 +236,24 @@ class Mixer(object):
 
             if r['ms'] > dur: dur = r['ms']
 
+        current_sense = False
         while True:
             sleep(.1)
             done = True
             for disp in active_disp:
-                if self.driver.is_dispensing(disp - 1): 
+                is_disp, is_cs = self.driver.is_dispensing(disp - 1)
+                if is_cs:
+                    done = True
+                    current_sense = True
+                    break
+
+                if is_disp: 
                     done = False
                     break
             if done: break
+
+        if current_sense: 
+            print "Current sense detected!"
 
         self.led_complete()
         app.log.info("drink complete")

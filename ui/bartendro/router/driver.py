@@ -344,6 +344,14 @@ class RouterDriver(object):
         else:
             return (ack, 0)
 
+    def receive_packet8_2(self):
+        ack, packet = self.receive_packet()
+        if ack == PACKET_ACK_OK:
+            data = unpack("BBBBBB", packet)
+            return (ack, data[2], data[3])
+        else:
+            return (ack, 0)
+
     def receive_packet16(self):
         ack, packet = self.receive_packet()
         if ack == PACKET_ACK_OK:
@@ -423,9 +431,9 @@ class RouterDriver(object):
         if self.software_only: return False
         while True:
             if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
-                ack, value = self.receive_packet8()
+                ack, value0, value1 = self.receive_packet8_2()
                 if ack == PACKET_ACK_OK:
-                    return value
+                    return (value0, value1)
 
     def update_liquid_levels(self):
         if self.software_only: return True

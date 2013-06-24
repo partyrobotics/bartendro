@@ -14,6 +14,7 @@ uint8_t serial_tx_nb(uint8_t ch);
 uint8_t receive_packet(packet_t *p);
 uint8_t send_packet(packet_t *p);
 uint8_t send_packet8(uint8_t type, uint8_t data);
+uint8_t send_packet8_2(uint8_t type, uint8_t data0, uint8_t data1);
 uint8_t send_packet16(uint8_t type, uint16_t data0, uint16_t data1);
 
 void i2c_tx(uint8_t ch);

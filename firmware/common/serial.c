@@ -199,6 +199,18 @@ uint8_t send_packet8(uint8_t type, uint8_t data)
     return send_packet(&p);
 }
 
+uint8_t send_packet8_2(uint8_t type, uint8_t data0, uint8_t data1)
+{
+    packet_t p;
+    
+    memset(&p, 0, sizeof(packet_t));
+    p.type = type;
+    p.p.uint8[0] = data0;
+    p.p.uint8[1] = data1;
+
+    return send_packet(&p);
+}
+
 uint8_t send_packet16(uint8_t type, uint16_t data0, uint16_t data1)
 {
     packet_t p;

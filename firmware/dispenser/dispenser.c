@@ -457,7 +457,7 @@ void is_dispensing(void)
     dispensing = g_is_dispensing;
     sei();
 
-    send_packet8(PACKET_IS_DISPENSING, dispensing);
+    send_packet8_2(PACKET_IS_DISPENSING, dispensing, g_current_sense_detected);
 }
 
 uint8_t address_exchange(void)
