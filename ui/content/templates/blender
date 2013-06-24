@@ -4,18 +4,18 @@
     <div class="row-fluid">	
         <div class="span1"></div>
         <div class="span10">	
-            <h2>Bartendro blender</h2>
+            <h2>Blender</h2>
               <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
               <div id="dispensers">
                  <form method="POST" action="/admin/save">
-                     {% for i in range(1, count + 1) %}
+                    {% for i in range(1, count + 1) %}
                         <div style="padding-bottom: 30px">
                             <div class="blender-title">{{ dispensers[i - 1].booze.name }}</div>
                             <div id="blender_info{{ i }}" class="blender-info">0 %</div>
                             <div id="slider{{ i }}" class="blender-slider"></div>
                         </div>
                     {% endfor %}
-                    <div class="div-spacer">
+                    <div class="div-spacer" style="float: right">
                       <a onclick="pour()" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
                     </div>
                    </form>
@@ -29,15 +29,26 @@
 <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
 
+var volumes = [];
+var booze_ids = [];
+
 $(document).ready(function() 
 {
+    load_values = [];
+    {% for i in range(1, count + 1) %}
+        booze_ids[{{ i - 1 }}] = {{ dispensers[i - 1].booze.id }};
+        load_values[{{ i - 1 }}] = {{ recipe[ dispensers[i - 1].booze.id ] or 0 }};
+    {% endfor %}
+
     for(i = 0; i < {{ count }}; i++)
         $( "#slider" + (i + 1)).slider({
             slide: function(event, ui) { update_percentages(); },
             stop: function(event, ui) { update_percentages(); },
             min : 0,
-            max: 100
+            max: 100,
+            value : load_values[i]
         });
+    update_percentages();
 });
 
 function update_percentages()
@@ -53,6 +64,8 @@ function update_percentages()
         else
             value = Math.round($("#slider" + (i + 1)).slider("value") * 100 / total);
         $("#blender_info" + (i + 1)).text(value + " %");
+
+        volumes[i] = Math.round({{ options.drink_size }} * value / 100);
     }
 }
 
@@ -63,129 +76,20 @@ function set_message(txt)
     $("#status-message").show();
 }
 
-function pour(disp)
+function pour()
 {
-    if (disp < 1 || disp > 15)
-        return;
-
-    dispensers[disp-1] = !dispensers[disp-1];
-    $.ajax({
-            url: "/ws/dispenser/" + disp + "/" + (dispensers[disp-1] ? "on" : "off") ,
-            success: function(html)
-            {
-                 if (dispensers[disp-1] == true)
-                     $("#disp" + disp).text('turn off');
-                 else
-                     $("#disp" + disp).text('turn on');
-
-                 if (html == "error state")
-                     window.location = "/admin";
-                 else
-                 if (html != "")
-                     set_message(html)
-                 else
-                 {
-                    if (dispensers[disp-1] == true)
-                        set_message("Turned on dispenser " + disp);
-                    else
-                        set_message("Turned off dispenser " + disp);
-                 }
-            },
-            error: function(xmlhttp, txtStatus, errorThrown)
-            {
-                 if (dispensers[disp-1] == true)
-                     $("#disp" + disp).text('turn off');
-                 else
-                     $("#disp" + disp).text('turn on');
-                 set_message("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
-            }
-    });
-}
-function test_dispense(disp)
-{
-    if (disp < 1 || disp > 15)
-        return;
-
-    $("#test" + disp).text('dispensing');
-    $("#test" + disp).toggleClass('disabled');
-    $.ajax({
-            url: "/ws/dispenser/" + disp + "/test" ,
-            success: function(html)
-            {
-                 $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
-                 $("#test" + disp).toggleClass('disabled');
-                 if (html == "busy")
-                     set_message("Already testing a dispense. Chill!");
-                 else
-                 if (html == "error state")
-                     window.location = "/admin";
-                 else
-                 if (html != "")
-                     set_message(html);
-                 else
-                     set_message("Test dispensed on dispenser " + disp);
-            },
-            error: function(xmlhttp, txtStatus, errorThrown)
-            {
-                 $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
-                 $("#test" + disp).toggleClass('disabled');
-                 set_message("Failed to test dispensers. Server status: " + xmlhttp.status);
-            }
-    });
-}
-function reset_bartendro()
-{
-    $.ajax({
-            url: "/ws/reset" ,
-            success: function(html)
-            {
-                window.location.reload();
-            }
-    });
-}
-function check_levels()
-{
-    $("#check_levels").text("checking levels...");
-    $("#check_levels").attr('disabled', true);
-    $.ajax({
-            url: "/ws/checklevels" ,
-            success: function(html)
-            {
-                 if (html != "")
-                     set_message("Error checking levels: " + html);
-                 else
-                 if (html == "error state")
-                     window.location = "/admin";
-                 else
-                     window.location = "/admin?updated=1";
-            },
-            error: function(xmlhttp, txtStatus, errorThrown)
-            {
-                 set_message("Error checking levels: " + xmlhttp.responseText);
-            }
-    });
-}
-function clean()
-{
-    $("#cleaning-dialog").dialog({ 
-              buttons: [ 
-                         { text: "Ok", click: function() { 
-                                $.ajax({
-                                        url: "/ws/clean",
-                                        success: function(html)
-                                        {
-                                             if (html == "error state")
-                                                 window.location = "/admin";
-                                        },
-                                        error: function(xhr, txtStatus, errorThrown)
-                                        {
-                                        }
-                                });
-                                $( this ).dialog( "close" ); 
-                         } },
-                         { text: "Cancel", click: function() { $( this ).dialog( "close" ); } }
-                       ] 
-    });
+    url = "/ws/drink";
+    for(i = 0; i < {{ count }}; i++)
+    {
+        if (i == 0)
+            args = "?";
+        else 
+            args += "&";
+        args += "booze" + booze_ids[i] + "=";
+        args += volumes[i];
+    }
+    url += args;
+    console.log(url);
 }
 </script>
 {% endblock %}

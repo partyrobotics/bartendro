@@ -88,6 +88,18 @@
         width: 80% !important;
     }
 
+    .blender-slider {
+        margin-left: 10px;
+        width: 70%;
+    }
+
+    .blender-info {
+        text-align: right;
+        float: right;
+        font-size: 16pt;
+        width: 30%;
+    }
+
 }
 
 @media (min-width: 768px) {
@@ -177,6 +189,18 @@
 
     .ui-dialog {
         width: 40% !important;
+    }
+
+    .blender-slider {
+        margin-left: 10px;
+        width: 80%;
+    }
+
+    .blender-info {
+        text-align: right;
+        float: right;
+        font-size: 16pt;
+        width: 20%;
     }
 
 }
@@ -314,18 +338,6 @@ table {
     font-size: 14pt;
     font-weight: bold;
     padding-bottom: 10px;
-}
-
-.blender-slider {
-    margin-left: 10px;
-    width: 80%;
-}
-
-.blender-info {
-    text-align: right;
-    float: right;
-    font-size: 16pt;
-    width: 20%;
 }
 
 .admin-box {

@@ -13,12 +13,18 @@ def blender():
     driver = app.driver
     count = driver.count()
 
+    recipe = {}
+    for arg in request.args:
+        n = int(arg[5:])
+        recipe[n] = int(request.args.get(arg))
+
     dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
     boozes = db.session.query(Booze).order_by(Booze.id).all()
 
     return render_template("blender", 
-                           title="Bartendro Blender",
+                           title="Blender",
                            dispensers=dispensers,
                            boozes=boozes,
                            count=count,
+                           recipe=recipe,
                            options=app.options)
