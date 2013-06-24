@@ -310,6 +310,24 @@ table {
     display: inline;
 }
 
+.blender-title {
+    font-size: 14pt;
+    font-weight: bold;
+    padding-bottom: 10px;
+}
+
+.blender-slider {
+    margin-left: 10px;
+    width: 80%;
+}
+
+.blender-info {
+    text-align: right;
+    float: right;
+    font-size: 16pt;
+    width: 20%;
+}
+
 .admin-box {
     border: 2px solid #D9A180;
     padding: 10px; 
