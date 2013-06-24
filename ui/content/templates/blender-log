@@ -13,7 +13,10 @@
                         <div><a href="{{ blend.url }}" style="font-size: 14pt; font-width: bold;">Blend # {{ blend.number }}</a></div>
                         <table class="table-striped table-bordered">
                         {% for booze in blend.blend %}
-                            <tr><td>{{ booze.name}}</td><td>{{ booze.value }}</td></tr>
+                            <tr>
+                                <td width="60%">{{ booze.name}}</td>
+                                <td width="40%">{{ booze.value }}</td>
+                            </tr>
                         {% endfor %}
                         </table>
                      </div>
