@@ -35,15 +35,21 @@ def blender():
 #@login_required
 def blender_log():
     boozes = db.session.query(Booze).order_by(Booze.id).all()
+    booze_index = {}
+    for booze in boozes:
+        booze_index[booze.id] = booze.name    
+
+    print booze_index
+
     log = BlenderLog.query.all()
     blends = []
     args = []
     for entry in log:
         blend = []
         data = json.loads(entry.blend)
-        for k, v in data:
-            blend.append({ 'name' : boozes[k].name, 'value' : v})
-            args.append("booze%d=%d" % (boozes[k].id, v))
+        for id, v in data:
+            blend.append({ 'name' : booze_index[id], 'value' : v})
+            args.append("booze%d=%d" % (id, v))
         url = "/blender?" + "&".join(args)
         blends.append({ 'number' : entry.id, 'blend' : blend, 'url' : url })
 

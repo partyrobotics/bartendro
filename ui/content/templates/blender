@@ -32,6 +32,7 @@
 <script type="text/javascript">
 
 var volumes = [];
+var percentages = [];
 var booze_ids = [];
 
 $(document).ready(function() 
@@ -69,7 +70,7 @@ function update_percentages()
         else
             value = Math.round($("#slider" + (i + 1)).slider("value") * 100 / total);
         $("#blender_info" + (i + 1)).text(value + " %");
-
+        percentages[i] = value;
         volumes[i] = Math.round({{ options.drink_size }} * value / 100);
     }
 }
@@ -90,26 +91,64 @@ function set_message(txt)
 
 function pour()
 {
-    url = "/ws/drink/82";
+    arg_count = 0;
     for(i = 0; i < {{ count }}; i++)
     {
-        if (i == 0)
-            args = "?";
-        else 
-            args += "&";
-        args += "booze" + booze_ids[i] + "=";
-        args += volumes[i];
+        if (percentages[i])
+        {
+            if (arg_count == 0)
+                args = "?";
+            else 
+                args += "&";
+            args += "booze" + booze_ids[i] + "=";
+            args += percentages[i];
+            arg_count++;
+        }
     }
 
+    console.log(args);
+    $.ajax({
+        url: "/ws/blender-log/assign" + args,
+        dataType : "json",
+        success: function(json)
+        {
+            pour_callback(json['id']);
+        },
+        error: function(xhr, textStatus, error)
+        {
+            set_message("Failed to assign blend a number. Status: " + xhr.status);
+            return;
+        }
+    });
+}
+
+function pour_callback(id)
+{
+    arg_count = 0;
+    for(i = 0; i < {{ count }}; i++)
+    {
+        if (volumes[i])
+        {
+            if (arg_count == 0)
+                args = "?";
+            else 
+                args += "&";
+            args += "booze" + booze_ids[i] + "=";
+            args += volumes[i];
+            arg_count++;
+        }
+    }
+
+    console.log(args);
     lb = '<div class="lb-box"><h1>';
-    lb += '<h1>Now serving your blend.</h1>'
+    lb += '<h1>Now serving blend ' + id + '</h1>'
     lb += "</div>";
-    $.modal(lb, { 'escClose' : false });
+    $.modal(lb);
         $.ajax({
-                url: url + args,
+                url: "/ws/drink/82" + args,
                 success: function(html)
                 {
-                    $.modal.close();
+                    //$.modal.close();
                 },
                 error: function(xmlhttp, textStatus, error)
                 {
