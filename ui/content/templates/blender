@@ -37,7 +37,7 @@ $(document).ready(function()
     load_values = [];
     {% for i in range(1, count + 1) %}
         booze_ids[{{ i - 1 }}] = {{ dispensers[i - 1].booze.id }};
-        load_values[{{ i - 1 }}] = {{ recipe[ dispensers[i - 1].booze.id ] or 0 }};
+        load_values[{{ i - 1 }}] = {{ recipe[ dispensers[i - 1].booze.id ] or 50 }};
     {% endfor %}
 
     for(i = 0; i < {{ count }}; i++)
@@ -78,7 +78,7 @@ function set_message(txt)
 
 function pour()
 {
-    url = "/ws/drink";
+    url = "/ws/drink/82";
     for(i = 0; i < {{ count }}; i++)
     {
         if (i == 0)
@@ -88,8 +88,33 @@ function pour()
         args += "booze" + booze_ids[i] + "=";
         args += volumes[i];
     }
-    url += args;
-    console.log(url);
+
+    lb = '<div class="lb-box"><h1>';
+    lb += '<h1>Now serving your blend.</h1>'
+    lb += "</div>";
+    $.modal(lb, { 'escClose' : false });
+        $.ajax({
+                url: url + args,
+                success: function(html)
+                {
+                    $.modal.close();
+                },
+                error: function(xmlhttp, textStatus, error)
+                {
+                    $.modal.close();
+                    if (xmlhttp.status == 500)
+                        $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                    else
+                    if (xmlhttp.status == 503)
+                        $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+                    else
+                    if (xmlhttp.status == 400)
+                        $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+                    else
+                        $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+                }
+        });
 }
 </script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
 {% endblock %}
