@@ -19,9 +19,14 @@ void led_pattern_next(uint32_t t, color_t *c);
 #define LED_PATTERN_CURRENT_SENSE 4
 #define LED_PATTERN_LAST          5
 
+// Define custom animations
 #define CUSTOM_PATTERN_OK           0
 #define CUSTOM_PATTERN_NOT_FINISHED 1
 #define CUSTOM_PATTERN_INVALID      2
 #define CUSTOM_PATTERN_FULL         3
+
+uint8_t pattern_define(uint8_t pattern);
+uint8_t pattern_add_segment(color_t *color, uint8_t steps);
+uint8_t pattern_finish(void);
 
 #endif

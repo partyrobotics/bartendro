@@ -49,6 +49,9 @@ PACKET_GET_LIQUID_THRESHOLDS  = 19
 PACKET_SET_LIQUID_THRESHOLDS  = 20
 PACKET_FLUSH_SAVED_TICK_COUNT = 21
 PACKET_TICK_SPEED_DISPENSE    = 22
+PACKET_PATTERN_DEFINE         = 23
+PACKET_PATTERN_ADD_SEGMENT    = 24
+PACKET_PATTERN_FINISH         = 25
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
@@ -476,6 +479,18 @@ class RouterDriver(object):
         if self.software_only: return True
         self.send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
 
+    def pattern_define(self, dispenser, pattern):
+        if self.software_only: return True
+        self.send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
+
+    def pattern_add_segment(self, dispenser, red, green, blue, steps):
+        if self.software_only: return True
+        self.send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
+
+    def pattern_finish(self, dispenser):
+        if self.software_only: return True
+        self.send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
+
 def ping_test(md):
     while True:
         disp = 0
@@ -506,33 +521,3 @@ def comm_test(md):
     while not md.comm_test():
         sleep(1)
 
-if __name__ == "__main__":
-    md = RouterDriver("/dev/ttyAMA0", 0)
-    md.open()
-
-#    sleep(3)
-#    print "Ping:"
-#    while not md.ping(0):
-#        pass
-
-#    comm_test(md)
-#    val = md.is_dispensing(0)
-#    print "is dispensing: %d\n" % val
-
-#    sleep(2)
-
-#    print "Ping:"
-#    md.ping(0)
-#    print
-
-#    val = md.get_liquid_level(1)
-#    print "liquid level: %d\n" % val
-#    val = md.is_dispensing(0)
-#    print "is dispensing: %d\n" % val
-
-#    sleep(2)
-
-#    md.ping(0);
-
-#    led_test(md)
-#    dispense_test()

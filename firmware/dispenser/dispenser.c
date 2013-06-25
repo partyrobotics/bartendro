@@ -518,7 +518,8 @@ void id_conflict(void)
 
 int main(void)
 {
-    uint8_t id, rec, i, cs;
+    uint8_t  id, rec, i, cs;
+    color_t  c;
     packet_t p;
 
     setup();
@@ -668,6 +669,20 @@ int main(void)
                             dispense_ticks(p.p.uint16[0], (uint8_t)p.p.uint16[1]);
                             flush_saved_tick_count(0);
                         }
+                        break;
+                    case PACKET_PATTERN_DEFINE:
+                        pattern_define(p.p.uint8[0]);
+                        break;
+
+                    case PACKET_PATTERN_ADD_SEGMENT:
+                        c.red = p.p.uint8[0];
+                        c.green = p.p.uint8[1];
+                        c.blue = p.p.uint8[2];
+                        pattern_add_segment(&c, p.p.uint8[3]);
+                        break;
+
+                    case PACKET_PATTERN_FINISH:
+                        pattern_finish();
                         break;
                 }
             }

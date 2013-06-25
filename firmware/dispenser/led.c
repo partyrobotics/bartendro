@@ -24,12 +24,6 @@
 #define CLOCK_PORT           PORTD
 #define DATA_PORT            PORTD
 
-/*
-PACKET_DEFINE_LED_SEQUENCE ?    args: sequence
-PACKET_ADD_LED_SEGMENT     ?    args: r,g,b,steps
-PACKET_END_LED_SEQUENCE    ?    args: none
-*/
-
 typedef struct
 {
     color_t color;
@@ -96,9 +90,9 @@ pattern_t g_pattern_table[MAX_PATTERNS] =
 color_segment_t  g_custom_segments[MAX_NUM_CUSTOM_SEGMENTS];
 uint8_t          g_num_custom_segments = 0;
 
-color_segment_t *g_custom_index        = NULL;
-int8_t           g_custom_pattern      = -1;
-uint8_t          g_custom_num_segments = 0;
+color_segment_t *g_custom_index            = NULL;
+int8_t           g_custom_pattern          = -1;
+uint8_t          g_custom_pattern_segments = 0;
 
 static color_segment_t *g_cur_segment = NULL;
 static uint8_t          g_num_segments = 0;
@@ -115,6 +109,7 @@ uint8_t pattern_define(uint8_t pattern)
 
     g_custom_pattern = pattern;
     g_custom_index = &g_custom_segments[g_num_custom_segments];
+    g_custom_pattern_segments = 0;
 
     return CUSTOM_PATTERN_OK;
 }
@@ -128,16 +123,22 @@ uint8_t pattern_add_segment(color_t *color, uint8_t steps)
     g_custom_segments[g_num_custom_segments].steps = steps;
 
     g_num_custom_segments++;
+    g_custom_pattern_segments++;
 
     return CUSTOM_PATTERN_OK;
 }
 
-void pattern_finish(void)
+uint8_t pattern_finish(void)
 {
+    if (g_custom_pattern == -1)
+        return CUSTOM_PATTERN_INVALID;
+
     g_pattern_table[g_custom_pattern].segments = g_custom_index;      
-    g_pattern_table[g_custom_pattern].num = g_custom_num_segments;
+    g_pattern_table[g_custom_pattern].num = g_custom_pattern_segments;
     g_custom_pattern = -1;
     g_custom_index = NULL;
+
+    return CUSTOM_PATTERN_OK;
 }
 
 // some delay helper functions
