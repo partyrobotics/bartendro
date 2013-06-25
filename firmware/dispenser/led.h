@@ -7,15 +7,21 @@ typedef struct
 } color_t;
 
 void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue);
-void led_pattern_init(uint8_t pattern);
+void led_pattern_init(int8_t pattern);
 void led_pattern_next(uint32_t t, color_t *c);
 
 // LED animation patterns
-#define LED_PATTERN_OFF           0
-#define LED_PATTERN_IDLE          1
-#define LED_PATTERN_DISPENSE      2
-#define LED_PATTERN_DRINK_DONE    3
-#define LED_PATTERN_CLEAN         4
-#define LED_PATTERN_CURRENT_SENSE 5
+#define LED_PATTERN_OFF           -1 
+#define LED_PATTERN_IDLE          0
+#define LED_PATTERN_DISPENSE      1
+#define LED_PATTERN_DRINK_DONE    2
+#define LED_PATTERN_CLEAN         3
+#define LED_PATTERN_CURRENT_SENSE 4
+#define LED_PATTERN_LAST          5
+
+#define CUSTOM_PATTERN_OK           0
+#define CUSTOM_PATTERN_NOT_FINISHED 1
+#define CUSTOM_PATTERN_INVALID      2
+#define CUSTOM_PATTERN_FULL         3
 
 #endif

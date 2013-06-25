@@ -25,7 +25,7 @@
 #define DATA_PORT            PORTD
 
 /*
-PACKET_DEFINE_LED_SEQUENCE ?    args: sequence, divisor
+PACKET_DEFINE_LED_SEQUENCE ?    args: sequence
 PACKET_ADD_LED_SEGMENT     ?    args: r,g,b,steps
 PACKET_END_LED_SEQUENCE    ?    args: none
 */
@@ -35,6 +35,12 @@ typedef struct
     color_t color;
     uint8_t steps;
 } color_segment_t;
+
+typedef struct
+{
+    color_segment_t *segments;
+    uint8_t          num;
+} pattern_t;
 
 #define LED_IDLE_NUM_SEGMENTS 3
 static color_segment_t idle_segments[LED_IDLE_NUM_SEGMENTS] =
@@ -76,10 +82,63 @@ static color_segment_t current_sense_segments[LED_CURRENT_SENSE_NUM_SEGMENTS] =
     { { 0,   0, 0},  0 }
 };
 
+#define MAX_PATTERNS 5
+pattern_t g_pattern_table[MAX_PATTERNS] =
+{ 
+    { idle_segments,          LED_IDLE_NUM_SEGMENTS          },
+    { dispense_segments,      LED_DISPENSE_NUM_SEGMENTS      },
+    { drink_done_segments,    LED_DRINK_DONE_NUM_SEGMENTS    },
+    { clean_segments,         LED_CLEAN_NUM_SEGMENTS         },
+    { current_sense_segments, LED_CURRENT_SENSE_NUM_SEGMENTS }
+};
+
+#define MAX_NUM_CUSTOM_SEGMENTS 32
+color_segment_t  g_custom_segments[MAX_NUM_CUSTOM_SEGMENTS];
+uint8_t          g_num_custom_segments = 0;
+
+color_segment_t *g_custom_index        = NULL;
+int8_t           g_custom_pattern      = -1;
+uint8_t          g_custom_num_segments = 0;
+
 static color_segment_t *g_cur_segment = NULL;
 static uint8_t          g_num_segments = 0;
 static uint8_t          g_segment_index = 0;
 static uint8_t          g_segment_step = 255;
+
+uint8_t pattern_define(uint8_t pattern)
+{
+    if (g_custom_pattern != -1)
+        return CUSTOM_PATTERN_NOT_FINISHED;
+
+    if (g_custom_pattern >= LED_PATTERN_LAST)
+        return CUSTOM_PATTERN_INVALID;
+
+    g_custom_pattern = pattern;
+    g_custom_index = &g_custom_segments[g_num_custom_segments];
+
+    return CUSTOM_PATTERN_OK;
+}
+
+uint8_t pattern_add_segment(color_t *color, uint8_t steps)
+{
+    if (g_num_custom_segments == MAX_NUM_CUSTOM_SEGMENTS)
+        return CUSTOM_PATTERN_FULL;
+
+    g_custom_segments[g_num_custom_segments].color = *color;
+    g_custom_segments[g_num_custom_segments].steps = steps;
+
+    g_num_custom_segments++;
+
+    return CUSTOM_PATTERN_OK;
+}
+
+void pattern_finish(void)
+{
+    g_pattern_table[g_custom_pattern].segments = g_custom_index;      
+    g_pattern_table[g_custom_pattern].num = g_custom_num_segments;
+    g_custom_pattern = -1;
+    g_custom_index = NULL;
+}
 
 // some delay helper functions
 void delay_ms(int ms) 
@@ -137,7 +196,7 @@ void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
     delay_us(COLOR_LATCH_DURATION);
 }
 
-void led_pattern_init(uint8_t pattern)
+void led_pattern_init(int8_t pattern)
 {
     switch(pattern)
     {
@@ -147,32 +206,13 @@ void led_pattern_init(uint8_t pattern)
             break;
 
         case LED_PATTERN_IDLE:
-            g_cur_segment = idle_segments;
-            g_num_segments = LED_IDLE_NUM_SEGMENTS;
-            break;
-
         case LED_PATTERN_DISPENSE:
-            g_cur_segment = dispense_segments;
-            g_num_segments = LED_DISPENSE_NUM_SEGMENTS;
-            break;
-
         case LED_PATTERN_DRINK_DONE:
-            g_cur_segment = drink_done_segments;
-            g_num_segments = LED_DRINK_DONE_NUM_SEGMENTS;
-            break;
-
         case LED_PATTERN_CLEAN:
-            g_cur_segment = clean_segments;
-            g_num_segments = LED_CLEAN_NUM_SEGMENTS;
-            break;
-
         case LED_PATTERN_CURRENT_SENSE:
-            g_cur_segment = current_sense_segments;
-            g_num_segments = LED_CURRENT_SENSE_NUM_SEGMENTS;
+            g_cur_segment = g_pattern_table[pattern].segments;
+            g_num_segments = g_pattern_table[pattern].num;
             break;
-
-        default:
-            return;
     }
     g_segment_step = 255;
     g_segment_index = 0;
