@@ -11,16 +11,12 @@ from bartendro.errors import SerialIOError, I2CIOError
 import argparse
 
 parser = argparse.ArgumentParser(description='Bartendro application process')
-parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default="1", nargs="?")
+parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=True, action='store_true')
 parser.add_argument("-t", "--host", help="Which interfaces to listen on. Default: 127.0.0.1", default="127.0.0.1", type=str)
 parser.add_argument("-p", "--port", help="Which port to listen on. Default: 8080", default="8080", type=int)
 
 args = parser.parse_args()
-
-if len(sys.argv) > 1 and sys.argv[1] == "--debug":
-    debug = True
-else:
-    debug = True
+if args.debug: print "Debugging has been enabled."
 
 try:
     import uwsgi
@@ -127,7 +123,7 @@ if app.software_only:
     app.log.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 
 app.log.info("Bartendro starting")
-app.debug = debug
+app.debug = args.debug
 
 if __name__ == '__main__':
     app.run(host=args.host, port=args.port)
