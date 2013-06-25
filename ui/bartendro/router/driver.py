@@ -273,7 +273,7 @@ class RouterDriver(object):
         Returns a tuple of (dispensing, is_over_current) 
         """
 
-        if self.software_only: return (True, False)
+        if self.software_only: return (False, False)
 
         # Sometimes the motors can interfere with communications.
         # In such cases, assume the motor is still running and 

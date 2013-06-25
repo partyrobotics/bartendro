@@ -254,7 +254,7 @@ class Mixer(object):
                 error(self.err)
                 return False
             recipe.append(r)
-        
+
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
     

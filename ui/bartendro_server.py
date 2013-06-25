@@ -16,7 +16,7 @@ parser.add_argument("-t", "--host", help="Which interfaces to listen on. Default
 parser.add_argument("-p", "--port", help="Which port to listen on. Default: 8080", default="8080", type=int)
 
 args = parser.parse_args()
-if args.debug: print "Debugging has been enabled."
+if args.debug: print " * Debugging has been enabled."
 
 try:
     import uwsgi
