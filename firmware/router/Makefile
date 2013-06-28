@@ -10,8 +10,7 @@ $(TARGET).hex: $(TARGET).obj
 	$(OBJ2HEX) -R .eeprom -O ihex $< $@
 
 $(TARGET).obj: $(TARGET).o
-	make -C ../common
-	$(CC) $(CFLAGS) -o $@ -Wl,-Map,$(TARGET).map $(TARGET).o ../common/common.ar
+	$(CC) $(CFLAGS) -o $@ -Wl,-Map,$(TARGET).map $(TARGET).o
 
 clean:
 	rm -f *.hex *.obj *.o *.map

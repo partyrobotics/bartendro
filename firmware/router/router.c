@@ -273,7 +273,6 @@ void port_d_process_change(uint8_t port_d, uint8_t changed_pins)
                     sbi(PORTB, 0);
                 else
                     cbi(PORTB, 0);
-                pcint21 = state;
             }
             break;
         case 2:
@@ -333,7 +332,7 @@ void reset_dispensers(void)
 
 int main (void)
 {
-    uint8_t reset = 0, i;
+    uint8_t reset = 0;
     uint8_t port_b, port_c, port_d;
     uint8_t port_b_last = 0xFF, port_c_last = 0xFF, port_d_last = 0xFF;
 
