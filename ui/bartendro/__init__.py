@@ -34,7 +34,7 @@ from bartendro.model.booze_group_booze import BoozeGroupBooze
 
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
-from bartendro.model.version import Version
+from bartendro.model.version import DatabaseVersion
 
 Drink.name = relationship(DrinkName, backref=backref("drink"))
 

@@ -10,10 +10,10 @@ class DatabaseVersion(db.Model):
     """
 
     __tablename__ = 'version'
-    schema = Column(Integer)
+    schema = Column(Integer, primary_key=True)
 
     query = db.session.query_property()
-    def __init__(self, schema = 1)
+    def __init__(self, schema = 1):
         self.schema = schema
 
     def update(self, schema):
