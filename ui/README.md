@@ -9,7 +9,7 @@ If you're installing into raspian then you can get all the dependencies in one g
 apt-get install nginx daemontools daemontools-run 
 apt-get install python-werkzeug python-jinja2 python-setuptools \
         python-wtforms python-serial python-smbus python-sqlite python-sqlalchemy \
-        python-cherrypy3 memcached python-memcache python-rpi.gpio python-flask 
+        memcached python-memcache python-rpi.gpio python-flask 
 
 If you'd like to have python dependencies installed with pip:
 

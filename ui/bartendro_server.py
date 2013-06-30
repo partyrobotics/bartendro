@@ -76,4 +76,4 @@ if app.software_only:
 app.log.info("Bartendro starting")
 
 app.debug = debug
-app.run(host='0.0.0.0', port=8080)
+app.run(host='127.0.0.1', port=8080)
