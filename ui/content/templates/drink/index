@@ -183,7 +183,11 @@ function update_volumes()
     } 
     for(i = 0; i < ing.length; i++)
     {
-        ing[i].volume = drink_size * ing[i].newparts / total;
+        {% if options.metric %}
+           ing[i].volume = drink_size * ing[i].newparts / total;
+        {% else %}
+           ing[i].volume = drink_size * 30 * ing[i].newparts / total;
+        {% endif %}
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
         if ({{ options.metric }})
             $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
