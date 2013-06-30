@@ -17,7 +17,7 @@
                 <li><a href="/admin">dispensers</a></li>
                 <li><a href="/admin/drink">drinks</a></li>
                 <li><a href="/admin/booze">booze</a></li>
-                <li><a href="/admin/report">report</a></li>
+                <li><a href="/admin/options">options</a></li>
                 <li><a href="/admin/liquidout">liquid out</a></li>
                 <li><a href="/admin/logout">logout</a></li>
             {% endif %}

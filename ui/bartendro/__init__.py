@@ -34,6 +34,7 @@ from bartendro.model.booze_group_booze import BoozeGroupBooze
 
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
+from bartendro.model.version import Version
 
 Drink.name = relationship(DrinkName, backref=backref("drink"))
 
@@ -55,7 +56,7 @@ DrinkLog.drink = relationship(Drink)
 # Import views
 from bartendro.view import root, trending
 from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \
-                                 dispenser as admin_dispenser, report, liquidout, user
+                                 dispenser as admin_dispenser, report, liquidout, user, options
 from bartendro.view.drink import drink
 from bartendro.view.ws import booze as ws_booze, dispenser as ws_dispenser, drink as ws_drink, \
                               misc as ws_misc, shotbot as ws_shotbot

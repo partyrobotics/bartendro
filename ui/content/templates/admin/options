@@ -1,0 +1,17 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="row-fluid">
+    <div class="span6">
+        <h2>{{ title }}</h2>
+        {% if saved %}
+           <p>Your changes have been saved.</p>
+        {% endif %}
+	</div>
+    </div>
+    <div class="span6">
+        Your database schema version is: {{ schema }}
+    </div>
+</div>
+<script type="text/javascript">
+</script>
+{% endblock %}
