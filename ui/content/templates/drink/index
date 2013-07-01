@@ -183,11 +183,7 @@ function update_volumes()
     } 
     for(i = 0; i < ing.length; i++)
     {
-        {% if options.metric %}
-           ing[i].volume = drink_size * ing[i].newparts / total;
-        {% else %}
-           ing[i].volume = drink_size * 30 * ing[i].newparts / total;
-        {% endif %}
+        ing[i].volume = drink_size * ing[i].newparts / total;
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
         if ({{ options.metric }})
             $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
@@ -316,7 +312,11 @@ function make_drink(drink, is_taster)
             else 
                 args += "&";
             args += "booze" + ing[i].id + "=";
-            args += is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
+            volume = is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
+            {% if not options.metric %}
+                volume *= 30;
+            {% endif %}
+            args += volume;
         }
         lb = '<div class="lb-box"><h1>';
         if (is_taster)
