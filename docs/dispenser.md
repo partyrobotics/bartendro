@@ -1,9 +1,9 @@
-Documentation for Partyrobotics Dispenser
+Documentation for Bartendro Dispenser
 
 Functional overview
 ===================
 
-The PartyRobotics Dispenser can dispense liquid with milliliter accuracy and can be 
+The Bartendro Dispenser can dispense liquid with milliliter accuracy and can be 
 used in a stand alone system or in combination with a router and other pumps to create a more
 complex liquid dispensing system.
 
