@@ -17,18 +17,19 @@
 #include "led.h"
 
 // EEprom data. 
-#define ee_pump_id_offset                0
-#define ee_run_time_ticks_offset         1
-#define ee_liquid_low_threshold_offset   5
-#define ee_liquid_out_threshold_offset   7 
+#define ee_pump_id_offset                 0
+#define ee_run_time_ticks_offset          1
+#define ee_liquid_low_threshold_offset    5
+#define ee_liquid_out_threshold_offset    7 
 
-#define RESET_DURATION                   1
-#define SYNC_COUNT                      10 // Every SYNC_INIT ms we will change the color animation
-#define NUM_ADC_SAMPLES                  5
-#define MAX_CURRENT_SENSE_CYCLES        10
-#define TICKS_SAVE_THRESHOLD          1000
-#define DEFAULT_LIQUID_LOW_THRESHOLD   140
-#define DEFAULT_LIQUID_OUT_THRESHOLD    90
+#define RESET_DURATION                    1
+#define SYNC_COUNT                       10 // Every SYNC_INIT ms we will change the color animation
+#define NUM_ADC_SAMPLES                   5
+#define MAX_CURRENT_SENSE_CYCLES         10
+#define TICKS_SAVE_THRESHOLD           1000
+#define DEFAULT_LIQUID_LOW_THRESHOLD    140
+#define DEFAULT_LIQUID_OUT_THRESHOLD     90
+#define DEFAULT_CURRENT_SENSE_THRESHOLD 610
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -50,7 +51,7 @@ static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
 static volatile uint8_t g_sync_divisor = 10;
 
 static uint8_t  g_current_sense_num_cycles = 0;
-static uint16_t g_current_sense_threshold = 465;
+static uint16_t g_current_sense_threshold = DEFAULT_CURRENT_SENSE_THRESHOLD;
 static volatile uint8_t g_current_sense_detected = 0;
 
 void check_dispense_complete_isr(void);
