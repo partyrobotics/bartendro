@@ -1,26 +1,47 @@
 # -*- coding: utf-8 -*-
 import json
-from operator import itemgetter
+from sqlalchemy import asc, func
 from bartendro import app, db, mixer
 from flask import Flask, request
 from flask.ext.login import login_required
-from werkzeug.exceptions import ServiceUnavailable, BadRequest
+from werkzeug.exceptions import InternalServerError, BadRequest
 from bartendro.model.option import Option
+from bartendro.options import bartendro_options
 
-@app.route('/ws/option/save', methods=["POST"])
-def ws_option_save(drink):
-    data = request.json['options']
+@app.route('/ws/options', methods=["POST", "GET"])
+@login_required
+def ws_options():
+    if request.method == 'GET':
+        options = Option.query.order_by(asc(func.lower(Option.key)))
+        data = {}
+        for o in options:
+            if isinstance(bartendro_options[o.key], int):
+               value = int(o.value)
+            elif isinstance(bartendro_options[o.key], unicode):
+               value = unicode(o.value)
+            elif isinstance(bartendro_options[o.key], boolean):
+               value = boolean(o.value)
+            else:
+                raise InternalServerError
+            data[o.key] = value
 
-    # TODO: Lookup how to remove all the options in the DB
-    Option.query.remove.all()
+        print  json.dumps({ 'options' : data });
+        return json.dumps({ 'options' : data });
 
-    # json: { options : [(key, value), (..), ..] }
-    for key, value in data:
-        option = Option(key, value)
-        db.session.add(option)
+    if request.method == 'POST':
+        data = request.json['options']
 
-    db.session.commit()
+        Option.query.remove.all()
 
-    # TODO: figure out how to restart Bartendro
+        # json: { options : [(key, value), (..), ..] }
+        for key, value in data:
+            option = Option(key, value)
+            db.session.add(option)
 
-    return json.dumps({});
+        db.session.commit()
+
+        # TODO: figure out how to restart Bartendro
+
+        return json.dumps({});
+
+    raise BadRequest

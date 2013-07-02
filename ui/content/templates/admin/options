@@ -45,15 +45,15 @@
                 <div style="margin-left: 15px">
                     <div>
                         <label for="option-drink-size">Default drink size</label>
-                        <input class="" id="option-drink-size" type="text"></input>
+                        <input class="" id="option-drink-size" type="text"></input> ml
                     </div>
                     <div>
                         <label for="option-taster-size">Taster size</label>
-                        <input class="" id="option-taster-size" type="text"></input>
+                        <input class="" id="option-taster-size" type="text"></input> ml
                     </div>
                     <div>
                         <label for="option-test-dispense-size">Test dispense size</label>
-                        <input class="" id="option-test-dispense-size" type="text"></input>
+                        <input class="" id="option-test-dispense-size" type="text"></input> ml
                     </div>
                 </div>
                 <div class="div-spacer"/>
@@ -104,6 +104,62 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
+$(document).ready(function() 
+{
+    load();
+});
+
+function load()
+{
+    $.ajax({
+            url: "/ws/options",
+            dataType : "json",
+            success: function(json)
+            {
+                set_options(json['options']);
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                set_message("Failed to load options:" + xhr.status);
+            }
+    });
+}
+
+function set_options(opts)
+{
+    if (opts['use_liquid_level_sensors'])
+        $("#option-use-liquid-sensors").prop("checked", true);
+    else
+        $("#option-use-liquid-sensors").prop("checked", false);
+    if (opts['metric'])
+        $('#option-metric').prop("checked", true);
+    else
+        $('#option-metric').prop("checked", false);
+    if (opts['must_login_to_dispense'])
+        $('#option-must-login-to-dispense').prop("checked", true);
+    else
+        $('#option-must-login-to-dispense').prop("checked", false);
+
+    $('#login-name').val(opts['login_name']);
+    $('#login-passwd').val(opts['login_passwd']);
+    $('#option-drink-size').val(opts['drink_size']);
+    $('#option-taster-size').val(opts['taster_size']);
+    $('#option-test-dispense-size').val(opts['test_dispense_ml']);
+
+    if (opts['show_taster'])
+        $('#option-show-taster').prop("checked", true);
+    else
+        $('#option-show-taster').prop("checked", false);
+    if (opts['drink_size'])
+        $('#option-show-drink-size').prop("checked", true);
+    else
+        $('#option-show-drink-size').prop("checked", false);
+    if (opts['show_strength'])
+        $('#option-show-strength').prop("checked", true);
+    else
+        $('#option-show-strength').prop("checked", false);
+}
+
 function save()
 {
     is_valid = true;
