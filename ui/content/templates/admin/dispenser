@@ -1,51 +1,55 @@
 {% extends 'admin/layout' %}
 {% block body %}
-<div class="row-fluid">
-    <div class="span6 admin-box">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <h2>Dispensers</h2>
-      {% if saved %}
-         <div class="alert">Your changes have been saved.</div>
-      {% endif %}
-     <form method="POST" action="/admin/save">
-         {% for i in range(1, count + 1) %}
-            <div style="padding-bottom: 10px">
-                {% if states[i-1] == 1 %}
-                      {{ form["dispenser%s" % i].label(class="dispenser-out")}}: 
-                {% elif states[i-1] == 2 %}
-                      {{ form["dispenser%s" % i].label(class="dispenser-warning")}}: 
-                {% else %}
-                      {{ form["dispenser%s" % i].label(class="dispenser-ok")}}: 
-                {% endif %}
-                {{ form["dispenser%s" % i](class="form select-field") }}
-                <a class="btn btn-large" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
-                <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
-            </div>
-        {% endfor %}
-        <div>
-            {{ form.save(class="btn btn-large btn-primary") }}
+<div class="container-fluid">
+    <div class="row-fluid">	
+        <div class="span1"></div>
+        <div class="span10 admin-box-full">	
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <h2>Dispensers</h2>
+              {% if saved %}
+                 <div class="alert">Your changes have been saved.</div>
+              {% endif %}
+              <div>
+                   There are {{ count }} dispensers available. 
+                   <div class="submit-button">
+                      <a onclick="reset()" class="btn">reset</a>
+                      {% if options.use_liquid_level_sensors %}
+                          <a onclick="check_levels()" class="btn">update liquid levels</a>
+                      {% endif %}
+                      <a onclick="clean()" class="btn btn-danger">clean</a>
+                   </div>
+              </div>
+              <div style="margin-top: 30px; clear: both;"/>
+             <form method="POST" action="/admin/save">
+                 {% for i in range(1, count + 1) %}
+                    <div style="padding-bottom: 10px">
+                        {% if states[i-1] == 1 %}
+                              {{ form["dispenser%s" % i].label(class="dispenser-out")}}: 
+                        {% elif states[i-1] == 2 %}
+                              {{ form["dispenser%s" % i].label(class="dispenser-warning")}}: 
+                        {% else %}
+                              {{ form["dispenser%s" % i].label(class="dispenser-ok")}}: 
+                        {% endif %}
+                        {{ form["dispenser%s" % i](class="form select-field") }}
+                        <a class="btn btn-large" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
+                        <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
+                    </div>
+                {% endfor %}
+                <div class="div-spacer">
+                    {{ form.save(class="btn btn-large btn-primary submit-button") }}
+                </div>
+              </form>
+           </div>
         </div>
-     </form>
-    </div>
-    <div class="span6">
-       <div>
-          <a onclick="reset()" class="btn">reset</a>
-          {% if options.use_liquid_level_sensors %}
-              <a onclick="check_levels()" class="btn">update liquid levels</a>
-          {% endif %}
-          <a onclick="clean()" class="btn btn-danger">clean</a>
-       </div>
-       <div>
-           There are {{ count }} dispensers available. 
-       </div>
+        <div class="span1"></div>
     </div>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>

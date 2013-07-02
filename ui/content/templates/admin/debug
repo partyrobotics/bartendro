@@ -5,26 +5,29 @@
         <div class="span2"></div>
         <div class="span8 admin-box-full">	
              <h2>Debug Bartendro</h2>
-             <h3>Test dispensers</h3>
+             <h4>Test dispensers</h4>
              <p>
                 If you suspect that one or more dispensers are not responding properly, press the test dispensers
                 button to see if all of the dispensers are in fact responding.
              </p>
              <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
              <div id="test-response"></div>
+             <div class="div-spacer"/>
 
-             <h3>Dispenser discovery log</h3>
+             <h4>Dispenser discovery log</h4>
              <p>
                 This debugging log shows the discovery of the dispensers:
              </p>
              <div><pre class="pre-scrollable">{{ startup_log }}</pre></div>
+             <div class="div-spacer"/>
 
-             <h3>Bartendro log</h3>
+             <h4>Bartendro log</h4>
              <p>
                 <a class="btn btn-large" style="float: right; margin-bottom: 10px;" onclick="reload()">refresh</a>
                 <p style="vertical-align: bottom">This log shows information and errors about Bartendro:</p>
              </p>
              <div id="b_log" class="pre-scrollable"><pre>{{ bartendro_log }}</pre></div>
+             <div class="div-spacer"/>
         </div>
         <div class="span2"></div>
     </div>

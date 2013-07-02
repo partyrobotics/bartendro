@@ -279,12 +279,6 @@ table {
     text-align: right;
 }
 
-
-label {
-    display: inline;
-    font-size: 13pt;
-}
-
 .dispenser-out {
     display: inline;
     color: red;
@@ -300,7 +294,7 @@ label {
 }
 
 .admin-box {
-    border: 2px solid #aaa; 
+    border: 2px solid #D9A180;
     padding: 10px; 
     border-radius: 5px;
     background: white;
@@ -309,7 +303,7 @@ label {
 }
 
 .admin-box-full {
-    border: 2px solid #aaa; 
+    border: 2px solid #D9A180;
     padding: 10px; 
     border-radius: 5px;
     background: white;
@@ -326,8 +320,8 @@ label {
     vertical-align: top !important;
 }
 
-.form-field {
-    display: block;
+.form-div {
+    margin-bottom: 10px;
 }
 
 .edit-field {
@@ -339,6 +333,15 @@ label {
 
 .form-element {
     width: 80%;
+}
+
+.div-spacer {
+    margin-top: 15px;
+}
+
+.submit-button {
+    float: right; 
+    margin-right: 25px;
 }
 
 .ll-calibrate-textbox {
