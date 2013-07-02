@@ -317,12 +317,16 @@ function make_drink(drink, is_taster)
         }
         lb = '<div class="lb-box"><h1>';
         if (is_taster)
+        {
+            drink += "/speed/128";
             lb += 'Now serving a taste of'
+        }
         else
             lb += 'Now serving your'
         lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
         lb += "</div>";
         $.modal(lb, { 'escClose' : false });
+        console.log("/ws/drink/" + drink + args);
         $.ajax({
                 url: "/ws/drink/" + drink + args,
                 success: function(html)
