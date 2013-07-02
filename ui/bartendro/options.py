@@ -42,7 +42,7 @@ def setup_options_table():
     try:
         import config
     except ImportError:
-        pass
+        config = None
 
     # Figure out which, if any options are missing from the options table
     options = db.session.query(Option).all()
