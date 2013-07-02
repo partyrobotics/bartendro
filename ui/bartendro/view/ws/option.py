@@ -31,16 +31,19 @@ def ws_options():
     if request.method == 'POST':
         data = request.json['options']
 
-        Option.query.remove.all()
+        Option.query.delete()
 
         # json: { options : [(key, value), (..), ..] }
-        for key, value in data:
-            option = Option(key, value)
+        for key in data:
+            option = Option(key, data[key])
             db.session.add(option)
 
         db.session.commit()
-
-        # TODO: figure out how to restart Bartendro
+        try:
+            import uwsgi
+            uwsgi.reload()
+        except ImportError:
+            pass
 
         return json.dumps({});
 

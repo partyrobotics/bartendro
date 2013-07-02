@@ -77,6 +77,10 @@
                             Allow users to change the strength of their drinks
                         </label>
                     </div>
+                    <div>
+                        <label for="option-strength-steps">Number of strength steps to show</label>
+                        <input class="" id="option-strength-steps" type="text"></input>
+                    </div>
                 </div>
             </fieldset>
         </form>
@@ -102,12 +106,22 @@
     </div>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() 
 {
     load();
 });
+
+function set_message(txt)
+{
+    $("#status-message").text(txt);
+    $("#status-message").show();
+}
+function clear_message(txt)
+{
+    $("#status-message").text("");
+    $("#status-message").hide();
+}
 
 function load()
 {
@@ -150,7 +164,7 @@ function set_options(opts)
         $('#option-show-taster').prop("checked", true);
     else
         $('#option-show-taster').prop("checked", false);
-    if (opts['drink_size'])
+    if (opts['show_size'])
         $('#option-show-drink-size').prop("checked", true);
     else
         $('#option-show-drink-size').prop("checked", false);
@@ -158,44 +172,38 @@ function set_options(opts)
         $('#option-show-strength').prop("checked", true);
     else
         $('#option-show-strength').prop("checked", false);
+    $('#option-strength-steps').val(opts['strength_steps']);
 }
 
 function save()
 {
-    is_valid = true;
-
-    if (!$("#drink-form").valid())
-        return;
-
-    drink = {};
-    drink['id'] = $("#drink-id").val();
-    drink['name'] = $("#drink-name").val();
-    drink['desc'] = $("#drink-desc").val();
-    drink['available'] = $("#drink-available").prop("checked") ? 1 : 0;
-    drink['popular'] = $("#drink-popular").prop("checked") ? 1 : 0;
-    drink['boozes'] = [];
-    for(i = 0; i < num_boozes; i++)
-    { 
-        drink['boozes'].push([ $("#selected-booze-id-" + i).val(), 
-                               $("#booze-parts-" + i).val() ,
-                               $("#old-booze-id-" + i).val() 
-                             ]);
-    }
+    options = {};
+    options['use_liquid_level_sensors'] = $("#option-use-liquid-sensors").prop("checked") ? 1 : 0;
+    options['metric'] = $("#option-metric").prop("checked") ? 1 : 0;
+    options['must_login_to_dispense'] = $("#option-must-login-to-dispense").prop("checked") ? 1 : 0;
+    options['login_name'] = $("#login-name").val();
+    options['login_passwd'] = $("#login-passwd").val();
+    options['drink_size'] = $("#option-drink-size").val();
+    options['taster_size'] = $("#option-taster-size").val();
+    options['test_dispense_ml'] = $("#option-test-dispense-size").val();
+    options['show_taster'] = $("#option-show-taster").prop("checked") ? 1 : 0;
+    options['show_size'] = $("#option-show-drink-size").prop("checked") ? 1 : 0;
+    options['show_strength'] = $("#option-show-strength").prop("checked") ? 1 : 0;
+    options['strength_steps'] = $("#option-strength-steps").val();
 
     $.ajax({
-            url: "/ws/drink/" + drink['id'] + "/save",
+            url: "/ws/options",
             type: "POST",
-            data : JSON.stringify({'drink' : drink}),
+            data : JSON.stringify({'options' : options}),
             dataType : "json",
             contentType: "application/json; charset=utf-8",
             success: function(json)
             {
-                set_message(drink['name'] + " has been saved.");
-                update_drink_list(drink['id'], json['id'], drink['name']);
+                set_message("The options have been saved");
             },
             error: function(xhr, txtStatus, errorThrown)
             {
-                set_message("Failed to save drink. Status: " + xhr.status);
+                set_message("Failed to save options. Status: " + xhr.status);
             }
     });
 }
