@@ -46,7 +46,6 @@
             </div>
         {% endfor %}
         <div>
-            {{ form.cancel(class="btn btn-large") }}
             {{ form.save(class="btn btn-large btn-primary") }}
         </div>
      </form>
