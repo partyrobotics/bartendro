@@ -42,8 +42,7 @@
                 {% endif %}
                 {{ form["dispenser%s" % i](class="form select-field") }}
                 <a class="btn btn-large" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
-                <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ calibrate_ml }}ml</a>
-                {{ form["actual%s" % i](class="edit-field") }}
+                <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
             </div>
         {% endfor %}
         <div>
@@ -86,12 +85,12 @@ function test_dispense(disp)
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
-                $("#test" + disp).text('dispense {{ calibrate_ml }}ml');
+                $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                 $("#test" + disp).toggleClass('disabled');
             },
             error: function(xhr, txtStatus, errorThrown)
             {
-                 $("#test" + disp).text('dispense {{ calibrate_ml }}ml');
+                 $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                  $("#test" + disp).toggleClass('disabled');
                  alert("Failed test dispense.");
             }

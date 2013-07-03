@@ -26,10 +26,11 @@ def ws_dispenser_off(disp):
 
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
-    app.driver.dispense_ticks(disp - 1, CALIBRATION_TICKS)
-    while app.driver.is_dispensing(disp - 1):
+    app.driver.dispense_ticks(disp - 1, app.options.test_dispense_ml)
+    while True:
+        (is_dispensing, over_current) = app.driver.is_dispensing(disp - 1)
+        if not is_dispensing: break
 	sleep(.1)
-    t, ticks = app.driver.get_dispense_stats(disp - 1)
     return "ok\n"
 
 @app.route('/ws/clean')
