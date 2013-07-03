@@ -46,7 +46,7 @@
                 </div>
             {% endif %}
 
-            {% if options.show_strength %}
+            {% if options.show_strength and can_change_strength %}
                 <div class="dispense-stack-element">
                   <table>
                   <tr>

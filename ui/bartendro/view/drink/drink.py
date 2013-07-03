@@ -50,14 +50,13 @@ def drink(id):
                                title=drink.name.name,
                                is_custom=0,
                                show_sweet_tart=show_sweet_tart,
-                               show_sobriety=show_sobriety)
+                               show_sobriety=show_sobriety,
+                               can_change_strength=show_strength)
 
     dispensers = db.session.query(Dispenser).all()
     disp_boozes = {}
     for dispenser in dispensers:
         disp_boozes[dispenser.booze_id] = 1
-
-    print disp_boozes
 
     booze_group = db.session.query(BoozeGroup) \
                           .join(DrinkBooze, DrinkBooze.booze_id == BoozeGroup.abstract_booze_id) \
@@ -67,7 +66,6 @@ def drink(id):
 
     filtered = []
     for bgb in booze_group.booze_group_boozes:
-        print booze
         try:
             dummy = disp_boozes[bgb.booze_id]
             filtered.append(bgb)
@@ -83,7 +81,8 @@ def drink(id):
                            custom_drink=drink.custom_drink[0],
                            booze_group=booze_group,
                            show_sweet_tart=show_sweet_tart,
-                           show_sobriety=show_sobriety)
+                           show_sobriety=show_sobriety,
+                           can_change_strength=show_strength)
 
 @app.route('/drink/sobriety')
 def drink_sobriety():
