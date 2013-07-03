@@ -101,6 +101,7 @@ function reset()
             url: "/ws/reset" ,
             success: function(html)
             {
+                window.location.reload();
             }
     });
 }
