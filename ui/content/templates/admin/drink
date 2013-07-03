@@ -23,14 +23,6 @@
                     <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
                 {% endif %}
 
-                <div>
-                    {{ form.sugg_size.label }}:
-                    {{ form.sugg_size(class="form-element") }}
-                </div>
-                {% if form.sugg_size.errors %}
-                    <div class="errors">{% for error in form.sugg_size.errors %}<li>{{ error }}</li>{% endfor %}</div>
-                {% endif %}
-
                 <div style="padding-bottom: 20px">
                     {{ form.popular(class="checkbox") }}
                     {{ form.popular.label }}
