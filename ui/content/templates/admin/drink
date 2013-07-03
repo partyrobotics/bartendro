@@ -59,7 +59,7 @@
                 {{ form.id() }}
                 <div>
                     <a class="btn btn-large" onclick="add_booze()">add booze</a>
-                    {{ form.cancel(class="btn btn-large") }}
+                    <a class="btn btn-large" onclick="cancel()">cancel</a>
                     {{ form.save(class="btn btn-large btn-primary") }}
                 </div>
             </form>
@@ -99,5 +99,10 @@ function available(state)
 {
     $.ajax({ url: "/ws/drink/0/available/" + state });
 }
+function cancel()
+{
+    window.location.reload();
+}
+
 </script>
 {% endblock %}
