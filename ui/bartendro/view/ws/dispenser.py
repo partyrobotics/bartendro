@@ -6,7 +6,7 @@ from flask.ext.login import current_user
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
-from bartendro.mixer import CALIBRATION_TICKS
+from bartendro.mixer import TICKS_PER_ML
 
 @app.route('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(disp):
@@ -26,7 +26,7 @@ def ws_dispenser_off(disp):
 
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
-    app.driver.dispense_ticks(disp - 1, app.options.test_dispense_ml)
+    app.driver.dispense_ticks(disp - 1, app.options.test_dispense_ml * TICKS_PER_ML)
     while True:
         (is_dispensing, over_current) = app.driver.is_dispensing(disp - 1)
         if not is_dispensing: break
