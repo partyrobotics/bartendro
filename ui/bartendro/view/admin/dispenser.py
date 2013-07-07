@@ -27,10 +27,10 @@ def dispenser():
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
     states = [dispenser.out for dispenser in dispensers]
-    print states 
 
     kwargs = {}
     fields = []
+    # TODO: Use the actual field for liquid out sensor calibration later
     for i in xrange(1, 17):
         dis = "dispenser%d" % i
         actual = "actual%d" % i
@@ -50,6 +50,7 @@ def dispenser():
                            form=form, count=count, 
                            fields=fields, 
                            saved=saved,
+                           options=app.options,
                            states=states)
 
 @app.route('/admin/save', methods=['POST'])
@@ -64,7 +65,7 @@ def save():
         for dispenser in dispensers:
             try:
                 dispenser.booze_id = request.form['dispenser%d' % dispenser.id]
-                dispenser.actual = request.form['actual%d' % dispenser.id]
+                #dispenser.actual = request.form['actual%d' % dispenser.id]
             except KeyError:
                 continue
         db.session.commit()

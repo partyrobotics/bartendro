@@ -12,7 +12,8 @@ import pack7
 import dispenser_select
 from bartendro.errors import SerialIOError
 
-BAUD_RATE = 9600
+BAUD_RATE       = 9600
+DEFAULT_TIMEOUT = 2 # in seconds
 
 MAX_DISPENSERS = 15
 SHOT_TICKS     = 20
@@ -111,6 +112,9 @@ class RouterDriver(object):
     def count(self):
         return self.num_dispensers
 
+    def set_timeout(self, timeout):
+        self.ser.timeout = timeout
+
     def open(self):
         '''Open the serial connection to the router'''
 
@@ -170,7 +174,7 @@ class RouterDriver(object):
                     break
 
         self.select(0)
-        self.ser.timeout = 2
+        self.set_timeout(DEFAULT_TIMEOUT)
         self.ser.write(chr(255));
 
         duplicate_ids = [x for x, y in collections.Counter(self.dispenser_ids).items() if y > 1]
@@ -431,12 +435,24 @@ class RouterDriver(object):
         return self.send_packet8(0, PACKET_COMM_TEST, 0)
 
     def is_dispensing(self, dispenser):
+        """
+        Returns a tuple of (dispensing, is_over_current) 
+        """
+
         if self.software_only: return False
-        while True:
-            if self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0):
-                ack, value0, value1 = self.receive_packet8_2()
-                if ack == PACKET_ACK_OK:
-                    return (value0, value1)
+
+        # Sometimes the motors can interfere with communications.
+        # In such cases, assume the motor is still running and 
+        # then assume the caller will again to see if it is still running
+        self.set_timeout(.1)
+        ret = self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0)
+        self.set_timeout(DEFAULT_TIMEOUT)
+        if ret: 
+            ack, value0, value1 = self.receive_packet8_2()
+            if ack == PACKET_ACK_OK:
+                return (value0, value1)
+            else:
+                return (True, False)
 
     def update_liquid_levels(self):
         if self.software_only: return True

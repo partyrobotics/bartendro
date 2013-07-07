@@ -32,6 +32,7 @@ class Drink(db.Model):
         self.size = size
         self.popular = popular
         self.available = available
+        self.sugg_size = 0
         db.session.add(self)
     
     def process_ingredients(self):

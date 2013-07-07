@@ -40,6 +40,33 @@ to each of the dispensers. This SYNC signal is used to synchronize LED animation
 stored in the dispensers. The dispenser changes the color of the LEDs based on the stored
 pattern periodically based on the SYNC signal.
 
+Accuracy considerations
+=======================
+
+Pumping speed and accuracy are sometimes in conflict. 
+
+For instance, if you are dispensing 10ml via the dispense ticks method at full speed (speed 255), 
+you are likely to get about 2ml more output that you asked for. The reason for this is that the
+motor requires more time to spin down from full speed once the desired number of ticks is reached.
+
+Rather than forcing one method on all of our users, we ask you to consider the proper handling
+of this quirk of our dispensers. We suggest the following methods:
+
+1. The ostrich solution: If you care about dispensing larger volumes and being off by 2ml is not a 
+problem, then don't worry about it.
+
+2. The sloppy method: Dispense 2ml less at full speed than you actually plan to dispense. This should
+work out ok, but its... sloppy.
+
+3. The slow, but sure method: Reduce the speed to half speed. The "overpour" will be negligible and your
+output will be correct, but slower.
+
+4. The corporate american way: Dispense your desired amount at full speed, less 10ml. For the last 10ml,
+dispense at half speed. This is how the oil companies ensure they don't give you one cent of gas too much. :)
+
+IMPORTANT NOTE: The above instructions assume that you provide the pump motor 24V. If you provide
+less voltage your results may differ and you should test the results accordingly.
+
 Communicating with a dispenser
 ==============================
 

@@ -60,9 +60,6 @@ def admin_drink_edit(id):
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
     drink = Drink.query.filter_by(id=int(id)).first()
 
-    # convert size to fl oz
-    drink.sugg_size = drink.sugg_size / constant.ML_PER_FL_OZ
-
     kwargs = {}
     fields = []
     null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
@@ -112,7 +109,6 @@ def admin_drink_save():
 
         drink.name.name = form.data['drink_name']
         drink.desc = form.data['desc']
-        drink.sugg_size = int(form.data['sugg_size'] * constant.ML_PER_FL_OZ);
         drink.popular = form.data['popular']
         drink.available = form.data['available']
 
