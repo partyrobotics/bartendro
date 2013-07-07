@@ -439,7 +439,7 @@ class RouterDriver(object):
         Returns a tuple of (dispensing, is_over_current) 
         """
 
-        if self.software_only: return False
+        if self.software_only: return (True, False)
 
         # Sometimes the motors can interfere with communications.
         # In such cases, assume the motor is still running and 
@@ -451,8 +451,7 @@ class RouterDriver(object):
             ack, value0, value1 = self.receive_packet8_2()
             if ack == PACKET_ACK_OK:
                 return (value0, value1)
-            else:
-                return (True, False)
+        return (True, False)
 
     def update_liquid_levels(self):
         if self.software_only: return True
