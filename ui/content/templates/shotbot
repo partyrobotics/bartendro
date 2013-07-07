@@ -3,9 +3,9 @@
 <div style="text-align: center; padding-bottom: 10px;">
 <h1>ShotBot is dispensing: {{ booze }}</h1>
 <button class="btn btn-warning button-border shotbot-button" onclick="make_drink()">I want a shot!</button>
+</div>
 <div>
 <a href="/admin" style="color: #Fafafa">admin</a>
-</div>
 </div>
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
