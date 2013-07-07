@@ -185,11 +185,13 @@ function update_volumes()
         {% if options.metric %}
             $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
         {% else %}
-            $("#booze" + ing[i].id).text((ing[i].volume * 30).toFixed(1));
+            $("#booze" + ing[i].id).text((ing[i].volume / 30).toFixed(1));
         {% endif %}
     } 
     {% if options.metric %}
         $("#size-text").text(drink_size + " " + unit_name);
+    {% else %}
+        $("#size-text").text((drink_size / 30) + " " + unit_name);
     {% endif %}
 }
 
