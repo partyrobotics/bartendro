@@ -108,13 +108,8 @@
 
 var taster_size = 30;
 var max_drink_size_multiplier = 2;
-{% if options.metric %}
-    var size_increment = 30;
-    var drink_size = {{ options.drink_size }};
-{% else %}
-    var size_increment = 1;
-    var drink_size = {{ options.drink_size / 30 }};
-{% endif %}
+var size_increment = 30;
+var drink_size = {{ options.drink_size }};
 var max_drink_size = drink_size * max_drink_size_multiplier;
 
 var drink_strength = 0;
@@ -185,14 +180,17 @@ function update_volumes()
     {
         ing[i].volume = drink_size * ing[i].newparts / total;
         ing[i].taster_volume = taster_size * ing[i].newparts / total;
-        if ({{ options.metric }})
-            $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
-        else
-            $("#booze" + ing[i].id).text(ing[i].volume.toFixed(1));
         $("#booze_type" + ing[i].id).text(ing[i].type);
         $("#booze_unit" + ing[i].id).text(unit_name_short);
+        {% if options.metric %}
+            $("#booze" + ing[i].id).text(ing[i].volume.toFixed(0));
+        {% else %}
+            $("#booze" + ing[i].id).text((ing[i].volume * 30).toFixed(1));
+        {% endif %}
     } 
-    $("#size-text").text(drink_size + " " + unit_name);
+    {% if options.metric %}
+        $("#size-text").text(drink_size + " " + unit_name);
+    {% endif %}
 }
 
 function change_alcohol()
@@ -313,9 +311,6 @@ function make_drink(drink, is_taster)
                 args += "&";
             args += "booze" + ing[i].id + "=";
             volume = is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
-            {% if not options.metric %}
-                volume *= 30;
-            {% endif %}
             args += volume;
         }
         lb = '<div class="lb-box"><h1>';
