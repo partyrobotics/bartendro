@@ -26,6 +26,9 @@ DISPENSER_WARNING = 2
 CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
 CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
 
+class BartendroBusyError(Exception):
+    pass
+
 class Mixer(object):
     '''This is where the magic happens!'''
 
@@ -44,6 +47,12 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.state = Mixer.MixerState.INIT
         self.check_liquid_levels()
+
+    def lock_bartendro(self):
+        return app.lock.lock_bartendro()
+
+    def unlock_bartendro(self):
+        return app.lock.unlock_bartendro()
 
     def get_error(self):
         return self.err
@@ -220,6 +229,9 @@ class Mixer(object):
                 return False
             recipe.append(r)
         
+        locked = self.lock_bartendro()
+        if not locked: raise BartendroBusyError
+    
         app.log.info("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
         self.led_dispense()
         dur = 0
@@ -250,6 +262,9 @@ class Mixer(object):
                 if is_disp: 
                     done = False
                     break
+
+                sleep(.05)
+
             if done: break
 
         if current_sense: 
@@ -264,10 +279,13 @@ class Mixer(object):
         db.session.commit()
 
         if app.options.use_liquid_out_sensors and not self.check_liquid_levels():
+            self.unlock_bartendro()
             self.leds_panic()
             return False
 
         FlashGreenLeds(self).start()
+        self.unlock_bartendro()
+
         return True 
 
     def clean(self):

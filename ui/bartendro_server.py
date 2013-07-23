@@ -5,9 +5,40 @@ import logging
 import os
 import memcache
 import sys
+import uwsgi
 from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
+
+class BartendroLock(object):
+
+    def lock_bartendro(self):
+        """Call this function before making a drink or doing anything that where two users' action may conflict.
+           This function will return True if the lock was granted, of False is someone else has already locked 
+           Bartendro."""
+
+        uwsgi.lock()
+        is_locked = uwsgi.sharedarea_readbyte(0)
+        if is_locked:
+           uwsgi.unlock()
+           return False
+        uwsgi.sharedarea_writebyte(0, 1)
+        uwsgi.unlock()
+
+        return True
+
+    def unlock_bartendro(self):
+        """Call this function when you've previously locked bartendro and now you want to unlock it."""
+
+        uwsgi.lock()
+        is_locked = uwsgi.sharedarea_readbyte(0)
+        if not is_locked:
+           uwsgi.unlock()
+           return False
+        uwsgi.sharedarea_writebyte(0, 0)
+        uwsgi.unlock()
+
+        return True
 
 def print_software_only_notice():
     print """If you're trying to run this code without having Bartendro hardware,
@@ -32,7 +63,10 @@ app.options = config
 if len(sys.argv) > 1 and sys.argv[1] == "--debug":
     debug = True
 else:
-    debug = False
+    debug = True
+
+# For now, leave debug on
+debug = True
 
 try: 
     app.software_only = int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
@@ -48,6 +82,8 @@ if not os.path.exists("bartendro.db"):
 # Create a memcache connection and flush everything
 app.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 app.mc.flush_all()
+
+app.lock = BartendroLock()
 
 app.log = logging.getLogger('bartendro')
 try:
@@ -76,4 +112,6 @@ if app.software_only:
 app.log.info("Bartendro starting")
 
 app.debug = debug
-app.run(host='127.0.0.1', port=8080)
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080)

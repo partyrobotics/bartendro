@@ -57,6 +57,15 @@ PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
 
+def crc16_update(crc, a):
+    crc ^= a
+    for i in xrange(0, 8):
+        if crc & 1:
+            crc = (crc >> 1) ^ 0xA001
+        else:
+            crc = (crc >> 1)
+    return crc
+
 class RouterDriver(object):
     '''This object interacts with the bartendro router controller.'''
 
@@ -81,33 +90,13 @@ class RouterDriver(object):
         else:
             self.num_dispensers = 0 
 
-    def log(self, msg):
-        return
-        if self.software_only: return
-        try:
-            t = localtime()
-            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
-            self.cl.flush()
-        except IOError:
-            pass
-
-    def sync(self, state):
-        if self.software_only: return
-        self.dispenser_select.sync(state)
-
     def reset(self):
+        """Reset the hardware. Do this if there is shit going wrong. All motors will be stopped
+           and reset."""
         if self.software_only: return
+
         self.close()
         self.open()
-
-    def select(self, dispenser):
-        if self.software_only: return True
-
-        # If for broadcast, then ignore this select
-        if dispenser == 255: return
-
-        port = self.dispenser_ports[dispenser]
-        self.dispenser_select.select(port)
 
     def count(self):
         return self.num_dispensers
@@ -173,7 +162,7 @@ class RouterDriver(object):
                 else:
                     break
 
-        self.select(0)
+        self._select(0)
         self.set_timeout(DEFAULT_TIMEOUT)
         self.ser.write(chr(255));
 
@@ -202,26 +191,186 @@ class RouterDriver(object):
         self.status = None
         self.dispenser_select = None
 
-    def crc16_update(self, crc, a):
-        crc ^= a
-        for i in xrange(0, 8):
-            if crc & 1:
-                crc = (crc >> 1) ^ 0xA001
-            else:
-                crc = (crc >> 1)
+    def log(self, msg):
+        return
+        if self.software_only: return
+        try:
+            t = localtime()
+            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+            self.cl.flush()
+        except IOError:
+            pass
 
-        return crc
+    def make_shot(self):
+        if self.software_only: return True
+        self._send_packet32(0, PACKET_TICK_DISPENSE, 90)
+        return True
 
-    def send_packet(self, dest, packet):
+    def ping(self, dispenser):
+        if self.software_only: return True
+        return self._send_packet32(dispenser, PACKET_PING, 0)
+
+    def start(self, dispenser):
+        if self.software_only: return True
+        return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
+
+    def stop(self, dispenser):
+        if self.software_only: return True
+        return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
+
+    def dispense_time(self, dispenser, duration):
+        if self.software_only: return True
+        return True
+
+    def dispense_ticks(self, dispenser, ticks, speed=255):
+        if self.software_only: return True
+        return self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+
+    def led_off(self):
+        if self.software_only: return True
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_OFF, 0)
+        return True
+
+    def led_idle(self):
+        if self.software_only: return True
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_IDLE, 0)
+        sleep(.01)
+        self._sync(1)
+        return True
+
+    def led_dispense(self):
+        if self.software_only: return True
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_DISPENSE, 0)
+        sleep(.01)
+        self._sync(1)
+        return True
+
+    def led_complete(self):
+        if self.software_only: return True
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
+        sleep(.01)
+        self._sync(1)
+        return True
+
+    def led_clean(self):
+        if self.software_only: return True
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
+        sleep(.01)
+        self._sync(1)
+        return True
+
+    def comm_test(self):
+        self._sync(0)
+        return self._send_packet8(0, PACKET_COMM_TEST, 0)
+
+    def is_dispensing(self, dispenser):
+        """
+        Returns a tuple of (dispensing, is_over_current) 
+        """
+
+        if self.software_only: return (True, False)
+
+        # Sometimes the motors can interfere with communications.
+        # In such cases, assume the motor is still running and 
+        # then assume the caller will again to see if it is still running
+        self.set_timeout(.1)
+        ret = self._send_packet8(dispenser, PACKET_IS_DISPENSING, 0)
+        self.set_timeout(DEFAULT_TIMEOUT)
+        if ret: 
+            ack, value0, value1 = self._receive_packet8_2()
+            if ack == PACKET_ACK_OK:
+                return (value0, value1)
+        return (True, False)
+
+    def update_liquid_levels(self):
+        if self.software_only: return True
+        self._send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
+
+    def get_liquid_level(self, dispenser):
+        if self.software_only: return 100
+        while True:
+            if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
+                ack, value, dummy = self._receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    return value
+
+    def get_liquid_level_thresholds(self, dispenser):
+        if self.software_only: return True
+        while True:
+            if self._send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
+                ack, low, out = self._receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    return (low, out)
+                
+    def set_liquid_level_thresholds(self, dispenser, low, out):
+        if self.software_only: return True
+        self._send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
+
+    def set_status_color(self, red, green, blue):
+        if self.software_only: return
+        if not self.status: return
+        self.status.set_color(red, green, blue)
+
+    def get_saved_tick_count(self, dispenser):
+        if self.software_only: return True
+        while True:
+            if self._send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
+                ack, ticks, dummy = self._receive_packet16()
+                if ack == PACKET_ACK_OK:
+                    return ticks
+
+    def flush_saved_tick_count(self):
+        if self.software_only: return True
+        self._send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
+
+    def pattern_define(self, dispenser, pattern):
+        if self.software_only: return True
+        self._send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
+
+    def pattern_add_segment(self, dispenser, red, green, blue, steps):
+        if self.software_only: return True
+        self._send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
+
+    def pattern_finish(self, dispenser):
+        if self.software_only: return True
+        self._send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
+
+    # -----------------------------------------------
+    # Past this point we only have private functions. 
+    # -----------------------------------------------
+
+    def _sync(self, state):
+        """Turn on/off the sync signal from the router. This signal is used to syncronize the LEDs"""
+
+        if self.software_only: return
+        self.dispenser_select.sync(state)
+
+    def _select(self, dispenser):
+        """Private function to select a dispenser."""
+
         if self.software_only: return True
 
-        self.select(dest);
+        # If for broadcast, then ignore this select
+        if dispenser == 255: return
+
+        port = self.dispenser_ports[dispenser]
+        self.dispenser_select.select(port)
+
+    def _send_packet(self, dest, packet):
+        if self.software_only: return True
+
+        self._select(dest);
         self.ser.flushInput()
         self.ser.flushOutput()
 
         crc = 0
         for ch in packet:
-            crc = self.crc16_update(crc, ord(ch))
+            crc = crc16_update(crc, ord(ch))
 
         encoded = pack7.pack_7bit(packet + pack("<H", crc))
         if len(encoded) != RAW_PACKET_SIZE:
@@ -266,32 +415,32 @@ class RouterDriver(object):
         print "  * Invalid ACK code %d" % ord(ch)
         return False
 
-    def send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
+    def _send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
 
-        return self.send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
+        return self._send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
 
-    def send_packet16(self, dest, type, val0, val1):
+    def _send_packet16(self, dest, type, val0, val1):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
-        return self.send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
+        return self._send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
 
-    def send_packet32(self, dest, type, val):
+    def _send_packet32(self, dest, type, val):
         if dest != DEST_BROADCAST: 
             dispenser_id = self.dispenser_ids[dest]
             if dispenser_id == 255: return False
         else:
             dispenser_id = dest
-        return self.send_packet(dest, pack("<BBI", dispenser_id, type, val))
+        return self._send_packet(dest, pack("<BBI", dispenser_id, type, val))
 
-    def receive_packet(self):
+    def _receive_packet(self):
         if self.software_only: return True
 
         header = 0
@@ -327,7 +476,7 @@ class RouterDriver(object):
 
                 crc = 0
                 for ch in packet:
-                    crc = self.crc16_update(crc, ord(ch))
+                    crc = crc16_update(crc, ord(ch))
 
                 if received_crc != crc:
                     print "CRC fail"
@@ -343,196 +492,26 @@ class RouterDriver(object):
         else:
             return (ack, "")
 
-    def receive_packet8(self):
-        ack, packet = self.receive_packet()
+    def _receive_packet8(self):
+        ack, packet = self._receive_packet()
         if ack == PACKET_ACK_OK:
             data = unpack("BBBBBB", packet)
             return (ack, data[2])
         else:
             return (ack, 0)
 
-    def receive_packet8_2(self):
-        ack, packet = self.receive_packet()
+    def _receive_packet8_2(self):
+        ack, packet = self._receive_packet()
         if ack == PACKET_ACK_OK:
             data = unpack("BBBBBB", packet)
             return (ack, data[2], data[3])
         else:
             return (ack, 0)
 
-    def receive_packet16(self):
-        ack, packet = self.receive_packet()
+    def _receive_packet16(self):
+        ack, packet = self._receive_packet()
         if ack == PACKET_ACK_OK:
             data = unpack("<BBHH", packet)
             return (ack, data[2], data[3])
         else:
             return (ack, 0, 0)
-
-    def make_shot(self):
-        if self.software_only: return True
-        self.send_packet32(0, PACKET_TICK_DISPENSE, 90)
-        return True
-
-    def ping(self, dispenser):
-        if self.software_only: return True
-        return self.send_packet32(dispenser, PACKET_PING, 0)
-
-    def start(self, dispenser):
-        if self.software_only: return True
-        return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
-
-    def stop(self, dispenser):
-        if self.software_only: return True
-        return self.send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
-
-    def dispense_time(self, dispenser, duration):
-        if self.software_only: return True
-        return True
-
-    def dispense_ticks(self, dispenser, ticks, speed=255):
-        if self.software_only: return True
-        return self.send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
-
-    def led_off(self):
-        if self.software_only: return True
-        self.sync(0)
-        self.send_packet8(DEST_BROADCAST, PACKET_LED_OFF, 0)
-        return True
-
-    def led_idle(self):
-        if self.software_only: return True
-        self.sync(0)
-        self.send_packet8(DEST_BROADCAST, PACKET_LED_IDLE, 0)
-        sleep(.01)
-        self.sync(1)
-        return True
-
-    def led_dispense(self):
-        if self.software_only: return True
-        self.sync(0)
-        self.send_packet8(DEST_BROADCAST, PACKET_LED_DISPENSE, 0)
-        sleep(.01)
-        self.sync(1)
-        return True
-
-    def led_complete(self):
-        if self.software_only: return True
-        self.sync(0)
-        self.send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
-        sleep(.01)
-        self.sync(1)
-        return True
-
-    def led_clean(self):
-        if self.software_only: return True
-        self.sync(0)
-        self.send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
-        sleep(.01)
-        self.sync(1)
-        return True
-
-    def comm_test(self):
-        self.sync(0)
-        return self.send_packet8(0, PACKET_COMM_TEST, 0)
-
-    def is_dispensing(self, dispenser):
-        """
-        Returns a tuple of (dispensing, is_over_current) 
-        """
-
-        if self.software_only: return (True, False)
-
-        # Sometimes the motors can interfere with communications.
-        # In such cases, assume the motor is still running and 
-        # then assume the caller will again to see if it is still running
-        self.set_timeout(.1)
-        ret = self.send_packet8(dispenser, PACKET_IS_DISPENSING, 0)
-        self.set_timeout(DEFAULT_TIMEOUT)
-        if ret: 
-            ack, value0, value1 = self.receive_packet8_2()
-            if ack == PACKET_ACK_OK:
-                return (value0, value1)
-        return (True, False)
-
-    def update_liquid_levels(self):
-        if self.software_only: return True
-        self.send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
-
-    def get_liquid_level(self, dispenser):
-        if self.software_only: return 100
-        while True:
-            if self.send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
-                ack, value, dummy = self.receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return value
-
-    def get_liquid_level_thresholds(self, dispenser):
-        if self.software_only: return True
-        while True:
-            if self.send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
-                ack, low, out = self.receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return (low, out)
-                
-    def set_liquid_level_thresholds(self, dispenser, low, out):
-        if self.software_only: return True
-        self.send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
-
-    def set_status_color(self, red, green, blue):
-        if self.software_only: return
-        if not self.status: return
-        self.status.set_color(red, green, blue)
-
-    def get_saved_tick_count(self, dispenser):
-        if self.software_only: return True
-        while True:
-            if self.send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
-                ack, ticks, dummy = self.receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return ticks
-
-    def flush_saved_tick_count(self):
-        if self.software_only: return True
-        self.send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
-
-    def pattern_define(self, dispenser, pattern):
-        if self.software_only: return True
-        self.send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
-
-    def pattern_add_segment(self, dispenser, red, green, blue, steps):
-        if self.software_only: return True
-        self.send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
-
-    def pattern_finish(self, dispenser):
-        if self.software_only: return True
-        self.send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
-
-def ping_test(md):
-    while True:
-        disp = 0
-        print "ping %d:" % disp
-        md.ping(disp)
-        sleep(1)
-
-def led_test(md):
-    while True:
-        print "idle"
-        md.led_idle()
-        sleep(5)
-        print "dispense"
-        md.led_dispense()
-        sleep(5)
-        print "complete"
-        md.led_complete()
-        sleep(5)
-
-def comm_test(md):
-    print "put disp 0 into comm test"
-    md.select(0)
-    while not md.comm_test():
-        sleep(1)
-
-    print "put disp 1 into comm test"
-    md.select(1)
-    while not md.comm_test():
-        sleep(1)
-

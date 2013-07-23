@@ -331,6 +331,15 @@ function make_drink(drink, is_taster)
                         $.modal.close();
                     else
                         window.location = "/";
+                },
+                error: function(xmlhttp, textStatus)
+                {
+                    if (xmlhttp.status == 503)
+                        msg = "Dude, hold your horses!";
+                    else
+                        msg = "Received error " + xmlhttp.status + " from server.";
+                    $.modal.close();
+                    alert(msg);
                 }
         });
 }
