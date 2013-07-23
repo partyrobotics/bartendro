@@ -334,12 +334,14 @@ function make_drink(drink, is_taster)
                 },
                 error: function(xmlhttp, textStatus)
                 {
-                    if (xmlhttp.status == 503)
-                        msg = "Dude, hold your horses!";
-                    else
-                        msg = "Received error " + xmlhttp.status + " from server.";
                     $.modal.close();
-                    alert(msg);
+                    lb = '<div class="lb-box">';
+                    if (xmlhttp.status == 503)
+                        lb += '<h1>Bartendro is Busy!</h1><div class="lb-error">Please wait a moment for Bartendro to become free!'
+                    else
+                        lb += '<h1>Bartendro Error:</h1><div class="lb-error">' + xmlhttp.status;
+                    lb += '</div></div>';
+                    $.modal(lb);
                 }
         });
 }
