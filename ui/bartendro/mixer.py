@@ -203,6 +203,18 @@ class Mixer(object):
         self.mc.set("available_drink_list", can_make)
         return can_make
 
+    def test_dispense(self, disp):
+        locked = self.lock_bartendro()
+        if not locked: raise BartendroBusyError
+
+        self.driver.dispense_ticks(disp, app.options.test_dispense_ml * TICKS_PER_ML)
+        while True:
+            (is_dispensing, over_current) = app.driver.is_dispensing(disp)
+            if not is_dispensing: break
+            sleep(.1)
+
+        self.unlock_bartendro()
+
     def make_drink(self, id, recipe_arg):
 
         drink = Drink.query.filter_by(id=int(id)).first()

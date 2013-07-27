@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from time import sleep
-from bartendro import app, db
+from werkzeug.exceptions import ServiceUnavailable
+from bartendro import app, db, mixer
 from flask import Flask, request
 from flask.ext.login import current_user
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
-from bartendro.mixer import TICKS_PER_ML
 
 @app.route('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(disp):
@@ -26,11 +26,10 @@ def ws_dispenser_off(disp):
 
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
-    app.driver.dispense_ticks(disp - 1, app.options.test_dispense_ml * TICKS_PER_ML)
-    while True:
-        (is_dispensing, over_current) = app.driver.is_dispensing(disp - 1)
-        if not is_dispensing: break
-	sleep(.1)
+    try:
+        app.mixer.test_dispense(disp - 1)
+    except mixer.BartendroBusyError:
+        raise ServiceUnavailable("busy")
     return "ok\n"
 
 @app.route('/ws/clean')

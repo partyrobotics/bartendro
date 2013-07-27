@@ -87,11 +87,14 @@ function test_dispense(disp)
                 $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                 $("#test" + disp).toggleClass('disabled');
             },
-            error: function(xhr, txtStatus, errorThrown)
+            error: function(xmlhttp, txtStatus, errorThrown)
             {
                  $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                  $("#test" + disp).toggleClass('disabled');
-                 alert("Failed test dispense.");
+                 if (xmlhttp.status == 503)
+                    alert("Already testing a dispense. Chill!");
+                 else
+                    alert("Failed to test dispensers. Server status: " + xmlhttp.status);
             }
     });
 }
