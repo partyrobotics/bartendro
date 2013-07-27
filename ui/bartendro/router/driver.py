@@ -506,7 +506,7 @@ class RouterDriver(object):
             data = unpack("BBBBBB", packet)
             return (ack, data[2], data[3])
         else:
-            return (ack, 0)
+            return (ack, 0, 0)
 
     def _receive_packet16(self):
         ack, packet = self._receive_packet()
