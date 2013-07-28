@@ -327,6 +327,14 @@ label {
     vertical-align: top !important;
 }
 
+.ll-dispenser-number {
+    font-size: 13pt;
+}
+
+.ll-column-spacer {
+    margin-right: 40px;
+}
+
 .login-box {
     border-radius: 7px;
     border-style: solid;
