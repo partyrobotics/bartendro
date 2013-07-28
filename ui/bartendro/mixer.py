@@ -79,7 +79,7 @@ class Mixer(object):
         return ok
 
     def check_liquid_levels(self):
-        if not app.options.use_liquid_out_sensors: 
+        if not app.options.use_liquid_level_sensors: 
             self.driver.set_status_color(0, 1, 0)
             state = Mixer.MixerState.READY
             return
@@ -126,7 +126,7 @@ class Mixer(object):
         return new_state
 
     def liquid_level_test(self, dispenser, threshold):
-        if not app.options.use_liquid_out_sensors: return
+        if not app.options.use_liquid_level_sensors: return
 
         print "Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold)
 
@@ -168,7 +168,7 @@ class Mixer(object):
                                                          FROM booze_group_booze bgb, dispenser 
                                                         WHERE bgb.booze_id = dispenser.booze_id)""")
 
-        if app.options.use_liquid_out_sensors: 
+        if app.options.use_liquid_level_sensors: 
             sql = "SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d"
         else:
             sql = "SELECT booze_id FROM dispenser ORDER BY id LIMIT :d"
@@ -290,7 +290,7 @@ class Mixer(object):
         db.session.add(dlog)
         db.session.commit()
 
-        if app.options.use_liquid_out_sensors and not self.check_liquid_levels():
+        if app.options.use_liquid_level_sensors and not self.check_liquid_levels():
             self.unlock_bartendro()
             self.leds_panic()
             return False

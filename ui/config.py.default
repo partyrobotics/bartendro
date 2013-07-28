@@ -1,8 +1,8 @@
 # General bartendro options
-use_liquid_out_sensors = False
-must_login_to_dispense = False
-login_name             = "bartendro"
-login_passwd           = "boozemeup"
+use_liquid_level_sensors = False
+must_login_to_dispense   = False
+login_name               = "bartendro"
+login_passwd             = "boozemeup"
 
 # Drink page options
 metric         = 0

@@ -7,6 +7,6 @@ from bartendro.model.version import DatabaseVersion
 
 @app.route('/admin/options')
 @login_required
-def report_index():
+def admin_options():
     ver = DatabaseVersion.query.one()
     return render_template("admin/options", options=app.options, title="Options", schema = ver.schema)
