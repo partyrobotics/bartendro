@@ -10,8 +10,9 @@ from bartendro.form.liquidout import LiquidOutTestForm
 @app.route('/admin/liquidout')
 @login_required
 def admin_liquidout():
+    count = app.driver.count()
     form = LiquidOutTestForm(request.form)
-    return render_template("admin/liquidout", options=app.options, form=form, title="Liquid out test")
+    return render_template("admin/liquidout", options=app.options, count=count, form=form, title="Liquid out test")
 
 @app.route('/admin/liquidout/test', methods=['POST'])
 @login_required

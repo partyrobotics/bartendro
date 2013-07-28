@@ -321,6 +321,12 @@ label {
     visibility: hidden;
 }
 
+.ll-calibrate-textbox {
+    width: 75px;
+    height: 35px !important;
+    vertical-align: top !important;
+}
+
 .login-box {
     border-radius: 7px;
     border-style: solid;
