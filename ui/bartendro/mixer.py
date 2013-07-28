@@ -203,15 +203,29 @@ class Mixer(object):
         self.mc.set("available_drink_list", can_make)
         return can_make
 
+    def wait_til_finished_dispensing(self, disp):
+        """Check to see if the given dispenser is still dispensing. Returns True when finished. False if over current"""
+        timeout_count = 0
+        while True:
+            (is_dispensing, over_current) = app.driver.is_dispensing(disp)
+            #print "%d, %d" % (is_dispensing, over_current)
+            if over_current: return False
+            if is_dispensing == 0: return True
+
+            # This timeout count is here to counteract Issue #64 -- this can be removed once #64 is fixed
+            if is_dispensing == -1:
+                timeout_count += 1
+                if timeout_count == 3:
+                    break
+
+            sleep(.1)
+
     def test_dispense(self, disp):
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
 
         self.driver.dispense_ticks(disp, app.options.test_dispense_ml * TICKS_PER_ML)
-        while True:
-            (is_dispensing, over_current) = app.driver.is_dispensing(disp)
-            if not is_dispensing: break
-            sleep(.1)
+        self.wait_til_finished_dispensing(disp)
 
         self.unlock_bartendro()
 
@@ -261,23 +275,9 @@ class Mixer(object):
             if r['ms'] > dur: dur = r['ms']
 
         current_sense = False
-        while True:
-            sleep(.1)
-            done = True
-            for disp in active_disp:
-                is_disp, is_cs = self.driver.is_dispensing(disp - 1)
-                if is_cs:
-                    done = True
-                    current_sense = True
-                    break
-
-                if is_disp: 
-                    done = False
-                    break
-
-                sleep(.05)
-
-            if done: break
+        for disp in active_disp:
+            if not self.wait_til_finished_dispensing(disp-1):
+                current_sense = True
 
         if current_sense: 
             print "Current sense detected!"

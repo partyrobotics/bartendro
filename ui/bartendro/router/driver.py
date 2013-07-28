@@ -285,6 +285,8 @@ class RouterDriver(object):
             ack, value0, value1 = self._receive_packet8_2()
             if ack == PACKET_ACK_OK:
                 return (value0, value1)
+            if ack == PACKET_ACK_TIMEOUT:
+                return (-1, -1)
         return (True, False)
 
     def update_liquid_levels(self):
