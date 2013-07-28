@@ -12,7 +12,7 @@ from bartendro.form.booze import BoozeForm
 def admin_booze():
     form = BoozeForm(request.form)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="Booze")
+    return render_template("admin/booze", options=app.options, boozes=boozes, form=form, title="Booze")
 
 @app.route('/admin/booze/edit/<id>')
 @login_required
@@ -21,7 +21,7 @@ def admin_booze_edit(id):
     booze = Booze.query.filter_by(id=int(id)).first()
     form = BoozeForm(obj=booze)
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", booze=booze, boozes=boozes, form=form, title="Booze", saved=saved)
+    return render_template("admin/booze", options=app.options, booze=booze, boozes=boozes, form=form, title="Booze", saved=saved)
 
 @app.route('/admin/booze/save', methods=['POST'])
 @login_required
@@ -48,4 +48,4 @@ def admin_booze_save():
         return redirect('/admin/booze/edit/%d?saved=1' % booze.id)
 
     boozes = Booze.query.order_by(Booze.name)
-    return render_template("admin/booze", boozes=boozes, form=form, title="")
+    return render_template("admin/booze", options=app.options, boozes=boozes, form=form, title="")

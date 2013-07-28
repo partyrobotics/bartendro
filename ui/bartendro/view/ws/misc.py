@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+from werkzeug.exceptions import ServiceUnavailable
 from bartendro import app, db
 from flask import Flask, request
-from werkzeug.exceptions import ServiceUnavailable
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
@@ -21,8 +21,9 @@ def ws_test_chain():
     driver = app.driver
     for disp in xrange(driver.count()):
 	if not driver.ping(disp):
-	    return "Error: Dispenser %d failed ping." % disp
-    return ""
+	    raise ServiceUnavailable("Dispenser %d failed ping." % disp + 1)
+
+    return "ok"
 
 @app.route('/ws/checklevels')
 def ws_check_levels():

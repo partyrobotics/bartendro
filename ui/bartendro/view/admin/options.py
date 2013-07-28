@@ -9,4 +9,4 @@ from bartendro.model.version import DatabaseVersion
 @login_required
 def report_index():
     ver = DatabaseVersion.query.one()
-    return render_template("admin/options", title="Options", schema = ver.schema)
+    return render_template("admin/options", options=app.options, title="Options", schema = ver.schema)

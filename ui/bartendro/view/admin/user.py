@@ -41,7 +41,7 @@ def login():
             flash("Logged in successfully.")
             return redirect(request.args.get("next") or url_for("dispenser"))
         flash("Invalid login.")
-    return render_template("/admin/login", form=form)
+    return render_template("/admin/login", options=app.options, form=form)
 
 @app.route("/admin/logout")
 @login_required

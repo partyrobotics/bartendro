@@ -11,7 +11,7 @@ from bartendro.form.booze import BoozeForm
 @app.route('/admin/report')
 @login_required
 def report_index():
-    return render_template("admin/report", title="Top drinks report")
+    return render_template("admin/report", options=app.options, title="Top drinks report")
 
 @app.route('/admin/report/<begin>/<end>')
 @login_required
@@ -23,7 +23,7 @@ def report_view(begin, end):
             begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d")))
             print begindate
         except ValueError:
-            return render_template("admin/report", error="Invalid begin date")
+            return render_template("admin/report", options=app.options, error="Invalid begin date")
 
     try:
         enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M")))
@@ -32,7 +32,7 @@ def report_view(begin, end):
             enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d")))
             print enddate
         except ValueError:
-            return render_template("admin/report", error="Invalid end date")
+            return render_template("admin/report", options=app.options, error="Invalid end date")
 
     total_number = db.session.query("number")\
                  .from_statement("""SELECT count(*) as number
@@ -59,7 +59,8 @@ def report_view(begin, end):
                                   ORDER BY count(drink_log.drink_id) desc;""")\
                  .params(begin=begindate, end=enddate).all()
 
-    return render_template("admin/report", top_drinks = top_drinks, 
+    return render_template("admin/report", options=app.options,
+                                           top_drinks = top_drinks, 
                                            title="Top drinks report",
                                            total_number=total_number[0],
                                            total_volume=total_volume[0],

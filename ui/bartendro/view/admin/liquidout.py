@@ -11,7 +11,7 @@ from bartendro.form.liquidout import LiquidOutTestForm
 @login_required
 def admin_liquidout():
     form = LiquidOutTestForm(request.form)
-    return render_template("admin/liquidout", form=form, title="Liquid out test")
+    return render_template("admin/liquidout", options=app.options, form=form, title="Liquid out test")
 
 @app.route('/admin/liquidout/test', methods=['POST'])
 @login_required
@@ -23,4 +23,4 @@ def admin_liquidout_save():
     threshold = int(request.form.get("threshold") or '0')
     app.mixer.liquid_level_test(dispenser, threshold)
 
-    return render_template("admin/liquidout", form=form, title="Liquid out test")
+    return render_template("admin/liquidout", options=app.options, form=form, title="Liquid out test")

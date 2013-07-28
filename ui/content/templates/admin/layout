@@ -21,6 +21,7 @@
                 {% if options.use_liquid_out_sensors %}
                    <li><a href="/admin/liquidout">liquid out</a></li>
                 {% endif %}
+                <li><a href="/admin/debug">debug</a></li>
                 <li><a href="/admin/logout">logout</a></li>
             {% endif %}
         </ul>

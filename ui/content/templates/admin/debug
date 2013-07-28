@@ -1,0 +1,37 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row-fluid">	
+        <div class="span2"></div>
+        <div class="span8">	
+             <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
+             <div id="test-response"></div>
+        </div>
+        <div class="span2"></div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript">
+function test_dispensers()
+{
+    $("#test-dispensers").text('testing...');
+    $("#test-dispensers").toggleClass('disabled');
+    $.ajax({
+            url: "/ws/test" ,
+            success: function(html)
+            {
+                $("#test-response").text("All dispensers are happy!");
+                $("#test-dispensers").text('test dispensers');
+                $("#test-dispensers").toggleClass('disabled');
+            },
+            error: function(xmlhttp, txtStatus, errorThrown)
+            {
+                $("#test-response").text(errorTrown);
+                $("#test-dispensers").text('test dispensers');
+                $("#test-dispensers").toggleClass('disabled');
+                alert("Failed to test dispensers.");
+            }
+    });
+}
+</script>
+{% endblock %}

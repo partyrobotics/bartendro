@@ -44,7 +44,7 @@ def admin_drink():
         fields.append((bf, bp, dbi, show))
     form = F(**kwargs)
 
-    return render_template("admin/drink", fields=fields, drinks=drinks, form=form, title="Drinks")
+    return render_template("admin/drink", options=app.options, fields=fields, drinks=drinks, form=form, title="Drinks")
 
 @app.route('/admin/drink/edit/<id>')
 @login_required
@@ -87,7 +87,7 @@ def admin_drink_edit(id):
         form["booze_name_%d" % i].data = "%d" % booze_list[booze.booze_id - 1][0]
     drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
-    return render_template("admin/drink", drinks=drinks, form=form, fields=fields, 
+    return render_template("admin/drink", options=app.options, drinks=drinks, form=form, fields=fields, 
                            title="Drinks", saved=saved)
 
 

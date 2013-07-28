@@ -110,28 +110,6 @@ function reset()
             }
     });
 }
-function test_dispensers()
-{
-    $("#test-dispensers").text('testing...');
-    $("#test-dispensers").toggleClass('disabled');
-    $.ajax({
-            url: "/ws/test" ,
-            success: function(html)
-            {
-                if (html != "")
-                    alert(html);
-
-                $("#test-dispensers").text('test dispensers');
-                $("#test-dispensers").toggleClass('disabled');
-            },
-            error: function(xhr, txtStatus, errorThrown)
-            {
-                $("#test-dispensers").text('test dispensers');
-                $("#test-dispensers").toggleClass('disabled');
-                alert("Failed to test dispensers.");
-            }
-    });
-}
 function check_levels()
 {
     $("#check_levels").text("checking levels...");
