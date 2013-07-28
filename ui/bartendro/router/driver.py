@@ -175,7 +175,7 @@ class RouterDriver(object):
                 for i, d in enumerate(self.dispenser_ids):
                     if d == dup: 
                         if not sent: 
-                            self.send_packet8(i, PACKET_ID_CONFLICT, 0)
+                            self._send_packet8(i, PACKET_ID_CONFLICT, 0)
                             sent = True
                         print "  dispenser %d has id %d" % (i, d)
                         self.dispenser_ids[i] = 255
