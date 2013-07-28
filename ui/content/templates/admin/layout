@@ -18,7 +18,9 @@
                 <li><a href="/admin/drink">drinks</a></li>
                 <li><a href="/admin/booze">booze</a></li>
                 <li><a href="/admin/options">options</a></li>
-                <li><a href="/admin/liquidout">liquid out</a></li>
+                {% if options.use_liquid_out_sensors %}
+                   <li><a href="/admin/liquidout">liquid out</a></li>
+                {% endif %}
                 <li><a href="/admin/logout">logout</a></li>
             {% endif %}
         </ul>

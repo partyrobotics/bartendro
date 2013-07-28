@@ -20,7 +20,9 @@
        <div>
           <a onclick="reset()" class="btn">reset</a>
           <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
-          <a onclick="check_levels()" class="btn">liquid levels</a>
+          {% if options.use_liquid_out_sensors %}
+              <a onclick="check_levels()" class="btn">update liquid levels</a>
+          {% endif %}
           <a onclick="clean()" class="btn btn-danger">clean</a>
        </div>
        <div>
