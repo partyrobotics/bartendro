@@ -9,9 +9,16 @@
 	</div>
     </div>
     <div class="span6">
-        Your database schema version is: {{ schema }}
+        <p>
+        Your database schema version is: {{ schema }}.
+        </p>
+        <p>
+        <a href="/ws/download/bartendro.db" id="database-download">Download your database</a>
+        </p>
+        <p>
+        You should do this periodically and
+        certainly before you upgrade your Bartendro software!
+        </p>
     </div>
 </div>
-<script type="text/javascript">
-</script>
 {% endblock %}

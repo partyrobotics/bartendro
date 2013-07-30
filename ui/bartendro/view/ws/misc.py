@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
+import os
 from werkzeug.exceptions import ServiceUnavailable
-from bartendro import app, db
-from flask import Flask, request
+from bartendro import app, db, STATIC_FOLDER
+from flask import Flask, request, Response
+from flask.ext.login import login_required
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
 
 @app.route('/ws/reset')
+@login_required
 def ws_reset():
     driver = app.driver
     mc = app.mc
@@ -17,6 +20,7 @@ def ws_reset():
     return "ok\n"
 
 @app.route('/ws/test')
+@login_required
 def ws_test_chain():
     driver = app.driver
     for disp in xrange(driver.count()):
@@ -26,6 +30,7 @@ def ws_test_chain():
     return "ok"
 
 @app.route('/ws/checklevels')
+@login_required
 def ws_check_levels():
     mixer = app.mixer
     if not mixer.check_liquid_levels():
@@ -35,3 +40,22 @@ def ws_check_levels():
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
     return "ok\n"
+
+@app.route('/ws/download/bartendro.db')
+@login_required
+def ws_download_db():
+
+    # close the connection to the database to flush anything that might still be in a cache somewhere
+    db.session.bind.dispose()
+
+    # Now read the database into memory
+    try:
+        fh = open(os.path.join(STATIC_FOLDER, "bartendro.db"), "r")
+        db_data = fh.read()
+        fh.close()
+    except IOError, e:
+        raise ServiceUnavailable("Error: downloading database failed: %s" % e.message)
+
+    r = Response(db_data, mimetype='application/x-sqlite')
+    r.set_cookie("fileDownload", "true")
+    return r
