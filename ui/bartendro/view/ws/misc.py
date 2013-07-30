@@ -50,11 +50,11 @@ def ws_download_db():
 
     # Now read the database into memory
     try:
-        fh = open(os.path.join(STATIC_FOLDER, "bartendro.db"), "r")
+        fh = open("bartendro.db", "r")
         db_data = fh.read()
         fh.close()
     except IOError, e:
-        raise ServiceUnavailable("Error: downloading database failed: %s" % e.message)
+        raise ServiceUnavailable("Error: downloading database failed: %s" % e)
 
     r = Response(db_data, mimetype='application/x-sqlite')
     r.set_cookie("fileDownload", "true")
