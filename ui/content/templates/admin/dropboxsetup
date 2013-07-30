@@ -4,17 +4,48 @@
     <div class="span12">
         <h2>{{ title }}</h2>
 
-        <a href="{{ url }}" target="_blank">Go here to authorize Bartendro.</a>
+        {% if access_token %}
+            Bartendro is setup to fetch and store database backup files on DropBox!
+            <br/>
+            Access token:
+            <br/>
+            <input type="text" value="{{ access_token }}" readonly</input>
+        {% else %}
+            <a href="{{ url }}" target="_blank">Go here to authorize Bartendro.</a>
 
-        <p>
-        Once you've authorized Bartendro, copy the access code that DropBox gives you
-        and paste it below, then click Save:
-        </p>
+            <p>
+            Once you've authorized Bartendro, copy the access code that DropBox gives you
+            and paste it below, then click Save:
+            </p>
 
-        <input type="text"></input>
+            <input type="text" id="auth_code"></input>
+            <br/>
+            <a class="btn btn-large btn-default" id="button-save" onclick="save_auth_code()">Save</a>
+        {% endif %}
+
 
     </div>
 </div>
 <script type="text/javascript">
+function save_auth_code()
+{
+    auth_code = $("#auth_code").val();
+    $("#button-save").attr('disabled', true);
+    $.ajax({
+            url: "/ws/dropbox-finish/" + auth_code ,
+            success: function(html)
+            {
+                 location.reload();
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                 alert("Error: Cannot save auth code to database. Sorry.");
+                 //TODO handle errors from DropBox here
+                 location.reload();
+            }
+    });
+
+
+}
 </script>
 {% endblock %}

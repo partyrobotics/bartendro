@@ -26,6 +26,9 @@ def ws_dispenser_off(disp):
 
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
     try:
         app.mixer.test_dispense(disp - 1)
     except mixer.BartendroBusyError:

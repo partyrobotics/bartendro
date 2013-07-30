@@ -12,14 +12,20 @@ def admin_options():
     ver = DatabaseVersion.query.one()
     return render_template("admin/options", options=app.options, title="Options", schema = ver.schema)
 
-@app.route('/admin/options/dropboxsetup')
+@app.route('/admin/options/dropbox-setup')
 @login_required
 def admin_options_dropbox_setup():
-    flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app.options.app_key, app.options.app_secret)
-    return render_template("admin/dropboxsetup", options=app.options, title="Dropbox setup", url=flow.start())
+    mc = app.mc
+    access_token = mc.get("dropbox_access_token")
+    user_id = mc.get("dropbox_user_id")
+    if not access_token:
+        flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app.options.app_key, app.options.app_secret)
+        url = flow.start()
+    else:
+        url = None
 
-@app.route('/admin/options/dropboxfinish')
-@login_required
-def admin_options_dropbox_setup():
-    flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app.options.app_key, app.options.app_secret)
-    return render_template("admin/dropboxsetup", options=app.options, title="Dropbox setup", url=flow.start())
+    return render_template("admin/dropboxsetup", options=app.options, 
+                                                 title="Dropbox setup", 
+                                                 access_token=access_token,
+                                                 user_id=user_id,
+                                                 url=url)
