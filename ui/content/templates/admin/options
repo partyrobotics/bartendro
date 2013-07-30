@@ -9,11 +9,13 @@
 	</div>
     </div>
     <div class="span6">
+        <h3>Database schema</h3>
         <p>
-        Your database schema version is: {{ schema }}.
+        Your database schema version is: {{ schema }}
         </p>
+        <h3>Database download</h3>
         <p>
-        <a href="/ws/download/bartendro.db" id="database-download">Download your database</a>
+        <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">Download your database</a>
         </p>
         <p>
         You should do this periodically and
