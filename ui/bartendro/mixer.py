@@ -54,9 +54,6 @@ class Mixer(object):
     def unlock_bartendro(self):
         return app.lock.unlock_bartendro()
 
-    def get_error(self):
-        return self.err
-
     def led_idle(self):
         self.driver.led_idle()
 
@@ -250,9 +247,7 @@ class Mixer(object):
                     size += r['ml']
                     break
             if not r:
-                self.err = "Cannot make drink. I don't have the required booze: %d" % booze_id
-                error(self.err)
-                return False
+                return "Cannot make drink. I don't have the required booze: %d" % booze_id
             recipe.append(r)
 
         locked = self.lock_bartendro()
@@ -280,7 +275,9 @@ class Mixer(object):
                 current_sense = True
 
         if current_sense: 
-            print "Current sense detected!"
+            self.unlock_bartendro()
+            self.led_panic()
+            return "One of the pumps did not operate properly. Your drink may not be as you wish. Sorry. :("
 
         self.led_complete()
         app.log.info("drink complete")
@@ -290,15 +287,13 @@ class Mixer(object):
         db.session.add(dlog)
         db.session.commit()
 
-        if app.options.use_liquid_level_sensors and not self.check_liquid_levels():
-            self.unlock_bartendro()
-            self.leds_panic()
-            return False
+        if app.options.use_liquid_level_sensors:
+            self.check_liquid_levels()
 
         FlashGreenLeds(self).start()
         self.unlock_bartendro()
 
-        return True 
+        return "" 
 
     def clean(self):
         CleanCycle(self).start()
