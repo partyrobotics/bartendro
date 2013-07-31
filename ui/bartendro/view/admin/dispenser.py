@@ -26,7 +26,10 @@ def dispenser():
     boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
-    states = [dispenser.out for dispenser in dispensers]
+    if app.options.use_liquid_level_sensors:
+        states = [dispenser.out for dispenser in dispensers]
+    else:
+        states = [0 for dispenser in dispensers]
 
     kwargs = {}
     fields = []
