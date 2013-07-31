@@ -7,7 +7,17 @@
     </div>
 </div>
 <div style="padding-bottom: 20px">
-Yadda, yadda. Text on how to use this shizzle. Yo, this page autosaves shit. Therefore no save button, yo.
+    <p>
+    Each dispenser’s threshold for “out” and “low” levels can be set manually as desired. Simply, insert 
+    liquid sensor tube into a bottle or glass of water with the desired liquid level for the corresponding 
+    threshold, and press the save button.
+    </p>
+    <p>
+    Be careful to make sure that the tube is actually in liquid when you hit save, otherwise you'll have bad drinks in your future. 
+    </p>
+    <p>
+    If your out value is lower than 80, you may be doing it wrong.
+    </p>
 </div>
 <div class="row-fluid">
   <div class="span12">
@@ -20,14 +30,15 @@ Yadda, yadda. Text on how to use this shizzle. Yo, this page autosaves shit. The
                        value="{{ thresholds[i-1][0] }}"
                        readonly>
                 </input> 
-                <a class="btn btn-large" onclick="save_threshold({{ i }}, 1)">save liquid low threshold</a>
+                <a class="btn btn-large ll-column-spacer" onclick="save_threshold({{ i }}, 1)">save liquid low threshold</a>
                 <input type="text" 
                        id="ll-current-value-out-{{ i }}" 
                        class="ll-calibrate-textbox" 
                        value="{{ thresholds[i-1][1] }}"
                        readonly>
                 </input> 
-                <a class="btn btn-large ll-column-spacer" onclick="save_threshold({{ i }}, 0)">save liquid out threshold</a>
+                <a class="btn btn-large" onclick="save_threshold({{ i }}, 0)">save liquid out threshold</a>
+                <a class="btn btn-large btn-danger" onclick="test_threshold({{ i }})">test!</a>
             </div>
         {% endfor %}
   </div>
@@ -57,6 +68,21 @@ function save_threshold(disp, low)
             error: function(xhr, txtStatus, errorThrown)
             {
                 set_message("Failed to save threshold for dispenser " + disp + ". Status: " + xhr.status);
+            }
+    });
+}
+function test_threshold(disp)
+{
+    url = "/ws/liquidlevel/test/" + (disp - 1);
+    $.ajax({
+            url: url,
+            success: function(html)
+            {
+                set_message("test complete.");
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                set_message("Failed to test dispenser " + disp + ". Status: " + xhr.status);
             }
     });
 }

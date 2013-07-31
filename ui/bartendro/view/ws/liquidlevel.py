@@ -6,6 +6,13 @@ from bartendro import app, db
 from flask import Flask, request, Response
 from flask.ext.login import login_required
 
+@app.route('/ws/liquidlevel/test/<int:disp>')
+@login_required
+def ws_liquidlevel_test(disp):
+    low, out = app.driver.get_liquid_level_thresholds(disp)
+    app.mixer.liquid_level_test(disp, out)
+    return "ok"
+
 @app.route('/ws/liquidlevel/out/<int:disp>/set')
 @login_required
 def ws_liquidlevel_out_set(disp):
