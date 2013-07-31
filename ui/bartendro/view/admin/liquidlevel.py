@@ -6,5 +6,14 @@ from flask.ext.login import login_required
 @app.route('/admin/liquidlevel')
 @login_required
 def admin_liquidlevel():
-    count = app.driver.count()
-    return render_template("admin/liquidlevel", options=app.options, count=count, title="Liquid level test")
+    driver = app.driver
+    count = driver.count()
+    thresholds = []
+    for disp in xrange(count):
+        low, out = driver.get_liquid_level_thresholds(disp)
+        thresholds.append((low, out))
+
+    return render_template("admin/liquidlevel", options=app.options, 
+                                                count=count, 
+                                                title="Liquid level calibration",
+                                                thresholds=thresholds)
