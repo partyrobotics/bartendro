@@ -8,14 +8,6 @@ class GPIO(object):
         self.pin = pin
 
     def setup(self):
-#        try:
-#            f = open("/sys/class/gpio/export", "w")
-#        except IOError:
-#            return False
-#
-#        f.write("%d" % self.pin)
-#        f.close()
-
         try:
             f = open("/sys/class/gpio/gpio%d/direction" % self.pin, "w")
         except IOError:

@@ -21,7 +21,6 @@ def report_view(begin, end):
     except ValueError:
         try:
             begindate = int(time.mktime(time.strptime(begin, "%Y-%m-%d")))
-            print begindate
         except ValueError:
             return render_template("admin/report", options=app.options, error="Invalid begin date")
 
@@ -30,7 +29,6 @@ def report_view(begin, end):
     except ValueError:
         try:
             enddate = int(time.mktime(time.strptime(end, "%Y-%m-%d")))
-            print enddate
         except ValueError:
             return render_template("admin/report", options=app.options, error="Invalid end date")
 

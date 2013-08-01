@@ -98,7 +98,7 @@ app.mc.flush_all()
 
 app.lock = BartendroLock()
 
-app.log = logging.getLogger('bartendro')
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 try:
     app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()
@@ -115,14 +115,13 @@ except SerialIOError:
     print_software_only_notice()
     sys.exit(-1)
 
-app.log.info("Found %d dispensers." % app.driver.count())
+logging.info("Found %d dispensers." % app.driver.count())
 
 app.mixer = mixer.Mixer(app.driver, app.mc)
-
 if app.software_only:
-    app.log.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
+    logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 
-app.log.info("Bartendro starting")
+logging.info("Bartendro starting")
 app.debug = args.debug
 
 if __name__ == '__main__':

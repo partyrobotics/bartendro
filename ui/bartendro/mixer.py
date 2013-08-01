@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from time import sleep, time
 from threading import Thread
 from flask import Flask, current_app
@@ -25,6 +26,8 @@ DISPENSER_WARNING = 2
 
 CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
 CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
+
+log = logging.getLogger('mixer')
 
 class BartendroBusyError(Exception):
     pass
@@ -118,22 +121,22 @@ class Mixer(object):
             self.driver.set_status_color(0, 1, 0)
 
         self.state = new_state
-        print "Checking levels done"
+        log.info("Checking levels done")
 
         return new_state
 
     def liquid_level_test(self, dispenser, threshold):
         if not app.options.use_liquid_level_sensors: return
 
-        print "Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold)
+        log.info("Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold))
 
         self.driver.update_liquid_levels()
         sleep(.01)
 
         level = self.driver.get_liquid_level(dispenser)
-	print "initial reading: %d" % level
+	log.info("initial reading: %d" % level)
         if level <= threshold:
-	    print "liquid is out before starting: %d" % level
+	    log.info("liquid is out before starting: %d" % level)
 	    return
 
         last = -1
@@ -143,14 +146,14 @@ class Mixer(object):
             sleep(.01)
             level = self.driver.get_liquid_level(dispenser)
             if level != last:
-                 print "  %d" % level
+                 log.info("  %d" % level)
             last = level
 
         self.driver.stop(dispenser)
-        print "Stopped at level: %d" % level
+        log.info("Stopped at level: %d" % level)
         sleep(.1);
         level = self.driver.get_liquid_level(dispenser)
-        print "motor stopped at level: %d" % level
+        log.info("motor stopped at level: %d" % level)
 
     def get_available_drink_list(self):
         can_make = self.mc.get("available_drink_list")
@@ -205,7 +208,7 @@ class Mixer(object):
         timeout_count = 0
         while True:
             (is_dispensing, over_current) = app.driver.is_dispensing(disp)
-            #print "%d, %d" % (is_dispensing, over_current)
+            log.debug("is_disp %d, over_cur %d" % (is_dispensing, over_current))
             if over_current: return False
             if is_dispensing == 0: return True
 
@@ -252,22 +255,25 @@ class Mixer(object):
 
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
-    
-        app.log.info("Making drink: '%s' size %.2f ml" % (drink.name.name, size))
+   
         self.led_dispense()
         dur = 0
         active_disp = []
+        ticks = []
         for r in recipe:
             if r['dispenser_actual'] == 0:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML)
             else:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
-            self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms']))
-            app.log.info("..dispense %d for %d ticks" % (r['dispenser'] - 1, int(r['ms'])))
+            if not self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms'])):
+                log.error("dispense_ticks: failed")
+            ticks.append("disp %d for %s ticks" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
             sleep(.01)
 
             if r['ms'] > dur: dur = r['ms']
+
+        log.info("Making drink: %.2f ml of %s (%s)" % (size, drink.name.name, ", ".join(ticks)))
 
         current_sense = False
         for disp in active_disp:
@@ -277,10 +283,10 @@ class Mixer(object):
         if current_sense: 
             self.unlock_bartendro()
             self.led_panic()
+            log.error("Current sense triggered on dispenser %d" % disp)
             return "One of the pumps did not operate properly. Your drink may not be as you wish. Sorry. :("
 
         self.led_complete()
-        app.log.info("drink complete")
 
         t = int(time())
         dlog = drink_log.DrinkLog(drink.id, t, size)
