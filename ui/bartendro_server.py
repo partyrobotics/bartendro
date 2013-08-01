@@ -2,6 +2,7 @@
 
 from bartendro import app
 import logging
+import logging.handlers
 import os
 import memcache
 import sys
@@ -9,6 +10,10 @@ from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
 import argparse
+
+LOG_SIZE = 1024 * 500  # 500k maximum log file size
+LOG_FILES_SAVED = 3    # number of log files to compress and save
+
 
 parser = argparse.ArgumentParser(description='Bartendro application process')
 parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=True, action='store_true')
@@ -96,9 +101,21 @@ if not os.path.exists("bartendro.db"):
 app.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 app.mc.flush_all()
 
+# Create the Bartendro lock to prevent multiple people from using it at the same time.
 app.lock = BartendroLock()
 
+# Set up logging
+if not os.path.exists("logs"):
+    os.mkdir("logs")
+
+handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.log"), 
+                                               maxBytes=LOG_SIZE, 
+                                               backupCount=LOG_FILES_SAVED)
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logger = logging.getLogger('bartendro')
+logger.addHandler(handler)
+
+# Start the driver, which talks to the hardware
 try:
     app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()

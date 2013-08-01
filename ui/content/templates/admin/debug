@@ -17,13 +17,29 @@
              <p>
                 This debugging log shows the discovery of the dispensers:
              </p>
-             <div><pre>{{ startup_log }}</pre></div>
+             <div><pre class="pre-scrollable">{{ startup_log }}</pre></div>
+
+             <h3>Bartendro log</h3>
+             <p>
+                <a class="btn btn-large" style="float: right; margin-bottom: 10px;" onclick="reload()">refresh</a>
+                <p style="vertical-align: bottom">This log shows information and errors about Bartendro:</p>
+             </p>
+             <div id="b_log" class="pre-scrollable" style="height: 500px; overflow: scroll; clear: both;"><pre>{{ bartendro_log }}</pre></div>
         </div>
         <div class="span2"></div>
     </div>
 </div>
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
+$(document).ready(function()
+{
+    $('#b_log').scrollTop($('#b_log')[0].scrollHeight);
+});
+function reload() 
+{
+    window.location.reload()
+}
+
 function test_dispensers()
 {
     $("#test-dispensers").text('testing...');

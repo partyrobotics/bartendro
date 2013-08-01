@@ -27,7 +27,7 @@ DISPENSER_WARNING = 2
 CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
 CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
 
-log = logging.getLogger('mixer')
+log = logging.getLogger('bartendro')
 
 class BartendroBusyError(Exception):
     pass

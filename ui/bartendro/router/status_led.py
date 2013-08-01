@@ -11,7 +11,7 @@ except ImportError, e:
         raise
     gpio_missing = 1
 
-log= logging.getLogger('led')
+log= logging.getLogger('bartendro')
 
 class StatusLED(object):
 

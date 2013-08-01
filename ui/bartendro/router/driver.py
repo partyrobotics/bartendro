@@ -58,7 +58,7 @@ PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
 
-log = logging.getLogger('driver')
+log = logging.getLogger('bartendro')
 
 def crc16_update(crc, a):
     crc ^= a

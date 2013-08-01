@@ -15,7 +15,7 @@ ROUTER_CMD_PING         = 253
 ROUTER_CMD_COUNT        = 254
 ROUTER_CMD_RESET        = 255
 
-log = logging.getLogger('select')
+log = logging.getLogger('bartendro')
 
 try:
     import smbus
