@@ -7,4 +7,5 @@ from flask.ext.login import login_required
 @app.route('/admin/debug')
 @login_required
 def report_index():
-    return render_template("admin/debug", options=app.options, title="Debug bartendro")
+    startup_log = app.driver.get_startup_log()
+    return render_template("admin/debug", options=app.options, title="Debug bartendro", startup_log=startup_log)

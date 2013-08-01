@@ -4,8 +4,20 @@
     <div class="row-fluid">	
         <div class="span2"></div>
         <div class="span8">	
+             <h2>Debug Bartendro</h2>
+             <h3>Test dispensers</h3>
+             <p>
+                If you suspect that one or more dispensers are not responding properly, press the test dispensers
+                button to see if all of the dispensers are in fact responding.
+             </p>
              <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
              <div id="test-response"></div>
+
+             <h3>Dispenser discovery log</h3>
+             <p>
+                This debugging log shows the discovery of the dispensers:
+             </p>
+             <div><pre>{{ startup_log }}</pre></div>
         </div>
         <div class="span2"></div>
     </div>
