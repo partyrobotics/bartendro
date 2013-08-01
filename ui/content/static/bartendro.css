@@ -315,10 +315,11 @@ label {
 }
 
 .booze-line {
+    display: block;
 }
 
 .booze-line-hidden {
-    visibility: hidden;
+    display: none;
 }
 
 .ll-calibrate-textbox {

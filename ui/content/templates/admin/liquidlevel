@@ -3,7 +3,7 @@
 <div class="row-fluid">
     <div class="span6">
       <h2>Liquid level sensors</h2>
-        <div class="alert" id="status-message"></div>
+        <div class="alert" id="status-message" style="display: none"></div>
     <p>
     Each dispenser’s threshold for “out” and “low” levels can be set to your preferences.
     </p>

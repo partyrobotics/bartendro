@@ -4,7 +4,7 @@
     <div class="span6">
         <h2>{{ title }}</h2>
         {% if saved %}
-           <p>Your changes have been saved.</p>
+           <div class="alert" id="status-message">Your changes have been saved.</div>
         {% endif %}
         <div class="forms">
             <form method="POST" action="/admin/drink/save">
@@ -46,19 +46,19 @@
                         <div class="booze-line-hidden" id="bl_{{ loop.index0 }}">
                     {% endif %}
                         <div>
-                            {{ form[id]() }}
-                            {{ form[name](class="select-field", style="width:75%") }}
-                            {{ form[parts](class="edit-field") }}
-                            {% if form[parts].errors %}
-                                <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
-                            {% endif %}
+                           {{ form[id]() }}
+                           {{ form[name](class="select-field", style="width:75%") }}
+                           {{ form[parts](class="edit-field") }}
+                           {% if form[parts].errors %}
+                               <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
+                           {% endif %}
                         </div>
                     </div>
                 {% endfor %}
 
                 {{ form.id() }}
                 <div>
-                    <a class="btn btn-large" onclick="add_booze()">add booze</a>
+                    <a class="btn btn-large" id="add-booze-button" onclick="add_booze()">add booze</a>
                     <a class="btn btn-large" onclick="cancel()">cancel</a>
                     {{ form.save(class="btn btn-large btn-primary") }}
                 </div>
@@ -78,10 +78,14 @@
     </div>
 </div>
 <script type="text/javascript">
-var max_boozes = 20;
+var max_boozes = {{ max_boozes }};
+var num_boozes = {{ num_boozes }};
 function add_booze()
 {
     var i = 0;
+
+    if (num_boozes == max_boozes)
+        return;
 
     for(i = 0; i < max_boozes; i++)
     {
@@ -92,8 +96,10 @@ function add_booze()
             return;
         }
     }
-    if (i == max_boozes)
-        alert("DOM problem. Don't know where to add booze div.");
+
+    num_boozes++;
+    if (num_boozes == max_boozes)
+        $("#add-booze-button").toggleClass('disabled');
 }
 function available(state)
 {
