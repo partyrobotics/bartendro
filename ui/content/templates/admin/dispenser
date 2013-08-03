@@ -19,7 +19,6 @@
     <div class="span6">
        <div>
           <a onclick="reset()" class="btn">reset</a>
-          <a onclick="test_dispensers()" class="btn" id="test-dispensers">test dispensers</a>
           {% if options.use_liquid_level_sensors %}
               <a onclick="check_levels()" class="btn">update liquid levels</a>
           {% endif %}
