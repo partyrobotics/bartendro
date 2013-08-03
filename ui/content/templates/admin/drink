@@ -7,7 +7,7 @@
            <div class="alert" id="status-message">Your changes have been saved.</div>
         {% endif %}
         <div class="forms">
-            <form method="POST" action="/admin/drink/save">
+            <form method="POST" action="/admin/drink/{{id}}/edit">
                 <div>
                     {{ form.drink_name.label }}:<br/> 
                     {{ form.drink_name(class="form-element") }}
@@ -60,7 +60,7 @@
                 <div>
                     <a class="btn btn-large" id="add-booze-button" onclick="add_booze()">add booze</a>
                     <a class="btn btn-large" onclick="cancel()">cancel</a>
-                    {{ form.save(class="btn btn-large btn-primary") }}
+                    {{ form.save(class="btn btn-large btn-primary", id="save-button") }}
                 </div>
             </form>
 	</div>
@@ -72,14 +72,22 @@
         <h2>drink list</h2>
 	<table class="table table-striped table-bordered">
             {% for drink in drinks %}
-              <tr><td><a href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></td></tr>
+              <tr><td><a href="/admin/drink/{{drink.id}}/edit">{{ drink.name.name }}</a></td></tr>
             {% endfor %}
         </table>
     </div>
 </div>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 var max_boozes = {{ max_boozes }};
 var num_boozes = {{ num_boozes }};
+$(document).ready(function() 
+{
+    if (num_boozes == 0)
+    {
+        $("#save-button").toggleClass('disabled');
+    }
+});
 function add_booze()
 {
     var i = 0;
@@ -98,6 +106,8 @@ function add_booze()
     }
 
     num_boozes++;
+    if (num_boozes == 1)
+        $("#save-button").toggleClass('disabled');
     if (num_boozes == max_boozes)
         $("#add-booze-button").toggleClass('disabled');
 }

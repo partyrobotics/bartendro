@@ -12,4 +12,10 @@ class DrinkForm(Form):
     save = SubmitField(u"save")
     cancel = SubmitField(u"cancel")
 
+    def __repr__(self):
+        s =  "form:"
+        s += "  id ", repr(self.id)
+        s += "  desc ", repr(self.desc)
+        return s
+
 form = DrinkForm()

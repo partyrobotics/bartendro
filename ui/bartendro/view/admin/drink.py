@@ -42,76 +42,34 @@ def admin_drink():
         kwargs[bp] = booze.value
         kwargs[dbi] = booze.id
         fields.append((bf, bp, dbi, show))
-    form = F(**kwargs)
 
+    form = F(**kwargs)
     return render_template("admin/drink", options=app.options, 
                                           title="Drinks",
                                           fields=fields, 
                                           drinks=drinks, 
                                           form=form, 
                                           max_boozes=MAX_BOOZES_PER_DRINK,
-                                          num_boozes=0)
+                                          num_boozes=0,
+                                          id = 0)
 
-@app.route('/admin/drink/edit/<id>')
+@app.route('/admin/drink/<id>/edit', methods=['GET', 'POST'])
 @login_required
 def admin_drink_edit(id):
 
-    saved = int(request.args.get('saved', "0"))
     class F(DrinkForm):
         pass
+
+    if request.method == 'POST':
+        form = DrinkForm(request.form)
+        cancel = request.form.get("cancel")
+        if cancel: return redirect('/admin/drink')
+
+    saved = int(request.args.get('saved', "0"))
 
     boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
 
-    sorted_booze_list = sorted(booze_list, key=itemgetter(1))
-    drink = Drink.query.filter_by(id=int(id)).first()
-
-    kwargs = {}
-    fields = []
-    num_boozes = 0
-    null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
-    for i in xrange(MAX_BOOZES_PER_DRINK):
-        if i < len(drink.drink_boozes):
-            booze = drink.drink_boozes[i]
-            num_boozes += 1
-            show = 1
-        else:
-            booze = null_drink_booze
-            show = 0
-
-        bf = "booze_name_%d" % i
-        bp = "booze_parts_%d" % i
-        dbi = "drink_booze_id_%d" % i
-        setattr(F, bf, SelectField("booze", choices=sorted_booze_list)) 
-        setattr(F, bp, DecimalField("parts", [validators.NumberRange(min=1, max=100)], places=0));
-        setattr(F, dbi, HiddenField("id"))
-        kwargs[bf] = booze.booze.name
-        kwargs[bp] = booze.value
-        kwargs[dbi] = booze.id
-        fields.append((bf, bp, dbi, show))
-
-    form = F(obj=drink, drink_name=drink.name.name, **kwargs)
-    for i, booze in enumerate(drink.drink_boozes):
-        form["booze_name_%d" % i].data = "%d" % booze_list[booze.booze_id - 1][0]
-    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
-                                 .order_by(DrinkName.name).all()
-    return render_template("admin/drink", options=app.options, 
-                                          drinks=drinks, 
-                                          form=form, 
-                                          fields=fields, 
-                                          title="Drinks", 
-                                          saved=saved,
-                                          max_boozes=MAX_BOOZES_PER_DRINK,
-                                          num_boozes = num_boozes)
-
-@app.route('/admin/drink/save', methods=['POST'])
-@login_required
-def admin_drink_save():
-
-    cancel = request.form.get("cancel")
-    if cancel: return redirect('/admin/drink')
-
-    form = DrinkForm(request.form)
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
         if id:
@@ -125,6 +83,7 @@ def admin_drink_save():
         drink.popular = form.data['popular']
         drink.available = form.data['available']
 
+        num_boozes = 0
         for i in xrange(MAX_BOOZES_PER_DRINK):
             try:
                 parts = request.form['booze_parts_%d' % i]
@@ -170,8 +129,46 @@ def admin_drink_save():
         mc.delete("top_drinks")
         mc.delete("other_drinks")
         mc.delete("available_drink_list")
-        return redirect('/admin/drink/edit/%d?saved=1' % drink.id)
+        return redirect('/admin/drink/%d/edit?saved=1' % drink.id)
 
+    sorted_booze_list = sorted(booze_list, key=itemgetter(1))
+    drink = Drink.query.filter_by(id=int(id)).first()
+
+    kwargs = {}
+    fields = []
+    num_boozes = 0
+    null_drink_booze = DrinkBooze(Drink("dummy"), boozes[0], 0, 0)
+    for i in xrange(MAX_BOOZES_PER_DRINK):
+        if i < len(drink.drink_boozes):
+            booze = drink.drink_boozes[i]
+            num_boozes += 1
+            show = 1
+        else:
+            booze = null_drink_booze
+            show = 0
+
+        bf = "booze_name_%d" % i
+        bp = "booze_parts_%d" % i
+        dbi = "drink_booze_id_%d" % i
+        setattr(F, bf, SelectField("booze", choices=sorted_booze_list)) 
+        setattr(F, bp, DecimalField("parts", [validators.NumberRange(min=1, max=100)], places=0));
+        setattr(F, dbi, HiddenField("id"))
+        kwargs[bf] = booze.booze.name
+        kwargs[bp] = booze.value
+        kwargs[dbi] = booze.id
+        fields.append((bf, bp, dbi, show))
+
+    form = F(**kwargs)
+#    for i, booze in enumerate(drink.drink_boozes):
+#        form["booze_name_%d" % i].data = "%d" % booze_list[booze.booze_id - 1][0]
     drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(DrinkName.name).all()
-    return render_template("admin/drink", drinks=drinks, form=form, title="")
+    return render_template("admin/drink", options=app.options, 
+                                          drinks=drinks, 
+                                          form=form, 
+                                          fields=fields, 
+                                          title="Drinks", 
+                                          saved=saved,
+                                          max_boozes=MAX_BOOZES_PER_DRINK,
+                                          num_boozes = num_boozes,
+                                          id=id)
