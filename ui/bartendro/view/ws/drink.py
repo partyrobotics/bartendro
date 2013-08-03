@@ -30,7 +30,6 @@ def ws_drink(drink):
 
 @app.route('/ws/drink/<int:drink>/available/<int:state>')
 def ws_drink_available(drink, state):
-
     if not drink:
         db.session.query(Drink).update({'available' : state})
     else:
@@ -38,3 +37,27 @@ def ws_drink_available(drink, state):
     db.session.flush()
     db.session.commit()
     return "ok\n"
+
+@app.route('/ws/drink/<int:drink>/save', methods=["POST"])
+def ws_drink_save(drink):
+
+    if request.method != "POST":
+        print "NOT POST!"
+        raise BadRequest
+
+    data = request.form
+    print data['id']
+
+    id = int(request.form.get("id") or '0')
+    if id:
+        drink = Drink.query.filter_by(id=int(id)).first()
+    else:
+        drink = Drink()
+        db.session.add(drink)
+
+    drink.name.name = form.data['drink_name']
+    drink.desc = form.data['desc']
+    drink.popular = form.data['popular']
+    drink.available = form.data['available']
+
+    print drink

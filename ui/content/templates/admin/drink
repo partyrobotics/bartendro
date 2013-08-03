@@ -7,60 +7,53 @@
            <div class="alert" id="status-message">Your changes have been saved.</div>
         {% endif %}
         <div class="forms">
-            <form method="POST" action="/admin/drink/save">
+            <form>
+                <input type="hidden" id="drink-id" value="{{ drink.id }}"></input>
                 <div>
-                    {{ form.drink_name.label }}:<br/> 
-                    {{ form.drink_name(class="form-element") }}
+                    <label for="drink_name">Name</label></br>
+                    <input class="form-element" id="drink-name" name="drink_name" type="text" value="{{ drink.name }}"></input>
                 </div>
-                {% if form.drink_name.errors %}
-                    <div class="errors">{% for error in form.drink_name.errors %}<li>{{ error }}</li>{% endfor %}</div>
-                {% endif %}
                 <div>
-                    {{ form.desc.label }}:<br/> 
-                    {{ form.desc(class="form-element") }}
+                    <label for="desc">Description</label></br>
+                    <textarea class="form-element" id="drink-desc" name="desc">{{ drink.desc }}</textarea>
                 </div>
-                {% if form.desc.errors %}
-                    <div class="errors">{% for error in form.desc.errors %}<li>{{ error }}</li>{% endfor %}</div>
-                {% endif %}
+                <div style="padding-bottom: 20px">
+                    <input class="checkbox" id="drink-popular" name="popular" type="checkbox" {% if drink.popular %}checked{% endif %}></input>
+                    <label for="popular">List this drink in the <i>the essentials</i> section.</label>
+                </div>
 
                 <div style="padding-bottom: 20px">
-                    {{ form.popular(class="checkbox") }}
-                    {{ form.popular.label }}
+                    <input class="checkbox-large" id="drink-available" name="available" type="checkbox" {% if drink.available %}checked{% endif %}></input>
+                    <label for="available">List this drink in the menu</label>
                 </div>
-                {% if form.popular.errors %}
-                    <div class="errors">{% for error in form.popular.errors %}<li>{{ error }}</li>{% endfor %}</div>
-                {% endif %}
 
-                <div style="padding-bottom: 20px">
-                    {{ form.available(class="checkbox-large") }}
-                    {{ form.available.label }}
+                <div style="display: none" id="template-booze-line">
+                    <select class="select-field" id="template-booze-select" style="width:75%">
+                    {% for booze_list_id, booze_list_name in drink.booze_list %}
+                        <option value="{{ booze_list_id }}">{{ booze_list_name }}</option>
+                    {% endfor %}
+                    </select>
+                    <input class="edit-field" id="template-booze-parts" type="text"></input>
                 </div>
-                {% if form.available.errors %}
-                    <div class="errors">{% for error in form.available.errors %}<li>{{ error }}</li>{% endfor %}</div>
-                {% endif %}
 
-                {% for name, parts, id, show in fields %}
-                    {% if show %}
-                        <div class="booze-line" id="bl_{{ loop.index0 }}">
-                    {% else %}
-                        <div class="booze-line-hidden" id="bl_{{ loop.index0 }}">
-                    {% endif %}
-                        <div>
-                           {{ form[id]() }}
-                           {{ form[name](class="select-field", style="width:75%") }}
-                           {{ form[parts](class="edit-field") }}
-                           {% if form[parts].errors %}
-                               <div class="errors">{% for error in form[parts].errors %}<li>{{ error }}</li>{% endfor %}</div>
-                           {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
+                <div id="booze-lines">
+                    {% for booze_id, name, parts in drink.boozes %}
+                        <select class="select-field" id="booze-name-{{ loop.index0 }}" style="width:75%">
+                        {% for booze_list_id, booze_list_name in drink.booze_list %}
+                            <option value="{{ booze_list_id }}"
+                            {% if booze_list_id == booze_id %} selected {% endif %}
+                            >{{ booze_list_name }}</option>
+                        {% endfor %}
+                        </select>
+                        <input class="edit-field" id="booze-parts-{{ loop.index0 }}" type="text" value="{{ parts }}"></input>
+                        <input type="hidden" id="booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
+                    {% endfor %}
+                </div>
 
-                {{ form.id() }}
                 <div>
                     <a class="btn btn-large" id="add-booze-button" onclick="add_booze()">add booze</a>
                     <a class="btn btn-large" onclick="cancel()">cancel</a>
-                    {{ form.save(class="btn btn-large btn-primary") }}
+                    <a class="btn btn-large btn-primary" onclick="save()">save</a>
                 </div>
             </form>
 	</div>
@@ -71,15 +64,15 @@
         </div>
         <h2>drink list</h2>
 	<table class="table table-striped table-bordered">
-            {% for drink in drinks %}
-              <tr><td><a href="/admin/drink/edit/{{drink.id}}">{{ drink.name.name }}</a></td></tr>
+            {% for d in drinks %}
+              <tr><td><a href="/admin/drink/{{d.id}}/edit">{{ d.name.name }}</a></td></tr>
             {% endfor %}
         </table>
     </div>
 </div>
 <script type="text/javascript">
-var max_boozes = {{ max_boozes }};
-var num_boozes = {{ num_boozes }};
+var max_boozes = {{ drink.max_boozes }};
+var num_boozes = {{ drink.num_boozes }};
 function add_booze()
 {
     var i = 0;
@@ -87,6 +80,9 @@ function add_booze()
     if (num_boozes == max_boozes)
         return;
 
+    $("#template-booze-line").children().clone(true).appendTo("#booze-lines");
+    $("#booze-lines #template-booze-select").attr("id", "booze_name_" + num_boozes);
+    $("#booze-lines #template-booze-parts").attr("id", "booze_parts_" + num_boozes);
     for(i = 0; i < max_boozes; i++)
     {
         if ( $("#bl_" + i).attr("class") == "booze-line-hidden" )
@@ -101,9 +97,31 @@ function add_booze()
     if (num_boozes == max_boozes)
         $("#add-booze-button").toggleClass('disabled');
 }
-function available(state)
+function save()
 {
-    $.ajax({ url: "/ws/drink/0/available/" + state });
+    drink = {};
+    drink['id'] = $("#drink-id").val();
+    drink['name'] = $("#drink-name").val();
+    drink['desc'] = $("#drink-desc").val();
+    drink['available'] = $("#drink-available").val();
+    drink['popular'] = $("#drink-popular").val();
+    drink['boozes'] = [];
+    for(i = 0; i < num_boozes; i++)
+        drink['boozes'].push([ $("#booze-id-" + i).val(), $("#booze-parts-" + i).val() ]);
+
+    $.ajax({
+            url: "/ws/drink/" + drink['id'] + "/save",
+            type: "POST",
+            data : JSON.stringify(drink),
+            dataType : "json",
+            success: function(html)
+            {
+                alert("ok");
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+            }
+    });
 }
 function cancel()
 {
