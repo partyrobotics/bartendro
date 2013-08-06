@@ -3,9 +3,7 @@
 <div class="row-fluid">
     <div class="span6">
         <h2>{{ title }}</h2>
-        {% if saved %}
-           <div class="alert" id="status-message">Your changes have been saved.</div>
-        {% endif %}
+        <div class="alert" id="status-message" style="display: none"></div>
         <div class="forms">
             <form>
                 <input type="hidden" id="drink-id" value="{{ drink.id }}"></input>
@@ -34,11 +32,12 @@
                     {% endfor %}
                     </select>
                     <input class="edit-field" id="template-booze-parts" type="text"></input>
+                    <input type="hidden" id="template-old-booze-id" value="0"></input>
                 </div>
 
                 <div id="booze-lines">
                     {% for booze_id, name, parts in drink.boozes %}
-                        <select class="select-field" id="booze-name-{{ loop.index0 }}" style="width:75%">
+                        <select class="select-field" id="selected-booze-id-{{ loop.index0 }}" style="width:75%">
                         {% for booze_list_id, booze_list_name in drink.booze_list %}
                             <option value="{{ booze_list_id }}"
                             {% if booze_list_id == booze_id %} selected {% endif %}
@@ -46,7 +45,7 @@
                         {% endfor %}
                         </select>
                         <input class="edit-field" id="booze-parts-{{ loop.index0 }}" type="text" value="{{ parts }}"></input>
-                        <input type="hidden" id="booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
+                        <input type="hidden" id="old-booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
                     {% endfor %}
                 </div>
 
@@ -70,9 +69,20 @@
         </table>
     </div>
 </div>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript">
 var max_boozes = {{ drink.max_boozes }};
 var num_boozes = {{ drink.num_boozes }};
+$(document).ready(function() 
+{
+    $("#status-message").hide();
+});
+function set_message(txt)
+{
+    $("#status-message").text(txt);
+    $("#status-message").show();
+}
+
 function add_booze()
 {
     var i = 0;
@@ -81,8 +91,9 @@ function add_booze()
         return;
 
     $("#template-booze-line").children().clone(true).appendTo("#booze-lines");
-    $("#booze-lines #template-booze-select").attr("id", "booze_name_" + num_boozes);
-    $("#booze-lines #template-booze-parts").attr("id", "booze_parts_" + num_boozes);
+    $("#booze-lines #template-booze-select").attr("id", "selected-booze-id-" + num_boozes);
+    $("#booze-lines #template-booze-parts").attr("id", "booze-parts-" + num_boozes);
+    $("#booze-lines #template-old-booze-id").attr("id", "old-booze-id-" + num_boozes);
     for(i = 0; i < max_boozes; i++)
     {
         if ( $("#bl_" + i).attr("class") == "booze-line-hidden" )
@@ -103,23 +114,28 @@ function save()
     drink['id'] = $("#drink-id").val();
     drink['name'] = $("#drink-name").val();
     drink['desc'] = $("#drink-desc").val();
-    drink['available'] = $("#drink-available").val();
-    drink['popular'] = $("#drink-popular").val();
+    drink['available'] = $("#drink-available").attr("checked") ? 1 : 0;
+    drink['popular'] = $("#drink-popular").attr("checked") ? 1 : 0;
     drink['boozes'] = [];
     for(i = 0; i < num_boozes; i++)
-        drink['boozes'].push([ $("#booze-id-" + i).val(), $("#booze-parts-" + i).val() ]);
+        drink['boozes'].push([ $("#selected-booze-id-" + i).val(), 
+                               $("#booze-parts-" + i).val() ,
+                               $("#old-booze-id-" + i).val() 
+                             ]);
 
     $.ajax({
             url: "/ws/drink/" + drink['id'] + "/save",
             type: "POST",
-            data : JSON.stringify(drink),
+            data : JSON.stringify({'drink' : drink}),
             dataType : "json",
+            contentType: "application/json; charset=utf-8",
             success: function(html)
             {
-                alert("ok");
+                set_message("This drink has been saved.");
             },
             error: function(xhr, txtStatus, errorThrown)
             {
+                set_message("Failed to save drink. Status: " + xhr.status);
             }
     });
 }
@@ -127,6 +143,5 @@ function cancel()
 {
     window.location.reload();
 }
-
 </script>
 {% endblock %}

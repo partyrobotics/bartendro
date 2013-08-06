@@ -42,7 +42,7 @@ def admin_drink_new():
                                           drinks=drinks,
                                           drink=drink)
 
-@app.route('/admin/drink/<int:id>/edit', methods=['GET', 'POST'])
+@app.route('/admin/drink/<int:id>/edit', methods=['GET'])
 @login_required
 def admin_drink_edit(id):
 
@@ -72,5 +72,5 @@ def admin_drink_edit(id):
         return render_template("admin/drink", options=app.options, 
                                               title="Drinks",
                                               drinks=drinks,
-                                          drink=drink)
+                                              drink=drink)
 
