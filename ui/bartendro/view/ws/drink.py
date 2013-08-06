@@ -43,9 +43,8 @@ def ws_drink_available(drink, state):
 def ws_drink_save(drink):
 
     data = request.json['drink']
-
-    if data.has_key("id"):
-        id = int(data["id"])
+    id = int(data["id"] or 0)
+    if id > 0:
         drink = Drink.query.filter_by(id=int(id)).first()
     else:
         id = 0
