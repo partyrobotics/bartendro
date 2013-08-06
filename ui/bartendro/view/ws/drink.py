@@ -51,23 +51,29 @@ def ws_drink_save(drink):
         drink = Drink()
         db.session.add(drink)
 
-    drink.name.name = data['name']
-    drink.desc = data['desc']
-    if data['popular']:
-        drink.popular = True
-    else:
-        drink.popular = False
-        
-    if data['available']:
-        drink.available = True
-    else:
-        drink.available = False
+    try:
+        drink.name.name = data['name']
+        drink.desc = data['desc']
+        if data['popular']:
+            drink.popular = True
+        else:
+            drink.popular = False
+            
+        if data['available']:
+            drink.available = True
+        else:
+            drink.available = False
+    except ValueError:
+        raise BadRequest
 
     for selected_booze_id, parts, old_booze_id in data['boozes']:
-        selected_booze_id = int(selected_booze_id) # this is the id that comes from the most recent selection
-        parts = int(parts)                   
-        old_booze_id = int(old_booze_id)     # this id is the id that was previously used by this slot. Used for
-                                             # cleaning up or updateing existing entries
+        try:
+            selected_booze_id = int(selected_booze_id) # this is the id that comes from the most recent selection
+            old_booze_id = int(old_booze_id)     # this id is the id that was previously used by this slot. Used for
+                                                 # cleaning up or updateing existing entries
+            parts = int(parts)                   
+        except ValueError:
+            raise BadRequest
 
         # if the parts are set to zero, remove this drink_booze from this drink
         if parts == 0:
@@ -96,4 +102,4 @@ def ws_drink_save(drink):
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
-    return "ok"
+    return ""
