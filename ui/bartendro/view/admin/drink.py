@@ -17,19 +17,7 @@ def admin_drink_new():
     boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_list = [(b.id, b.name) for b in boozes] 
     sorted_booze_list = sorted(booze_list, key=itemgetter(1))
-
-    print sorted_booze_list
-    drink = { 
-        'id'         : 0,
-        'name'       : "",
-        'desc'       : "",
-        'popular'    : 'n',
-        'available'  : 'n',
-        'boozes'     : [],
-        'booze_list' : sorted_booze_list,
-        'num_boozes' : 0
-    }
     return render_template("admin/drink", options=app.options, 
                                           title="Drinks",
-                                          drinks=drinks,
-                                          drink=drink)
+                                          booze_list=sorted_booze_list,
+                                          drinks=drinks)
