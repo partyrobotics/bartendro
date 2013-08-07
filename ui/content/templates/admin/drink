@@ -5,55 +5,57 @@
         <h2>{{ title }}</h2>
         <div class="alert" id="status-message" style="display: none"></div>
         <div class="forms">
-            <form>
-                <input type="hidden" id="drink-id" value="{{ drink.id }}"></input>
-                <div>
-                    <label for="drink_name">Name</label></br>
-                    <input class="form-element" id="drink-name" name="drink_name" type="text" value="{{ drink.name }}"></input>
-                </div>
-                <div>
-                    <label for="desc">Description</label></br>
-                    <textarea class="form-element" id="drink-desc" name="desc">{{ drink.desc }}</textarea>
-                </div>
-                <div style="padding-bottom: 20px">
-                    <input class="checkbox" id="drink-popular" name="popular" type="checkbox" {% if drink.popular %}checked{% endif %}></input>
-                    <label for="popular">List this drink in the <i>the essentials</i> section.</label>
-                </div>
+            <form id="drink-form">
+                <fieldset>
+                    <input type="hidden" id="drink-id" value="{{ drink.id }}"></input>
+                    <div>
+                        <label for="drink-name">Name</label></br>
+                        <input class="form-element" id="drink-name" name="drink_name" minlength="2" required type="text" value="{{ drink.name }}"></input>
+                    </div>
+                    <div>
+                        <label for="drink-desc">Description</label></br>
+                        <textarea class="form-element" id="drink-desc" name="desc">{{ drink.desc }}</textarea>
+                    </div>
+                    <div style="padding-bottom: 20px">
+                        <input class="checkbox" id="drink-popular" name="popular" type="checkbox" {% if drink.popular %}checked{% endif %}></input>
+                        <label for="popular">List this drink in the <i>the essentials</i> section.</label>
+                    </div>
 
-                <div style="padding-bottom: 20px">
-                    <input class="checkbox-large" id="drink-available" name="available" type="checkbox" {% if drink.available %}checked{% endif %}></input>
-                    <label for="available">List this drink in the menu</label>
-                </div>
+                    <div style="padding-bottom: 20px">
+                        <input class="checkbox-large" id="drink-available" name="available" type="checkbox" {% if drink.available %}checked{% endif %}></input>
+                        <label for="available">List this drink in the menu</label>
+                    </div>
 
-                <div style="display: none" id="template-booze-line">
-                    <select class="select-field" id="template-booze-select" style="width:75%">
-                    {% for booze_list_id, booze_list_name in drink.booze_list %}
-                        <option value="{{ booze_list_id }}">{{ booze_list_name }}</option>
-                    {% endfor %}
-                    </select>
-                    <input class="edit-field" id="template-booze-parts" type="text"></input>
-                    <input type="hidden" id="template-old-booze-id" value="0"></input>
-                </div>
-
-                <div id="booze-lines">
-                    {% for booze_id, name, parts in drink.boozes %}
-                        <select class="select-field" id="selected-booze-id-{{ loop.index0 }}" style="width:75%">
+                    <div style="display: none" id="template-booze-line">
+                        <select class="select-field" id="template-booze-select" style="width:75%">
                         {% for booze_list_id, booze_list_name in drink.booze_list %}
-                            <option value="{{ booze_list_id }}"
-                            {% if booze_list_id == booze_id %} selected {% endif %}
-                            >{{ booze_list_name }}</option>
+                            <option value="{{ booze_list_id }}">{{ booze_list_name }}</option>
                         {% endfor %}
                         </select>
-                        <input class="edit-field" id="booze-parts-{{ loop.index0 }}" type="text" value="{{ parts }}"></input>
-                        <input type="hidden" id="old-booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
-                    {% endfor %}
-                </div>
+                        <input class="edit-field" id="template-booze-parts" type="text"></input>
+                        <input type="hidden" id="template-old-booze-id" value="0"></input>
+                    </div>
 
-                <div>
-                    <a class="btn btn-large" id="add-booze-button" onclick="add_booze()">add booze</a>
-                    <a class="btn btn-large" onclick="cancel()">cancel</a>
-                    <a class="btn btn-large btn-primary" onclick="save()">save</a>
-                </div>
+                    <div id="booze-lines">
+                        {% for booze_id, name, parts in drink.boozes %}
+                            <select class="select-field" id="selected-booze-id-{{ loop.index0 }}" style="width:75%">
+                            {% for booze_list_id, booze_list_name in drink.booze_list %}
+                                <option value="{{ booze_list_id }}"
+                                {% if booze_list_id == booze_id %} selected {% endif %}
+                                >{{ booze_list_name }}</option>
+                            {% endfor %}
+                            </select>
+                            <input class="edit-field" id="booze-parts-{{ loop.index0 }}" type="text" value="{{ parts }}"></input>
+                            <input type="hidden" id="old-booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <a class="btn btn-large" id="add-booze-button" onclick="add_booze()">add booze</a>
+                        <a class="btn btn-large" onclick="cancel()">cancel</a>
+                        <a class="btn btn-large btn-primary" onclick="save()">save</a>
+                    </div>
+                </fieldset>
             </form>
 	</div>
     </div>
@@ -69,12 +71,14 @@
         </table>
     </div>
 </div>
-<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
 var max_boozes = {{ drink.max_boozes }};
 var num_boozes = {{ drink.num_boozes }};
 $(document).ready(function() 
 {
+    $("#drink-form").validate();
     $("#status-message").hide();
 });
 function set_message(txt)
