@@ -66,7 +66,7 @@
         <h2>drink list</h2>
 	<table class="table table-striped table-bordered">
             {% for d in drinks %}
-              <tr><td><a href="/admin/drink/{{d.id}}/edit">{{ d.name.name }}</a></td></tr>
+              <tr><td><a href="#" onclick="edit({{d.id}})">{{ d.name.name }}</a></td></tr>
             {% endfor %}
         </table>
     </div>
@@ -74,25 +74,27 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
-var max_boozes = {{ drink.max_boozes }};
 var num_boozes = {{ drink.num_boozes }};
 $(document).ready(function() 
 {
     $("#drink-form").validate();
     $("#status-message").hide();
 });
+
 function set_message(txt)
 {
     $("#status-message").text(txt);
     $("#status-message").show();
 }
+function clear_message(txt)
+{
+    $("#status-message").text("");
+    $("#status-message").hide();
+}
 
 function add_booze()
 {
     var i = 0;
-
-    if (num_boozes == max_boozes)
-        return;
 
     $("#template-booze-line").children().clone(true).appendTo("#booze-lines");
     $("#booze-lines #template-booze-select").attr("id", "selected-booze-id-" + num_boozes);
@@ -100,9 +102,53 @@ function add_booze()
     $("#booze-lines #template-old-booze-id").attr("id", "old-booze-id-" + num_boozes);
 
     num_boozes++;
-    if (num_boozes == max_boozes)
-        $("#add-booze-button").toggleClass('disabled');
 }
+
+function edit(drink_id)
+{
+    $.ajax({
+            url: "/ws/drink/" + drink_id + "/load",
+            dataType : "json",
+            success: function(json)
+            {
+                load_form(json);
+                clear_message();
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                set_message("Failed to load drink. Status: " + xhr.status);
+            }
+    });
+    return false;
+}
+
+function load_form(drink)
+{
+    new_drink_num_boozes = drink['num_boozes'];
+
+    $("#drink-id").val(drink['id']);
+    $("#drink-name").val(drink['name']);
+    $("#drink-desc").val(drink['desc']);
+    if (drink['available'])
+        $("#drink-available").prop("checked", true);
+    else
+        $("#drink-available").prop("checked", false);
+    if (drink['popular'])
+        $("#drink-popular").prop("checked", true);
+    else
+        $("#drink-popular").prop("checked", false);
+
+    $("#booze-lines").html("");
+    num_boozes = 0;
+    for(i = 0; i < new_drink_num_boozes; i++)
+    {
+        add_booze();
+        $("#selected-booze-id-" + i).val(drink.boozes[i][0]);
+        $("#booze-parts-" + i).val(drink.boozes[i][1]);
+        $("#old-booze-id-" + i).val(drink.boozes[i][0]); 
+    }
+}
+
 function save()
 {
     if (!$("#drink-form").valid())
@@ -139,7 +185,13 @@ function save()
 }
 function cancel()
 {
-    window.location.reload();
+    $("#drink-id").val("");
+    $("#drink-name").val("");
+    $("#drink-desc").val("");
+    $("#drink-available").prop("checked", false);
+    $("#drink-popular").prop("checked", false);
+    $("#booze-lines").html("");
+    num_boozes = 0;
 }
 </script>
 {% endblock %}

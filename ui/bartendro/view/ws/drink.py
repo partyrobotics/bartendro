@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+import json
 from time import sleep
+from operator import itemgetter
 from bartendro import app, db, mixer
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest
 from bartendro.model.drink import Drink
+from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
-from bartendro.form.booze import BoozeForm
-from bartendro import constant
 
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
@@ -38,6 +39,28 @@ def ws_drink_available(drink, state):
     db.session.flush()
     db.session.commit()
     return "ok\n"
+
+@app.route('/ws/drink/<int:id>/load')
+@login_required
+def admin_drink_load(id):
+
+    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
+                                 .order_by(DrinkName.name).all()
+    drink = Drink.query.filter_by(id=int(id)).first()
+    boozes = []
+    for booze in drink.drink_boozes:
+        boozes.append((booze.booze_id, booze.value))
+    drink = { 
+        'id'         : id,
+        'name'       : drink.name.name,
+        'desc'       : drink.desc,
+        'popular'    : drink.popular,
+        'available'  : drink.available,
+        'boozes'     : boozes,
+        'num_boozes' : len(boozes)
+    }
+    print json.dumps(drink)
+    return json.dumps(drink)
 
 @app.route('/ws/drink/<int:drink>/save', methods=["POST"])
 def ws_drink_save(drink):
