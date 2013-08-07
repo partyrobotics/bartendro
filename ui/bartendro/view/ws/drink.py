@@ -102,4 +102,4 @@ def ws_drink_save(drink):
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
-    return ""
+    return "{}"

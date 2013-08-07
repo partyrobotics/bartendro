@@ -1,7 +1,7 @@
 {% extends 'admin/layout' %}
 {% block body %}
 <div class="row-fluid">
-    <div class="span6">
+    <div class="span6 drink-box">
         <h2>{{ title }}</h2>
         <div class="alert" id="status-message" style="display: none"></div>
         <div class="forms">
@@ -9,12 +9,12 @@
                 <fieldset>
                     <input type="hidden" id="drink-id" value="{{ drink.id }}"></input>
                     <div>
-                        <label for="drink-name">Name</label></br>
-                        <input class="form-element" id="drink-name" name="drink_name" minlength="2" required type="text" value="{{ drink.name }}"></input>
+                        <label for="drink-name">Name</label><br/>
+                        <input class="form-element form-field" id="drink-name" name="drink-name" minlength="1" required type="text" value="{{ drink.name }}"></input>
                     </div>
                     <div>
-                        <label for="drink-desc">Description</label></br>
-                        <textarea class="form-element" id="drink-desc" name="desc">{{ drink.desc }}</textarea>
+                        <label for="drink-desc">Description</label><br/>
+                        <textarea class="form-element form-field" id="drink-desc" name="drink_desc" minlength="1" required>{{ drink.desc }}</textarea>
                     </div>
                     <div style="padding-bottom: 20px">
                         <input class="checkbox" id="drink-popular" name="popular" type="checkbox" {% if drink.popular %}checked{% endif %}></input>
@@ -32,20 +32,20 @@
                             <option value="{{ booze_list_id }}">{{ booze_list_name }}</option>
                         {% endfor %}
                         </select>
-                        <input class="edit-field" id="template-booze-parts" type="text"></input>
+                        <input class="edit-field" id="template-booze-parts" required digits type="text"></input>
                         <input type="hidden" id="template-old-booze-id" value="0"></input>
                     </div>
 
                     <div id="booze-lines">
                         {% for booze_id, name, parts in drink.boozes %}
-                            <select class="select-field" id="selected-booze-id-{{ loop.index0 }}" style="width:75%">
+                            <select class="select-field form-element" id="selected-booze-id-{{ loop.index0 }}" style="width:75%">
                             {% for booze_list_id, booze_list_name in drink.booze_list %}
                                 <option value="{{ booze_list_id }}"
                                 {% if booze_list_id == booze_id %} selected {% endif %}
                                 >{{ booze_list_name }}</option>
                             {% endfor %}
                             </select>
-                            <input class="edit-field" id="booze-parts-{{ loop.index0 }}" type="text" value="{{ parts }}"></input>
+                            <input class="edit-field" id="booze-parts-{{ loop.index0 }}" required digits type="text" value="{{ parts }}"></input>
                             <input type="hidden" id="old-booze-id-{{ loop.index0 }}" value="{{ booze_id }}"></input>
                         {% endfor %}
                     </div>
@@ -59,8 +59,8 @@
             </form>
 	</div>
     </div>
-    <div class="span6">
-        <div style="float: right; padding-top: 10px">
+    <div class="span6 drink-box">
+        <div style="float: right; padding-top: 10px;">
         <a href="/admin/drink" class="btn btn-large">add new drink</a>
         </div>
         <h2>drink list</h2>
@@ -98,15 +98,6 @@ function add_booze()
     $("#booze-lines #template-booze-select").attr("id", "selected-booze-id-" + num_boozes);
     $("#booze-lines #template-booze-parts").attr("id", "booze-parts-" + num_boozes);
     $("#booze-lines #template-old-booze-id").attr("id", "old-booze-id-" + num_boozes);
-    for(i = 0; i < max_boozes; i++)
-    {
-        if ( $("#bl_" + i).attr("class") == "booze-line-hidden" )
-        {
-            $("#bl_" + i).toggleClass("booze-line-hidden");
-            $("#bl_" + i).toggleClass("booze-line");
-            return;
-        }
-    }
 
     num_boozes++;
     if (num_boozes == max_boozes)
@@ -114,6 +105,9 @@ function add_booze()
 }
 function save()
 {
+    if (!$("#drink-form").valid())
+        return;
+
     drink = {};
     drink['id'] = $("#drink-id").val();
     drink['name'] = $("#drink-name").val();
@@ -135,7 +129,7 @@ function save()
             contentType: "application/json; charset=utf-8",
             success: function(html)
             {
-                set_message("This drink has been saved.");
+                set_message(drink['name'] + " has been saved.");
             },
             error: function(xhr, txtStatus, errorThrown)
             {
