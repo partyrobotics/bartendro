@@ -354,5 +354,5 @@ function close_modal() {
     $.modal.close();
 }
 </script>
-<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
 {% endblock %}
