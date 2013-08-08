@@ -1,7 +1,7 @@
 {% extends 'admin/layout' %}
 {% block body %}
 <div class="row-fluid">
-    <div class="span6 drink-box">
+    <div class="span6 admin-box">
         <h2>{{ title }}</h2>
         <div class="alert" id="status-message" style="display: none"></div>
         <div class="forms">
@@ -48,7 +48,7 @@
             </form>
 	</div>
     </div>
-    <div class="span6 drink-box">
+    <div class="span6 admin-box">
         <div style="float: right; padding-top: 10px;">
         <a href="/admin/drink" class="btn btn-large">add new drink</a>
         </div>

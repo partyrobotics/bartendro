@@ -1,7 +1,7 @@
 {% extends 'admin/layout' %}
 {% block body %}
 <div class="row-fluid">
-    <div class="span6">
+    <div class="span6 admin-box">
        <h2>{{ title }}</h2>
        {% if saved %}
           <div class="alert"> Your changes have been saved.  </div>
@@ -44,7 +44,7 @@
        </div>
     </div>
 
-    <div class="span6">
+    <div class="span6 admin-box">
        <div style="float: right; padding-top: 10px">
           <a href="/admin/booze" class="btn btn-large">add new booze</a>
        </div>
