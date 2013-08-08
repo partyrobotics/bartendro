@@ -7,7 +7,7 @@
 <div>
 <a href="/admin" style="color: #Fafafa">admin</a>
 </div>
-<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
 function make_drink()
 {

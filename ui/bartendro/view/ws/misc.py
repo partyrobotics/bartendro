@@ -25,7 +25,7 @@ def ws_test_chain():
     driver = app.driver
     for disp in xrange(driver.count()):
 	if not driver.ping(disp):
-	    raise ServiceUnavailable("Dispenser %d failed ping." % disp + 1)
+	    raise ServiceUnavailable("Dispenser %d failed ping." % (disp + 1))
 
     return "ok"
 

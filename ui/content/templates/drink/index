@@ -103,7 +103,7 @@
       </div>
   </div>
 </div>
-<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
 
 var taster_size = 30;
@@ -354,5 +354,5 @@ function close_modal() {
     $.modal.close();
 }
 </script>
-<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
 {% endblock %}
