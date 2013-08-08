@@ -181,27 +181,20 @@ function save()
             }
     });
 }
+
+function sortAlpha(a,b)
+{  
+    return a.cells[0].innerText.toLowerCase() > b.cells[0].innerText.toLowerCase() ? 1 : -1;  
+}
 function update_drink_list(old_drink_id, new_drink_id, name)
 {
     last_id = -1;
     last_name = "";
 
     $("#drink-row-" + old_drink_id).remove();
-    $("#drinks-table").find("td").each(function(){
-        text = $(this).text();
-        console.log(name + " >= " + last_name + " " + name + " < " + text);
-        if (name >= last_name && name < text)
-        {
-            tr = '<tr id="drink-row-' + new_drink_id + '"><td><a href="#" id="booze-link-' + new_drink_id + '" onclick="edit(' + new_drink_id + ')">' + name + '</a></td></tr>';
-            if (last_name == "")
-                console.log("Insert first!");
-            else
-                $("#drink-row-" + last_id).after(tr);
-            return false;
-        }
-        last_name = text;
-        last_id = text;
-    });
+    tr = $('<tr id="drink-row-' + new_drink_id + '"><td><a href="#" id="booze-link-' + new_drink_id + '" onclick="edit(' + new_drink_id + ')">' + name + '</a></td></tr>');
+    $('#drinks-table tr:last').after(tr);
+    $('#drinks-table').html($('#drinks-table tr').sort(sortAlpha));
 }
 
 function cancel()

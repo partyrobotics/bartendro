@@ -43,9 +43,6 @@ def ws_drink_available(drink, state):
 @app.route('/ws/drink/<int:id>/load')
 @login_required
 def admin_drink_load(id):
-
-    drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
-                                 .order_by(DrinkName.name).all()
     drink = Drink.query.filter_by(id=int(id)).first()
     boozes = []
     for booze in drink.drink_boozes:
