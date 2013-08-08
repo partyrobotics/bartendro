@@ -46,9 +46,19 @@ void    flash_led(uint8_t fast);
 // global variables that actually control states
 volatile uint8_t         g_sync = 0;
 
+volatile uint32  pad1;
+volatile uint32  pad2;
+
 // reset related variables
 volatile uint8_t  g_dispenser = 0;
+
+volatile uint32  pad3;
+volatile uint32  pad4;
+
 volatile uint8_t  g_reset = 0;
+
+volatile uint32  pad5;
+volatile uint32  pad6;
 
 void setup(void)
 {
