@@ -19,7 +19,6 @@
 
 #define MAX_DISPENSERS   15 
 #define RESET_DURATION   10
-#define PULSE_WIDTH      1
 
 void    set_pin(uint8_t port, uint8_t pin);
 void    clear_pin(uint8_t port, uint8_t pin);
@@ -48,12 +47,8 @@ void    flash_led(uint8_t fast);
 volatile uint8_t         g_sync = 0;
 
 // reset related variables
-static volatile uint8_t  g_dispenser = 0;
-static volatile uint8_t  g_reset = 0;
-
-// dispenser select related stuff
-volatile uint8_t         g_in_id_assignment;
-static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
+volatile uint8_t  g_dispenser = 0;
+volatile uint8_t  g_reset = 0;
 
 void setup(void)
 {
