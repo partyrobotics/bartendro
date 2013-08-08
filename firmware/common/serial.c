@@ -77,7 +77,7 @@ uint8_t serial_rx_nb(uint8_t *ch)
 
 #ifndef ROUTER
 
-uint8_t receive_packet(packet_t *p)
+uint8_t receive_packet(uint8_t id, packet_t *p)
 {
     uint16_t crc = 0;
     uint8_t  i, ret, ack, header, ch, *ptr;
@@ -159,8 +159,8 @@ uint8_t receive_packet(packet_t *p)
                 ack = PACKET_ACK_CRC_FAIL;
         }
 
-        // send response, unless this is a broadcast packet
-        if (p->dest != DEST_BROADCAST)
+        // send response if this is for us and not a broadcast packet
+        if (p->dest != DEST_BROADCAST && p->dest == id)
         {
             for(;;)
             {
