@@ -7,7 +7,7 @@
         <div class="forms">
             <form id="drink-form">
                 <fieldset>
-                    <input type="hidden" id="drink-id""></input>
+                    <input type="hidden" id="drink-id"" value="0"></input>
                     <div>
                         <label for="drink-name">Name</label><br/>
                         <input class="form-element form-field required" id="drink-name" name="drink-name" minlength="1" type="text"></input>
@@ -145,7 +145,6 @@ function save()
 {
     is_valid = true;
 
-//    $("#drink-form").validate();
     if (!$("#drink-form").valid())
         return;
 
@@ -170,10 +169,10 @@ function save()
             data : JSON.stringify({'drink' : drink}),
             dataType : "json",
             contentType: "application/json; charset=utf-8",
-            success: function(html)
+            success: function(json)
             {
                 set_message(drink['name'] + " has been saved.");
-                update_drink_list(drink['id'], drink['id'], drink['name']);
+                update_drink_list(drink['id'], json['id'], drink['name']);
             },
             error: function(xhr, txtStatus, errorThrown)
             {
