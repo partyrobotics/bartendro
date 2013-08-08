@@ -53,9 +53,9 @@
         <a href="/admin/drink" class="btn btn-large">add new drink</a>
         </div>
         <h2>drink list</h2>
-	<table class="table table-striped table-bordered">
+	<table class="table table-striped table-bordered" id="drinks-table">
             {% for d in drinks %}
-              <tr><td><a href="#" onclick="edit({{d.id}})">{{ d.name.name }}</a></td></tr>
+              <tr id="drink-row-{{d.id}}"><td><a href="#" id="booze-link-{{d.id}}" onclick="edit({{d.id}})">{{ d.name.name }}</a></td></tr>
             {% endfor %}
         </table>
     </div>
@@ -173,6 +173,7 @@ function save()
             success: function(html)
             {
                 set_message(drink['name'] + " has been saved.");
+                update_drink_list(drink['id'], drink['id'], drink['name']);
             },
             error: function(xhr, txtStatus, errorThrown)
             {
@@ -180,6 +181,29 @@ function save()
             }
     });
 }
+function update_drink_list(old_drink_id, new_drink_id, name)
+{
+    last_id = -1;
+    last_name = "";
+
+    $("#drink-row-" + old_drink_id).remove();
+    $("#drinks-table").find("td").each(function(){
+        text = $(this).text();
+        console.log(name + " >= " + last_name + " " + name + " < " + text);
+        if (name >= last_name && name < text)
+        {
+            tr = '<tr id="drink-row-' + new_drink_id + '"><td><a href="#" id="booze-link-' + new_drink_id + '" onclick="edit(' + new_drink_id + ')">' + name + '</a></td></tr>';
+            if (last_name == "")
+                console.log("Insert first!");
+            else
+                $("#drink-row-" + last_id).after(tr);
+            return false;
+        }
+        last_name = text;
+        last_id = text;
+    });
+}
+
 function cancel()
 {
     $("#drink-id").val("");
