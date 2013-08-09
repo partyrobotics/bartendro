@@ -24,8 +24,10 @@ def dispenser():
         pass
 
     dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
-    boozes = db.session.query(Booze).order_by(asc(func.lower(Booze.name))).all()
-    booze_list = [(b.id, b.name) for b in boozes] 
+    boozes = db.session.query(Booze).order_by(Booze.id).all()
+    booze_list = [(b.id, b.name) for b in boozes]
+    sorted_booze_list = sorted(booze_list, key=itemgetter(1))
+
     if app.options.use_liquid_level_sensors:
         states = [dispenser.out for dispenser in dispensers]
     else:
@@ -36,7 +38,7 @@ def dispenser():
     for i in xrange(1, 17):
         dis = "dispenser%d" % i
         actual = "actual%d" % i
-        setattr(F, dis, SelectField("%d" % i, choices=booze_list)) 
+        setattr(F, dis, SelectField("%d" % i, choices=sorted_booze_list)) 
         setattr(F, actual, IntegerField(actual, [validators.NumberRange(min=1, max=100)]))
         kwargs[dis] = "1" # string of selected booze
         fields.append((dis, actual))

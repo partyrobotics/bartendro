@@ -360,32 +360,20 @@ ISR(TWI_vect)
 
    // Get TWI Status Register, mask the prescaler bits (TWPS1,TWPS0)
    twi_status=TWSR & 0xF8;     
-   switch(twi_status) 
+   if (twi_status == TW_SR_DATA_ACK)     // 0x80: data received, ACK returned
    {
-       case TW_SR_DATA_ACK:     // 0x80: data received, ACK returned
-           data = TWDR;
-           if (data == ROUTER_CMD_RESET)
-           {
-               g_reset = 1;
-               break;
-           }
-
-           if (data < MAX_DISPENSERS)
-           {
-               g_dispenser = data;
-               break;
-           }
-           if (data == ROUTER_CMD_SYNC_OFF)
-           {
-               g_sync = 0;
-               break;
-           }
-           if (data == ROUTER_CMD_SYNC_ON)
-           {
-               g_sync = 1;
-               break;
-           }
-           break;
+       data = TWDR;
+       if (data == ROUTER_CMD_RESET)
+           g_reset = 1;
+       else
+       if (data < MAX_DISPENSERS)
+           g_dispenser = data;
+       else
+       if (data == ROUTER_CMD_SYNC_OFF)
+           g_sync = 0;
+       else
+       if (data == ROUTER_CMD_SYNC_ON)
+           g_sync = 1;
    }
    TWCR |= (1<<TWINT);    // Clear TWINT Flag
 }
