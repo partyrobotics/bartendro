@@ -11,7 +11,7 @@ uint8_t serial_rx(void);
 uint8_t serial_rx_nb(uint8_t *ch);
 uint8_t serial_tx_nb(uint8_t ch);
 
-uint8_t receive_packet(packet_t *p);
+uint8_t receive_packet(uint8_t id, packet_t *p);
 uint8_t send_packet(packet_t *p);
 uint8_t send_packet8(uint8_t type, uint8_t data);
 uint8_t send_packet8_2(uint8_t type, uint8_t data0, uint8_t data1);

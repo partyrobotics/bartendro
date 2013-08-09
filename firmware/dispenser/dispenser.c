@@ -553,7 +553,7 @@ int main(void)
 
         for(; !check_reset();)
         {
-            rec = receive_packet(&p);
+            rec = receive_packet(id, &p);
             if (rec == COMM_CRC_FAIL)
                 continue;
 
