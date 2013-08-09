@@ -463,7 +463,7 @@ void is_dispensing(void)
 
 uint8_t address_exchange(void)
 {
-    uint8_t  ch;
+    uint8_t  ch, have_sent_id = 0;
     uint8_t  id;
 
     set_led_rgb(0, 0, 255);
@@ -485,10 +485,13 @@ uint8_t address_exchange(void)
             if (check_reset())
                 return 0xFF;
         }
-        if (ch == 0xFF)
+        if (ch == 0xFF && have_sent_id)
             break;
-        if (ch == '?')
+        if (ch == id)
+        {
             serial_tx(id);
+            have_sent_id = 1;
+        }
     }
     set_led_rgb(0, 255, 0);
 

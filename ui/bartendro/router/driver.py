@@ -144,13 +144,12 @@ class RouterDriver(object):
 
         log.info("Discovering dispensers")
         self.num_dispensers = 0
-        for port in xrange(MAX_DISPENSERS):
-            self._log_startup("port %d:" % port)
-            self.dispenser_select.select(port)
-            sleep(.01)
+        for id in xrange(255):
+            if id == 0: continue
+
             while True:
                 self.ser.flushInput()
-                self.ser.write("???") 
+                self.ser.write(chr(id) + chr(id) + chr(id)) 
                 data = self.ser.read(3)
                 ll = ""
                 for ch in data:
@@ -159,9 +158,8 @@ class RouterDriver(object):
                     if data[0] != data[1] or data[0] != data[2]:
                         self._log_startup("  %s -- inconsistent" % ll)
                         continue
-                    id = ord(data[0])
                     self.dispenser_ids[self.num_dispensers] = id
-                    self.dispenser_ports[self.num_dispensers] = port
+                    self.dispenser_ports[self.num_dispensers] = 0
                     self.num_dispensers += 1
                     self._log_startup("  %s -- Found dispenser with pump id %02X, index %d" % (ll, id, self.num_dispensers))
                     break

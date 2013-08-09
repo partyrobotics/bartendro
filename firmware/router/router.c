@@ -48,12 +48,7 @@ void    flash_led(uint8_t fast);
 volatile uint8_t         g_sync = 0;
 
 // reset related variables
-static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_reset = 0;
-
-// dispenser select related stuff
-volatile uint8_t         g_in_id_assignment;
-static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
 
 void setup(void)
 {
@@ -65,9 +60,6 @@ void setup(void)
     DDRC |= (1<< PORTC3);
     // TX to dispensers
     DDRD |= (1<< PORTD1);
-
-    // By default, select the first dispenser
-    g_dispenser = 0;
 
     // Check the state of the lines that we are routing and repeat that on 
     // our output lines.
@@ -131,81 +123,65 @@ ISR(PCINT0_vect)
             cbi(PORTD, 1);
         g_pcint1 = state;
     }
-
-    switch(g_dispenser)
+    // Check for RX for Dispenser 3
+    state = PINB & (1<<PINB3);
+    if (state != g_pcint3)
     {
-        case 3:
-            // Check for RX for Dispenser 3
-            state = PINB & (1<<PINB3);
-            if (state != g_pcint3)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint3 = state;
-            }
-            break;
-        case 4:
-            // Check for RX for Dispenser 4
-            state = PINB & (1<<PINB5);
-            if (state != g_pcint5)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint5 = state;
-            }
-            break;
-        case 5:
-            // Check for RX for Dispenser 5
-            state = PINB & (1<<PINB7);
-            if (state != g_pcint7)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint7 = state;
-            }
-            break;
-        case 10:
-            // Check for RX for Dispenser 10
-            state = PINB & (1<<PINB2);
-            if (state != g_pcint2)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint2 = state;
-            }
-            break;
-        case 11:
-            // Check for RX for Dispenser 11
-            state = PINB & (1<<PINB4);
-            if (state != g_pcint4)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint4 = state;
-            }
-            break;
-        case 12:
-            // Check for RX for Dispenser 12
-            state = PINB & (1<<PINB6);
-            if (state != g_pcint6)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint6 = state;
-            }
-            break;
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint3 = state;
+    }
+    // Check for RX for Dispenser 4
+    state = PINB & (1<<PINB5);
+    if (state != g_pcint5)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint5 = state;
+    }
+    // Check for RX for Dispenser 5
+    state = PINB & (1<<PINB7);
+    if (state != g_pcint7)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint7 = state;
+    }
+    // Check for RX for Dispenser 10
+    state = PINB & (1<<PINB2);
+    if (state != g_pcint2)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint2 = state;
+    }
+    // Check for RX for Dispenser 11
+    state = PINB & (1<<PINB4);
+    if (state != g_pcint4)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint4 = state;
+    }
+    // Check for RX for Dispenser 12
+    state = PINB & (1<<PINB6);
+    if (state != g_pcint6)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint6 = state;
     }
 }
 
@@ -217,44 +193,35 @@ ISR(PCINT1_vect)
 {
     uint8_t state;
 
-    switch(g_dispenser)
+    // Check for RX for Dispenser 6
+    state = PINC & (1<<PINC1);
+    if (state != g_pcint9)
     {
-        case 6:
-            // Check for RX for Dispenser 6
-            state = PINC & (1<<PINC1);
-            if (state != g_pcint9)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint9 = state;
-            }
-            break;
-        case 13:
-            // Check for RX for Dispenser 13
-            state = PINC & (1<<PINC0);
-            if (state != g_pcint8)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint8 = state;
-            }
-            break;
-        case 14:
-            // Check for RX for Dispenser 14
-            state = PINC & (1<<PINC2);
-            if (state != g_pcint10)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint10 = state;
-            }
-            break;
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint9 = state;
+    }
+    // Check for RX for Dispenser 13
+    state = PINC & (1<<PINC0);
+    if (state != g_pcint8)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint8 = state;
+    }
+    // Check for RX for Dispenser 14
+    state = PINC & (1<<PINC2);
+    if (state != g_pcint10)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        g_pcint10 = state;
     }
 }
 
@@ -270,80 +237,65 @@ ISR(PCINT2_vect)
 {
     uint8_t state;
 
-    switch(g_dispenser)
+    // Check for RX for Dispenser 0
+    state = PIND & (1<<PIND3);
+    if (state != pcint19)
     {
-        case 0:
-            // Check for RX for Dispenser 0
-            state = PIND & (1<<PIND3);
-            if (state != pcint19)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint19 = state;
-            }
-            break;
-        case 1:
-            // Check for RX for Dispenser 1
-            state = PIND & (1<<PIND5);
-            if (state != pcint21)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint21 = state;
-            }
-            break;
-        case 2:
-            // Check for RX for Dispenser 2
-            state = PIND & (1<<PIND7);
-            if (state != pcint23)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint23 = state;
-            }
-            break;
-        case 7:
-            // Check for RX for Dispenser 7
-            state = PIND & (1<<PIND0);
-            if (state != pcint16)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint16 = state;
-            }
-            break;
-        case 8:
-            // Check for RX for Dispenser 8
-            state = PIND & (1<<PIND4);
-            if (state != pcint20)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint20 = state;
-            }
-            break;
-        case 9:
-            // Check for RX for Dispenser 9
-            state = PIND & (1<<PIND6);
-            if (state != pcint22)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint22 = state;
-            }
-            break;
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint19 = state;
+    }
+    // Check for RX for Dispenser 1
+    state = PIND & (1<<PIND5);
+    if (state != pcint21)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint21 = state;
+    }
+    // Check for RX for Dispenser 2
+    state = PIND & (1<<PIND7);
+    if (state != pcint23)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint23 = state;
+    }
+    // Check for RX for Dispenser 7
+    state = PIND & (1<<PIND0);
+    if (state != pcint16)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint16 = state;
+    }
+    // Check for RX for Dispenser 8
+    state = PIND & (1<<PIND4);
+    if (state != pcint20)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint20 = state;
+    }
+    // Check for RX for Dispenser 9
+    state = PIND & (1<<PIND6);
+    if (state != pcint22)
+    {
+        if (state)
+            sbi(PORTB, 0);
+        else
+            cbi(PORTB, 0);
+        pcint22 = state;
     }
 }
 
@@ -367,12 +319,6 @@ ISR(TWI_vect)
            if (data == ROUTER_CMD_RESET)
            {
                g_reset = 1;
-               break;
-           }
-
-           if (data < MAX_DISPENSERS)
-           {
-               g_dispenser = data;
                break;
            }
            if (data == ROUTER_CMD_SYNC_OFF)
