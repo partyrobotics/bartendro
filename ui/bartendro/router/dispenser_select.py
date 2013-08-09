@@ -42,7 +42,7 @@ class DispenserSelect(object):
 
     def select(self, dispenser):
         if self.software_only: return
-        if dispenser < self.max_dispensers and self.selected != dispenser:
+        if dispenser < self.max_dispensers: # and self.selected != dispenser:
             self.selected = dispenser
             self.router.write_byte(ROUTER_ADDRESS, dispenser)
             sleep(.01)
