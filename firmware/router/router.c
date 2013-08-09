@@ -46,14 +46,8 @@ void    flash_led(uint8_t fast);
 
 // global variables that actually control states
 volatile uint8_t         g_sync = 0;
-
-// reset related variables
 static volatile uint8_t  g_dispenser = 0;
 static volatile uint8_t  g_reset = 0;
-
-// dispenser select related stuff
-volatile uint8_t         g_in_id_assignment;
-static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
 
 void setup(void)
 {
@@ -85,14 +79,6 @@ void setup(void)
     // the pull up on B1, which we should not need.
     //sbi(PORTB, 1);
 
-    // PCINT setup
-    PCMSK0 |= (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT3) | (1 << PCINT4) | 
-              (1 << PCINT5) | (1 << PCINT6) | (1 << PCINT7);
-    PCMSK1 |= (1 << PCINT8) | (1 << PCINT9) | (1 << PCINT10);
-    PCMSK2 |= (1 << PCINT16) | (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21) | 
-              (1 << PCINT22) | (1 << PCINT23);
-    PCICR |=  (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2);
-
     // Timer setup for SYNC signal
     TCCR1B |= TIMER1_FLAGS;
     TCNT1 = TIMER1_INIT;
@@ -107,244 +93,6 @@ void setup(void)
     g_sync = 0;
 
     sei();
-}
-
-static volatile uint8_t g_pcint1 = 0;
-static volatile uint8_t g_pcint2 = 0;
-static volatile uint8_t g_pcint3 = 0;
-static volatile uint8_t g_pcint4 = 0;
-static volatile uint8_t g_pcint5 = 0;
-static volatile uint8_t g_pcint6 = 0;
-static volatile uint8_t g_pcint7 = 0;
-
-ISR(PCINT0_vect)
-{
-    uint8_t      state;
-
-    // Check for RX from the RPI
-    state = PINB & (1<<PINB1);
-    if (state != g_pcint1)
-    {
-        if (state)
-            sbi(PORTD, 1);
-        else
-            cbi(PORTD, 1);
-        g_pcint1 = state;
-    }
-
-    switch(g_dispenser)
-    {
-        case 3:
-            // Check for RX for Dispenser 3
-            state = PINB & (1<<PINB3);
-            if (state != g_pcint3)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint3 = state;
-            }
-            break;
-        case 4:
-            // Check for RX for Dispenser 4
-            state = PINB & (1<<PINB5);
-            if (state != g_pcint5)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint5 = state;
-            }
-            break;
-        case 5:
-            // Check for RX for Dispenser 5
-            state = PINB & (1<<PINB7);
-            if (state != g_pcint7)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint7 = state;
-            }
-            break;
-        case 10:
-            // Check for RX for Dispenser 10
-            state = PINB & (1<<PINB2);
-            if (state != g_pcint2)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint2 = state;
-            }
-            break;
-        case 11:
-            // Check for RX for Dispenser 11
-            state = PINB & (1<<PINB4);
-            if (state != g_pcint4)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint4 = state;
-            }
-            break;
-        case 12:
-            // Check for RX for Dispenser 12
-            state = PINB & (1<<PINB6);
-            if (state != g_pcint6)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint6 = state;
-            }
-            break;
-    }
-}
-
-static volatile uint8_t  g_pcint8 = 0;
-static volatile uint8_t  g_pcint9 = 0;
-static volatile uint8_t  g_pcint10 = 0;
-
-ISR(PCINT1_vect)
-{
-    uint8_t state;
-
-    switch(g_dispenser)
-    {
-        case 6:
-            // Check for RX for Dispenser 6
-            state = PINC & (1<<PINC1);
-            if (state != g_pcint9)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint9 = state;
-            }
-            break;
-        case 13:
-            // Check for RX for Dispenser 13
-            state = PINC & (1<<PINC0);
-            if (state != g_pcint8)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint8 = state;
-            }
-            break;
-        case 14:
-            // Check for RX for Dispenser 14
-            state = PINC & (1<<PINC2);
-            if (state != g_pcint10)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint10 = state;
-            }
-            break;
-    }
-}
-
-// variables related to PCINT2
-static volatile uint8_t  pcint16 = 0;
-static volatile uint8_t  pcint19 = 0;
-static volatile uint8_t  pcint20 = 0;
-static volatile uint8_t  pcint21 = 0;
-static volatile uint8_t  pcint22 = 0;
-static volatile uint8_t  pcint23 = 0;
-
-ISR(PCINT2_vect)
-{
-    uint8_t state;
-
-    switch(g_dispenser)
-    {
-        case 0:
-            // Check for RX for Dispenser 0
-            state = PIND & (1<<PIND3);
-            if (state != pcint19)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint19 = state;
-            }
-            break;
-        case 1:
-            // Check for RX for Dispenser 1
-            state = PIND & (1<<PIND5);
-            if (state != pcint21)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint21 = state;
-            }
-            break;
-        case 2:
-            // Check for RX for Dispenser 2
-            state = PIND & (1<<PIND7);
-            if (state != pcint23)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint23 = state;
-            }
-            break;
-        case 7:
-            // Check for RX for Dispenser 7
-            state = PIND & (1<<PIND0);
-            if (state != pcint16)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint16 = state;
-            }
-            break;
-        case 8:
-            // Check for RX for Dispenser 8
-            state = PIND & (1<<PIND4);
-            if (state != pcint20)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint20 = state;
-            }
-            break;
-        case 9:
-            // Check for RX for Dispenser 9
-            state = PIND & (1<<PIND6);
-            if (state != pcint22)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint22 = state;
-            }
-            break;
-    }
 }
 
 ISR (TIMER1_OVF_vect)
@@ -390,6 +138,187 @@ ISR(TWI_vect)
    TWCR |= (1<<TWINT);    // Clear TWINT Flag
 }
 
+void port_b_process_change(uint8_t port_b, uint8_t changed_pins)
+{
+    // Check for RX from the RPI
+    if (changed_pins & (1 << PB1))
+    {
+        if (port_b & (1 << PB1))
+            sbi(PORTD, 1);
+        else
+            cbi(PORTD, 1);
+    }
+
+    switch(g_dispenser)
+    {
+        case 3:
+            // Check for RX for Dispenser 3
+            if (changed_pins & (1 << PB3))
+            {
+                if (port_b & (1 << PB3))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 4:
+            // Check for RX for Dispenser 4
+            if (changed_pins & (1 << PB5))
+            {
+                if (port_b & (1 << PB5))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 5:
+            // Check for RX for Dispenser 5
+            if (changed_pins & (1 << PB5))
+            {
+                if (port_b & (1 << PB5))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 10:
+            // Check for RX for Dispenser 10
+            if (changed_pins & (1 << PB2))
+            {
+                if (port_b & (1 << PB2))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 11:
+            // Check for RX for Dispenser 11
+            if (changed_pins & (1 << PB4))
+            {
+                if (port_b & (1 << PB4))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 12:
+            // Check for RX for Dispenser 12
+            if (changed_pins & (1 << PB6))
+            {
+                if (port_b & (1 << PB6))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+    }
+}
+
+void port_c_process_change(uint8_t port_c, uint8_t changed_pins)
+{
+    switch(g_dispenser)
+    {
+        case 6:
+            // Check for RX for Dispenser 6
+            if (changed_pins & (1 << PC1))
+            {
+                if (port_c & (1 << PC1))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 13:
+            // Check for RX for Dispenser 13
+            if (changed_pins & (1 << PC0))
+            {
+                if (port_c & (1 << PC0))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 14:
+            // Check for RX for Dispenser 14
+            if (changed_pins & (1 << PC2))
+            {
+                if (port_c & (1 << PC2))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+    }
+}
+
+void port_d_process_change(uint8_t port_d, uint8_t changed_pins)
+{
+    switch(g_dispenser)
+    {
+        case 0:
+            // Check for RX for Dispenser 0
+            if (changed_pins & (1 << PD3))
+            {
+                if (port_d & (1 << PD3))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 1:
+            // Check for RX for Dispenser 1
+            if (changed_pins & (1 << PD5))
+            {
+                if (port_d & (1 << PD5))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+                pcint21 = state;
+            }
+            break;
+        case 2:
+            // Check for RX for Dispenser 2
+            if (changed_pins & (1 << PD7))
+            {
+                if (port_d & (1 << PD7))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 7:
+            // Check for RX for Dispenser 7
+            if (changed_pins & (1 << PD0))
+            {
+                if (port_d & (1 << PD0))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 8:
+            // Check for RX for Dispenser 8
+            if (changed_pins & (1 << PD4))
+            {
+                if (port_d & (1 << PD4))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+        case 9:
+            // Check for RX for Dispenser 9
+            if (changed_pins & (1 << PD6))
+            {
+                if (port_d & (1 << PD6))
+                    sbi(PORTB, 0);
+                else
+                    cbi(PORTB, 0);
+            }
+            break;
+    }
+}
+
 void reset_dispensers(void)
 {
     // Reset the dispensers
@@ -402,35 +331,20 @@ void reset_dispensers(void)
     _delay_ms(1000);
 }
 
-// These functions are needed in the dispenser, but not the router.
-// So we just have empty functions here
-void idle()
-{
-
-}
-uint8_t check_reset(void)
-{
-    return 0;
-}
-
 int main (void)
 {
     uint8_t reset = 0, i;
+    uint8_t port_b, port_c, port_d;
+    uint8_t port_b_last = 0xFF, port_c_last = 0xFF, port_d_last = 0xFF;
 
     for(;;)
     {
         setup();
-        for(i = 0; i < 5; i++)
-        {
-            sbi(PORTC, 3);
-            _delay_ms(10);
-            cbi(PORTC, 3);
-            _delay_ms(10);
-        }
         reset_dispensers();
 
         for(;;)
         {
+            // Check for a reset signal
             cli();
             reset = g_reset;
             sei();
@@ -442,7 +356,30 @@ int main (void)
                 sei();
                 break; 
             }
-            _delay_ms(1);
+
+            // check for a change on PORT B
+            port_b = PINB;
+            if (port_b != port_b_last)
+            {
+                port_b_process_change(port_b, port_b ^ port_b_last);
+                port_b_last = port_b;
+            }
+
+            // check for a change on PORT C
+            port_c = PINC;
+            if (port_c != port_c_last)
+            {
+                port_c_process_change(port_c, port_c ^ port_c_last);
+                port_c_last = port_c;
+            }
+
+            // check for a change on PORT D
+            port_d = PIND;
+            if (port_d != port_d_last)
+            {
+                port_d_process_change(port_d, port_d ^ port_d_last);
+                port_d_last = port_d;
+            }
         }
     }
     return 0;
