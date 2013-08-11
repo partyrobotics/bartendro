@@ -3,7 +3,7 @@ from bartendro import db
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import Table, Column, Integer, UnicodeText, Text, Index
 
-class Options(db.Model):
+class Option(db.Model):
     """
     Configuration options for Bartendro
     """
@@ -21,4 +21,4 @@ class Options(db.Model):
     def __repr__(self):
         return "<Option('%s','%s'='%s')>" % (self.id, self.key, self.value)
 
-Index('options_key_ndx', Options.key)
+Index('options_key_ndx', Option.key)
