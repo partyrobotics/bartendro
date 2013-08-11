@@ -75,7 +75,42 @@ static const struct {
     { &PINC, PINC0 }, // dispenser 13
     { &PINC, PINC2 }, // dispenser 14
 };
- 
+
+void echo_dispenser(void)
+{
+    volatile unsigned char *group;
+    uint8_t pin, state;
+
+    // capture a local copy of g_dispenser to guarantee the next two lines use the same value
+    // (interrupt could come between the two and change g_dispenser, I think? Depends on interrupt
+    // rules. I don't *think* this is an issue, but it would be a rare enough failure case that
+    // it would be near impossible to debug.)
+    uint8_t disp = g_dispenser;
+
+    group = dispenser[disp].group;
+    pin = dispenser[disp].pin;
+
+    state = *group & (1 << pin);
+
+    if (state)
+        sbi(PORTB, 0);
+    else
+        cbi(PORTB, 0);
+}
+
+void echo_rpi(void)
+{
+    uint8_t      state;
+
+    // Check for RX from the RPI
+    state = PINB & (1<<PINB1);
+
+    if (state)
+        sbi(PORTD, 1);
+    else
+        cbi(PORTD, 1);
+}
+
 void setup(void)
 {
     // TX to RPI
@@ -92,15 +127,8 @@ void setup(void)
 
     // Check the state of the lines that we are routing and repeat that on 
     // our output lines.
-    if (PINB & (1<<PINB1))
-        sbi(PORTD, 1);
-    else
-        cbi(PORTD, 1);
-
-    if (PIND & (1<<PIND3))
-        sbi(PORTB, 0);
-    else
-        cbi(PORTB, 0);
+    echo_rpi();
+    echo_dispenser();
     
     // TODO: Check to see if we really want this statement. This enables
     // the pull up on B1, which we should not need.
@@ -128,35 +156,6 @@ void setup(void)
     g_sync = 0;
 
     sei();
-}
-
-void echo_dispenser(void)
-{
-    volatile unsigned char *group;
-    uint8_t pin, state;
-
-    group = dispenser[g_dispenser].group;
-    pin = dispenser[g_dispenser].pin;
-
-    state = *group & (1 << pin);
-
-    if (state)
-        sbi(PORTB, 0);
-    else
-        cbi(PORTB, 0);
-}
-
-void echo_rpi(void)
-{
-    uint8_t      state;
-
-    // Check for RX from the RPI
-    state = PINB & (1<<PINB1);
-
-    if (state)
-        sbi(PORTD, 1);
-    else
-        cbi(PORTD, 1);
 }
 
 ISR(PCINT0_vect)
@@ -234,8 +233,8 @@ void reset_dispensers(void)
 // So we just have empty functions here
 void idle()
 {
-
 }
+
 uint8_t check_reset(void)
 {
     return 0;
