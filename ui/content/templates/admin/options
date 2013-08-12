@@ -1,28 +1,36 @@
 {% extends 'admin/layout' %}
 {% block body %}
 <div class="row-fluid">
-    <div class="span8">
+    <div class="span12">
         <h2>{{ title }}</h2>
         <div class="alert" id="status-message" style="display: none"></div>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span8 admin-box">
         <h3>Bartendro options</h3>
         <form id="options-form">
             <fieldset>
-                <table id="bartendro-options-table">
-                {% for option in db_options %}
-                    <tr>
-                       <td>{{ option.key }}</td>
-                       {% if option.type == "boolean" %}
-                            <input class="checkbox" id="option-{{ key }}" 
-                                   type="checkbox" {% if option.value %}checked{% endif %}'></input>
-                       <td>{{ option.value }}</td>
-                    </tr>
-                {% endfor %}
+                <h4>General options</h4>
+                    <div>
+                        <input class="required" id="use-liquid-sensors" type="checkbox"></input>
+                        <label for="use-liquid-sensors">Use liquid level sensors (only check this if you have the sensors installed)</label>
+                    </div>
+                    <div>
+                        <input class="required" id="must-login-to-dispense" type="checkbox"></input>
+                        <label for="must-login-to-dispense">Require a valid user login to dispense drinks</label>
+                    </div>
+                    <div>
+                        <label for="must-login-to-dispense">Require a valid user login to dispense drinks</label>
+                        <input class="required" id="must-login-to-dispense" type="checkbox"></input>
+                    </div>
+                    
                 </table>
             </fieldset>
         </form>
         <a class="btn btn-large btn-primary" onclick="save()">save</a>
     </div>
-    <div class="span4">
+    <div class="span4 admin-box">
         <h3>Database schema</h3>
         <p>
         Your database schema version is: {{ schema }}
