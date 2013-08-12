@@ -42,7 +42,12 @@ class DispenserSelect(object):
 
     def select(self, dispenser):
         if self.software_only: return
-        if dispenser < self.max_dispensers: # and self.selected != dispenser:
+
+        # NOTE: This code used to only send the select message if the dispenser changed.
+        # but tracking which dispenser was last selected across many web server threads
+        # is an extra pain I dont care to handle now. For now we'll just set the dispenser
+        # for each packet we send.
+        if dispenser < self.max_dispensers:
             self.selected = dispenser
             self.router.write_byte(ROUTER_ADDRESS, dispenser)
             sleep(.01)
