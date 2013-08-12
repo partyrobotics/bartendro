@@ -7,18 +7,21 @@ from sqlalchemy.exc import OperationalError
 log = logging.getLogger('bartendro')
 
 bartendro_options = {
-    u'use_liquid_level_sensors': u'0',
-    u'must_login_to_dispense'  : u'0',
+    u'use_liquid_level_sensors': False,
+    u'must_login_to_dispense'  : False,
     u'login_name'              : u"bartendro",
     u'login_passwd'            : u"boozemeup",
-    u'metric'                  : u'0',
-    u'drink_size'              : u'150',
-    u'show_strength'           : u'1',
-    u'show_size'               : u'1',
-    u'show_taster'             : u'0',
-    u'strength_steps'          : u'2',
-    u'test_dispense_ml'        : u'10'
+    u'metric'                  : False,
+    u'drink_size'              : 150,
+    u'show_strength'           : True,
+    u'show_size'               : True,
+    u'show_taster'             : False,
+    u'strength_steps'          : 2,
+    u'test_dispense_ml'        : 10
 }
+
+class BadConfigOptionsError(Exception):
+    pass
 
 class Options(object):
     '''A simple placeholder for options'''
@@ -29,12 +32,10 @@ class Options(object):
 def setup_options_table():
     '''Check to make sure the options table is present'''
 
-    if db.engine.dialect.has_table(db.engine.connect(), "option"):
-        return
-
-    log.info("Creating options table")
-    option = Option()
-    option.__table__.create(db.engine)
+    if not db.engine.dialect.has_table(db.engine.connect(), "option"):
+        log.info("Creating options table")
+        option = Option()
+        option.__table__.create(db.engine)
 
     # Try and see if we have a legacy config.py kicking around. If so,
     # import the options and save them in the DB
@@ -47,15 +48,18 @@ def setup_options_table():
     options = db.session.query(Option).all()
     opt_dict = {}
     for o in options:
-        opt_dict[o.key] = value
+        opt_dict[o.key] = o.value
 
     # Now populate missing keys from old config or defaults
     for opt in bartendro_options:
         if not opt in opt_dict:
+            log.info("option %s is not in DB." % opt)
             try:
                 value = getattr(config, opt)
+                log.info("Get option from legacy: %s" % value)
             except AttributeError:
                 value = bartendro_options[opt]
+                log.info("Get option from defaults: %s" % value)
 
             log.info("Adding option '%s'" % opt)
             o = Option(opt, value)
@@ -70,6 +74,15 @@ def load_options():
 
     options = Options()
     for o in db.session.query(Option).all():
-        setattr(options, o.key, o.value)
+        if isinstance(bartendro_options[o.key], int):
+           value = int(o.value)
+        elif isinstance(bartendro_options[o.key], unicode):
+           value = unicode(o.value)
+        elif isinstance(bartendro_options[o.key], boolean):
+           value = boolean(o.value)
+        else:
+            raise BadConfigOptionsError
+
+        setattr(options, o.key, value)
 
     return options
