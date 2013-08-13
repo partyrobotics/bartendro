@@ -3,7 +3,7 @@ import json
 from sqlalchemy import asc, func
 from bartendro import app, db, mixer
 from flask import Flask, request
-from flask.ext.login import login_required
+from flask.ext.login import login_required, logout_user
 from werkzeug.exceptions import InternalServerError, BadRequest
 from bartendro.model.option import Option
 from bartendro.options import bartendro_options
@@ -25,11 +25,14 @@ def ws_options():
                 raise InternalServerError
             data[o.key] = value
 
-        print  json.dumps({ 'options' : data });
         return json.dumps({ 'options' : data });
 
     if request.method == 'POST':
+        print  json.dumps(request.json);
         data = request.json['options']
+        logout = request.json['logout']
+
+        if logout: logout_user()
 
         Option.query.delete()
 

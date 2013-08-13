@@ -125,6 +125,7 @@
 <script type="text/javascript">
 
 var timer;
+var saved_login_name, saved_login_passwd;
 
 $(document).ready(function() 
 {
@@ -175,6 +176,8 @@ function set_options(opts)
         $('#option-must-login-to-dispense').prop("checked", false);
 
     $('#login-name').val(opts['login_name']);
+    saved_login_name = opts['login_name'];
+    saved_login_passwd = opts['login_passwd'];
     $('#login-passwd').val(opts['login_passwd']);
     $('#option-drink-size').val(opts['drink_size']);
     $('#option-taster-size').val(opts['taster_size']);
@@ -211,10 +214,15 @@ function save()
     options['show_strength'] = $("#option-show-strength").prop("checked") ? 1 : 0;
     options['strength_steps'] = $("#option-strength-steps").val();
 
+    j = {}
+    j['options'] = options;
+    if (options['login_name'] != saved_login_name || options['login_name'] != saved_login_passwd)
+        j['logout'] = 1;
+
     $.ajax({
             url: "/ws/options",
             type: "POST",
-            data : JSON.stringify({'options' : options}),
+            data : JSON.stringify(j),
             dataType : "json",
             contentType: "application/json; charset=utf-8",
             success: function(json)
