@@ -105,11 +105,31 @@
         </div>
     </div>
 </div>
+<div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
+  <p>
+    The options have been saved and Bartendro is being restarted. 
+  </p>
+  <p>
+    Please wait.
+  </p>
+</div>
+<div id="manual-reload-dialog" title="Bartendro" style="display: none; text-align: center;">
+  <p>
+    The options have been saved. In order for these options to take effect, please 
+    restart Bartendro.
+  </p>
+</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.timer.js"></script>
 <script type="text/javascript">
+
+var timer;
+
 $(document).ready(function() 
 {
     load();
+    timer = $.timer(function() { window.location.reload(); });
 });
 
 function set_message(txt)
@@ -200,8 +220,14 @@ function save()
             success: function(json)
             {
                 set_message("The options have been saved.");
-                if (json['reload'))
 
+                if (json['reload'])
+                {
+                    timer.set({ time : 12000, autostart : true });
+                    $("#reload-dialog" ).dialog({ modal: true, closeOnEscape: false, dialogClass: "no-close" });
+                }
+                else
+                    $("#manual-reload-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
             },
             error: function(xhr, txtStatus, errorThrown)
             {

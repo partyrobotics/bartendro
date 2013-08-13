@@ -1,0 +1,386 @@
+/* For mobile phone screens */
+@media (max-width: 767px) {
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: Verdana, Geneva, sans-serif;
+        background-color: #DADADA;
+        padding: 0px;
+    }
+    #content {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        display: block;
+    }
+    .fill { 
+        min-height: 100%;
+        height: 100%;
+        background-color: #DADADA;
+    }
+    #moar {
+        padding: 5px;
+    }
+
+    .orange-border {
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 6px;
+        border-color: #D9A180;
+        background-color: #D9A180;
+    }
+
+    .dark-border {
+        border-radius: 7px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #B98160;
+        padding: 2px;
+        background-color: white;
+    }
+
+    #scroll-pane {
+        padding: 5px;
+    }
+    .dispense-stack {
+        padding: 0 5px 0 5px;
+    }
+
+    .lb-box {
+        background-color: white;
+        float: center;
+        height:250px;   
+        width: 250;
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        text-align: center;
+        overflow: hidden;
+        padding: 10px;
+        background-color: white;
+    }
+
+    .lb-drink {
+        padding-top: 10px;
+        font-weight: bold;
+        font-size: 20pt;
+        line-height: 20pt;
+        text-align: center;
+    }
+
+    .lb-error {
+        padding-top: 10px;
+        font-weight: bold;
+        font-size: 11pt;
+        line-height: 13pt;
+        text-align: center;
+    }
+}
+
+@media (min-width: 768px) {
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: Verdana, Geneva, sans-serif;
+        background-color: #DADADA;
+    }
+    #content {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        display: block;
+    }
+    .fill { 
+        min-height: 100%;
+        height: 100%;
+        background-color: #DADADA;
+    }
+    #moar {
+        padding: 20px;
+    }
+
+    .orange-border {
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        background-color: #D9A180;
+    }
+
+    .dark-border {
+        border-radius: 7px;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #B98160;
+        padding: 4px;
+        background-color: white;
+    }
+
+    #scroll-pane {
+        padding: 20px;
+    }
+
+    .dispense-stack {
+        padding: 0 20px 0 20px;
+    }
+
+    .lb-box {
+        background-color: white;
+        float: center;
+        height:250px;   
+        width: 500px;
+        border-radius: 15px;
+        border-style: solid;
+        border-width: 12px;
+        border-color: #D9A180;
+        text-align: center;
+        overflow: hidden;
+        padding: 20px;
+        background-color: white;
+    }
+
+    .lb-drink {
+        padding-top: 50px;
+        font-weight: bold;
+        font-size: 35pt;
+        line-height: 35pt;
+        text-align: center;
+    }
+
+    .lb-error {
+        padding-top: 10px;
+        font-weight: bold;
+        font-size: 16pt;
+        line-height: 18pt;
+        text-align: center;
+    }
+}
+
+.trending-drinks {
+    text-align: right;
+    font-size: 16pt;
+    padding-top: 25px;
+}
+
+.menuitem
+{
+    padding: 8px;
+    font-size: 15pt;
+}
+
+.menuitem-button {
+    display: block;
+    margin-bottom: 8px;
+}
+
+h1 {
+    color: #005991;
+    font-weight: normal;
+    font-size: 24pt;
+    padding-left: 10px;
+}
+
+h3 {
+    color: #005991;
+    font-weight: normal;
+    font-size: 16pt;
+    margin: 0px;
+    padding: 20px 0 0 0;
+}
+
+.ingredients {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.button-border {
+    border-width: 2px;
+    border-color: #4788BF;
+}
+
+.drink-btn {
+    font-size: 15pt;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.drink-plus-minus {
+    font-size: 25pt;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.drink-heading {
+    color: white;
+    background-color: #005991;
+    border-radius: 5px;
+    font-size: 30pt;
+    padding: 25px;
+    line-height: 30pt;
+}
+
+.dispense-drink-detail {
+    padding: 20px 0 20px 20px; 
+    font-size: 15pt;
+}
+
+.dispense-stack-element {
+    padding-top: 20px;
+}
+
+table {
+    width: 100%;
+}
+
+.margin-td {
+    width: 5%;
+}
+
+.main-td {
+    width: 90%;
+    text-align: center;
+}
+
+.margin-td-label {
+    font-weight: bold;
+    text-align: center;
+}
+
+.adjust-middle {
+    font-size: 15pt;
+    font-weight: bold;
+}
+
+.stack-element-title {
+    color: #005991;
+    font-weight: normal;
+    font-size: 22pt;
+    padding-left: 10px;
+}
+
+.dispense-button {
+}
+
+.dispense-buttons {
+    margin: 40px 0 20px 0;
+}
+
+.dispense-buttons-left {
+}
+
+.dispense-buttons-middle {
+    text-align: center;
+}
+
+.dispense-buttons-right {
+    font-weight: bold;
+    text-align: right;
+}
+
+.dispenser-out {
+    display: inline;
+    color: red;
+}
+
+.dispenser-warning {
+    display: inline;
+    color: orange;
+}
+
+.dispenser-ok {
+    display: inline;
+}
+
+.admin-box {
+    border: 2px solid #D9A180;
+    padding: 10px; 
+    border-radius: 5px;
+    background: white;
+    height: 800px;
+    overflow-y: auto;
+}
+
+.admin-box-full {
+    border: 2px solid #D9A180;
+    padding: 10px; 
+    border-radius: 5px;
+    background: white;
+}
+
+.pre-scrollable {
+    height: 500px; 
+    scroll-y: auto; 
+    clear: both;
+}
+
+.select-field {
+    height: 44px;
+    vertical-align: top !important;
+}
+
+.form-div {
+    margin-bottom: 10px;
+}
+
+.edit-field {
+    margin-left: 10px;
+    width: 30px;
+    height: 35px !important;
+    vertical-align: top !important;
+}
+
+.form-element {
+    width: 80%;
+}
+
+.div-spacer {
+    margin-top: 15px;
+}
+
+.submit-button {
+    float: right; 
+    margin-right: 25px;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
+.ll-calibrate-textbox {
+    width: 75px;
+    height: 35px !important;
+    vertical-align: top !important;
+}
+
+.ll-dispenser-number {
+    font-size: 13pt;
+}
+
+.ll-column-spacer {
+    margin-right: 40px;
+}
+
+.error {
+    color: red;
+    display: block;
+    font-size: 11pt;
+}
+
+.login-box {
+    border-radius: 7px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #bbb;;
+    padding: 20px;
+    background-color: white;
+}
+
+.shotbot-button {
+    width: 50%;
+    height: 200px;
+    font-size: 30pt;
+    line-height: 30pt;
+    border-radius: 1em;
+}
