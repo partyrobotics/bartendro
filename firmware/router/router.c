@@ -55,6 +55,62 @@ static volatile uint8_t  g_reset = 0;
 volatile uint8_t         g_in_id_assignment;
 static volatile uint8_t  g_dispenser_id[MAX_DISPENSERS];
 
+static const struct {
+    volatile unsigned char *group;
+    unsigned pin;
+} dispenser[MAX_DISPENSERS] = {
+    { &PIND, PIND3 }, // dispenser 0
+    { &PIND, PIND5 }, // dispenser 1
+    { &PIND, PIND7 }, // dispenser 2
+    { &PINB, PINB3 }, // dispenser 3
+    { &PINB, PINB5 }, // dispenser 4
+    { &PINB, PINB7 }, // dispenser 5
+    { &PINC, PINC1 }, // dispenser 6
+    { &PIND, PIND0 }, // dispenser 7
+    { &PIND, PIND4 }, // dispenser 8
+    { &PIND, PIND6 }, // dispenser 9
+    { &PINB, PINB2 }, // dispenser 10
+    { &PINB, PINB4 }, // dispenser 11
+    { &PINB, PINB6 }, // dispenser 12
+    { &PINC, PINC0 }, // dispenser 13
+    { &PINC, PINC2 }, // dispenser 14
+};
+
+void echo_dispenser(void)
+{
+    volatile unsigned char *group;
+    uint8_t pin, state;
+
+    // capture a local copy of g_dispenser to guarantee the next two lines use the same value
+    // (interrupt could come between the two and change g_dispenser, I think? Depends on interrupt
+    // rules. I don't *think* this is an issue, but it would be a rare enough failure case that
+    // it would be near impossible to debug.)
+    uint8_t disp = g_dispenser;
+
+    group = dispenser[disp].group;
+    pin = dispenser[disp].pin;
+
+    state = *group & (1 << pin);
+
+    if (state)
+        sbi(PORTB, 0);
+    else
+        cbi(PORTB, 0);
+}
+
+void echo_rpi(void)
+{
+    uint8_t      state;
+
+    // Check for RX from the RPI
+    state = PINB & (1<<PINB1);
+
+    if (state)
+        sbi(PORTD, 1);
+    else
+        cbi(PORTD, 1);
+}
+
 void setup(void)
 {
     // TX to RPI
@@ -71,15 +127,8 @@ void setup(void)
 
     // Check the state of the lines that we are routing and repeat that on 
     // our output lines.
-    if (PINB & (1<<PINB1))
-        sbi(PORTD, 1);
-    else
-        cbi(PORTD, 1);
-
-    if (PIND & (1<<PIND3))
-        sbi(PORTB, 0);
-    else
-        cbi(PORTB, 0);
+    echo_rpi();
+    echo_dispenser();
     
     // TODO: Check to see if we really want this statement. This enables
     // the pull up on B1, which we should not need.
@@ -109,242 +158,20 @@ void setup(void)
     sei();
 }
 
-static volatile uint8_t g_pcint1 = 0;
-static volatile uint8_t g_pcint2 = 0;
-static volatile uint8_t g_pcint3 = 0;
-static volatile uint8_t g_pcint4 = 0;
-static volatile uint8_t g_pcint5 = 0;
-static volatile uint8_t g_pcint6 = 0;
-static volatile uint8_t g_pcint7 = 0;
-
 ISR(PCINT0_vect)
 {
-    uint8_t      state;
-
-    // Check for RX from the RPI
-    state = PINB & (1<<PINB1);
-    if (state != g_pcint1)
-    {
-        if (state)
-            sbi(PORTD, 1);
-        else
-            cbi(PORTD, 1);
-        g_pcint1 = state;
-    }
-
-    switch(g_dispenser)
-    {
-        case 3:
-            // Check for RX for Dispenser 3
-            state = PINB & (1<<PINB3);
-            if (state != g_pcint3)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint3 = state;
-            }
-            break;
-        case 4:
-            // Check for RX for Dispenser 4
-            state = PINB & (1<<PINB5);
-            if (state != g_pcint5)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint5 = state;
-            }
-            break;
-        case 5:
-            // Check for RX for Dispenser 5
-            state = PINB & (1<<PINB7);
-            if (state != g_pcint7)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint7 = state;
-            }
-            break;
-        case 10:
-            // Check for RX for Dispenser 10
-            state = PINB & (1<<PINB2);
-            if (state != g_pcint2)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint2 = state;
-            }
-            break;
-        case 11:
-            // Check for RX for Dispenser 11
-            state = PINB & (1<<PINB4);
-            if (state != g_pcint4)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint4 = state;
-            }
-            break;
-        case 12:
-            // Check for RX for Dispenser 12
-            state = PINB & (1<<PINB6);
-            if (state != g_pcint6)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint6 = state;
-            }
-            break;
-    }
+    echo_rpi();
+    echo_dispenser();
 }
-
-static volatile uint8_t  g_pcint8 = 0;
-static volatile uint8_t  g_pcint9 = 0;
-static volatile uint8_t  g_pcint10 = 0;
 
 ISR(PCINT1_vect)
 {
-    uint8_t state;
-
-    switch(g_dispenser)
-    {
-        case 6:
-            // Check for RX for Dispenser 6
-            state = PINC & (1<<PINC1);
-            if (state != g_pcint9)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint9 = state;
-            }
-            break;
-        case 13:
-            // Check for RX for Dispenser 13
-            state = PINC & (1<<PINC0);
-            if (state != g_pcint8)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint8 = state;
-            }
-            break;
-        case 14:
-            // Check for RX for Dispenser 14
-            state = PINC & (1<<PINC2);
-            if (state != g_pcint10)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                g_pcint10 = state;
-            }
-            break;
-    }
+    echo_dispenser();
 }
-
-// variables related to PCINT2
-static volatile uint8_t  pcint16 = 0;
-static volatile uint8_t  pcint19 = 0;
-static volatile uint8_t  pcint20 = 0;
-static volatile uint8_t  pcint21 = 0;
-static volatile uint8_t  pcint22 = 0;
-static volatile uint8_t  pcint23 = 0;
 
 ISR(PCINT2_vect)
 {
-    uint8_t state;
-
-    switch(g_dispenser)
-    {
-        case 0:
-            // Check for RX for Dispenser 0
-            state = PIND & (1<<PIND3);
-            if (state != pcint19)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint19 = state;
-            }
-            break;
-        case 1:
-            // Check for RX for Dispenser 1
-            state = PIND & (1<<PIND5);
-            if (state != pcint21)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint21 = state;
-            }
-            break;
-        case 2:
-            // Check for RX for Dispenser 2
-            state = PIND & (1<<PIND7);
-            if (state != pcint23)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint23 = state;
-            }
-            break;
-        case 7:
-            // Check for RX for Dispenser 7
-            state = PIND & (1<<PIND0);
-            if (state != pcint16)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint16 = state;
-            }
-            break;
-        case 8:
-            // Check for RX for Dispenser 8
-            state = PIND & (1<<PIND4);
-            if (state != pcint20)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint20 = state;
-            }
-            break;
-        case 9:
-            // Check for RX for Dispenser 9
-            state = PIND & (1<<PIND6);
-            if (state != pcint22)
-            {
-                if (state)
-                    sbi(PORTB, 0);
-                else
-                    cbi(PORTB, 0);
-                pcint22 = state;
-            }
-            break;
-    }
+    echo_dispenser();
 }
 
 ISR (TIMER1_OVF_vect)
@@ -394,8 +221,8 @@ void reset_dispensers(void)
 // So we just have empty functions here
 void idle()
 {
-
 }
+
 uint8_t check_reset(void)
 {
     return 0;
@@ -435,4 +262,3 @@ int main (void)
     }
     return 0;
 }
-
