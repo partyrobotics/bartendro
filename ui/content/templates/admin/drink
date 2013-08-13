@@ -153,8 +153,6 @@ function load_form(drink)
 
 function save()
 {
-    is_valid = true;
-
     if (!$("#drink-form").valid())
         return;
 

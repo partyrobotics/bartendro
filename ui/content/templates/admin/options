@@ -9,77 +9,85 @@
                 <h4>General options</h4>
                 <div style="margin-left: 15px">
                     <div>
-                        <label class="checkbox">
-                             <input id="option-use-liquid-sensors" type="checkbox"></input>
+                        <label for="option-use-liquid-sensors" class="checkbox">
+                             <input id="option-use-liquid-sensors" name="option-use-liquid-sensors" type="checkbox"></input>
                              Use liquid level sensors (check this only if you have the sensors installed)
                         </label>
                     </div>
                     <div>
                         <label class="checkbox">
-                             <input id="option-metric" type="checkbox"></input>
+                             <input id="option-metric" name="option-metric" type="checkbox"></input>
                              Use metric for all units shown in Bartendro
                         </label>
+                    </div>
+                    <div class="div-spacer"/>
+                    <span class="help-block">
+                        The username and password that must be given to use the admin features of Bartendro:
+                    </span>
+                    <div style="margin-left: 15px;">
+                        <label for="login-name">User name</label>
+                        <input id="login-name" name="login-name" type="text"></input>
+                    </div>
+                    <div style="margin-left: 15px;">
+                        <label for="login-passwd">Password</label>
+                        <input id="login-passwd" name="login-passwd" type="password"></input>
                     </div>
                     <span class="help-block">
                         If you trust all of the users of Bartendro to "do the right thing", you can allow 
                         anyone to pour drinks from Bartendro. If you'd like only allow devices that are 
-                        logged into Bartendro to dispense drinks, enable this feature:
+                        logged into Bartendro to dispense drinks, enable this feature. Logging into the 
+                        admin section of Bartendro will allow that logged in user to dispense drinks:
                     </span>
-                    <div>
+                    <div style="margin-left: 15px;">
                         <label class="checkbox">
-                             <input id="option-must-login-to-dispense" type="checkbox"></input>
+                             <input id="option-must-login-to-dispense" name="option-must-login-to-dispense" type="checkbox"></input>
                              Require a valid user login to dispense drinks
                         </label>
-                    </div>
-                    <div style="margin-left: 15px;">
-                        <label>User name</label>
-                        <input id="login-name" type="text"></input>
-                    </div>
-                    <div style="margin-left: 15px;">
-                        <label for="login-passwd">Password</label>
-                        <input id="login-passwd" type="password"></input>
                     </div>
                 </div>
                 <div class="div-spacer"/>
                 <h4>Size options</h4>
+                <span class="help-block">
+                    All values here are in milliliters (ml).
+                </span>
                 <div style="margin-left: 15px">
                     <div>
                         <label for="option-drink-size">Default drink size</label>
-                        <input class="" id="option-drink-size" type="text"></input> ml
+                        <input id="option-drink-size" name="option-drink-size" type="text"></input>
                     </div>
                     <div>
                         <label for="option-taster-size">Taster size</label>
-                        <input class="" id="option-taster-size" type="text"></input> ml
+                        <input id="option-taster-size" name="option-taster-size" type="text"></input>
                     </div>
                     <div>
                         <label for="option-test-dispense-size">Test dispense size</label>
-                        <input class="" id="option-test-dispense-size" type="text"></input> ml
+                        <input id="option-test-dispense-size" name="option-test-dispense-size" type="text"></input>
                     </div>
                 </div>
                 <div class="div-spacer"/>
                 <h4>Drink options</h4>
                 <div style="margin-left: 15px">
                     <div>
-                        <label class="checkbox">
-                            <input id="option-show-taster" type="checkbox"></input>
+                        <label for="option-show-taster" class="checkbox">
+                            <input id="option-show-taster" name="option-show-taster" type="checkbox"></input>
                             Show taster button
                         </label>
                     </div>
                     <div>
-                        <label class="checkbox">
-                            <input id="option-show-drink-size" type="checkbox"></input>
+                        <label for="option-show-drink-size" class="checkbox">
+                            <input id="option-show-drink-size" name="option-show-drink-size" type="checkbox"></input>
                             Allow users to change the drink size
                         </label>
                     </div>
                     <div>
-                        <label class="checkbox">
-                            <input id="option-show-strength" type="checkbox"></input>
+                        <label for="option-show-strength" class="checkbox">
+                            <input id="option-show-strength" name="option-show-strength" type="checkbox"></input>
                             Allow users to change the strength of their drinks
                         </label>
                     </div>
                     <div>
                         <label for="option-strength-steps">Number of strength steps to show</label>
-                        <input class="" id="option-strength-steps" type="text"></input>
+                        <input id="option-strength-steps" name="option-strength-steps" type="text" class="required" minlength="1"></input>
                     </div>
                 </div>
             </fieldset>
@@ -107,7 +115,7 @@
 </div>
 <div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
   <p>
-    The options have been saved and Bartendro is being restarted. 
+    The options have been saved and Bartendro is restarting. 
   </p>
   <p>
     Please wait.
@@ -122,6 +130,7 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.timer.js"></script>
+<script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
 
 var timer;
@@ -130,6 +139,40 @@ var saved_login_name, saved_login_passwd;
 $(document).ready(function() 
 {
     load();
+    $("#options-form").validate({ 
+         debug: true,
+         rules: {
+            'login-name' : {
+                required: true,
+                minlength: 2
+            },
+            'login-passwd' : {
+                required: true,
+                minlength: 4
+            },
+            'option-drink-size' : {
+                required: true,
+                minlength: 2,
+                digits : true
+            },
+            'option-taster-size' : {
+                required: true,
+                minlength: 2,
+                digits : true
+            },
+            'option-test-dispense-size' : {
+                required: true,
+                minlength: 2,
+                digits : true
+            },
+            'option-strength-steps' : {
+                required: true,
+                minlength: 1,
+                maxlength: 1,
+                digits : true
+            }
+        }
+    });
     timer = $.timer(function() { window.location.reload(); });
 });
 
@@ -200,6 +243,9 @@ function set_options(opts)
 
 function save()
 {
+    if (!$("#options-form").valid())
+        return;
+
     options = {};
     options['use_liquid_level_sensors'] = $("#option-use-liquid-sensors").prop("checked") ? 1 : 0;
     options['metric'] = $("#option-metric").prop("checked") ? 1 : 0;
@@ -216,8 +262,10 @@ function save()
 
     j = {}
     j['options'] = options;
-    if (options['login_name'] != saved_login_name || options['login_name'] != saved_login_passwd)
+    if (options['login_name'] != saved_login_name || options['login_passwd'] != saved_login_passwd)
         j['logout'] = 1;
+    else
+        j['logout'] = 0;
 
     $.ajax({
             url: "/ws/options",

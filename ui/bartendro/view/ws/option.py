@@ -28,9 +28,11 @@ def ws_options():
         return json.dumps({ 'options' : data });
 
     if request.method == 'POST':
-        print  json.dumps(request.json);
-        data = request.json['options']
-        logout = request.json['logout']
+        try:
+            data = request.json['options']
+            logout = request.json['logout']
+        except KeyError:
+            raise BadRequest
 
         if logout: logout_user()
 
