@@ -229,7 +229,7 @@ class Mixer(object):
 
         self.unlock_bartendro()
 
-    def make_drink(self, id, recipe_arg):
+    def make_drink(self, id, recipe_arg, speed = 255):
 
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
@@ -265,7 +265,7 @@ class Mixer(object):
                 r['ms'] = int(r['ml'] * TICKS_PER_ML)
             else:
                 r['ms'] = int(r['ml'] * TICKS_PER_ML * (CALIBRATE_ML / float(r['dispenser_actual'])))
-            if not self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms'])):
+            if not self.driver.dispense_ticks(r['dispenser'] - 1, int(r['ms']), speed):
                 log.error("dispense_ticks: failed")
             ticks.append("disp %d for %s ticks" % (r['dispenser'] - 1, int(r['ms'])))
             active_disp.append(r['dispenser'])
