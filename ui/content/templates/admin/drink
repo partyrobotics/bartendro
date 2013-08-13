@@ -46,7 +46,12 @@
                     <input type="hidden" id="template-old-booze-id" name="template-old-booze-id" value="0"></input>
                 </div>
 
-                <div id="booze-lines">
+                <div>
+                   Booze
+                   <div style="float: right; margin-right: 16%">Parts</div>
+                </div>
+
+                <div id="booze-lines" style="clear: both">
                 </div>
 
                 <div class="div-spacer">
