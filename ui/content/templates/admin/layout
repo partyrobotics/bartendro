@@ -2,9 +2,9 @@
 <html>
 <head>
   <title>{{ title }}</title>
-  <link rel="stylesheet" type="text/css" href="/static/bootstrap.css">
-  <link rel="stylesheet" type="text/css" href="/static/bartendro.css">
-  <link rel="stylesheet" type="text/css" href="/static/jquery-ui.1.8.24.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/bartendro.css">
+  <link rel="stylesheet" type="text/css" href="/static/js/jquery-ui-1.10.3.custom.min.js" />
   <link rel="icon" type="image/vnd.microsoft.icon" href="/static/images/icon.ico">
 </head>
 <body>

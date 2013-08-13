@@ -33,7 +33,6 @@ def ws_options():
 
         Option.query.delete()
 
-        # json: { options : [(key, value), (..), ..] }
         for key in data:
             option = Option(key, data[key])
             db.session.add(option)
@@ -42,9 +41,9 @@ def ws_options():
         try:
             import uwsgi
             uwsgi.reload()
+            reload = True
         except ImportError:
-            pass
-
-        return json.dumps({});
+            reload = False
+        return json.dumps({ 'reload' : reload });
 
     raise BadRequest

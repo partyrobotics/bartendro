@@ -199,7 +199,9 @@ function save()
             contentType: "application/json; charset=utf-8",
             success: function(json)
             {
-                set_message("The options have been saved");
+                set_message("The options have been saved.");
+                if (json['reload'))
+
             },
             error: function(xhr, txtStatus, errorThrown)
             {

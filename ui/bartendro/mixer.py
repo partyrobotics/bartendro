@@ -156,6 +156,7 @@ class Mixer(object):
         log.info("motor stopped at level: %d" % level)
 
     def get_available_drink_list(self):
+
         can_make = self.mc.get("available_drink_list")
         if can_make: 
             return can_make
@@ -231,6 +232,9 @@ class Mixer(object):
 
     def make_drink(self, id, recipe_arg, speed = 255):
 
+        # start by updating liqid levels to make sure we have the right fluids
+        self.check_liquid_levels()
+
         drink = Drink.query.filter_by(id=int(id)).first()
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
@@ -241,6 +245,12 @@ class Mixer(object):
             booze_id = int(booze[5:])
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
+
+                # if we're out of booze, don't consider this drink
+                if app.options.use_liquid_level_sensors and disp.out: 
+                    log.info("Dispenser %d is out of booze. Cannot make this drink." % (i+1))
+                    continue
+
                 if booze_id == disp.booze_id:
                     r = {}
                     r['dispenser'] = disp.id
@@ -255,6 +265,7 @@ class Mixer(object):
 
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
+
    
         self.led_dispense()
         dur = 0
