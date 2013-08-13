@@ -9,11 +9,11 @@
                 <input type="hidden" id="drink-id"" value="0"></input>
                 <div>
                     <label>Name</label>
-                    <input id="drink-name" name="drink-name" minlength="1" type="text"  style="width: 75%"></input>
+                    <input id="drink-name" name="drink-name" type="text"  style="width: 75%"></input>
                 </div>
                 <div>
                     <label>Description</label>
-                    <textarea id="drink-desc" name="drink_desc" minlength="1" style="width: 75%"></textarea>
+                    <textarea id="drink-desc" name="drink-desc" style="width: 75%"></textarea>
                 </div>
                 <div>
                     <label class="checkbox">
@@ -42,7 +42,7 @@
                         <option value="{{ booze_list_id }}">{{ booze_list_name }}</option>
                     {% endfor %}
                     </select>
-                    <input class="edit-field required digits" name="template-booze-parts" id="template-booze-parts" type="text" minlength="1"></input>
+                    <input class="edit-field" name="template-booze-parts" id="template-booze-parts" type="text"></input>
                     <input type="hidden" id="template-old-booze-id" name="template-old-booze-id" value="0"></input>
                 </div>
 
@@ -73,9 +73,22 @@
 <script type="text/javascript" src="/static/js/jquery.validate.1.11.1.min.js"></script>
 <script type="text/javascript">
 var num_boozes = 0;
+
+var rules = {
+                'drink-name' : {
+                     required: true,
+                    minlength: 2
+                },
+                'drink-desc' : {
+                     required: true,
+                    minlength: 4
+                }
+            };
 $(document).ready(function() 
 {
-    $("#drink-form").validate();
+    $("#drink-form").validate({
+         rules: rules
+    });
     $("#status-message").hide();
     add_booze();
 });
@@ -102,6 +115,9 @@ function add_booze()
     $("#booze-lines #template-booze-parts").attr("name", "booze-parts-" + num_boozes);
     $("#booze-lines #template-old-booze-id").attr("id", "old-booze-id-" + num_boozes);
     $("#booze-lines #template-old-booze-id").attr("name", "old-booze-id-" + num_boozes);
+
+    // Add the new parts box to the validation
+    $("#booze-parts-" + num_boozes).rules('add', { required : true, minlength : 1, digits : true });
 
     num_boozes++;
 }
@@ -149,6 +165,7 @@ function load_form(drink)
         $("#booze-parts-" + i).val(drink.boozes[i][1]);
         $("#old-booze-id-" + i).val(drink.boozes[i][0]); 
     }
+    $("#drink-form").valid();
 }
 
 function save()

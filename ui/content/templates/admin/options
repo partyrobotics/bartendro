@@ -140,7 +140,6 @@ $(document).ready(function()
 {
     load();
     $("#options-form").validate({ 
-         debug: true,
          rules: {
             'login-name' : {
                 required: true,
