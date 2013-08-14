@@ -301,6 +301,9 @@ class RouterDriver(object):
 
     def get_liquid_level(self, dispenser):
         if self.software_only: return 100
+# IMPORTANT REMOVE ME
+        return 150
+# IMPORTANT REMOVE ME
         if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
             ack, value, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:

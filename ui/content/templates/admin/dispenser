@@ -7,7 +7,12 @@
             <h2>Dispensers</h2>
               <div class="alert" id="status-message" style="display: none"></div>
               <div>
-                   There are {{ count }} dispensers available. 
+                   There are {{ count }} dispensers available and liquid level sensors are
+                   {% if options.use_liquid_level_sensors %}
+                      enabled.
+                   {% else %}
+                      disabled.
+                   {% endif %}
                    <div class="submit-button">
                       <a onclick="reset()" class="btn">reset</a>
                       {% if options.use_liquid_level_sensors %}

@@ -20,6 +20,7 @@ def ws_reset():
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
     driver.reset()
+    app.mixer.reset()
     return "ok\n"
 
 @app.route('/ws/test')

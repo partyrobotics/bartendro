@@ -6,6 +6,7 @@ import logging.handlers
 import os
 import memcache
 import sys
+from bartendro.global_lock import BartendroGlobalLock
 from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
@@ -29,42 +30,6 @@ try:
     have_uwsgi = True
 except ImportError:
     have_uwsgi = False
-    
-class BartendroLock(object):
-
-    def lock_bartendro(self):
-        """Call this function before making a drink or doing anything that where two users' action may conflict.
-           This function will return True if the lock was granted, of False is someone else has already locked 
-           Bartendro."""
-
-        # If we're not running inside uwsgi, then don't try to use the lock
-        if not have_uwsgi: return True
-
-        uwsgi.lock()
-        is_locked = uwsgi.sharedarea_readbyte(0)
-        if is_locked:
-           uwsgi.unlock()
-           return False
-        uwsgi.sharedarea_writebyte(0, 1)
-        uwsgi.unlock()
-
-        return True
-
-    def unlock_bartendro(self):
-        """Call this function when you've previously locked bartendro and now you want to unlock it."""
-
-        # If we're not running inside uwsgi, then don't try to use the lock
-        if not have_uwsgi: return True
-
-        uwsgi.lock()
-        is_locked = uwsgi.sharedarea_readbyte(0)
-        if not is_locked:
-           uwsgi.unlock()
-           return False
-        uwsgi.sharedarea_writebyte(0, 0)
-        uwsgi.unlock()
-
-        return True
 
 def print_software_only_notice():
     print """If you're trying to run this code without having Bartendro hardware,
@@ -105,8 +70,8 @@ if not os.path.exists("bartendro.db"):
 app.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 app.mc.flush_all()
 
-# Create the Bartendro lock to prevent multiple people from using it at the same time.
-app.lock = BartendroLock()
+# Create the Bartendro globals to prevent multiple people from using it at the same time.
+app.globals = BartendroGlobalLock()
 
 # Start the driver, which talks to the hardware
 try:

@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
 from bartendro import db, app
+from bartendro.global_lock import STATE_INIT, STATE_READY, STATE_LOW, STATE_OUT, STATE_ERROR
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
@@ -35,26 +36,28 @@ class BartendroBusyError(Exception):
 class Mixer(object):
     '''This is where the magic happens!'''
 
-    class MixerState:
-        INIT = object()            # the bot is initializing
-        READY = object()           # the bot is ready to make drinks
-        WARNING = object()         # one or more bottles of booze is low
-        OUT_OF_BOOZE = object()    # one of more bottles of booze is OUT
-        ERROR = object()           # we received some error and bartendro is unhappy. :(
-
     def __init__(self, driver, mc):
         self.driver = driver
         self.mc = mc
         self.err = ""
         self.disp_count = self.driver.count()
-        self.state = Mixer.MixerState.INIT
+        self.check_liquid_levels()
+
+    def reset(self):
+        self.set_state(STATE_INIT)
         self.check_liquid_levels()
 
     def lock_bartendro(self):
-        return app.lock.lock_bartendro()
+        return app.globals.lock_bartendro()
 
     def unlock_bartendro(self):
-        return app.lock.unlock_bartendro()
+        return app.globals.unlock_bartendro()
+
+    def get_state(self):
+        return app.globals.get_state()
+
+    def set_state(self, state):
+        return app.globals.set_state(state)
 
     def led_idle(self):
         self.driver.led_idle()
@@ -69,6 +72,7 @@ class Mixer(object):
         self.driver.led_clean()
 
     def can_make_drink(self, boozes, booze_dict):
+        
         ok = True
         for booze in boozes:
             try:
@@ -78,17 +82,20 @@ class Mixer(object):
         return ok
 
     def check_liquid_levels(self):
+        if self.get_state() == STATE_ERROR:
+            return 
+
         if not app.options.use_liquid_level_sensors: 
             self.driver.set_status_color(0, 1, 0)
-            state = Mixer.MixerState.READY
+            self.set_state(STATE_READY)
             return
 
-        new_state = Mixer.MixerState.READY
+        new_state = STATE_READY
 
         # step 1: ask the dispensers to update their liquid levels
         if not self.driver.update_liquid_levels():
             log.error("Failed to update liquid levels")
-            state = Mixer.MixerState.ERROR
+            self.set_state(STATE_ERROR)
             return
 
         # wait for the dispensers to determine the levels
@@ -106,34 +113,39 @@ class Mixer(object):
                 return
 
             if level <= LIQUID_WARNING_THRESHOLD:
-                if new_state == Mixer.MixerState.READY:
-                    new_state = Mixer.MixerState.WARNING
+                if new_state == STATE_READY:
+                    new_state = STATE_LOW
                 if dispenser.out != DISPENSER_WARNING:
                     dispenser.out = DISPENSER_WARNING
 
             if level <= LIQUID_OUT_THRESHOLD:
-                if new_state == Mixer.MixerState.READY or new_state == Mixer.MixerState.WARNING:
-                    new_state = Mixer.MixerState.OUT_OF_BOOZE
+                if new_state == STATE_READY or new_state == STATE_LOW:
+                    new_state = STATE_OUT
                 if dispenser.out != DISPENSER_OUT:
                     dispenser.out = DISPENSER_OUT
 
         db.session.commit()
 
-        if new_state == Mixer.MixerState.OUT_OF_BOOZE:
-            self.driver.set_status_color(1, 0, 0)
-        elif new_state == Mixer.MixerState.WARNING:
-            self.driver.set_status_color(1, 1, 0)
-        elif new_state == Mixer.MixerState.READY:
-            self.driver.set_status_color(0, 1, 0)
-        else:
-            self.driver.set_status_color(1, 1, 1)
-
-        self.state = new_state
+        self.set_state(new_state)
+        self.update_status_led()
         log.info("Checking levels done")
 
         return new_state
 
+    def update_status_led(self):
+        state = self.get_state()
+        if state == STATE_OUT:
+            self.driver.set_status_color(1, 0, 0)
+        elif state == STATE_LOW:
+            self.driver.set_status_color(1, 1, 0)
+        elif state == STATE_READY:
+            self.driver.set_status_color(0, 1, 0)
+        else:
+            self.driver.set_status_color(1, 1, 1)
+
     def liquid_level_test(self, dispenser, threshold):
+        if self.get_state() == STATE_ERROR:
+            return 
         if not app.options.use_liquid_level_sensors: return
 
         log.info("Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold))
@@ -168,6 +180,8 @@ class Mixer(object):
         log.info("motor stopped at level: %d" % level)
 
     def get_available_drink_list(self):
+        if self.get_state() == STATE_ERROR:
+            return []
 
         can_make = self.mc.get("available_drink_list")
         if can_make: 
@@ -237,6 +251,9 @@ class Mixer(object):
             sleep(.1)
 
     def test_dispense(self, disp):
+        if self.get_state() == STATE_ERROR:
+            return
+
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
 
@@ -246,9 +263,10 @@ class Mixer(object):
         self.unlock_bartendro()
 
     def make_drink(self, id, recipe_arg, speed = 255):
-
-        if self.state == Mixer.MixerState.ERROR:
+        log.debug("Make drink state: %d" % self.get_state())
+        if self.get_state() == STATE_ERROR:
             return "Cannot make a drink. Bartendro has encountered some error and is stopped. :("
+        log.info("State ok! making drink!")
 
         # start by updating liqid levels to make sure we have the right fluids
         self.check_liquid_levels()
@@ -283,7 +301,6 @@ class Mixer(object):
 
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
-
    
         self.led_dispense()
         dur = 0
@@ -308,12 +325,14 @@ class Mixer(object):
         for disp in active_disp:
             if not self.wait_til_finished_dispensing(disp-1):
                 current_sense = True
+                break
 
         if current_sense: 
+            self.set_state(STATE_ERROR)
+            self.update_status_led()
             self.unlock_bartendro()
-            self.led_panic()
             log.error("Current sense triggered on dispenser %d" % disp)
-            return "One of the pumps did not operate properly. Your drink may not be as you wish. Sorry. :("
+            return "One of the pumps did not operate properly. Your drink is broken. Sorry. :("
 
         self.led_complete()
 
