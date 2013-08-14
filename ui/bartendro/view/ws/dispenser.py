@@ -61,7 +61,7 @@ def ws_dispenser_test(disp):
         return "error state"
 
     try:
-        is_cs, err = app.mixer.test_dispense(disp - 1)
+        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.test_dispense_ml)
         if is_cs:
             app.mixer.set_state(STATE_ERROR)
             return "error state"

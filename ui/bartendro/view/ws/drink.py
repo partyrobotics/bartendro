@@ -3,6 +3,7 @@ import json
 from time import sleep
 from operator import itemgetter
 from bartendro import app, db, mixer
+from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest
@@ -138,3 +139,23 @@ def ws_drink_save(drink):
     mc.delete("available_drink_list")
 
     return json.dumps({ 'id' : drink.id });
+
+@app.route('/ws/shotbot/<int:disp>')
+def ws_shotbot(disp):
+
+    if app.mixer.get_state() == STATE_ERROR:
+        return "error state"
+
+    try:
+        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.shot_size)
+        if is_cs:
+            app.mixer.set_state(STATE_ERROR)
+            return "error state"
+        if err:
+            err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
+            log.error(err)
+            return err
+    except mixer.BartendroBusyError:
+        return "busy"
+
+    return ""

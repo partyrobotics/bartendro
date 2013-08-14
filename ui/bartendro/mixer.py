@@ -250,19 +250,24 @@ class Mixer(object):
 
             sleep(.1)
 
-    def test_dispense(self, disp):
+    def dispense_ml(self, disp, ml):
+        if disp < 0 or disp >= self.driver.count():
+            return (0, "invalid dispenser")
+
         if self.get_state() == STATE_ERROR:
             return (0, "Bartendro is in error state")
 
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
 
-        self.driver.dispense_ticks(disp, app.options.test_dispense_ml * TICKS_PER_ML)
+        self.led_dispense()
+        self.driver.dispense_ticks(disp, ml * TICKS_PER_ML)
         if not self.wait_til_finished_dispensing(disp):
             self.set_state(STATE_ERROR)
             self.update_status_led()
             self.unlock_bartendro()
             return (1, "Dispenser is current limited")
+        self.led_idle()
 
         self.unlock_bartendro()
         return (0, "")

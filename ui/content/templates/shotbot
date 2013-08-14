@@ -1,17 +1,26 @@
 {% extends 'layout' %}
 {% block body %}
 <div style="text-align: center; padding-bottom: 10px;">
-<h1>ShotBot is dispensing: {{ booze }}</h1>
-<button class="btn btn-warning button-border shotbot-button" onclick="make_drink()">I want a shot!</button>
+<h1>ShotBot</h1>
+
+{% for i in range(0, count) %}
+   <div>
+        <p>
+          {{ i + 1 }} -- {{ dispensers[i].booze.name }} 
+          <button class="btn btn-warning button-border" onclick="make_shot({{i}})">hit me!</button>
+        </p>
+   <div>
+{% endfor %}
+
 </div>
 <div>
 <a href="/admin" style="color: #Fafafa">admin</a>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
-function make_drink()
+function make_shot(disp)
 {
-     $.ajax({ url: "/ws/shotbot"});
+     $.ajax({ url: "/ws/shotbot/" + (disp+1)});
 }
 </script>
 {% endblock %}

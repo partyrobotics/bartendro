@@ -23,11 +23,8 @@ def filter_drink_list(can_make_dict, drinks):
 
 @app.route('/')
 def index():
-    if app.mixer.disp_count == 1:
-        disp = db.session.query(Dispenser) \
-                          .filter(Dispenser.id == 1) \
-                          .one()
-        return render_template("shotbot", booze=disp.booze.name, title="ShotBot")
+    if app.options.use_shotbot_ui:
+        return shotbot()
 
     can_make = app.mixer.get_available_drink_list()
     can_make_dict = {}
@@ -56,3 +53,7 @@ def index():
                            top_drinks=top_drinks, 
                            other_drinks=other_drinks,
                            title="Bartendro")
+def shotbot():
+    disp = db.session.query(Dispenser).all()
+    disp = disp[:app.driver.count()]
+    return render_template("shotbot", dispensers=disp, count=app.driver.count(), title="ShotBot")

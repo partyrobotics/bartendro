@@ -14,11 +14,13 @@ bartendro_options = {
     u'metric'                  : False,
     u'drink_size'              : 150,
     u'taster_size'             : 30,
+    u'shot_size'               : 30,
     u'test_dispense_ml'        : 10,
     u'show_strength'           : True,
     u'show_size'               : True,
     u'show_taster'             : False,
-    u'strength_steps'          : 2
+    u'strength_steps'          : 2,
+    u'use_shotbot_ui'          : False
 }
 
 class BadConfigOptionsError(Exception):
