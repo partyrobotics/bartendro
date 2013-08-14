@@ -36,6 +36,13 @@
                 <a class="btn btn-large" onclick="save_threshold({{ i }}, 0)">save liquid out threshold</a>
             </div>
         {% endfor %}
+        <div style="margin-top: 10px">
+            <span class="help-block">
+               If you're a calibration ninja, like the Partyrobotics team, you can calibrate all the sensors in one go:
+            </span>
+            <a class="btn btn-large btn-warning" style="margin-left: 30px" onclick="save_all_thresholds(1)">save all liquid low thresholds</a>
+            <a class="btn btn-large btn-warning" style="margin-left: 30px" onclick="save_all_thresholds(0)">save all liquid out thresholds</a>
+        </div>
   </div>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
@@ -63,6 +70,30 @@ function save_threshold(disp, low)
             error: function(xhr, txtStatus, errorThrown)
             {
                 set_message("Failed to save threshold for dispenser " + disp + ". Status: " + xhr.status);
+            }
+    });
+}
+
+function save_all_thresholds(low)
+{
+    attr = (low ? "low" : "out");
+    url = "/ws/liquidlevel/" + attr + "/all/set";
+    $.ajax({
+            url: url,
+            dataType : "json",
+            success: function(json)
+            {
+                thresholds = json['levels'];
+                set_message("saved liquid " + attr + " threshold for all dispensers");
+                for(i = 0; i < {{ count }}; i++)
+                {
+                    console.log("#ll-current-value-" + attr + "-" + (i + 1) + "=" + thresholds[i]);
+                    $("#ll-current-value-" + attr + "-" + (i + 1)).val(thresholds[i]);
+                }
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                set_message("Failed to save threshold for all dispensers. Status: " + xhr.status);
             }
     });
 }

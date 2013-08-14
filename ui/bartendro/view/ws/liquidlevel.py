@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 from time import sleep
 from werkzeug.exceptions import BadRequest
 from bartendro import app, db
@@ -37,30 +38,39 @@ def ws_liquidlevel_low_set(disp):
     driver.set_liquid_level_thresholds(disp, low, out)
     return "%d\n" % low
 
+
+from random import randint
+
 @app.route('/ws/liquidlevel/out/all/set')
 @login_required
 def ws_liquidlevel_out_all_set():
     driver = app.driver
-    driver.update_liquid_levels()
-    sleep(.01)
 
+    data = []
     for disp in xrange(driver.count()):
         out = driver.get_liquid_level(disp)
         low, dummy = driver.get_liquid_level_thresholds(disp)
         driver.set_liquid_level_thresholds(disp, low, out)
+        data.append(out)
 
-    return "ok\n"
+    driver.update_liquid_levels()
+    sleep(.01)
+
+    return json.dumps({ 'levels' : data })
 
 @app.route('/ws/liquidlevel/low/all/set')
 @login_required
 def ws_liquidlevel_low_all_set():
     driver = app.driver
-    driver.update_liquid_levels()
-    sleep(.01)
 
+    data = []
     for disp in xrange(driver.count()):
         low = driver.get_liquid_level(disp)
         dummy, out = driver.get_liquid_level_thresholds(disp)
         driver.set_liquid_level_thresholds(disp, low, out)
+        data.append(low)
 
-    return "ok\n"
+    driver.update_liquid_levels()
+    sleep(.01)
+
+    return json.dumps({ 'levels' : data })
