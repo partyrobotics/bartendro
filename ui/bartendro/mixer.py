@@ -380,6 +380,13 @@ class CleanCycle(Thread):
             sleep(1)
         self.mixer.led_idle()
 
+        for i in xrange(self.mixer.disp_count):
+            (is_dispensing, over_current) = app.driver.is_dispensing(i)
+            if over_current:
+                app.mixer.set_state(STATE_ERROR)
+                app.mixer.update_status_led()
+                break
+
 class FlashGreenLeds(Thread):
     def __init__(self, mixer):
         Thread.__init__(self)
