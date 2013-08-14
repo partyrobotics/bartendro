@@ -1,0 +1,22 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="row-fluid">
+    <div class="span4"></div>
+    <div class="span4 admin-box-full">
+        <h4>{{ title }}</h4>
+
+        <p>
+        The username is <pre>{{ options.login_name }}</pre> and the 
+        password is <pre>{{ options.login_passwd }}</pre>
+        </p>
+
+        <p>
+        Sure, next version we'll work on securing those passwords. :-) But for now, go make some cocktails!
+        </p>
+        <p style="text-align: center">
+        <a href="/admin/options" class="btn btn-large btn-primary">I'm outta here</a>
+        </p>
+    </div>
+    <div class="span4"></div>
+</div>
+{% endblock %}

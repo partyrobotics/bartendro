@@ -102,16 +102,24 @@
         <div>
         Your database schema version is: {{ schema }}
         </div>
-        <div class="div-spacer"/>
+        <div class="div-spacer"></div>
         <h4>Database download</h4>
         <div>
         <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">Download your database</a>
         </div>
-        <div class="div-spacer"/>
+        <div class="div-spacer"></div>
         <div>
         You should do this periodically and certainly before you upgrade your Bartendro software!
         </div>
     </div>
+    {% if show_passwd_recovery %}
+    <div class="span4 admin-box-full" style="margin-top: 25px">
+        <h2>Ooops</h2>
+        <div>
+        <a href="/admin/lost-passwd">I lost my username/password.</a>
+        </div>
+    </div>  
+    {% endif %}
 </div>
 <div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
   <p>
