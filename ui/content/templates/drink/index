@@ -106,7 +106,7 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
 
-var taster_size = 30;
+var taster_size = {{ options.taster_size }};
 var max_drink_size_multiplier = 2;
 var size_increment = 30;
 var drink_size = {{ options.drink_size }};

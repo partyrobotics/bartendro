@@ -34,7 +34,7 @@
                     </div>
                     <span class="help-block">
                         If you trust all of the users of Bartendro to "do the right thing", you can allow 
-                        anyone to pour drinks from Bartendro. If you'd like only allow devices that are 
+                        anyone to pour drinks from Bartendro. If you'd like to only allow devices that are 
                         logged into Bartendro to dispense drinks, enable this feature. Logging into the 
                         admin section of Bartendro will allow that logged in user to dispense drinks:
                     </span>
