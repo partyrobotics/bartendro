@@ -61,7 +61,7 @@ def dispenser():
     elif bstate == STATE_OUT:
         state = "Bartendro is ready, but one or more boozes is out!"
     elif bstate == STATE_ERROR:
-        state = "Bartendro is out of commission. Please consult the debug page for error information."
+        state = "Bartendro is out of commission. Please reset Bartendro!"
         error = True
 
     return render_template("admin/dispenser", 

@@ -258,7 +258,11 @@ class Mixer(object):
         if not locked: raise BartendroBusyError
 
         self.driver.dispense_ticks(disp, app.options.test_dispense_ml * TICKS_PER_ML)
-        self.wait_til_finished_dispensing(disp)
+        if not self.wait_til_finished_dispensing(disp):
+            self.set_state(STATE_ERROR)
+            self.update_status_led()
+            self.unlock_bartendro()
+            return "Dispenser current limited"
 
         self.unlock_bartendro()
         return ""

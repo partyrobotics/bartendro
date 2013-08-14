@@ -20,6 +20,11 @@ def ws_dispenser_on(disp):
     if app.mixer.get_state() == STATE_ERROR:
         return "error state"
 
+    is_disp, is_cs = app.driver.is_dispensing(disp - 1)
+    if is_cs:
+        app.mixer.set_state(STATE_ERROR)
+        return "error state"
+
     if not app.driver.start(disp - 1):
         err = "Failed to start dispenser %d" % disp
         log.error(err)
@@ -33,6 +38,11 @@ def ws_dispenser_off(disp):
         return "login required"
 
     if app.mixer.get_state() == STATE_ERROR:
+        return "error state"
+
+    is_disp, is_cs = app.driver.is_dispensing(disp - 1)
+    if is_cs:
+        app.mixer.set_state(STATE_ERROR)
         return "error state"
 
     if not app.driver.stop(disp - 1):
