@@ -378,9 +378,14 @@ table {
 }
 
 .shotbot-button {
-    width: 50%;
-    height: 200px;
-    font-size: 30pt;
+    width: 100%;
+    font-size: 16pt;
     line-height: 30pt;
-    border-radius: 1em;
+    border-radius: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.shotbot-text {
+    font-size: 13pt;
 }

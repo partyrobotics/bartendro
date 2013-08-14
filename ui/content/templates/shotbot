@@ -1,20 +1,26 @@
 {% extends 'layout' %}
 {% block body %}
-<div style="text-align: center; padding-bottom: 10px;">
-<h1>ShotBot</h1>
-
-{% for i in range(0, count) %}
-   <div>
-        <p>
-          {{ i + 1 }} -- {{ dispensers[i].booze.name }} 
-          <button class="btn btn-warning button-border" onclick="make_shot({{i}})">hit me!</button>
-        </p>
-   <div>
-{% endfor %}
-
+<div id="scroll-pane">
+<div class="row-fluid">
+   <div class="span12">
+      <h1>ShotBot</h1>
+      <span class="shotbot-text">
+      ShotBot is serving {{ options.shot_size }} ml shots. Choose one below:
+      </span>
+      <div class="div-spacer"></div>
+      {% for i in range(0, count) %}
+          <div class="row-fluid">
+              <div class="span6">
+                 <button class="btn btn-warning button-border shotbot-button" onclick="make_shot({{i}})">{{ dispensers[i].booze.name }}</button>
+              </div>
+              <div class="span6 shotbot-text">
+                 {{ dispensers[i].booze.desc }} 
+              </div>
+          </div>
+      {% endfor %}
+      <a href="/admin" style="color: #Fafafa">admin</a>
+   </div>
 </div>
-<div>
-<a href="/admin" style="color: #Fafafa">admin</a>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">

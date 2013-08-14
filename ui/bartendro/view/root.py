@@ -56,4 +56,8 @@ def index():
 def shotbot():
     disp = db.session.query(Dispenser).all()
     disp = disp[:app.driver.count()]
-    return render_template("shotbot", dispensers=disp, count=app.driver.count(), title="ShotBot")
+    return render_template("shotbot", 
+                           options=app.options, 
+                           dispensers=disp, 
+                           count=app.driver.count(), 
+                           title="ShotBot")

@@ -13,6 +13,7 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model import drink_booze
 from bartendro.model import booze
 from bartendro.model import drink_log
+from bartendro.model import shot_log
 
 TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
@@ -250,7 +251,7 @@ class Mixer(object):
 
             sleep(.1)
 
-    def dispense_ml(self, disp, ml):
+    def dispense_ml(self, disp, ml, booze_id = -1):
         if disp < 0 or disp >= self.driver.count():
             return (0, "invalid dispenser")
 
@@ -268,6 +269,13 @@ class Mixer(object):
             self.unlock_bartendro()
             return (1, "Dispenser is current limited")
         self.led_idle()
+
+        # If we're given a booze_id, log this shot
+        if booze_id >= 0:
+            t = int(time())
+            slog = shot_log.ShotLog(booze_id, t, ml)
+            db.session.add(slog)
+            db.session.commit()
 
         self.unlock_bartendro()
         return (0, "")

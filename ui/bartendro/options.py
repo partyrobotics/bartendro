@@ -2,6 +2,7 @@
 import logging
 from bartendro import app, db
 from bartendro.model.option import Option
+from bartendro.model.shot_log import ShotLog
 from sqlalchemy.exc import OperationalError
 
 log = logging.getLogger('bartendro')
@@ -40,6 +41,7 @@ def setup_options_table():
         option = Option()
         option.__table__.create(db.engine)
 
+
     # Try and see if we have a legacy config.py kicking around. If so,
     # import the options and save them in the DB
     try:
@@ -69,6 +71,12 @@ def setup_options_table():
             db.session.add(o)
 
     db.session.commit()
+
+    # This should go someplace else, but not right this second
+    if not db.engine.dialect.has_table(db.engine.connect(), "shot_log"):
+        log.info("Creating shot_log table")
+        shot_log = ShotLog()
+        shot_log.__table__.create(db.engine)
 
 def load_options():
     '''Load options from the db and make them into a nice an accessible modules'''

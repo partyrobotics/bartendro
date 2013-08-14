@@ -11,6 +11,7 @@ from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
+from bartendro.model.dispenser import Dispenser
 
 def ws_make_drink(drink, recipe, speed = 255):
     drink_mixer = app.mixer
@@ -146,8 +147,9 @@ def ws_shotbot(disp):
     if app.mixer.get_state() == STATE_ERROR:
         return "error state"
 
+    dispenser = db.session.query(Dispenser).filter_by(id=disp).first()
     try:
-        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.shot_size)
+        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.shot_size, dispenser.booze.id)
         if is_cs:
             app.mixer.set_state(STATE_ERROR)
             return "error state"
