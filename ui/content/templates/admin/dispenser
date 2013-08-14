@@ -87,13 +87,18 @@ function toggle(disp)
                  else
                      $("#disp" + disp).text('turn on');
 
+                 if (html == "error state")
+                     window.location = "/admin";
+                 else
                  if (html != "")
-                    set_message(html);
-                else
+                     set_message(html)
+                 else
+                 {
                     if (dispensers[disp-1] == true)
                         set_message("Turned on dispenser " + disp);
                     else
                         set_message("Turned off dispenser " + disp);
+                 }
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
@@ -119,12 +124,15 @@ function test_dispense(disp)
                  $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                  $("#test" + disp).toggleClass('disabled');
                  if (html == "busy")
-                    set_message("Already testing a dispense. Chill!");
+                     set_message("Already testing a dispense. Chill!");
+                 else
+                 if (html == "error state")
+                     window.location = "/admin";
                  else
                  if (html != "")
-                    set_message(html);
+                     set_message(html);
                  else
-                    set_message("Test dispensed on dispenser " + disp);
+                     set_message("Test dispensed on dispenser " + disp);
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
@@ -154,6 +162,9 @@ function check_levels()
             {
                  if (html != "")
                      set_message("Error checking levels: " + html);
+                 else
+                 if (html == "error state")
+                     window.location = "/admin";
                  else
                      window.location = "/admin?updated=1";
             },
