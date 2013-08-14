@@ -122,7 +122,7 @@ function add_booze()
     $("#booze-lines #template-old-booze-id").attr("name", "old-booze-id-" + num_boozes);
 
     // Add the new parts box to the validation
-    $("#booze-parts-" + num_boozes).rules('add', { required : true, minlength : 1, digits : true });
+    $("#booze-parts-" + num_boozes).rules('add', { required : true, minlength : 1, maxlength : 3, digits : true });
 
     num_boozes++;
 }
