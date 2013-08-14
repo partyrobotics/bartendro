@@ -87,7 +87,6 @@ function toggle(disp)
                  else
                      $("#disp" + disp).text('turn on');
 
-                 console.log(html);
                  if (html == "error state")
                      window.location = "/admin";
                  else

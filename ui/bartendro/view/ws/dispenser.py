@@ -61,7 +61,10 @@ def ws_dispenser_test(disp):
         return "error state"
 
     try:
-        err = app.mixer.test_dispense(disp - 1)
+        is_cs, err = app.mixer.test_dispense(disp - 1)
+        if is_cs:
+            app.mixer.set_state(STATE_ERROR)
+            return "error state"
         if err:
             err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
             log.error(err)

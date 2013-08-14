@@ -252,7 +252,7 @@ class Mixer(object):
 
     def test_dispense(self, disp):
         if self.get_state() == STATE_ERROR:
-            return "Bartendro is in error state"
+            return (0, "Bartendro is in error state")
 
         locked = self.lock_bartendro()
         if not locked: raise BartendroBusyError
@@ -262,10 +262,10 @@ class Mixer(object):
             self.set_state(STATE_ERROR)
             self.update_status_led()
             self.unlock_bartendro()
-            return "Dispenser current limited"
+            return (1, "Dispenser is current limited")
 
         self.unlock_bartendro()
-        return ""
+        return (0, "")
 
     def make_drink(self, id, recipe_arg, speed = 255):
         log.debug("Make drink state: %d" % self.get_state())
