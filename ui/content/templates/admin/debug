@@ -14,13 +14,6 @@
              <div id="test-response"></div>
              <div class="div-spacer"/>
 
-             <h4>Dispenser discovery log</h4>
-             <p>
-                This debugging log shows the discovery of the dispensers:
-             </p>
-             <div><pre class="pre-scrollable">{{ startup_log }}</pre></div>
-             <div class="div-spacer"/>
-
              <h4>Bartendro log</h4>
              <p>
                 <a class="btn btn-large" style="float: right; margin-bottom: 10px;" onclick="reload()">refresh</a>
@@ -28,6 +21,14 @@
              </p>
              <div id="b_log" class="pre-scrollable"><pre>{{ bartendro_log }}</pre></div>
              <div class="div-spacer"/>
+
+             <h4>Dispenser discovery log</h4>
+             <p>
+                This debugging log shows the discovery of the dispensers:
+             </p>
+             <div><pre class="pre-scrollable">{{ startup_log }}</pre></div>
+             <div class="div-spacer"/>
+
         </div>
         <div class="span2"></div>
     </div>

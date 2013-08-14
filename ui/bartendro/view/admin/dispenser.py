@@ -2,6 +2,7 @@
 from sqlalchemy import func, asc
 import memcache
 from bartendro import app, db
+from bartendro.global_lock import STATE_INIT, STATE_READY, STATE_LOW, STATE_OUT, STATE_ERROR
 from flask import Flask, request, redirect, render_template
 from flask.ext.login import login_required
 from wtforms import Form, SelectField, IntegerField, validators
@@ -49,12 +50,28 @@ def dispenser():
         form["dispenser%d" % (i + 1)].data = "%d" % booze_list[dispenser.booze_id - 1][0]
         form["actual%d" % (i + 1)].data = dispenser.actual
 
+    bstate = app.globals.get_state()
+    error = False
+    if bstate == STATE_INIT:
+        state = "Bartendro is starting up."
+    elif bstate == STATE_READY:
+        state = "Bartendro is ready!"
+    elif bstate == STATE_LOW:
+        state = "Bartendro is ready, but one or more boozes is low!"
+    elif bstate == STATE_OUT:
+        state = "Bartendro is ready, but one or more boozes is out!"
+    elif bstate == STATE_ERROR:
+        state = "Bartendro is out of commission. Please consult the debug page for error information."
+        error = True
+
     return render_template("admin/dispenser", 
                            title="Dispensers",
                            calibrate_ml=CALIBRATE_ML, 
                            form=form, count=count, 
                            fields=fields, 
                            saved=saved,
+                           state=state,
+                           error=error,
                            updated=updated,
                            options=app.options,
                            states=states)

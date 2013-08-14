@@ -5,14 +5,18 @@
         <div class="span1"></div>
         <div class="span10 admin-box-full">	
             <h2>Dispensers</h2>
-              <div class="alert" id="status-message" style="display: none"></div>
+              <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
               <div>
-                   There are {{ count }} dispensers available and liquid level sensors are
+                   <p style="font-size: 13pt; {% if error %}color: red;{% endif %}">
+                   {{ state }}
+                   </p> 
+                   <p>There are {{ count }} dispensers available and liquid level sensors are
                    {% if options.use_liquid_level_sensors %}
                       enabled.
                    {% else %}
                       disabled.
                    {% endif %}
+                   </p>
                    <div class="submit-button">
                       <a onclick="reset()" class="btn">reset</a>
                       {% if options.use_liquid_level_sensors %}
@@ -58,14 +62,13 @@ $(document).ready(function()
        set_message("Your changes have been saved.");
     {% elif updated %}
        set_message("Liquid levels have been updated.");
-    {% else %}
-       $("#status-message").hide();
     {% endif %}
 });
 
 function set_message(txt)
 {
     $("#status-message").text(txt);
+    $("#status-message").css('visibility', 'visible');
     $("#status-message").show();
 }
 
@@ -98,7 +101,7 @@ function toggle(disp)
                      $("#disp" + disp).text('turn off');
                  else
                      $("#disp" + disp).text('turn on');
-                 alert("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
+                 set_message("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
             }
     });
 }
@@ -120,6 +123,8 @@ function test_dispense(disp)
                  else
                  if (html != "")
                     set_message(html);
+                 else
+                    set_message("Test dispensed on dispenser " + disp);
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {

@@ -38,8 +38,9 @@ def ws_dispenser_off(disp):
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
     try:
-        if not app.mixer.test_dispense(disp - 1):
-            err = "Failed to test dispense on dispenser %d" % disp
+        err = app.mixer.test_dispense(disp - 1)
+        if err:
+            err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
             log.error(err)
             return err
     except mixer.BartendroBusyError:
