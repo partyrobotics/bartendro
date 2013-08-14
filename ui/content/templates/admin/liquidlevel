@@ -86,10 +86,7 @@ function save_all_thresholds(low)
                 thresholds = json['levels'];
                 set_message("saved liquid " + attr + " threshold for all dispensers");
                 for(i = 0; i < {{ count }}; i++)
-                {
-                    console.log("#ll-current-value-" + attr + "-" + (i + 1) + "=" + thresholds[i]);
                     $("#ll-current-value-" + attr + "-" + (i + 1)).val(thresholds[i]);
-                }
             },
             error: function(xhr, txtStatus, errorThrown)
             {

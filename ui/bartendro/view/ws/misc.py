@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import logging
 from werkzeug.exceptions import ServiceUnavailable
 from bartendro import app, db, STATIC_FOLDER
 from flask import Flask, request, Response
@@ -7,6 +8,8 @@ from flask.ext.login import login_required
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
+
+log = logging.getLogger('bartendro')
 
 @app.route('/ws/reset')
 @login_required
@@ -25,21 +28,25 @@ def ws_test_chain():
     driver = app.driver
     for disp in xrange(driver.count()):
 	if not driver.ping(disp):
-	    raise ServiceUnavailable("Dispenser %d failed ping." % (disp + 1))
+            log.error("Dispense %d failed ping" % (disp + 1))
+	    return "Dispenser %d failed ping." % (disp + 1)
 
-    return "ok"
+    return ""
 
 @app.route('/ws/checklevels')
 @login_required
 def ws_check_levels():
     mixer = app.mixer
     if not mixer.check_liquid_levels():
-        raise ServiceUnavailable("Error: Checking dispenser levels failed.")
+        error = "Check levels failed."
+        log.error(error)
+        return error
+
     mc = app.mc
     mc.delete("top_drinks")
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
-    return "ok\n"
+    return ""
 
 @app.route('/ws/download/bartendro.db')
 @login_required

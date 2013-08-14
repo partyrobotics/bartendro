@@ -19,6 +19,7 @@ def dispenser():
     count = driver.count()
 
     saved = int(request.args.get('saved', "0"))
+    updated = int(request.args.get('updated', "0"))
 
     class F(DispenserForm):
         pass
@@ -54,6 +55,7 @@ def dispenser():
                            form=form, count=count, 
                            fields=fields, 
                            saved=saved,
+                           updated=updated,
                            options=app.options,
                            states=states)
 

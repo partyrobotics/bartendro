@@ -51,16 +51,18 @@ function test_dispensers()
             url: "/ws/test" ,
             success: function(html)
             {
-                $("#test-response").text("All dispensers are happy!");
+                if (html == "")
+                    $("#test-response").text("All dispensers are happy!");
+                else
+                    $("#test-response").text(html);
                 $("#test-dispensers").text('test dispensers');
                 $("#test-dispensers").toggleClass('disabled');
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
-                $("#test-response").text(errorTrown);
+                $("#test-response").text("Call to test dispensers failed. Status: " + xmlhttp.status);
                 $("#test-dispensers").text('test dispensers');
                 $("#test-dispensers").toggleClass('disabled');
-                alert("Failed to test dispensers.");
             }
     });
 }

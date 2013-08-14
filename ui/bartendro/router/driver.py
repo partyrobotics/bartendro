@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import sys
 import os
 import collections
@@ -29,7 +28,6 @@ PACKET_ACK_INVALID          = 3
 PACKET_ACK_INVALID_HEADER   = 4
 PACKET_ACK_HEADER_IN_PACKET = 5
 PACKET_ACK_CRC_FAIL         = 6
-PACKET_ACK_ALT_OK           = 0x80 # sometimes we get 1 bit errors and we get back 0x80 instead of 0 :(
 
 PACKET_PING                   = 3
 PACKET_SET_MOTOR_SPEED        = 4
@@ -299,27 +297,27 @@ class RouterDriver(object):
 
     def update_liquid_levels(self):
         if self.software_only: return True
-        self._send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
+        return self._send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
 
     def get_liquid_level(self, dispenser):
         if self.software_only: return 100
-        while True:
-            if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
-                ack, value, dummy = self._receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return value
+        if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
+            ack, value, dummy = self._receive_packet16()
+            if ack == PACKET_ACK_OK:
+                return value
+        return -1
 
     def get_liquid_level_thresholds(self, dispenser):
         if self.software_only: return True
-        while True:
-            if self._send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
-                ack, low, out = self._receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return (low, out)
+        if self._send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
+            ack, low, out = self._receive_packet16()
+            if ack == PACKET_ACK_OK:
+                return (low, out)
+        return (-1, -1)
                 
     def set_liquid_level_thresholds(self, dispenser, low, out):
         if self.software_only: return True
-        self._send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
+        return self._send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
 
     def set_status_color(self, red, green, blue):
         if self.software_only: return
@@ -328,27 +326,27 @@ class RouterDriver(object):
 
     def get_saved_tick_count(self, dispenser):
         if self.software_only: return True
-        while True:
-            if self._send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
-                ack, ticks, dummy = self._receive_packet16()
-                if ack == PACKET_ACK_OK:
-                    return ticks
+        if self._send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
+            ack, ticks, dummy = self._receive_packet16()
+            if ack == PACKET_ACK_OK:
+                return ticks
+        return -1
 
     def flush_saved_tick_count(self):
         if self.software_only: return True
-        self._send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
+        return self._send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
 
     def pattern_define(self, dispenser, pattern):
         if self.software_only: return True
-        self._send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
+        return self._send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
 
     def pattern_add_segment(self, dispenser, red, green, blue, steps):
         if self.software_only: return True
-        self._send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
+        return self._send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
 
     def pattern_finish(self, dispenser):
         if self.software_only: return True
-        self._send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
+        return self._send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
 
     # -----------------------------------------------
     # Past this point we only have private functions. 
@@ -370,6 +368,7 @@ class RouterDriver(object):
 
         port = self.dispenser_ports[dispenser]
         self.dispenser_select.select(port)
+
 
     def _send_packet(self, dest, packet):
         if self.software_only: return True
@@ -404,7 +403,8 @@ class RouterDriver(object):
             return False
 
         ack = ord(ch)
-        if ack == PACKET_ACK_OK or ack == PACKET_ACK_ALT_OK: return True
+        if ack == PACKET_ACK_OK: 
+            return True
         if ack == PACKET_CRC_FAIL: 
             log.error("send packet: packet ack crc fail")
             return False

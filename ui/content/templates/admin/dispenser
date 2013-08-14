@@ -4,19 +4,8 @@
     <div class="row-fluid">	
         <div class="span1"></div>
         <div class="span10 admin-box-full">	
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                  <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
-              {% endif %}
-            {% endwith %}
             <h2>Dispensers</h2>
-              {% if saved %}
-                 <div class="alert">Your changes have been saved.</div>
-              {% endif %}
+              <div class="alert" id="status-message" style="display: none"></div>
               <div>
                    There are {{ count }} dispensers available. 
                    <div class="submit-button">
@@ -58,22 +47,53 @@
 <script type="text/javascript">
 var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 
+$(document).ready(function() 
+{
+    {% if saved %}
+       set_message("Your changes have been saved.");
+    {% elif updated %}
+       set_message("Liquid levels have been updated.");
+    {% else %}
+       $("#status-message").hide();
+    {% endif %}
+});
+
+function set_message(txt)
+{
+    $("#status-message").text(txt);
+    $("#status-message").show();
+}
+
 function toggle(disp)
 {
     if (disp < 1 || disp > 15)
         return;
-
-    //$("#size_text").text(drink_size + " fluid ounces");
 
     dispensers[disp-1] = !dispensers[disp-1];
     $.ajax({
             url: "/ws/dispenser/" + disp + "/" + (dispensers[disp-1] ? "on" : "off") ,
             success: function(html)
             {
-                if (dispensers[disp-1] == true)
-                    $("#disp" + disp).text('turn off');
+                 if (dispensers[disp-1] == true)
+                     $("#disp" + disp).text('turn off');
+                 else
+                     $("#disp" + disp).text('turn on');
+
+                 if (html != "")
+                    set_message(html);
                 else
-                    $("#disp" + disp).text('turn on');
+                    if (dispensers[disp-1] == true)
+                        set_message("Turned on dispenser " + disp);
+                    else
+                        set_message("Turned off dispenser " + disp);
+            },
+            error: function(xmlhttp, txtStatus, errorThrown)
+            {
+                 if (dispensers[disp-1] == true)
+                     $("#disp" + disp).text('turn off');
+                 else
+                     $("#disp" + disp).text('turn on');
+                 alert("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
             }
     });
 }
@@ -88,17 +108,19 @@ function test_dispense(disp)
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
-                $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
-                $("#test" + disp).toggleClass('disabled');
+                 $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
+                 $("#test" + disp).toggleClass('disabled');
+                 if (html == "busy")
+                    set_message("Already testing a dispense. Chill!");
+                 else
+                 if (html != "")
+                    set_message(html);
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
                  $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
                  $("#test" + disp).toggleClass('disabled');
-                 if (xmlhttp.status == 503)
-                    alert("Already testing a dispense. Chill!");
-                 else
-                    alert("Failed to test dispensers. Server status: " + xmlhttp.status);
+                 set_message("Failed to test dispensers. Server status: " + xmlhttp.status);
             }
     });
 }
@@ -120,12 +142,14 @@ function check_levels()
             url: "/ws/checklevels" ,
             success: function(html)
             {
-                 location.reload();
+                 if (html != "")
+                     set_message("Error checking levels: " + html);
+                 else
+                     window.location = "/admin?updated=1";
             },
-            error: function(xhr, txtStatus, errorThrown)
+            error: function(xmlhttp, txtStatus, errorThrown)
             {
-                 alert("Error checking levels. Useless error info: " + errorThrown);
-                 location.reload();
+                 set_message("Error checking levels: " + xmlhttp.responseText);
             }
     });
 }

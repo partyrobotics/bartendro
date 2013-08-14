@@ -40,8 +40,7 @@ class Mixer(object):
         READY = object()           # the bot is ready to make drinks
         WARNING = object()         # one or more bottles of booze is low
         OUT_OF_BOOZE = object()    # one of more bottles of booze is OUT
-        # not in use yet
-        # BUSTED = object()          # out of all booze, can't make ANY drinks
+        ERROR = object()           # we received some error and bartendro is unhappy. :(
 
     def __init__(self, driver, mc):
         self.driver = driver
@@ -87,7 +86,10 @@ class Mixer(object):
         new_state = Mixer.MixerState.READY
 
         # step 1: ask the dispensers to update their liquid levels
-        self.driver.update_liquid_levels()
+        if not self.driver.update_liquid_levels():
+            log.error("Failed to update liquid levels")
+            state = Mixer.MixerState.ERROR
+            return
 
         # wait for the dispensers to determine the levels
         sleep(.01)
@@ -99,6 +101,10 @@ class Mixer(object):
 
             dispenser.out = DISPENSER_OK
             level = self.driver.get_liquid_level(i)
+            if level < 0:
+                log.error("Failed to read liquid levels from dispenser %d" % (i+1))
+                return
+
             if level <= LIQUID_WARNING_THRESHOLD:
                 if new_state == Mixer.MixerState.READY:
                     new_state = Mixer.MixerState.WARNING
@@ -117,8 +123,10 @@ class Mixer(object):
             self.driver.set_status_color(1, 0, 0)
         elif new_state == Mixer.MixerState.WARNING:
             self.driver.set_status_color(1, 1, 0)
-        else:
+        elif new_state == Mixer.MixerState.READY:
             self.driver.set_status_color(0, 1, 0)
+        else:
+            self.driver.set_status_color(1, 1, 1)
 
         self.state = new_state
         log.info("Checking levels done")
@@ -130,7 +138,9 @@ class Mixer(object):
 
         log.info("Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold))
 
-        self.driver.update_liquid_levels()
+        if not self.driver.update_liquid_levels():
+            log.error("Failed to update liquid levels")
+            return
         sleep(.01)
 
         level = self.driver.get_liquid_level(dispenser)
@@ -142,7 +152,9 @@ class Mixer(object):
         last = -1
         self.driver.start(dispenser)
         while level > threshold:
-            self.driver.update_liquid_levels()
+            if not self.driver.update_liquid_levels():
+                log.error("Failed to update liquid levels")
+                return
             sleep(.01)
             level = self.driver.get_liquid_level(dispenser)
             if level != last:
@@ -209,6 +221,9 @@ class Mixer(object):
         timeout_count = 0
         while True:
             (is_dispensing, over_current) = app.driver.is_dispensing(disp)
+            if is_dispensing < 0 or over_current < 0:
+                continue
+
             log.debug("is_disp %d, over_cur %d" % (is_dispensing, over_current))
             if over_current: return False
             if is_dispensing == 0: return True
@@ -231,6 +246,9 @@ class Mixer(object):
         self.unlock_bartendro()
 
     def make_drink(self, id, recipe_arg, speed = 255):
+
+        if self.state == Mixer.MixerState.ERROR:
+            return "Cannot make a drink. Bartendro has encountered some error and is stopped. :("
 
         # start by updating liqid levels to make sure we have the right fluids
         self.check_liquid_levels()
