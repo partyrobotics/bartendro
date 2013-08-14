@@ -158,9 +158,9 @@
 }
 
 .trending-drinks {
-    text-align: right;
-    font-size: 16pt;
-    padding-top: 25px;
+    float: right;
+    font-size: 11pt;
+    padding-top: 20px;
 }
 
 .menuitem
