@@ -2,18 +2,12 @@
 {% block body %}
     <div class="row-fluid">
         <div class="span3"></div>
-        <div class="span6 login-box">
-
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                  <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
-              {% endif %}
-            {% endwith %}
-
+        <div class="span6 admin-box-full">
+          {% if fail %}
+              <div class="alert" id="status-message">Login incorrect</div>
+          {% else %}
+              <div class="alert" id="status-message">Login required</div>
+          {% endif %}
           <form method="POST" action="/admin/login" class="form-horizontal">
              <div class="control-group">
                 {{ form["user"].label(class="control-label")}} 

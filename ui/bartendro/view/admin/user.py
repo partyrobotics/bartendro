@@ -38,10 +38,9 @@ def login():
         password = request.form.get("password" or '')
         if (user == app.options.login_name and password == app.options.login_passwd):
             login_user(User(user))
-            flash("Logged in successfully.")
             return redirect(request.args.get("next") or url_for("dispenser"))
-        flash("Invalid login.")
-    return render_template("/admin/login", options=app.options, form=form)
+        return render_template("/admin/login", options=app.options, form=form, fail=1)
+    return render_template("/admin/login", options=app.options, form=form, fail=0)
 
 @app.route("/admin/logout")
 @login_required

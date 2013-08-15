@@ -378,15 +378,6 @@ table {
     font-size: 9pt;
 }
 
-.login-box {
-    border-radius: 7px;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #bbb;;
-    padding: 20px;
-    background-color: white;
-}
-
 .shotbot-button {
     width: 100%;
     font-size: 16pt;
