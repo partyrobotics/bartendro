@@ -39,6 +39,12 @@ $(function () {
             obj = JSON.parse(data.result);
             upload_complete(obj["file_name"]);
         },
+        fail : function(e, data) {
+            if (data.jqXHR.status == 400)
+                set_message("Uploaded file was not recognized as a Bartendro database.");
+            else
+                set_message("Uploaded failed. Status: " + data.jqXHR.status);
+        },
     });
 });
 function set_message(txt)
