@@ -77,6 +77,13 @@
         text-align: center;
     }
 
+    .stack-element-title {
+        color: #005991;
+        font-weight: normal;
+        font-size: 19pt;
+        padding-left: 10px;
+    }
+
     .ui-dialog {
         width: 80% !important;
     }
@@ -160,6 +167,14 @@
         line-height: 18pt;
         text-align: center;
     }
+
+    .stack-element-title {
+        color: #005991;
+        font-weight: normal;
+        font-size: 22pt;
+        padding-left: 10px;
+    }
+
     .ui-dialog {
         width: 40% !important;
     }
@@ -260,13 +275,6 @@ table {
 .adjust-middle {
     font-size: 15pt;
     font-weight: bold;
-}
-
-.stack-element-title {
-    color: #005991;
-    font-weight: normal;
-    font-size: 22pt;
-    padding-left: 10px;
 }
 
 .dispense-button {
