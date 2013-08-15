@@ -15,8 +15,8 @@
     {% else %}
         <div class="row-fluid">
            <div class="span2"></div>
-           <div class="span6" style="height: 200px; margin-top: 100px;">
-              <p style="font-size: 15pt; font-weight: bold">{{ error_message }}</p>
+           <div class="span6" style="height: 200px; margin-top: 50px;">
+              <p style="font-size: 15pt; font-weight: bold; text-align: center">{{ error_message }}</p>
            </div>
            <div class="span4" style="text-align: center;">
               <img style="height: 200px" src="/static/images/sick_party_robot.png">
