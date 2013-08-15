@@ -108,6 +108,26 @@
       Sorry, but you need to be logged into Bartendro to dispense drinks.
   </p>
 </div>
+<div id="busy-dialog" title="Bartendro is busy" style="display: none; text-align: center">
+  <p>
+      Bartendro is already busy dispensing another drink. Please wait your turn!
+  </p>
+</div>
+<div id="error-state-dialog" title="Bartendro is broken" style="display: none; text-align: center">
+  <p>
+      Bartendro has hit a snag and can't make drinks right now. Sorry!
+  </p>
+</div>
+<div id="cant-make-dialog" title="Drink selection error" style="display: none; text-align: center">
+  <p>
+      Bartendro can't make this drink right now. Sorry!
+  </p>
+</div>
+<div id="error-dialog" title="Bartendro error" style="display: none; text-align: center">
+  <p>
+      Bartendro has encountered an error making this drink. Sorry!
+  </p>
+</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
@@ -351,17 +371,16 @@ function make_drink(drink, is_taster)
                 error: function(xmlhttp, textStatus, error)
                 {
                     $.modal.close();
-                    lb = '<div class="lb-box">';
+                    if (xmlhttp.status == 500)
+                        $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                    else
                     if (xmlhttp.status == 503)
-                        lb += '<h1>Bartendro is Busy!</h1><div class="lb-error">Please wait a moment for Bartendro to become free!';
+                        $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
                     else
                     if (xmlhttp.status == 400)
-                        lb += '<h1>Whoops</h1><div class="lb-error">Sorry, I can\'t make<br/> this drink right now.';
+                        $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
                     else
-                        lb += '<h1>Bartendro Error:</h1><div class="lb-error">' + textStatus;
-                    lb += '</div><br/><a class="btn btn-large" onclick="close_modal()">OK</a></div>';
-                    lb += '</div></div>';
-                    $.modal(lb);
+                        $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
                 }
         });
 }

@@ -18,7 +18,7 @@ LOG_FILES_SAVED = 3    # number of log files to compress and save
 
 
 parser = argparse.ArgumentParser(description='Bartendro application process')
-parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=True, action='store_true')
+parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=False, action='store_true')
 parser.add_argument("-t", "--host", help="Which interfaces to listen on. Default: 127.0.0.1", default="127.0.0.1", type=str)
 parser.add_argument("-p", "--port", help="Which port to listen on. Default: 8080", default="8080", type=int)
 parser.add_argument("-s", "--software-only", help="Run only the server software, without hardware interaction.", default=False, action='store_true')

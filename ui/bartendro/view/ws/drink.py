@@ -6,7 +6,7 @@ from bartendro import app, db, mixer
 from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
-from werkzeug.exceptions import ServiceUnavailable, BadRequest
+from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
@@ -14,9 +14,10 @@ from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
 
 def ws_make_drink(drink, recipe, speed = 255):
-    drink_mixer = app.mixer
+    if app.mixer.get_state() == STATE_ERROR:
+        raise InternalServerError
     try:
-        err = drink_mixer.make_drink(drink, recipe, speed)
+        err = app.mixer.make_drink(drink, recipe, speed)
         if not err:
             return "ok\n"
         else:
