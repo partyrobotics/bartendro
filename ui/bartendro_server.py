@@ -18,7 +18,7 @@ LOG_FILES_SAVED = 3    # number of log files to compress and save
 
 
 parser = argparse.ArgumentParser(description='Bartendro application process')
-parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=False, action='store_true')
+parser.add_argument("-d", "--debug", help="Turn on debugging mode to see stack traces in the error log", default=True, action='store_true')
 parser.add_argument("-t", "--host", help="Which interfaces to listen on. Default: 127.0.0.1", default="127.0.0.1", type=str)
 parser.add_argument("-p", "--port", help="Which port to listen on. Default: 8080", default="8080", type=int)
 parser.add_argument("-s", "--software-only", help="Run only the server software, without hardware interaction.", default=False, action='store_true')
@@ -49,7 +49,7 @@ if not os.path.exists("logs"):
 handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.log"), 
                                                maxBytes=LOG_SIZE, 
                                                backupCount=LOG_FILES_SAVED)
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger('bartendro')
 logger.addHandler(handler)
 
@@ -91,6 +91,9 @@ except SerialIOError:
     sys.exit(-1)
 
 logging.info("Found %d dispensers." % app.driver.count())
+
+if app.driver.count() == 1:
+    app.options.use_shotbot_ui = True
 
 app.mixer = mixer.Mixer(app.driver, app.mc)
 if app.software_only:

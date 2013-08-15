@@ -59,7 +59,7 @@
 </div>
 <div id="cleaning-dialog" title="Warning" style="display: none; text-align: center">
   <p>
-      Please remove all the hoses from the bottles and put the hoses in cleaning solution before proceeding.
+      Please remove all the hoses from the bottles and put them in cleaning solution before proceeding.
   </p>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
