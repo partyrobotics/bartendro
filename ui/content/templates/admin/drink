@@ -18,7 +18,7 @@
                 <div>
                     <label class="checkbox">
                         <input id="drink-popular" name="popular" type="checkbox"> </input>
-                        List this drink in the <i>the essentials</i> section.
+                        List this drink in <i>the essentials</i> section.
                     </label>
                 </div>
 
