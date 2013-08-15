@@ -16,6 +16,8 @@
                    {% else %}
                       disabled.
                    {% endif %}
+                   <br/>
+                   {{ num_drinks }} drinks can be made.
                    </p>
                    <div style="">
                    </div>

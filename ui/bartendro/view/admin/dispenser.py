@@ -64,6 +64,7 @@ def dispenser():
         state = "Bartendro is out of commission. Please reset Bartendro!"
         error = True
 
+    avail_drinks = app.mixer.get_available_drink_list()
     return render_template("admin/dispenser", 
                            title="Dispensers",
                            calibrate_ml=CALIBRATE_ML, 
@@ -73,6 +74,7 @@ def dispenser():
                            state=state,
                            error=error,
                            updated=updated,
+                           num_drinks=len(avail_drinks),
                            options=app.options,
                            states=states)
 
