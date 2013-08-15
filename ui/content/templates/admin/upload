@@ -20,7 +20,7 @@
 </div>
 <div id="confirm-dialog" title="Confirm" style="display: none; text-align: center;">
   <p>
-      Are you sure you want to install the updated database?
+      Are you sure you want to install the uploaded database?
   </p>
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
