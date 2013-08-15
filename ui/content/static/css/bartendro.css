@@ -346,6 +346,7 @@ table {
 
 .div-spacer {
     margin-top: 15px;
+    clear: both;
 }
 
 .submit-button {

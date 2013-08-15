@@ -2,6 +2,7 @@
 import memcache
 from sqlalchemy import func, asc
 from bartendro import app, db
+from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request, render_template
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink import Drink
@@ -26,7 +27,21 @@ def index():
     if app.options.use_shotbot_ui:
         return shotbot()
 
+    if app.globals.get_state() == STATE_ERROR:
+        return render_template("index", 
+                               top_drinks=[], 
+                               other_drinks=[],
+                               error_message="Bartendro can make no drinks right now.<br/><br/>Bartendro has had too much to drink and is sick. :-(",
+                               title="Bartendro error")
+
     can_make = app.mixer.get_available_drink_list()
+    if not len(can_make):
+        return render_template("index", 
+                               top_drinks=[], 
+                               other_drinks=[],
+                               error_message="Bartendro can make no drinks right now.<br/><br/>No drinks can be made with the available boozes.",
+                               title="Bartendro error")
+
     can_make_dict = {}
     for drink in can_make:
         can_make_dict[drink] = 1
@@ -53,6 +68,7 @@ def index():
                            top_drinks=top_drinks, 
                            other_drinks=other_drinks,
                            title="Bartendro")
+
 def shotbot():
     disp = db.session.query(Dispenser).all()
     disp = disp[:app.driver.count()]

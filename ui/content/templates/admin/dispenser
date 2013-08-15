@@ -36,8 +36,8 @@
                             <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
                         </div>
                     {% endfor %}
-                    <div class="div-spacer"">
-                      <a onclick="reset()" class="btn btn-large" style="margin-left: 5px">reset</a>
+                    <div class="div-spacer">
+                      <a onclick="reset_bartendro()" class="btn btn-large" style="margin-left: 5px">reset</a>
                       {% if options.use_liquid_level_sensors %}
                           <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
                       {% endif %}
@@ -73,6 +73,11 @@ $(document).ready(function()
        set_message("Liquid levels have been updated.");
     {% endif %}
 });
+
+function fuss()
+{
+    alert("fuss");
+}
 
 function set_message(txt)
 {
@@ -151,7 +156,7 @@ function test_dispense(disp)
             }
     });
 }
-function reset()
+function reset_bartendro()
 {
     $.ajax({
             url: "/ws/reset" ,
@@ -192,6 +197,8 @@ function clean()
                                         url: "/ws/clean",
                                         success: function(html)
                                         {
+                                             if (html == "error state")
+                                                 window.location = "/admin";
                                         },
                                         error: function(xhr, txtStatus, errorThrown)
                                         {
