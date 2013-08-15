@@ -11,7 +11,7 @@
       {% else %}
           {{ "%.1f" % (options.shot_size / 30) }} fl oz
       {% endif %}
-      shots. Choose one below:
+      shots. 
       </span>
       <div class="div-spacer"></div>
       {% for i in range(0, count) %}
