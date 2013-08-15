@@ -103,7 +103,13 @@
       </div>
   </div>
 </div>
+<div id="log-in-required-dialog" title="Bartendro log in required" style="display: none; text-align: center;">
+  <p style="font-size: 14pt; line-height: 18pt;">
+      Sorry, but you need to be logged into Bartendro to dispense drinks.
+  </p>
+</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
 
 var taster_size = {{ options.taster_size }};
@@ -297,10 +303,15 @@ function back()
     window.location = "/";
 }
 
+function show_dialog(title, text)
+{
+    $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+}
+
 {% if options.must_login_to_dispense and not current_user.is_authenticated() %}
 function make_drink(drink, is_taster)
 {
-    alert("Please make your drinks selection from the tablet attached to the bot. Thank you!");
+    $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
 }
 {% else %}
 function make_drink(drink, is_taster)
@@ -316,9 +327,11 @@ function make_drink(drink, is_taster)
             args += volume;
         }
         lb = '<div class="lb-box"><h1>';
+        url = "/ws/drink/" + drink;
         if (is_taster)
         {
-            drink += "/speed/128";
+            if ({{ options.taster_size }} < 20)
+                url += "/speed/128";
             lb += 'Now serving a taste of'
         }
         else
@@ -326,9 +339,8 @@ function make_drink(drink, is_taster)
         lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
         lb += "</div>";
         $.modal(lb, { 'escClose' : false });
-        console.log("/ws/drink/" + drink + args);
         $.ajax({
-                url: "/ws/drink/" + drink + args,
+                url: url + args,
                 success: function(html)
                 {
                     if (is_taster)
