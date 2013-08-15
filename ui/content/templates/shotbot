@@ -5,7 +5,13 @@
    <div class="span12">
       <h1>ShotBot</h1>
       <span class="shotbot-text">
-      ShotBot is serving {{ options.shot_size }} ml shots. Choose one below:
+      ShotBot is serving 
+      {% if options.metric %}
+          {{ options.shot_size }} ml
+      {% else %}
+          {{ "%.1f" % (options.shot_size / 30) }} fl oz
+      {% endif %}
+      shots. Choose one below:
       </span>
       <div class="div-spacer"></div>
       {% for i in range(0, count) %}
