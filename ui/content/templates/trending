@@ -34,6 +34,7 @@
     {% else %}
        <div>
          <h4>No drinks have been poured in the last {{ hours }} hours! Go and be a trend setter!</h4>
+         <a href="/" class="btn btn-large btn-warning button-border">Main menu</a>
        </div>
     {% endif %}
 </div>
