@@ -32,7 +32,7 @@ def index():
         return render_template("index", 
                                top_drinks=[], 
                                other_drinks=[],
-                               error_message="Bartendro can make no drinks right now.<br/><br/>Bartendro has had too much to drink and is sick. :-(",
+                               error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
                                title="Bartendro error")
 
     try:
@@ -50,7 +50,7 @@ def index():
         return render_template("index", 
                                top_drinks=[], 
                                other_drinks=[],
-                               error_message="Bartendro can make no drinks right now.<br/><br/>No drinks can be made with the available boozes.",
+                               error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
                                title="Bartendro error")
 
     can_make_dict = {}
