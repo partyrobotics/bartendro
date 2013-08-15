@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import memcache
 from sqlalchemy import func, asc
+from sqlalchemy.exc import OperationalError
 from bartendro import app, db
 from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request, render_template
@@ -34,7 +35,17 @@ def index():
                                error_message="Bartendro can make no drinks right now.<br/><br/>Bartendro has had too much to drink and is sick. :-(",
                                title="Bartendro error")
 
-    can_make = app.mixer.get_available_drink_list()
+    try:
+        can_make = app.mixer.get_available_drink_list()
+    except OperationalError:
+        return render_template("index", 
+                               top_drinks=[], 
+                               other_drinks=[],
+                               error_message="Bartendro database errror.<br/><br/>There doesn't seem to be a valid database installed.",
+                               title="Bartendro error")
+        
+
+
     if not len(can_make):
         return render_template("index", 
                                top_drinks=[], 

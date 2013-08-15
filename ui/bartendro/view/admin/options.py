@@ -26,3 +26,10 @@ def admin_lost_passwd():
 
     return render_template("admin/lost-passwd", 
                            options=app.options)
+
+@app.route('/admin/upload')
+@login_required
+def admin_upload_db():
+    return render_template("admin/upload", 
+                           title="Upload database",
+                           options=app.options)

@@ -115,11 +115,20 @@
         <div class="div-spacer"></div>
         <h4>Database download</h4>
         <div>
+        You should do this periodically and certainly before you upgrade your Bartendro software!
+        </div>
+        <div class="div-spacer"></div>
+        <div style="text-align: center">
         <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">Download your database</a>
         </div>
         <div class="div-spacer"></div>
+        <h4>Database upload</h4>
         <div>
-        You should do this periodically and certainly before you upgrade your Bartendro software!
+        If you've previously downloaded a database and would like to upload it.
+        </div>
+        <div class="div-spacer"></div>
+        <div style="text-align: center">
+        <a class="btn btn-big" href="/admin/upload" id="database-upload">Upload a database</a>
         </div>
     </div>
     {% if show_passwd_recovery %}

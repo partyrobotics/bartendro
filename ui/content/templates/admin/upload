@@ -1,0 +1,87 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="row-fluid">
+    <div class="span2"></div>
+    <div class="span8 admin-box-full">
+        <h2>{{ title }}</h2>
+        <div class="alert" id="status-message" style="display: none"></div>
+        <div class="div-spacer"></div>
+        <p class="help-block">
+            To upload a new database to Bartendro, click the button below and select a <pre>bartendro.db</pre> file on your
+            local machine. This will upload the database file and then verify that you want to install that 
+            database file.
+        </p>
+        <span class="btn btn-primary fileinput-button">
+             <span>Upload database...</span>
+             <input id="fileupload" type="file" name="file" data-url="/ws/upload" multiple>
+        </span>
+    </div>
+    <div class="span2"></div>
+</div>
+<div id="confirm-dialog" title="Confirm" style="display: none; text-align: center;">
+  <p>
+      Are you sure you want to install the updated database?
+  </p>
+</div>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.iframe-transport.8.7.1.js"></script>
+<script type="text/javascript" src="/static/js/jquery.fileupload.8.7.1.js"></script>
+<script type="text/javascript">
+$(document).ready(function() 
+{
+});
+$(function () {
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        done: function (e, data) {
+            set_message("Database file uploaded");
+            obj = JSON.parse(data.result);
+            upload_complete(obj["file_name"]);
+        },
+    });
+});
+function set_message(txt)
+{
+    $("#status-message").text(txt);
+    $("#status-message").show();
+}
+
+function upload_complete(file_name)
+{
+    $("#confirm-dialog").dialog({ 
+              buttons: [ 
+                         { text: "Ok", click: function() { 
+                                install_db(file_name);
+                                $( this ).dialog( "close" ); 
+                         } },
+                         { text: "Cancel", click: function() { $( this ).dialog( "close" ); } }
+                       ] 
+    });
+}
+
+function install_db(file_name)
+{
+    $.ajax({
+            url: "/ws/upload/confirm",
+            type: "POST",
+            data : JSON.stringify({ "file_name" : file_name }),
+            dataType : "json",
+            contentType: "application/json; charset=utf-8",
+            success: function(json)
+            {
+                err = json['error'];
+                if (err == '')
+                    set_message("The uploaded database was successfully installed.")
+                else
+                    set_message(err);
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                set_message("Failed to install new database. Status: " + xhr.status);
+            }
+    });
+}
+
+</script>
+{% endblock %}
