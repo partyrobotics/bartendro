@@ -17,15 +17,9 @@
                       disabled.
                    {% endif %}
                    </p>
-                   <div class="submit-button">
-                      <a onclick="reset()" class="btn">reset</a>
-                      {% if options.use_liquid_level_sensors %}
-                          <a onclick="check_levels()" class="btn">update liquid levels</a>
-                      {% endif %}
-                      <a onclick="clean()" class="btn btn-danger">clean</a>
+                   <div style="">
                    </div>
               </div>
-              <div style="margin-top: 30px; clear: both;"/>
               <div id="dispensers">
                  <form method="POST" action="/admin/save">
                      {% for i in range(1, count + 1) %}
@@ -42,8 +36,17 @@
                             <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
                         </div>
                     {% endfor %}
-                    <div class="div-spacer">
-                        {{ form.save(class="btn btn-large btn-primary submit-button") }}
+                    <div class="div-spacer"">
+                      <a onclick="reset()" class="btn btn-large" style="margin-left: 5px">reset</a>
+                      {% if options.use_liquid_level_sensors %}
+                          <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
+                      {% endif %}
+                      <a onclick="clean()" class="btn btn-large btn-warning">clean</a>
+                      {% if options.use_liquid_level_sensors %}
+                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 25px") }}
+                      {% else %}
+                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 250px") }}
+                      {% endif %}
                     </div>
                    </form>
                 </div>
@@ -52,7 +55,13 @@
         <div class="span1"></div>
     </div>
 </div>
+<div id="cleaning-dialog" title="Warning" style="display: none; text-align: center">
+  <p>
+      Please remove all the hoses from the bottles and put the hoses in cleaning solution before proceeding.
+  </p>
+</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
 var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 
@@ -176,18 +185,23 @@ function check_levels()
 }
 function clean()
 {
-    if (window.confirm("Remove all the hoses from the bottles. No alcohol fouls!"))
-    {
-        $.ajax({
-                url: "/ws/clean",
-                success: function(html)
-                {
-                },
-                error: function(xhr, txtStatus, errorThrown)
-                {
-                }
-        });
-    }
+    $("#cleaning-dialog").dialog({ 
+              buttons: [ 
+                         { text: "Ok", click: function() { 
+                                $.ajax({
+                                        url: "/ws/clean",
+                                        success: function(html)
+                                        {
+                                        },
+                                        error: function(xhr, txtStatus, errorThrown)
+                                        {
+                                        }
+                                });
+                                $( this ).dialog( "close" ); 
+                         } },
+                         { text: "Cancel", click: function() { $( this ).dialog( "close" ); } }
+                       ] 
+    });
 }
 </script>
 {% endblock %}

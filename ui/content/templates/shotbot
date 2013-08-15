@@ -28,8 +28,8 @@
    </div>
 </div>
 </div>
-<div id="log-in-required-dialog" title="Bartendro log in required" style="display: none; text-align: center;">
-  <p style="font-size: 14pt; line-height: 18pt;">
+<div id="log-in-required-dialog" title="Bartendro login" style="display: none; text-align: center;">
+  <p>
       Sorry, but you need to be logged into Bartendro to dispense drinks.
   </p>
 </div>

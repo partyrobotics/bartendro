@@ -76,6 +76,11 @@
         line-height: 13pt;
         text-align: center;
     }
+
+    .ui-dialog {
+        width: 80% !important;
+    }
+
 }
 
 @media (min-width: 768px) {
@@ -155,6 +160,10 @@
         line-height: 18pt;
         text-align: center;
     }
+    .ui-dialog {
+        width: 40% !important;
+    }
+
 }
 
 .trending-drinks {
@@ -388,4 +397,26 @@ table {
 
 .shotbot-text {
     font-size: 13pt;
+}
+
+.ui-dialog .ui-dialog-buttonpane button 
+{
+    float: right; 
+}
+
+.ui-dialog .ui-button-text {
+    font-size: 20pt;
+}
+
+.ui-dialog .ui-dialog-title {
+    font-size: 20pt;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    line-height: 26pt;
+}
+
+.ui-dialog p {
+    font-size: 18pt;
+    line-height: 20pt;
 }
