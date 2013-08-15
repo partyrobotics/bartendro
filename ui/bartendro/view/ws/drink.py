@@ -143,6 +143,8 @@ def ws_drink_save(drink):
 
 @app.route('/ws/shotbot/<int:disp>')
 def ws_shotbot(disp):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
 
     if app.mixer.get_state() == STATE_ERROR:
         return "error state"

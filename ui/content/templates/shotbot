@@ -28,11 +28,28 @@
    </div>
 </div>
 </div>
+<div id="log-in-required-dialog" title="Bartendro log in required" style="display: none; text-align: center;">
+  <p style="font-size: 14pt; line-height: 18pt;">
+      Sorry, but you need to be logged into Bartendro to dispense drinks.
+  </p>
+</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
 function make_shot(disp)
 {
-     $.ajax({ url: "/ws/shotbot/" + (disp+1)});
+     $.ajax({ 
+            url: "/ws/shotbot/" + (disp+1),
+            success: function(html)
+            {
+                if (html == "login required")
+                    $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+            },
+            error: function(xhr, txtStatus, errorThrown)
+            {
+                alert("Failed to dispense shot. Status:" + xhr.status);
+            }
+     });
 }
 </script>
 {% endblock %}

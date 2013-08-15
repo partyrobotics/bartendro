@@ -7,6 +7,7 @@
     <link rel="icon" type="image/vnd.microsoft.icon" href="/static/images/icon.ico">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/static/css/bartendro.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bartendro-theme/jquery-ui-1.10.3.custom.min.css" />
   </head>
   <body>
       <div class="container-fluid fill">
