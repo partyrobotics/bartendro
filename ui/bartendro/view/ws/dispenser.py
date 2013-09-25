@@ -74,6 +74,35 @@ def ws_dispenser_test(disp):
 
     return ""
 
+@app.route('/ws/dispenser/<int:disp>/dispense')
+def ws_dispenser_dispense(disp):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    if app.mixer.get_state() == STATE_ERROR:
+        return "error state"
+
+    quantityml = request.values.get('quantity', 0, type=int)
+
+    if (quantityml < 0 && quantityml > 500) :
+        err = "Invalid quantity %d" % (quantityml)
+        log.error(err)
+        return err
+        
+    try:
+        is_cs, err = app.mixer.dispense_ml(disp - 1, quantityml)
+        if is_cs:
+            app.mixer.set_state(STATE_ERROR)
+            return "error state"
+        if err:
+            err = "Failed to dispense on dispenser %d: %s" % (disp, err)
+            log.error(err)
+            return err
+    except mixer.BartendroBusyError:
+        return "busy"
+
+    return ""
+
 @app.route('/ws/clean')
 def ws_dispenser_clean():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
