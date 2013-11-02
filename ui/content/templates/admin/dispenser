@@ -76,11 +76,6 @@ $(document).ready(function()
     {% endif %}
 });
 
-function fuss()
-{
-    alert("fuss");
-}
-
 function set_message(txt)
 {
     $("#status-message").text(txt);

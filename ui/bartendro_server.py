@@ -11,6 +11,7 @@ from bartendro.router import driver
 from bartendro import mixer
 from bartendro.errors import SerialIOError, I2CIOError
 from bartendro.options import load_options
+from bartendro.booze_picker import Planner
 import argparse
 
 LOG_SIZE = 1024 * 500  # 500k maximum log file size
@@ -101,6 +102,7 @@ if app.software_only:
 
 logging.info("Bartendro starting")
 app.debug = args.debug
+app.planner = Planner(app.driver.count())
 
 if __name__ == '__main__':
     app.run(host=args.host, port=args.port)

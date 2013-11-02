@@ -1,0 +1,65 @@
+{% extends 'admin/layout' %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row-fluid">	
+        <div class="span2"></div>
+        <div class="span8 admin-box-full">	
+        <h2>Booze Planner</h2>
+        <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
+        <a onclick="start()" class="btn btn-large">Start</a>
+        <a onclick="update()" class="btn btn-large">Update</a>
+
+        <div id="debug"></div>
+
+        </div>
+        <div class="span2"></div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function()
+{
+});
+function set_message(txt)
+{
+    $("#status-message").text(txt);
+    $("#status-message").css('visibility', 'visible');
+    $("#status-message").show();
+}
+function start() 
+{
+    data = { 'require_booze' : [1, 11, 12], 'exclude_booze' : [], num_generations : 16 };
+    $.ajax({
+            url: "/ws/planner/start" ,
+            type: "POST",
+            data : JSON.stringify(data),
+            dataType : "json",
+            contentType: "application/json; charset=utf-8",
+            success: function(json)
+            {
+                set_message("Booze planner started")
+            },
+            error: function(html)
+            {
+                set_message("Booze planner could not be started.")
+            }
+    });
+}
+function update() 
+{
+    $.ajax({
+            url: "/ws/planner/update" ,
+            dataType : "json",
+            success: function(json)
+            {
+                $("#debug").text(json)
+            },
+            error: function(html)
+            {
+                set_message("Booze planner failed to update" + html)
+            }
+    });
+}
+
+</script>
+{% endblock %}
