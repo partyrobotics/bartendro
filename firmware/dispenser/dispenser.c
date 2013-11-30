@@ -412,14 +412,14 @@ void stop_motor(void)
     sei();
 }
 
-void run_motor_timed(uint32_t duration)
+void run_motor_timed(uint32_t duration, uint8_t speed)
 {
     uint32_t t;
 
     if (duration == 0)
         return;
 
-    set_motor_speed(255, 1);
+    set_motor_speed(speed, 1);
     for(t = 0; t < duration && !check_reset(); t++)
         _delay_ms(1);
     stop_motor();
@@ -601,11 +601,11 @@ void text_interface(void)
                 }
                 continue;
             }
-            if (sscanf(cmd, "timedisp %ud", (unsigned int *)&time) == 1)
+            if (sscanf(cmd, "timedisp %u %hhu", (unsigned int *)&time, &speed) == 2)
             {
                 if (!cs)
                 {
-                    run_motor_timed(time);
+                    run_motor_timed(time, speed);
                     flush_saved_tick_count(0);
                 }
                 continue;
@@ -729,7 +729,7 @@ int main(void)
                     case PACKET_TIME_DISPENSE:
                         if (!cs)
                         {
-                            run_motor_timed(p.p.uint32);
+                            run_motor_timed(p.p.uint32, 255);
                             flush_saved_tick_count(0);
                         }
                         break;
