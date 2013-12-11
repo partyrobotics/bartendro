@@ -188,6 +188,12 @@ class RouterDriver(object):
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
+        for d in xrange(self.num_dispensers):
+            self.pattern_define(d, 0)
+            self.pattern_add_segment(d, 255, 50, 50, 100)
+            self.pattern_add_segment(d, 128, 25, 25, 100)
+            self.pattern_finish(d)
+
         self.led_idle()
 
     def close(self):

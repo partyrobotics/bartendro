@@ -6,6 +6,7 @@ from flask import Flask, current_app
 from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
+from bartendro.router import trigger_switch
 from bartendro import db, app
 from bartendro.global_lock import STATE_INIT, STATE_READY, STATE_LOW, STATE_OUT, STATE_ERROR
 from bartendro.model.drink import Drink
@@ -43,6 +44,9 @@ class Mixer(object):
         self.err = ""
         self.disp_count = self.driver.count()
         self.check_liquid_levels()
+
+        ts = trigger_switch.TriggerSwitch(self, False)
+        ts.start()
 
     def reset(self):
         self.set_state(STATE_INIT)
@@ -297,6 +301,7 @@ class Mixer(object):
         for booze in recipe_arg:
             r = None
             booze_id = int(booze[5:])
+            print booze_id
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
 
