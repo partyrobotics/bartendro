@@ -182,6 +182,9 @@ $(document).ready(function()
     update_volumes();
     max_x = $(".sobriety").width() - $(".clickme_button").width();
     max_y = $(".sobriety").height() - $(".clickme_button").height();
+
+    if ({{ go }} && {{ options.show_feeling_lucky }})
+        make_drink({{ drink.id}}, 0);
 });
 
 function update_volumes()

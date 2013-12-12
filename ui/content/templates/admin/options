@@ -21,6 +21,13 @@
                         </label>
                     </div>
                     <div>
+                        <label for="option-show-feeling-lucky" class="checkbox">
+                             <input id="option-show-feeling-lucky" name="option-show-feeling-lucky" type="checkbox"></input>
+                             Show the <em>I'm feeling lucky button</em> to give the users the option to immediately
+                             pour a random drink.
+                        </label>
+                    </div>
+                    <div>
                         <label class="checkbox">
                              <input id="option-metric" name="option-metric" type="checkbox"></input>
                              Use metric for all units shown in Bartendro
@@ -248,6 +255,10 @@ function set_options(opts)
         $("#option-use-shotbot-ui").prop("checked", true);
     else
         $("#option-use-shotbot-ui").prop("checked", false);
+    if (opts['show_feeling_lucky'])
+        $("#option-show-feeling-lucky").prop("checked", true);
+    else
+        $("#option-show-feeling-lucky").prop("checked", false);
     if (opts['metric'])
         $('#option-metric').prop("checked", true);
     else
@@ -289,6 +300,7 @@ function save()
     options = {};
     options['use_liquid_level_sensors'] = $("#option-use-liquid-sensors").prop("checked") ? 1 : 0;
     options['use_shotbot_ui'] = $("#option-use-shotbot-ui").prop("checked") ? 1 : 0;
+    options['show_feeling_lucky'] = $("#option-show-feeling-lucky").prop("checked") ? 1 : 0;
     options['metric'] = $("#option-metric").prop("checked") ? 1 : 0;
     options['must_login_to_dispense'] = $("#option-must-login-to-dispense").prop("checked") ? 1 : 0;
     options['login_name'] = $("#login-name").val();

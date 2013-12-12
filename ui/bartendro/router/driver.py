@@ -6,7 +6,6 @@ import logging
 from subprocess import call
 from time import sleep, localtime, time
 import serial
-import random
 from struct import pack, unpack
 import pack7
 import dispenser_select

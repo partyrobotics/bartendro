@@ -21,6 +21,9 @@ class Drink(db.Model):
     popular = Column(Boolean)
     available = Column(Boolean)
 
+    # Not for storing in the DB, but for telling the UI if a drink is lucky
+    am_lucky = 0
+
     query = db.session.query_property()
 
     def __init__(self, desc = u'', data = None, size = DEFAULT_SUGGESTED_DRINK_SIZE, popular = False, available = True):
@@ -35,6 +38,13 @@ class Drink(db.Model):
         self.sugg_size = 0
         db.session.add(self)
     
+    def set_ingredients_text(self, txt=""):
+        self.ingredients = [{ 'name' : txt, 
+                              'id' : 0, 
+                              'parts' : 1, 
+                              'type' : 0 
+                           }]
+
     def process_ingredients(self):
         ing = []
 
@@ -46,6 +56,9 @@ class Drink(db.Model):
                          'type' : db.booze.type 
                        })
         self.ingredients = ing
+
+    def set_lucky(self, lucky):
+        self.am_lucky = lucky
 
     def __repr__(self):
         return "<Drink>(%d,%s,%s,%s)>" % (self.id or -1, self.name.name, self.desc, " ".join(["<DrinkBooze>(%d)" % (db.id or -1) for db in self.drink_boozes]))
