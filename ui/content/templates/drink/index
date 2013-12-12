@@ -96,7 +96,7 @@
                 {% if options.show_taster %}
                     <td class="dispense-buttons-middle"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
                 {% endif %}
-                <td class="dispense-buttons-right"><a class="btn btn-large btn-warning dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour</a></td>
+                <td class="dispense-buttons-right"><a style="font-size: 13pt" class="btn btn-large btn-success dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour Drink!</a></td>
               </tr>
               </table>
           </div>
