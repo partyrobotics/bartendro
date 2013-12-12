@@ -21,7 +21,8 @@ bartendro_options = {
     u'show_size'               : True,
     u'show_taster'             : False,
     u'strength_steps'          : 2,
-    u'use_shotbot_ui'          : False
+    u'use_shotbot_ui'          : False,
+    u'show_feeling_lucky'      : False
 }
 
 class BadConfigOptionsError(Exception):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import memcache
+import random
 from sqlalchemy import func, asc
 from sqlalchemy.exc import OperationalError
 from bartendro import app, db
@@ -65,6 +66,14 @@ def index():
                         .order_by(asc(func.lower(DrinkName.name))).all() 
     top_drinks = filter_drink_list(can_make_dict, top_drinks)
     process_ingredients(top_drinks)
+
+    if app.options.show_feeling_lucky:
+        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
+        lucky.name = DrinkName("I'm feeling lucky!")
+        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
+        lucky.set_lucky(True)
+        lucky.set_ingredients_text("Pour a random drink now")
+        top_drinks.insert(0, lucky)
 
     other_drinks = db.session.query(Drink) \
                         .join(DrinkName) \
