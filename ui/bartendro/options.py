@@ -86,14 +86,18 @@ def load_options():
 
     options = Options()
     for o in db.session.query(Option).all():
-        if isinstance(bartendro_options[o.key], int):
-           value = int(o.value)
-        elif isinstance(bartendro_options[o.key], unicode):
-           value = unicode(o.value)
-        elif isinstance(bartendro_options[o.key], boolean):
-           value = boolean(o.value)
-        else:
-            raise BadConfigOptionsError
+        try:
+            if isinstance(bartendro_options[o.key], int):
+               value = int(o.value)
+            elif isinstance(bartendro_options[o.key], unicode):
+               value = unicode(o.value)
+            elif isinstance(bartendro_options[o.key], boolean):
+               value = boolean(o.value)
+            else:
+                raise BadConfigOptionsError
+        except KeyError:
+            # Ignore options we don't understand
+            pass
 
         setattr(options, o.key, value)
 
