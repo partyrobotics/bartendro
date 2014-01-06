@@ -5,7 +5,7 @@
         <div class="span1"></div>
         <div class="span10">	
             <h2>Previous blends</h2>
-              <a href="/blender" style="float:right" class="btn btn-large btn-warning">make a new blend</a>
+              <a href="/blend" style="float:right" class="btn btn-large btn-warning">make a new blend</a>
               <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
               <div id="blends">
                  {% for blend in blends %}

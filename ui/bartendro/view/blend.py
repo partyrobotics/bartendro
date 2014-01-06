@@ -8,10 +8,10 @@ from flask.ext.login import login_required
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.model.dispenser import Dispenser
-from bartendro.model.blender_log import BlenderLog
+from bartendro.model.blend_log import BlendLog
 
-@app.route('/blender')
-def blender():
+@app.route('/blend')
+def blend():
     driver = app.driver
     count = driver.count()
 
@@ -23,17 +23,17 @@ def blender():
     dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
     boozes = db.session.query(Booze).order_by(Booze.id).all()
 
-    return render_template("blender", 
-                           title="Blender",
+    return render_template("blend", 
+                           title="Blend designer",
                            dispensers=dispensers,
                            boozes=boozes,
                            count=count,
                            recipe=recipe,
                            options=app.options)
 
-@app.route('/blender/log')
+@app.route('/blend/log')
 #@login_required
-def blender_log():
+def blend_log():
     boozes = db.session.query(Booze).order_by(Booze.id).all()
     booze_index = {}
     for booze in boozes:
@@ -41,7 +41,7 @@ def blender_log():
 
     print booze_index
 
-    log = BlenderLog.query.all()
+    log = BlendLog.query.all()
     blends = []
     args = []
     for entry in log:
@@ -50,10 +50,10 @@ def blender_log():
         for id, v in data:
             blend.append({ 'name' : booze_index[id], 'value' : v})
             args.append("booze%d=%d" % (id, v))
-        url = "/blender?" + "&".join(args)
+        url = "/blend?" + "&".join(args)
         blends.append({ 'number' : entry.id, 'blend' : blend, 'url' : url })
 
-    return render_template("blender-log",
+    return render_template("blend-log",
                            title="Previous blends",
                            blends=blends,
                            options=app.options)

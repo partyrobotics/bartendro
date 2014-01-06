@@ -6,20 +6,20 @@ from bartendro import app, db, mixer
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
-from bartendro.model.blender_log import BlenderLog
+from bartendro.model.blend_log import BlendLog
 
-@app.route('/ws/blender-log')
+@app.route('/ws/blend-log')
 #@login_required
-def blender_log_load():
-    log = BlenderLog.query.all()
+def blend_log_load():
+    log = BlendLog.query.all()
     blends = []
     for blend in log:
         blends.append((blend.id, blend.blend))
     return json.dumps({ 'log' : blends})
 
-@app.route('/ws/blender-log/assign')
+@app.route('/ws/blend-log/assign')
 #@login_required
-def blender_log_assign():
+def blend_log_assign():
 
     arg_blend = []
     for arg in request.args:
@@ -28,7 +28,7 @@ def blender_log_assign():
         arg_blend.append((n, v))
     arg_set = set(arg_blend)
 
-    log = BlenderLog.query.all()
+    log = BlendLog.query.all()
     for entry in log:
         blend = []
         data = json.loads(entry.blend)
@@ -39,7 +39,7 @@ def blender_log_assign():
             return json.dumps({ 'id' : entry.id })
 
     # save new blend to disk
-    blend = BlenderLog(json.dumps(arg_blend))
+    blend = BlendLog(json.dumps(arg_blend))
     db.session.add(blend)
     db.session.commit()
 

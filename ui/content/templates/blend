@@ -4,20 +4,20 @@
     <div class="row-fluid">	
         <div class="span1"></div>
         <div class="span10">	
-            <h2>Blender</h2>
+            <h2>Blend designer</h2>
               <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
               <div id="dispensers">
                  <form method="POST" action="/admin/save">
                     {% for i in range(1, count + 1) %}
                         <div style="padding-bottom: 30px">
-                            <div class="blender-title">{{ dispensers[i - 1].booze.name }}</div>
-                            <div id="blender_info{{ i }}" class="blender-info">0 %</div>
-                            <div id="slider{{ i }}" class="blender-slider"></div>
+                            <div class="blend-title">{{ dispensers[i - 1].booze.name }}</div>
+                            <div id="blend_info{{ i }}" class="blend-info">0 %</div>
+                            <div id="slider{{ i }}" class="blend-slider"></div>
                         </div>
                     {% endfor %}
                     <div class="div-spacer">
                       <a onclick="pour()" style="float: right" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
-                      <a href="/blender/log" style="float: left" class="btn btn-large btn-warning">see past blends</a>
+                      <a href="/blend/log" style="float: left" class="btn btn-large btn-warning">see past blends</a>
                       <a onclick="zero()" class="btn btn-large btn-warning" style="margin-left: 15px">zero all</a>
                     </div>
                    </form>
@@ -69,7 +69,7 @@ function update_percentages()
             value = 0;
         else
             value = Math.round($("#slider" + (i + 1)).slider("value") * 100 / total);
-        $("#blender_info" + (i + 1)).text(value + " %");
+        $("#blend_info" + (i + 1)).text(value + " %");
         percentages[i] = value;
         volumes[i] = Math.round({{ options.drink_size }} * value / 100);
     }
@@ -107,7 +107,7 @@ function pour()
     }
 
     $.ajax({
-        url: "/ws/blender-log/assign" + args,
+        url: "/ws/blend-log/assign" + args,
         dataType : "json",
         success: function(json)
         {
@@ -169,7 +169,7 @@ function pour_callback(id)
 function pour_complete()
 {
     $.modal.close();
-    window.location = "/blender";
+    window.location = "/blend";
 }
 </script>
 <script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>

@@ -88,12 +88,12 @@
         width: 80% !important;
     }
 
-    .blender-slider {
+    .blend-slider {
         margin-left: 10px;
         width: 70%;
     }
 
-    .blender-info {
+    .blend-info {
         text-align: right;
         float: right;
         font-size: 16pt;
@@ -191,12 +191,12 @@
         width: 40% !important;
     }
 
-    .blender-slider {
+    .blend-slider {
         margin-left: 10px;
         width: 80%;
     }
 
-    .blender-info {
+    .blend-info {
         text-align: right;
         float: right;
         font-size: 16pt;
@@ -334,7 +334,7 @@ table {
     display: inline;
 }
 
-.blender-title {
+.blend-title {
     font-size: 14pt;
     font-weight: bold;
     padding-bottom: 10px;
