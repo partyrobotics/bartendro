@@ -12,7 +12,11 @@
                         <div style="padding-bottom: 30px">
                             <div class="blend-title">{{ dispensers[i - 1].booze.name }}</div>
                             <div id="blend_info{{ i }}" class="blend-info">0 %</div>
-                            <div id="slider{{ i }}" class="blend-slider"></div>
+                            <div>
+                                <a class="btn btn-large btn-warning drink-plus-minus button-border">-</a>
+                                <div id="slider{{ i }}" class="blend-slider"></div>
+                                <a class="btn btn-large btn-warning drink-plus-minus button-border">+</a>
+                            </div>
                         </div>
                     {% endfor %}
                     <div class="div-spacer">
