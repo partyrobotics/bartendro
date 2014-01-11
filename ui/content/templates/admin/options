@@ -20,20 +20,22 @@
                              Use ShotBot interface to dispense shots of booze, instead of mixed drinks.
                         </label>
                     </div>
-                    <div>
-                        <label for="option-show-feeling-lucky" class="checkbox">
-                             <input id="option-show-feeling-lucky" name="option-show-feeling-lucky" type="checkbox"></input>
-                             Show the <em>I'm feeling lucky button</em> to give the users the option to immediately
-                             pour a random drink.
-                        </label>
-                    </div>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-show-feeling-lucky" class="checkbox">
+                                 <input id="option-show-feeling-lucky" name="option-show-feeling-lucky" type="checkbox"></input>
+                                 Show the <em>I'm feeling lucky button</em> to give the users the option to immediately
+                                 pour a random drink.
+                            </label>
+                        </div>
+                    {% endif %}
                     <div>
                         <label class="checkbox">
                              <input id="option-metric" name="option-metric" type="checkbox"></input>
                              Use metric for all units shown in Bartendro
                         </label>
                     </div>
-                    <div class="div-spacer"/>
+                    <div class="div-spacer"></div>
                     <span class="help-block">
                         The username and password that must be given to use the admin features of Bartendro:
                     </span>
@@ -58,69 +60,80 @@
                         </label>
                     </div>
                 </div>
-                <div class="div-spacer"/>
+                <div class="div-spacer"></div>
                 <h4>Size options</h4>
-                <span class="help-block">
-                    All values here are in milliliters (ml).
-                </span>
                 <div style="margin-left: 15px">
-                    <div>
-                        <label for="option-drink-size">Default drink size</label>
-                        <input id="option-drink-size" name="option-drink-size" type="text"></input>
-                    </div>
+                    <span class="help-block">
+                        All values here are in milliliters (ml).
+                    </span>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-drink-size">Default drink size</label>
+                            <input id="option-drink-size" name="option-drink-size" type="text"></input>
+                        </div>
+                    {% endif %}
                     <div>
                         <label for="option-shot-size">Shot size (for ShotBot interface)</label>
                         <input id="option-shot-size" name="option-shot-size" type="text"></input>
                     </div>
-                    <div>
-                        <label for="option-taster-size">Taster size</label>
-                        <input id="option-taster-size" name="option-taster-size" type="text"></input>
-                    </div>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-taster-size">Taster size</label>
+                            <input id="option-taster-size" name="option-taster-size" type="text"></input>
+                        </div>
+                    {% endif %}
                     <div>
                         <label for="option-test-dispense-size">Test dispense size</label>
                         <input id="option-test-dispense-size" name="option-test-dispense-size" type="text"></input>
                     </div>
                 </div>
                 <div class="div-spacer"/>
-                <h4>Drink options</h4>
-                <div style="margin-left: 15px">
-                    <div>
-                        <label for="option-show-taster" class="checkbox">
-                            <input id="option-show-taster" name="option-show-taster" type="checkbox"></input>
-                            Show taster button
-                        </label>
+                {% if not options.i_am_shotbot %}
+                    <h4>Drink options</h4>
+                    <div style="margin-left: 15px">
+                        <div>
+                            <label for="option-show-taster" class="checkbox">
+                                <input id="option-show-taster" name="option-show-taster" type="checkbox"></input>
+                                Show taster button
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-show-drink-size" class="checkbox">
+                                <input id="option-show-drink-size" name="option-show-drink-size" type="checkbox"></input>
+                                Allow users to change the drink size
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-show-strength" class="checkbox">
+                                <input id="option-show-strength" name="option-show-strength" type="checkbox"></input>
+                                Allow users to change the strength of their drinks
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-strength-steps">Number of strength steps to show</label>
+                            <input id="option-strength-steps" name="option-strength-steps" type="text" class="required" minlength="1"></input>
+                        </div>
                     </div>
-                    <div>
-                        <label for="option-show-drink-size" class="checkbox">
-                            <input id="option-show-drink-size" name="option-show-drink-size" type="checkbox"></input>
-                            Allow users to change the drink size
-                        </label>
-                    </div>
-                    <div>
-                        <label for="option-show-strength" class="checkbox">
-                            <input id="option-show-strength" name="option-show-strength" type="checkbox"></input>
-                            Allow users to change the strength of their drinks
-                        </label>
-                    </div>
-                    <div>
-                        <label for="option-strength-steps">Number of strength steps to show</label>
-                        <input id="option-strength-steps" name="option-strength-steps" type="text" class="required" minlength="1"></input>
-                    </div>
-                </div>
+                {% endif %}
             </fieldset>
         </form>
         <div class="div-spacer">
             <a class="btn btn-large btn-primary submit-button" onclick="save()">save and reboot</a>
         </div>
     </div>
-    {% if show_passwd_recovery %}
     <div class="span4 admin-box-full" style="margin-bottom: 25px">
-        <h2>Ooops</h2>
+        <h2>Network info</h2>
         <div>
-        <a href="/admin/lost-passwd">I lost my username/password.</a>
+        WiFi address: {{ wlan0 }}<br/>
+        Network address: {{ eth0 }} 
         </div>
+        {% if show_passwd_recovery %}
+            <h4>Ooops</h4>
+            <div>
+            <a href="/admin/lost-passwd">I lost my username/password.</a>
+            </div>
+        {% endif %}
     </div>  
-    {% endif %}
     <div class="span4 admin-box-full">
         <h2>Database</h2>
         <h4>Current schema</h4>
@@ -158,13 +171,6 @@
         <a class="btn btn-big btn-danger" href="/admin/upload" id="database-upload">upload a database</a>
         </div>
     </div>
-    <div class="span4 admin-box-full" style="margin-top: 25px">
-        <h2>Network info</h2>
-        <div>
-        WiFi address: {{ wlan0 }}<br/>
-        Network address: {{ eth0 }} 
-        </div>
-    </div>  
 </div>
 <div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
   <p>

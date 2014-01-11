@@ -53,8 +53,6 @@ logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger('bartendro')
 logger.addHandler(handler)
 
-app.options = load_options()
-
 try: 
     app.software_only = args.software_only or int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
     app.num_dispensers = 15
@@ -92,9 +90,7 @@ except SerialIOError:
 
 logging.info("Found %d dispensers." % app.driver.count())
 
-if app.driver.count() == 1:
-    app.options.use_shotbot_ui = True
-
+app.options = load_options()
 app.mixer = mixer.Mixer(app.driver, app.mc)
 if app.software_only:
     logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")

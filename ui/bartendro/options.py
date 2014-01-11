@@ -101,4 +101,10 @@ def load_options():
 
         setattr(options, o.key, value)
 
+    if app.driver.count() == 1:
+        setattr(options, "i_am_shotbot", True)
+        setattr(options, "use_shotbot_ui", True)
+    else:
+        setattr(options, "i_am_shotbot", False)
+
     return options
