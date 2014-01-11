@@ -39,15 +39,15 @@
                         </div>
                     {% endfor %}
                     <div class="div-spacer">
-                      <a onclick="reset_bartendro()" class="btn btn-large" style="margin-left: 5px">reset</a>
+                      <a onclick="reset_bartendro()" class="btn btn-large" style="margin-left: 5px">reset dispensers</a>
                       {% if options.use_liquid_level_sensors %}
                           <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
                       {% endif %}
                       <a onclick="clean()" class="btn btn-large btn-warning">clean</a>
                       {% if options.use_liquid_level_sensors %}
-                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 25px") }}
+                          {{ form.save(class="btn btn-large btn-primary") }}
                       {% else %}
-                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 250px") }}
+                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 160px") }}
                       {% endif %}
                     </div>
                    </form>
