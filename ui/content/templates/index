@@ -7,6 +7,11 @@
                 <span class="trending-drinks"><a href="/trending">What's popular now?</a></span>
                 <h1>the essentials</h1>
            </div>
+           <div class="span6">
+           {% if options.use_shotbot_ui %}
+                <span class="trending-drinks"><a href="/shotbot">ShotBot mode</a></span>
+           {% endif %}
+           </div>
         </div>
         {{ drink_table(top_drinks) }}
         <div style="clear: both"/>

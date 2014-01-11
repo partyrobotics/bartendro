@@ -17,7 +17,7 @@
                     <div>
                         <label for="option-use-shotbot-ui" class="checkbox">
                              <input id="option-use-shotbot-ui" name="option-use-shotbot-ui" type="checkbox"></input>
-                             Use ShotBot interface to dispense shots of booze, instead of mixed drinks.
+                             Allow users to use the ShotBot interface to dispense individual shots of booze.
                         </label>
                     </div>
                     {% if not options.i_am_shotbot %}

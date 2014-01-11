@@ -3,16 +3,30 @@
 <div id="scroll-pane">
 <div class="row-fluid">
    <div class="span12">
-      <h1>ShotBot</h1>
-      <span class="shotbot-text">
-      ShotBot is serving 
-      {% if options.metric %}
-          {{ options.shot_size }} ml
-      {% else %}
-          {{ "%.1f" % (options.shot_size / 30) }} fl oz
-      {% endif %}
-      shots. 
-      </span>
+      <div class="row-fluid">
+           <div class="span6">
+                <h1>ShotBot</h1>
+           </div>
+           <div class="span6">
+               {% if not options.i_am_shotbot %}
+                    <span class="trending-drinks"><a href="/">Cocktails mode</a></span>
+               {% endif %}
+           </div>
+        </div>
+      </div>
+      <div class="row-fluid">
+           <div class="span12">
+              <span class="shotbot-text">
+              ShotBot is serving 
+              {% if options.metric %}
+                  {{ options.shot_size }} ml
+              {% else %}
+                  {{ "%.1f" % (options.shot_size / 30) }} fl oz
+              {% endif %}
+              shots. 
+              </span>
+           </div>
+      </div>
       <div class="div-spacer"></div>
       {% for i in range(0, count) %}
           <div class="row-fluid">
