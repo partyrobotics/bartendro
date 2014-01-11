@@ -113,6 +113,14 @@
             <a class="btn btn-large btn-primary submit-button" onclick="save()">save</a>
         </div>
     </div>
+    {% if show_passwd_recovery %}
+    <div class="span4 admin-box-full" style="margin-bottom: 25px">
+        <h2>Ooops</h2>
+        <div>
+        <a href="/admin/lost-passwd">I lost my username/password.</a>
+        </div>
+    </div>  
+    {% endif %}
     <div class="span4 admin-box-full">
         <h2>Database</h2>
         <h4>Current schema</h4>
@@ -122,7 +130,13 @@
         <div class="div-spacer"></div>
         <h4>Database download</h4>
         <div>
-        You should do this periodically and certainly before you upgrade your Bartendro software!
+        <p>
+        Bartendro's database contains all the information needed to run your Bartendro, including booze you've added, 
+        your drink recipes and a log of your drinks poured. This information is <b>not</b> automatically backed up
+        and you should make period backups of this data base using the two buttons below.
+        </p>
+
+        Download Bartendro's database to your local machine. We recommend saving this file to a DropBox account!
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
@@ -131,21 +145,19 @@
         <div class="div-spacer"></div>
         <h4>Database upload</h4>
         <div>
-        If you've previously downloaded a database and would like to upload it.
+        <p>
+        If you've previously saved your Bartendro database and would like to upload this database to Bartendro,
+        use the button below.
+        </p>
+        <b>Warning:</b> This will overwrite your current database! All changes made to Bartendro's
+        database will be lost! We recommend downloading a copy of the database and stashing it in a safe place before
+        proceeding.
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
-        <a class="btn btn-big" href="/admin/upload" id="database-upload">Upload a database</a>
+        <a class="btn btn-big btn-danger" href="/admin/upload" id="database-upload">Upload a database</a>
         </div>
     </div>
-    {% if show_passwd_recovery %}
-    <div class="span4 admin-box-full" style="margin-top: 25px">
-        <h2>Ooops</h2>
-        <div>
-        <a href="/admin/lost-passwd">I lost my username/password.</a>
-        </div>
-    </div>  
-    {% endif %}
     <div class="span4 admin-box-full" style="margin-top: 25px">
         <h2>Network info</h2>
         <div>
