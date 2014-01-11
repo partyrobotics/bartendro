@@ -146,6 +146,13 @@
         </div>
     </div>  
     {% endif %}
+    <div class="span4 admin-box-full" style="margin-top: 25px">
+        <h2>Network info</h2>
+        <div>
+        WiFi address: {{ wlan0 }}<br/>
+        Network address: {{ eth0 }} 
+        </div>
+    </div>  
 </div>
 <div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
   <p>
