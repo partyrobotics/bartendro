@@ -46,8 +46,8 @@
                         <input id="login-passwd" name="login-passwd" type="password"></input>
                     </div>
                     <span class="help-block">
-                        If you trust all of the users of Bartendro to "do the right thing", you can allow 
-                        anyone to pour drinks from Bartendro. If you'd like to only allow devices that are 
+                        If you trust all the people in the wireless reach of Bartendro to not abuse it and/or 
+                        waste booze, you can allow anyone to pour drinks. If you'd like to only allow devices that are 
                         logged into Bartendro to dispense drinks, enable this feature. Logging into the 
                         admin section of Bartendro will allow that logged in user to dispense drinks:
                     </span>
