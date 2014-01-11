@@ -110,7 +110,7 @@
             </fieldset>
         </form>
         <div class="div-spacer">
-            <a class="btn btn-large btn-primary submit-button" onclick="save()">save</a>
+            <a class="btn btn-large btn-primary submit-button" onclick="save()">save and reboot</a>
         </div>
     </div>
     {% if show_passwd_recovery %}
@@ -140,7 +140,7 @@
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
-        <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">Download your database</a>
+        <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">download your database</a>
         </div>
         <div class="div-spacer"></div>
         <h4>Database upload</h4>
@@ -155,7 +155,7 @@
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
-        <a class="btn btn-big btn-danger" href="/admin/upload" id="database-upload">Upload a database</a>
+        <a class="btn btn-big btn-danger" href="/admin/upload" id="database-upload">upload a database</a>
         </div>
     </div>
     <div class="span4 admin-box-full" style="margin-top: 25px">
