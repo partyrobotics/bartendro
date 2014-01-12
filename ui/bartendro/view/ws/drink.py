@@ -142,8 +142,8 @@ def ws_drink_save(drink):
 
     return json.dumps({ 'id' : drink.id });
 
-@app.route('/ws/shotbot/<int:disp>')
-def ws_shotbot(disp):
+@app.route('/ws/shots/<int:disp>')
+def ws_shots(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 

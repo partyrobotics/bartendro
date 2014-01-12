@@ -11,7 +11,6 @@
 <body>
 <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-        <a class="brand" href="#">admin</a>
         <ul class="nav">
             <li><a href="/">menu</a></li>
             {% if current_user.is_authenticated() %}
@@ -28,6 +27,12 @@
                 <li><a href="/admin/logout">logout</a></li>
             {% endif %}
         </ul>
+        <div class="bartendro-logo">
+            <img class="bartendro-logo-img" src="/static/images/bartendro-logo.png">
+        </div>
+        <div class="party-robot">
+            <img class="party-robot-img" src="/static/images/partyrobot.png">
+        </div>
     </div>
 </div>
 <div class="container-fluid">

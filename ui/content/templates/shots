@@ -1,23 +1,19 @@
 {% extends 'layout' %}
+{% set active = "shots" %}
 {% block body %}
 <div id="scroll-pane">
 <div class="row-fluid">
    <div class="span12">
       <div class="row-fluid">
-           <div class="span6">
-                <h1>ShotBot</h1>
-           </div>
-           <div class="span6">
-               {% if not options.i_am_shotbot %}
-                    <span class="trending-drinks"><a href="/">Cocktails mode</a></span>
-               {% endif %}
+           <div class="span12">
+                <h1>Shots</h1>
            </div>
         </div>
       </div>
       <div class="row-fluid">
            <div class="span12">
               <span class="shotbot-text">
-              ShotBot is serving 
+              Now serving 
               {% if options.metric %}
                   {{ options.shot_size }} ml
               {% else %}
@@ -53,7 +49,7 @@
 function make_shot(disp)
 {
      $.ajax({ 
-            url: "/ws/shotbot/" + (disp+1),
+            url: "/ws/shots/" + (disp+1),
             success: function(html)
             {
                 if (html == "login required")

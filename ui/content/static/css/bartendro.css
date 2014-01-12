@@ -87,7 +87,6 @@
     .ui-dialog {
         width: 80% !important;
     }
-
 }
 
 @media (min-width: 768px) {
@@ -178,7 +177,33 @@
     .ui-dialog {
         width: 40% !important;
     }
+}
 
+@media (min-width: 550px) {
+    .bartendro-logo {
+        float: right;
+    }
+    .bartendro-logo-img {
+        width: 150px;
+        padding-top: 10px;
+    }
+    .party-robot {
+        display: none
+    }
+}
+
+@media (max-width: 550px) {
+    .bartendro-logo {
+        display: none;
+    }
+    .party-robot {
+        width: 20px;
+        float: right;
+    }
+    .party-robot-img {
+        width: 20px;
+        padding-top: 8px;
+    }
 }
 
 .trending-drinks {
@@ -211,6 +236,10 @@ h3 {
     font-size: 16pt;
     margin: 0px;
     padding: 20px 0 0 0;
+}
+
+.navbar .nav > .active > a {
+    color: #0088cc;
 }
 
 .ingredients {

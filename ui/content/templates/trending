@@ -1,4 +1,5 @@
 {% extends 'layout' %}
+{% set active = "trending" %}
 {% block body %}
 <div id="scroll-pane">
     {% if top_drinks %}

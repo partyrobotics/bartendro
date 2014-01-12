@@ -87,14 +87,14 @@ def index():
                            other_drinks=other_drinks,
                            title="Bartendro")
 
-@app.route('/shotbot')
-def shotbot():
+@app.route('/shots')
+def shots():
     if not app.options.use_shotbot_ui:
         return redirect("/")
     disp = db.session.query(Dispenser).all()
     disp = disp[:app.driver.count()]
-    return render_template("shotbot", 
+    return render_template("shots", 
                            options=app.options, 
                            dispensers=disp, 
                            count=app.driver.count(), 
-                           title="ShotBot")
+                           title="Shots")
