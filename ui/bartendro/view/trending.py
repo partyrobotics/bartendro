@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
 from bartendro import app, db
+from sqlalchemy import desc
 from flask import Flask, request, render_template
 from flask.ext.login import login_required
 from bartendro.model.drink import Drink
+from bartendro.model.drink_log import DrinkLog
 from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.form.booze import BoozeForm
@@ -16,7 +18,12 @@ def trending_drinks():
 
 @app.route('/trending/<int:hours>')
 def trending_drinks_detail(hours):
-    enddate = int(time.time())
+
+    log = db.session.query(DrinkLog).order_by(desc(DrinkLog.time)).first() or 0
+    if not log.time:
+        enddate = int(time.time())
+    else:
+        enddate = log.time
     begindate = enddate - (hours * 60 * 60)
 
     total_number = db.session.query("number")\
