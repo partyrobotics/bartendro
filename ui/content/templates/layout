@@ -34,10 +34,10 @@
           ><a href="/trending">Trending</a></li>
         </ul>
         <div class="bartendro-logo">
-            <img class="bartendro-logo-img" src="/static/images/bartendro-logo.png">
+            <a href="/admin"><img class="bartendro-logo-img" src="/static/images/bartendro-logo.png"></a>
         </div>
         <div class="party-robot">
-            <img class="party-robot-img" src="/static/images/partyrobot.png">
+            <a href="/admin"><img class="party-robot-img" src="/static/images/partyrobot.png"></a>
         </div>
       </div>
     </div>
