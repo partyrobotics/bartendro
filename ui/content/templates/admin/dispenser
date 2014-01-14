@@ -34,8 +34,8 @@
                                   {{ form["dispenser%s" % i].label(class="dispenser-ok")}}: 
                             {% endif %}
                             {{ form["dispenser%s" % i](class="form select-field") }}
-                            <a class="btn btn-large" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
-                            <a class="btn btn-large" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
+                            <a class="btn btn-large btn-success" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
+                            <a class="btn btn-large btn-success" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
                         </div>
                     {% endfor %}
                     <div class="div-spacer">
@@ -43,7 +43,7 @@
                       {% if options.use_liquid_level_sensors %}
                           <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
                       {% endif %}
-                      <a onclick="clean()" class="btn btn-large btn-warning">clean</a>
+                      <a onclick="clean()" class="btn btn-large btn-success">clean</a>
                       {% if options.use_liquid_level_sensors %}
                           {{ form.save(class="btn btn-large btn-primary") }}
                       {% else %}
