@@ -20,19 +20,29 @@
                   {{ "%.1f" % (options.shot_size / 30) }} fl oz
               {% endif %}
               shots. 
+              <br/>
+              <br/>
+              <b>Make sure there is a glass under the spout, the shot will pour immediately!</b>
               </span>
            </div>
       </div>
       <div class="div-spacer"></div>
       {% for i in range(0, count) %}
           <div class="row-fluid">
-              <div class="span6">
-                 <button class="btn btn-warning button-border shotbot-button" onclick="make_shot({{i}})">{{ dispensers[i].booze.name }}</button>
+              <div class="span1"></div>
+              <div class="span10">
+                <div class="row-fluid">
+                  <div class="span6">
+                     <button class="btn btn-success button-border shotbot-button" onclick="make_shot({{i}})">{{ dispensers[i].booze.name }}</button>
+                  </div>
+                  <div class="span6 shotbot-text" style="padding-top: 10px">
+                     {{ dispensers[i].booze.desc }} 
+                  </div>
+                </div>
               </div>
-              <div class="span6 shotbot-text">
-                 {{ dispensers[i].booze.desc }} 
-              </div>
+              <div class="span1"></div>
           </div>
+          <div style="margin-bottom: 10px"></div>
       {% endfor %}
       <a href="/admin" style="color: #Fafafa">admin</a>
    </div>

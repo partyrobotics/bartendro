@@ -68,7 +68,7 @@ $(document).ready(function() {
       {% endif %}
       <div class="span6 menuitem">
          <a class="btn btn-large btn-block drink-btn button-border
-         {% if drink.am_lucky %} btn-danger {% else %} btn-warning {% endif %}" style="margin-bottom: 8px;" 
+         {% if drink.am_lucky %} btn-success {% else %} btn-warning {% endif %}" style="margin-bottom: 8px;" 
                 type="button" href="/drink/{{ drink.id }}{% if drink.am_lucky %}/go{% endif %}">{{ drink.name.name }}</a>
          <div class="ingredients">
             {% for ing in drink.ingredients %}
