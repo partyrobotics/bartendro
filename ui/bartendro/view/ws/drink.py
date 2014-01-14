@@ -21,6 +21,7 @@ def ws_make_drink(drink, recipe, speed = 255):
         if not err:
             return "ok\n"
         else:
+            print err
             raise BadRequest(err)
     except mixer.BartendroBusyError:
         raise ServiceUnavailable("busy")
@@ -33,7 +34,8 @@ def ws_drink(drink):
 
     recipe = {}
     for arg in request.args:
-        recipe[arg] = int(request.args.get(arg))
+        disp = int(arg[5:])
+        recipe[disp] = int(request.args.get(arg))
 
     return ws_make_drink(drink, recipe)
 
