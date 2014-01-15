@@ -21,6 +21,7 @@ CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 FULL_SPEED = 255
 HALF_SPEED = 128
 SLOW_DISPENSE_THRESHOLD = 20 # ml
+MAX_DISPENSE = 1000 # ml max dispense per call. Just for sanity. :)
 
 LIQUID_OUT_THRESHOLD       = 75
 LIQUID_WARNING_THRESHOLD   = 120 
@@ -284,6 +285,9 @@ class Mixer(object):
                     if ml <= 0:
                         log_lines[i] = "  %-2d %-32s %d ml (not dispensed)" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
                         continue
+
+                    if ml > MAX_DISPENSE:
+                        return log_and_return("Cannot make drink. Invalid dispense quantity: %d ml. (Max %d ml)" % (ml, MAX_DISPENSE))
 
                     recipe[i] =  ml
                     size += ml
