@@ -17,6 +17,11 @@ TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
+
+FULL_SPEED = 255
+HALF_SPEED = 128
+SLOW_DISPENSE_THRESHOLD = 20 # ml
+
 LIQUID_OUT_THRESHOLD       = 75
 LIQUID_WARNING_THRESHOLD   = 120 
 
@@ -274,11 +279,15 @@ class Mixer(object):
                     return log_and_return("Cannot make drink: Dispenser %d is out of booze." % (i+1))
 
                 if booze_id == disp.booze_id:
-                    ml = recipe_arg[booze_id]
-                    recipe[i] =  ml
                     found = True
+                    ml = recipe_arg[booze_id]
+                    if ml <= 0:
+                        log_lines[i] = "  %-2d %-32s %d ml (not dispensed)" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
+                        continue
+
+                    recipe[i] =  ml
                     size += ml
-                    log_lines[i] = "  %-2d %-32s %d ml" % (i, disp.booze.name, ml)
+                    log_lines[i] = "  %-2d %-32s %d ml" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
                     continue
 
             if not found:
@@ -312,9 +321,15 @@ class Mixer(object):
         self.led_dispense()
         active_disp = []
         for disp in recipe:
+            if not recipe[disp]:
+                continue
             ticks = int(recipe[disp] * TICKS_PER_ML)
-            if not self.driver.dispense_ticks(disp, ticks, speed):
-                log.error("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
+            if recipe[disp] < SLOW_DISPENSE_THRESHOLD and speed > HALF_SPEED: 
+                actual_speed = HALF_SPEED 
+            else:
+                actual_speed = speed 
+            if not self.driver.dispense_ticks(disp, ticks, actual_speed):
+                log.error("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, actual_speed, disp + 1))
             active_disp.append(disp)
             sleep(.01)
 
