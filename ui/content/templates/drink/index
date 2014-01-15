@@ -92,12 +92,12 @@
 
               <table class="dispense-buttons">
               <tr>
-                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning dispense-button button-border" onclick="back()">Back</a></td>
+                <td class="dispense-buttons-left"><a class="btn btn-large btn-warning button-border smaller-font" onclick="back()">Back</a></td>
                 {% if can_make %}
                     {% if options.show_taster %}
-                        <td class="dispense-buttons-middle"><a class="btn btn-large btn-success dispense-button button-border" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
+                        <td class="dispense-buttons-middle"><a class="btn btn-large btn-success button-border smaller-font" onclick="make_drink({{ drink.id}}, 1)">Taster</a></td>
                     {% endif %}
-                    <td class="dispense-buttons-right"><a style="font-size: 13pt" class="btn btn-large btn-success dispense-button button-border" onclick="make_drink({{ drink.id}}, 0)">Pour Drink!</a></td>
+                    <td class="dispense-buttons-right"><a style="font-size: 13pt" class="btn btn-large btn-success button-border smaller-font" onclick="make_drink({{ drink.id}}, 0)">Pour Drink!</a></td>
                 {% else %}
                     <td><div style="float: right"><b>This drink cannot be dispensed right now.</b></div></td>
                 {% endif %}
@@ -343,53 +343,53 @@ function make_drink(drink, is_taster)
 {% else %}
 function make_drink(drink, is_taster)
 {
-        for(i = 0; i < ing.length; i++)
-        {
-            if (i == 0)
-                args = "?";
-            else 
-                args += "&";
-            args += "booze" + ing[i].id + "=";
-            volume = is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
-            args += volume;
-        }
-        lb = '<div class="lb-box"><h1>';
-        url = "/ws/drink/" + drink;
-        if (is_taster)
-        {
-            if ({{ options.taster_size }} < 20)
-                url += "/speed/128";
-            lb += 'Now serving a taste of'
-        }
-        else
-            lb += 'Now serving your'
-        lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
-        lb += "</div>";
-        $.modal(lb, { 'escClose' : false });
-        $.ajax({
-                url: url + args,
-                success: function(html)
-                {
-                    if (is_taster)
-                        $.modal.close();
-                    else
-                        window.location = "/";
-                },
-                error: function(xmlhttp, textStatus, error)
-                {
+    for(i = 0; i < ing.length; i++)
+    {
+        if (i == 0)
+            args = "?";
+        else 
+            args += "&";
+        args += "booze" + ing[i].id + "=";
+        volume = is_taster ? ing[i].taster_volume.toFixed(0) : ing[i].volume.toFixed(0);
+        args += volume;
+    }
+    lb = '<div class="lb-box"><h1>';
+    url = "/ws/drink/" + drink;
+    if (is_taster)
+    {
+        if ({{ options.taster_size }} < 20)
+            url += "/speed/128";
+        lb += 'Now serving a taste of'
+    }
+    else
+        lb += 'Now serving your'
+    lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
+    lb += "</div>";
+    $.modal(lb, { 'escClose' : false });
+    $.ajax({
+            url: url + args,
+            success: function(html)
+            {
+                if (is_taster)
                     $.modal.close();
-                    if (xmlhttp.status == 500)
-                        $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
-                    else
-                    if (xmlhttp.status == 503)
-                        $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
-                    else
-                    if (xmlhttp.status == 400)
-                        $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
-                    else
-                        $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
-                }
-        });
+                else
+                    window.location = "/";
+            },
+            error: function(xmlhttp, textStatus, error)
+            {
+                $.modal.close();
+                if (xmlhttp.status == 500)
+                    $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                else
+                if (xmlhttp.status == 503)
+                    $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+                else
+                if (xmlhttp.status == 400)
+                    $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+                else
+                    $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/"; } } ] });
+            }
+    });
 }
 {% endif %}
 function close_modal() {

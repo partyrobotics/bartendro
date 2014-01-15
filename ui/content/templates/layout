@@ -18,20 +18,20 @@
              {% if active == "index" %}
                 class="active"
              {% endif %}
-             ><a href="/">Cocktails</a></li>
+             ><a href="/" class="slim-nav-item">Cocktails</a></li>
           {% endif %}
           {% if options.use_shotbot_ui %}
              <li
              {% if active == "shots" %}
                 class="active"
              {% endif %}
-             ><a href="/shots">Shots</a></li>
+             ><a href="/shots" class="slim-nav-item">Shots</a></li>
           {% endif %}
           <li
           {% if active == "trending" %}
              class="active"
           {% endif %}
-          ><a href="/trending">Trending</a></li>
+          ><a href="/trending" class="slim-nav-item">Trending</a></li>
         </ul>
         <div class="bartendro-logo">
             <a href="/admin"><img class="bartendro-logo-img" src="/static/images/bartendro-logo.png"></a>

@@ -80,13 +80,18 @@
     .stack-element-title {
         color: #005991;
         font-weight: normal;
-        font-size: 19pt;
-        padding-left: 10px;
+        font-size: 17pt;
+        padding-left: 5px;
     }
 
     .ui-dialog {
         width: 80% !important;
     }
+
+    .smaller-font {
+        font-size: 16px;
+    }
+
 }
 
 @media (min-width: 768px) {
@@ -177,9 +182,14 @@
     .ui-dialog {
         width: 40% !important;
     }
+
+    .smaller-font {
+        font-size: 17.5px;
+    }
+
 }
 
-@media (min-width: 550px) {
+@media (min-width: 530px) {
     .bartendro-logo {
         float: right;
     }
@@ -192,7 +202,7 @@
     }
 }
 
-@media (max-width: 550px) {
+@media (max-width: 530px) {
     .bartendro-logo {
         display: none;
     }
@@ -203,6 +213,9 @@
     .party-robot-img {
         width: 20px;
         padding-top: 8px;
+    }
+    .slim-nav-item {
+        padding: 10px 10px 10px !important;
     }
 }
 
@@ -306,23 +319,23 @@ table {
     font-weight: bold;
 }
 
-.dispense-button {
-}
-
 .dispense-buttons {
     margin: 40px 0 20px 0;
 }
 
 .dispense-buttons-left {
+    width: 30%;
 }
 
 .dispense-buttons-middle {
     text-align: center;
+    width: 30%;
 }
 
 .dispense-buttons-right {
     font-weight: bold;
     text-align: right;
+    width: 30%;
 }
 
 .dispenser-out {
