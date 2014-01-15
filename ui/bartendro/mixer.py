@@ -32,7 +32,7 @@ log = logging.getLogger('bartendro')
 class BartendroBusyError(Exception):
     pass
 
-def log_and_return(self, text):
+def log_and_return(text):
     ''' helper function to make code less cluttered '''
     log.error(text)
     return text
@@ -244,6 +244,9 @@ class Mixer(object):
         return (0, "")
 
     def make_drink(self, id, recipe_arg, speed = 255):
+        '''Make a drink! is is the drink id and its optional to make a "custom" drink that isn't in the drink
+           table. If no id is given, the drink will not be logged to the drink log.'''
+
         log.debug("Make drink state: %d" % self.get_state())
         if self.get_state() == STATE_ERROR:
             return log_and_return("Cannot make a drink. Bartendro has encountered some error and is stopped. :(")
@@ -251,7 +254,11 @@ class Mixer(object):
         # start by updating liqid levels to make sure we have the right fluids
         self.check_liquid_levels()
 
-        drink = Drink.query.filter_by(id=int(id)).first()
+        if id:
+            drink = Drink.query.filter_by(id=int(id)).first()
+        else:
+            drink = None
+
         dispensers = Dispenser.query.order_by(Dispenser.id).all()
 
         recipe = {}
@@ -281,15 +288,19 @@ class Mixer(object):
         if ret:
             return log_and_return(ret)
 
-        log.info("Made cocktail: %s" % drink.name.name)
+        if drink:
+            log.info("Made cocktail: %s" % drink.name.name)
+        else:
+            log.info("Made custom drink:")
         for line in sorted(log_lines.keys()):
             log.info(log_lines[line])
         log.info("%s ml dispensed. done." % size)
 
-        t = int(time())
-        dlog = DrinkLog(drink.id, t, size)
-        db.session.add(dlog)
-        db.session.commit()
+        if drink:
+            t = int(time())
+            dlog = DrinkLog(drink.id, t, size)
+            db.session.add(dlog)
+            db.session.commit()
 
         return ""
 

@@ -13,7 +13,12 @@ from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
 
-def ws_make_drink(drink, recipe, speed = 255):
+def ws_make_drink(drink, speed):
+    recipe = {}
+    for arg in request.args:
+        disp = int(arg[5:])
+        recipe[disp] = int(request.args.get(arg))
+
     if app.mixer.get_state() == STATE_ERROR:
         raise InternalServerError
     try:
@@ -21,7 +26,6 @@ def ws_make_drink(drink, recipe, speed = 255):
         if not err:
             return "ok\n"
         else:
-            print err
             raise BadRequest(err)
     except mixer.BartendroBusyError:
         raise ServiceUnavailable("busy")
@@ -32,23 +36,21 @@ def ws_drink(drink):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    recipe = {}
-    for arg in request.args:
-        disp = int(arg[5:])
-        recipe[disp] = int(request.args.get(arg))
-
-    return ws_make_drink(drink, recipe)
+    return ws_make_drink(drink, 255)
 
 @app.route('/ws/drink/<int:drink>/speed/<int:speed>')
 def ws_drink_at_speed(drink, speed):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    recipe = {}
-    for arg in request.args:
-        recipe[arg] = int(request.args.get(arg))
+    return ws_make_drink(drink, speed)
 
-    return ws_make_drink(drink, recipe, speed)
+@app.route('/ws/drink/custom/speed/<int:speed>')
+def ws_custom_drink(speed):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    return ws_make_drink(0, speed)
 
 @app.route('/ws/drink/<int:drink>/available/<int:state>')
 def ws_drink_available(drink, state):
