@@ -43,11 +43,25 @@
                       {% if options.use_liquid_level_sensors %}
                           <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
                       {% endif %}
-                      <a onclick="clean()" class="btn btn-large btn-success">clean</a>
+                      {% if count != 3 %} 
+                          <a onclick="clean()" class="btn btn-large btn-success" style="margin-right: 22px">clean</a>
+                      {% else %}
+                          <div class="btn-group">
+                            <a class="btn dropdown-toggle btn-large btn-success" data-toggle="dropdown" href="#">
+                                clean
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a onclick="clean_all()">Clean all</a></li>
+                                <li><a onclick="clean_left()">Clean left</a></li>
+                                <li><a onclick="clean_right()">Clean right</a></li>
+                            </ul>
+                          </div>
+                      {% endif %}
                       {% if options.use_liquid_level_sensors %}
                           {{ form.save(class="btn btn-large btn-primary") }}
                       {% else %}
-                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 160px") }}
+                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 138px") }}
                       {% endif %}
                     </div>
                    </form>
@@ -64,6 +78,7 @@
 </div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/static/js/bootstrap-dropdown-2.3.0.js"></script>
 <script type="text/javascript">
 var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 
