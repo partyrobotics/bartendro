@@ -607,10 +607,14 @@ void text_interface(void)
                 dprintf("You can use these commands:\n");
                 dprintf("  speed <speed> <cs>\n");
                 dprintf("  tickdisp <ticks> <speed>\n");
+<<<<<<< HEAD
                 dprintf("  timedisp <ms> <speed>\n");
                 dprintf("  forward\n");
                 dprintf("  backward\n");
                 dprintf("  timedisp <ms> <speed>\n");
+=======
+                dprintf("  timedisp <ms>\n");
+>>>>>>> 473b466a3dae45b65686ab79a78d7f5c8153face
                 dprintf("  reset\n");
                 dprintf("  led_idle\n");
                 dprintf("  led_dispense\n");
