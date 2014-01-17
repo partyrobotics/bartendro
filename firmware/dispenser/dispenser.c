@@ -25,7 +25,6 @@
 #define RESET_DURATION                    1
 #define SYNC_COUNT                       10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES                   5
-#define MAX_CURRENT_SENSE_CYCLES         10
 #define TICKS_SAVE_THRESHOLD           1000
 #define DEFAULT_LIQUID_LOW_THRESHOLD    140
 #define DEFAULT_LIQUID_OUT_THRESHOLD     90
@@ -50,9 +49,9 @@ static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
 static volatile uint8_t g_sync_divisor = 10;
 
-static uint8_t  g_current_sense_num_cycles = 0;
-static uint16_t g_current_sense_threshold = DEFAULT_CURRENT_SENSE_THRESHOLD;
 static volatile uint8_t g_current_sense_detected = 0;
+static volatile uint8_t g_current_sense_state = 0;
+static volatile uint8_t g_current_sense_enabled = 1;
 
 void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense);
@@ -69,14 +68,18 @@ void set_led_pattern(uint8_t pattern);
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-   5  - PD5 - motor PWM out
-   6  - PD6 - Hall 0 (pcint 22)
-   7  - PD7 - Hall 1 (pcint 23)
-   8  - PB0 - Hall 2 (pcint 0)
-   9  - PB1 - Hall 3 (pcint 1) 
-  10  - PB2 - SYNC (pcint 2)
-  A0  - PC0 - CS
+*  5  - PD5 - motor control B
+*  6  - PD6 - motor control A
+   7  - PD7 - Hall 0 (pcint 23)
+   8  - PB0 - Hall 1 (pcint 0)
+   9  - PB1 - Hall 2 (pcint 1) 
+  10  - PB2 - Hall 3 (pcint 2)
+* A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
   A1  - PC1 - liquid level
+* A2  - PC2 - REV0
+* A3  - PC3 - REV1
+* A4  - PC4 - REV2
+  A5  - PC5 - SYNC (pcint13)
 
 */
 void setup(void)
@@ -84,13 +87,13 @@ void setup(void)
     serial_init();
 
     // Set up LEDs & motor out
-    DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
+    DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5)|(1<<PD6);
 
-    // pull ups
-    sbi(PORTD, 6);
+    // pull ups for hall sensors
     sbi(PORTD, 7);
     sbi(PORTB, 0);
     sbi(PORTB, 1);
+    sbi(PORTB, 2);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= TIMER1_FLAGS;
@@ -113,8 +116,9 @@ void setup(void)
 
     // PCINT setup
     PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2);
-    PCMSK2 |= (1 << PCINT22) | (1 << PCINT23);
-    PCICR |=  (1 << PCIE2) | (1 << PCIE0);
+    PCMSK1 |= (1 << PCINT8) | (1 << PCINT13);
+    PCMSK2 |= (1 << PCINT23);
+    PCICR |=  (1 << PCIE2) | (1 << PCIE1) | (1 << PCIE0);
 }
 
 // update g_time
@@ -144,72 +148,66 @@ ISR(PCINT0_vect)
     uint8_t      state;
 
     state = PINB & (1<<PINB0);
+    if (state != g_hall1)
+    {
+        g_hall1 = state;
+        g_ticks++;
+    }
+
+    state = PINB & (1<<PINB1);
     if (state != g_hall2)
     {
         g_hall2 = state;
         g_ticks++;
     }
-
-    state = PINB & (1<<PINB1);
+    state = PINB & (1<<PINB2);
     if (state != g_hall3)
     {
         g_hall3 = state;
         g_ticks++;
     }
     check_dispense_complete_isr();
+}
 
-    state = PINB & (1<<PINB2);
+ISR(PCINT1_vect)
+{
+    uint8_t      state;
+
+    state = PINC & (1<<PINC5);
     if (state != g_sync)
     {
         g_sync_count++;
         g_sync = state;
     }
+    state = PINC & (1<<PINC0);
+    if (state != g_current_sense_state)
+    {
+        g_current_sense_state = state;
+
+        if (state && g_current_sense_enabled)
+        {
+            stop_motor();
+            g_is_dispensing = 0;
+            g_dispense_target_ticks = 0;
+            set_led_pattern(LED_PATTERN_CURRENT_SENSE);
+            g_current_sense_detected = 1;
+        }
+    }
+    check_dispense_complete_isr();
 }
 
 ISR(PCINT2_vect)
 {
     uint8_t state;
 
-    state = PIND & (1<<PIND6);
+    state = PIND & (1<<PIND7);
     if (state != g_hall0)
     {
         g_hall0 = state;
         g_ticks++;
     }
 
-    state = PIND & (1<<PIND7);
-    if (state != g_hall1)
-    {
-        g_hall1 = state;
-        g_ticks++;
-    }
     check_dispense_complete_isr();
-}
-
-ISR(ADC_vect)
-{
-    uint8_t low, hi;
-    uint16_t data;
-
-    low = ADCL;
-    hi = ADCH;
-    data = (hi << 8) | low;
-
-    if (data >= g_current_sense_threshold)
-        g_current_sense_num_cycles++;
-
-    if (g_current_sense_num_cycles >= MAX_CURRENT_SENSE_CYCLES)
-    {
-        stop_motor();
-        g_is_dispensing = 0;
-        g_dispense_target_ticks = 0;
-        set_led_pattern(LED_PATTERN_CURRENT_SENSE);
-        g_current_sense_detected = 1;
-    }
-
-    // If we're still dispensing, then start another ADC conversion
-    if (g_is_dispensing || g_is_motor_on)
-        ADCSRA |= (1<<ADSC);
 }
 
 // this function is called from an ISR, so no need to turn off/on interrupts
@@ -345,17 +343,6 @@ void set_led_pattern(uint8_t pattern)
     sei();
 }
 
-void adc_current_sense_start(void)
-{
-    // Set up ADC conversion with interrupt enable
-    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2) | (1 << ADIE);
-    ADMUX = (1<<REFS0) | (0 << REFS1);
-    ADCSRA |= (1<<ADEN);
-
-    // Start a conversion
-    ADCSRA |= (1<<ADSC);
-}
-
 void adc_liquid_level_setup(void)
 {
     ADCSRA = (1 << ADPS1);
@@ -399,8 +386,9 @@ void get_liquid_level(void)
 
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
 {
-    if (use_current_sense)
-        adc_current_sense_start();
+    cli();
+    g_current_sense_enabled = use_current_sense;
+    sei();
 
     OCR0B = 255 - speed;
 
@@ -542,7 +530,6 @@ int main(void)
         cli();
         g_reset = 0;
         g_current_sense_detected = 0;
-        g_current_sense_num_cycles = 0;
         setup();
         serial_init();
         stop_motor();
@@ -641,7 +628,7 @@ int main(void)
                         break;
 
                     case PACKET_SET_CS_THRESHOLD:
-                        g_current_sense_threshold = p.p.uint16[0];
+                        // Only for v2 pumps
                         break;
 
                     case PACKET_SAVED_TICK_COUNT:
