@@ -28,6 +28,7 @@ def filter_drink_list(can_make_dict, drinks):
 def index():
     if app.globals.get_state() == STATE_ERROR:
         return render_template("index", 
+                               options=app.options, 
                                top_drinks=[], 
                                other_drinks=[],
                                error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
@@ -37,6 +38,7 @@ def index():
         can_make = app.mixer.get_available_drink_list()
     except OperationalError:
         return render_template("index", 
+                               options=app.options, 
                                top_drinks=[], 
                                other_drinks=[],
                                error_message="Bartendro database errror.<br/><br/>There doesn't seem to be a valid database installed.",
@@ -46,6 +48,7 @@ def index():
 
     if not len(can_make):
         return render_template("index", 
+                               options=app.options, 
                                top_drinks=[], 
                                other_drinks=[],
                                error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
