@@ -391,7 +391,7 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
     g_current_sense_enabled = use_current_sense;
     sei();
 
-    OCR0A = 255 - speed;
+    OCR0A = speed;
 
     cli();
     g_is_motor_on = speed != 0;
@@ -401,7 +401,7 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
 void stop_motor(void)
 {
     adc_shutdown();
-    OCR0B = 255;
+    OCR0A = 0;
     cli();
     g_is_motor_on = 0;
     sei();
@@ -570,7 +570,7 @@ void text_interface(void)
                 dprintf("You can use these commands:\n");
                 dprintf("  speed <speed> <cs>\n");
                 dprintf("  tickdisp <ticks> <speed>\n");
-                dprintf("  timedisp <ms> <speed>\n");
+                dprintf("  timedisp <ms>\n");
                 dprintf("  reset\n");
                 dprintf("  led_idle\n");
                 dprintf("  led_dispense\n");
