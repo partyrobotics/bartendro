@@ -450,6 +450,144 @@ void is_dispensing(void)
     send_packet8_2(PACKET_IS_DISPENSING, dispensing, g_current_sense_detected);
 }
 
+#define MAX_CMD_LEN 32
+// return true is a command was read, false if a reset was requested
+uint8_t receive_cmd(char *cmd)
+{
+    uint8_t num = 0, ch;
+
+    dprintf(">");
+
+    *cmd = 0;
+    for(; !check_reset();)
+    {
+        for(;!check_reset() && !serial_rx_nb(&ch);)
+            idle();
+
+        if (check_reset())
+            return 0;
+
+        serial_tx(ch);
+        if (ch == '\r')
+        {
+            serial_tx('\n');
+            cmd[num] = 0;
+            return 1;
+        }
+        cmd[num] = ch;
+        num++;
+    }
+    return 0;
+}
+
+void text_interface(void)
+{
+    char cmd[MAX_CMD_LEN];
+    uint8_t  speed, current_sense;
+    uint16_t ticks;
+    uint32_t time;
+    uint8_t  i, cs;
+
+    for(i = 0; i < 5; i++)
+    {
+        set_led_rgb(0, 0, 255);
+        _delay_ms(150);
+        set_led_rgb(0, 0, 0);
+        _delay_ms(150);
+    }
+    set_led_pattern(LED_PATTERN_IDLE);
+    for(;;)
+    {
+        cli();
+        g_reset = 0;
+        g_current_sense_detected = 0;
+        setup();
+        stop_motor();
+        serial_init();
+        cs = 0;
+        sei();
+
+        _delay_ms(10);
+        dprintf("\nParty Robotics Dispenser at your service!\n\n");
+
+        for(;;)
+        {
+            cli();
+            cs = g_current_sense_detected;
+            sei();
+            if (!receive_cmd(cmd))
+                break;
+
+            if (sscanf(cmd, "speed %hhu %hhu", &speed, &current_sense) == 2)
+            {
+                if (!cs)
+                    set_motor_speed(speed, current_sense);
+
+                if (current_sense == 0)
+                    flush_saved_tick_count(0);
+                continue;
+            }
+            if (sscanf(cmd, "tickdisp %hu %hhu", (short unsigned int *)&ticks, &speed) == 2)
+            {
+                if (!cs)
+                {
+                    dispense_ticks(ticks, speed);
+                    flush_saved_tick_count(0);
+                }
+                continue;
+            }
+            if (sscanf(cmd, "timedisp %u", (unsigned int *)&time) == 1)
+            {
+                if (!cs)
+                {
+                    run_motor_timed(time);
+                    flush_saved_tick_count(0);
+                }
+                continue;
+            }
+            if (strncmp(cmd, "led_idle", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_IDLE);
+                continue;
+            }
+            if (strncmp(cmd, "led_dispense", 12) == 0)
+            {
+                set_led_pattern(LED_PATTERN_DISPENSE);
+                continue;
+            }
+            if (strncmp(cmd, "led_done", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_DRINK_DONE);
+                continue;
+            }
+            if (strncmp(cmd, "led_clean", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_CLEAN);
+                continue;
+            }
+            if (strncmp(cmd, "help", 4) == 0)
+            {
+                dprintf("You can use these commands:\n");
+                dprintf("  speed <speed> <cs>\n");
+                dprintf("  tickdisp <ticks> <speed>\n");
+                dprintf("  timedisp <ms> <speed>\n");
+                dprintf("  reset\n");
+                dprintf("  led_idle\n");
+                dprintf("  led_dispense\n");
+                dprintf("  led_done\n");
+                dprintf("  led_clean\n\n");
+                dprintf("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
+                dprintf("ticks == number of quarter turns. ms == milliseconds\n");
+                continue;
+            }
+            if (strncmp(cmd, "reset", 5) == 0)
+                break;
+
+            dprintf("Unknown command. Use help to get, eh help. Duh.\n");
+        }
+    }
+}
+
 uint8_t address_exchange(void)
 {
     uint8_t  ch;
@@ -478,6 +616,8 @@ uint8_t address_exchange(void)
             break;
         if (ch == '?')
             serial_tx(id);
+        if (ch == '!')
+            text_interface();
     }
     set_led_rgb(0, 255, 0);
 
@@ -505,6 +645,7 @@ void id_conflict(void)
     for(; !check_reset();)
         ;
 }
+
 
 int main(void)
 {
