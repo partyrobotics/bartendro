@@ -68,13 +68,13 @@ void set_led_pattern(uint8_t pattern);
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-*  5  - PD5 - motor control B
-*  6  - PD6 - motor control A
+*  5  - PD5 - motor control B (OC0B)
+*  6  - PD6 - motor control A (OC0A)
    7  - PD7 - Hall 0 (pcint 23)
    8  - PB0 - Hall 1 (pcint 0)
    9  - PB1 - Hall 2 (pcint 1) 
   10  - PB2 - Hall 3 (pcint 2)
-* A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
+  A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
   A1  - PC1 - liquid level
 * A2  - PC2 - REV0
 * A3  - PC3 - REV1
@@ -101,12 +101,13 @@ void setup(void)
     TIMSK1 |= (1<<TOIE1);
 
     // Set to Phase correct PWM, compare output mode
-    TCCR0A |= _BV(WGM00) | _BV(COM0B1);
+    TCCR0A |= _BV(WGM00) | _BV(COM0A1) | _BV(COM0B1);
 
     // Set the clock source
     TCCR0B |= (0 << CS00) | (1 << CS01);
 
     // Reset timers and comparators
+    OCR0A = 0;
     OCR0B = 0;
     TCNT0 = 0;
 
@@ -390,7 +391,7 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
     g_current_sense_enabled = use_current_sense;
     sei();
 
-    OCR0B = 255 - speed;
+    OCR0A = 255 - speed;
 
     cli();
     g_is_motor_on = speed != 0;
