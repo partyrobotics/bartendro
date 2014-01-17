@@ -29,6 +29,8 @@
 #define DEFAULT_LIQUID_LOW_THRESHOLD    140
 #define DEFAULT_LIQUID_OUT_THRESHOLD     90
 #define DEFAULT_CURRENT_SENSE_THRESHOLD 610
+#define MOTOR_DIRECTION_FORWARD           1
+#define MOTOR_DIRECTION_BACKWARD          0
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -40,6 +42,7 @@ static volatile uint32_t g_ticks = 0;
 static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_is_motor_on = 0;
+static volatile uint8_t g_motor_direction = MOTOR_DIRECTION_FORWARD;
 
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
@@ -55,6 +58,7 @@ static volatile uint8_t g_current_sense_enabled = 1;
 
 void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense);
+void set_motor_direction(uint8_t direction);
 void stop_motor(void);
 void adc_shutdown(void);
 uint8_t check_reset(void);
@@ -69,7 +73,7 @@ void set_led_pattern(uint8_t pattern);
    3  - PD3 - LED clock
    4  - PD4 - LED data
 *  5  - PD5 - motor control B (OC0B)
-*  6  - PD6 - motor control A (OC0A)
+   6  - PD6 - motor control A (OC0A)
    7  - PD7 - Hall 0 (pcint 23)
    8  - PB0 - Hall 1 (pcint 0)
    9  - PB1 - Hall 2 (pcint 1) 
@@ -385,13 +389,35 @@ void get_liquid_level(void)
     send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level, 0);
 }
 
+void set_motor_direction(uint8_t direction)
+{
+    if (direction != MOTOR_DIRECTION_FORWARD && direction != MOTOR_DIRECTION_BACKWARD)
+        return;
+
+    cli();
+    g_motor_direction = direction;
+    sei();
+}
+
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
 {
+    uint8_t direction;
+
     cli();
     g_current_sense_enabled = use_current_sense;
+    direction = g_motor_direction;
     sei();
 
-    OCR0A = 255 - speed;
+    if (direction == MOTOR_DIRECTION_FORWARD)
+    {
+        OCR0A = speed;
+        OCR0B = 0;
+    }
+    else
+    {
+        OCR0A = 0;
+        OCR0B = speed;
+    }
 
     cli();
     g_is_motor_on = speed != 0;
@@ -401,7 +427,8 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
 void stop_motor(void)
 {
     adc_shutdown();
-    OCR0B = 255;
+    OCR0A = 0;
+    OCR0B = 0;
     cli();
     g_is_motor_on = 0;
     sei();
@@ -545,6 +572,16 @@ void text_interface(void)
                 }
                 continue;
             }
+            if (strncmp(cmd, "forward", 7) == 0)
+            {
+                set_motor_direction(MOTOR_DIRECTION_FORWARD);
+                continue;
+            }
+            if (strncmp(cmd, "backward", 8) == 0)
+            {
+                set_motor_direction(MOTOR_DIRECTION_BACKWARD);
+                continue;
+            }
             if (strncmp(cmd, "led_idle", 8) == 0)
             {
                 set_led_pattern(LED_PATTERN_IDLE);
@@ -570,6 +607,9 @@ void text_interface(void)
                 dprintf("You can use these commands:\n");
                 dprintf("  speed <speed> <cs>\n");
                 dprintf("  tickdisp <ticks> <speed>\n");
+                dprintf("  timedisp <ms> <speed>\n");
+                dprintf("  forward\n");
+                dprintf("  backward\n");
                 dprintf("  timedisp <ms> <speed>\n");
                 dprintf("  reset\n");
                 dprintf("  led_idle\n");
@@ -707,6 +747,12 @@ int main(void)
 
                         if (p.p.uint8[0] == 0)
                             flush_saved_tick_count(0);
+                        break;
+
+                    case PACKET_SET_MOTOR_DIRECTION:
+                        if (!cs)
+                            set_motor_direction(p.p.uint8[0]);
+
                         break;
 
                     case PACKET_TICK_DISPENSE:
