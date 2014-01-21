@@ -189,7 +189,7 @@ ISR(PCINT1_vect)
     {
         g_current_sense_state = state;
 
-        if (state && g_current_sense_enabled)
+        if (!state && g_current_sense_enabled)
         {
             stop_motor();
             g_is_dispensing = 0;
