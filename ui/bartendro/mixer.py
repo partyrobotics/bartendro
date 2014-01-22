@@ -285,7 +285,7 @@ class Mixer(object):
                 disp = dispensers[i]
 
                 # if we're out of booze, don't consider this drink
-                if app.options.use_liquid_level_sensors and disp.out: 
+                if app.options.use_liquid_level_sensors and disp.out == DISPENSER_OUT:
                     return log_and_return("Cannot make drink: Dispenser %d is out of booze." % (i+1))
 
                 if booze_id == disp.booze_id:
