@@ -88,20 +88,21 @@ class Mixer(object):
         """ Ask the dispense to update their own liquid levels and then fetch the levels
             and set the machine state accordingly. """
         if self.get_state() == STATE_ERROR:
-            return 
+            return STATE_ERROR
 
         if not app.options.use_liquid_level_sensors: 
             self.driver.set_status_color(0, 1, 0)
             self.set_state(STATE_READY)
-            return
+            return STATE_READY
 
         new_state = STATE_READY
 
+        log.info("mixer.check_liquid_levels: check levels");
         # step 1: ask the dispensers to update their liquid levels
         if not self.driver.update_liquid_levels():
             log.error("Failed to update liquid levels")
             self.set_state(STATE_ERROR)
-            return
+            return STATE_ERROR
 
         # wait for the dispensers to determine the levels
         sleep(.01)
@@ -115,7 +116,9 @@ class Mixer(object):
             level = self.driver.get_liquid_level(i)
             if level < 0:
                 log.error("Failed to read liquid levels from dispenser %d" % (i+1))
-                return
+                return STATE_ERROR
+
+            log.info("dispenser %d level: %d" % (i, level))
 
             if level <= LIQUID_WARNING_THRESHOLD:
                 if new_state == STATE_READY:
@@ -133,7 +136,7 @@ class Mixer(object):
 
         self.set_state(new_state)
         self._update_status_led()
-        log.info("Checking levels done")
+        log.info("Checking levels done. New state: %d" % new_state)
 
         return new_state
 
@@ -262,7 +265,9 @@ class Mixer(object):
             return log_and_return("Cannot make a drink. Bartendro has encountered some error and is stopped. :(")
 
         # start by updating liqid levels to make sure we have the right fluids
-        self.check_liquid_levels()
+        state = self.check_liquid_levels()
+        if state != STATE_READY and state != STATE_LOW:
+            return log_and_return("Cannot make drink. State is not low or out. :(")
 
         if id:
             drink = Drink.query.filter_by(id=int(id)).first()
@@ -357,7 +362,8 @@ class Mixer(object):
         self.led_complete()
 
         if app.options.use_liquid_level_sensors:
-            self.check_liquid_levels()
+            state = self.check_liquid_levels()
+            log.info("Post make drink. State is: %d" % state)
 
         FlashGreenLeds(self).start()
         self._unlock_bartendro()
