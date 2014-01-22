@@ -415,8 +415,8 @@ class Mixer(object):
             sleep(.1)
 
 class CleanCycle(Thread):
-    left_set = [5, 6, 7, 8, 9, 10, 11]
-    right_set = [0, 1, 2, 3, 4, 12, 13, 14]
+    left_set = [4, 5, 6, 7, 8, 9, 10]
+    right_set = [0, 1, 2, 3, 11, 13, 14]
     STAGGER_DELAY = .150 # ms
 
     def __init__(self, mixer, mode):
