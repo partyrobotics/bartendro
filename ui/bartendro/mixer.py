@@ -134,6 +134,11 @@ class Mixer(object):
 
         db.session.commit()
 
+        if self.get_state() != new_state: 
+            self.mc.delete("top_drinks")
+            self.mc.delete("other_drinks")
+            self.mc.delete("available_drink_list")
+
         self.set_state(new_state)
         self._update_status_led()
         log.info("Checking levels done. New state: %d" % new_state)
@@ -193,7 +198,7 @@ class Mixer(object):
                                                         WHERE bgb.booze_id = dispenser.booze_id)""")
 
         if app.options.use_liquid_level_sensors: 
-            sql = "SELECT booze_id FROM dispenser WHERE out == 0 ORDER BY id LIMIT :d"
+            sql = "SELECT booze_id FROM dispenser WHERE out == 0 or out == 2 ORDER BY id LIMIT :d"
         else:
             sql = "SELECT booze_id FROM dispenser ORDER BY id LIMIT :d"
 
