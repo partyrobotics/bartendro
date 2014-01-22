@@ -17,11 +17,12 @@ TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
 CALIBRATION_TICKS = TICKS_PER_ML * CALIBRATE_ML
 
-
 FULL_SPEED = 255
 HALF_SPEED = 128
 SLOW_DISPENSE_THRESHOLD = 20 # ml
 MAX_DISPENSE = 1000 # ml max dispense per call. Just for sanity. :)
+
+CLEAN_DURATION = 10 # seconds
 
 LIQUID_OUT_THRESHOLD       = 75
 LIQUID_WARNING_THRESHOLD   = 120 
@@ -29,9 +30,6 @@ LIQUID_WARNING_THRESHOLD   = 120
 DISPENSER_OUT     = 1
 DISPENSER_OK      = 0
 DISPENSER_WARNING = 2
-
-CLEAN_CYCLE_MAX_PUMPS = 5   # The maximum number of pups to run at any one time
-CLEAN_CYCLE_DURATION  = 30  # in seconds for each pump
 
 log = logging.getLogger('bartendro')
 
@@ -78,7 +76,13 @@ class Mixer(object):
         self.driver.led_clean()
 
     def clean(self):
-        CleanCycle(self).start()
+        CleanCycle(self, "all").start()
+
+    def clean_right(self):
+        CleanCycle(self, "right").start()
+
+    def clean_left(self):
+        CleanCycle(self, "left").start()
 
     def check_liquid_levels(self):
         """ Ask the dispense to update their own liquid levels and then fetch the levels
@@ -411,26 +415,36 @@ class Mixer(object):
             sleep(.1)
 
 class CleanCycle(Thread):
-    def __init__(self, mixer):
+    left_set = [0, 1] # [5, 6, 7, 8, 9, 10, 11]
+    right_set = [2 ] # [0, 1, 2, 3, 4, 12, 13, 14]
+    STAGGER_DELAY = .150 # ms
+
+    def __init__(self, mixer, mode):
         Thread.__init__(self)
         self.mixer = mixer
+        self.mode = mode
 
     def run(self):
-        disp_on_times = []
-        disp_off_times = []
-        for i in xrange(self.mixer.disp_count):
-            disp_on_times.append(((i / CLEAN_CYCLE_MAX_PUMPS) * CLEAN_CYCLE_DURATION) + (i % CLEAN_CYCLE_MAX_PUMPS))
-            disp_off_times.append(disp_on_times[-1] + CLEAN_CYCLE_DURATION)
+
+        disp_list = []
+        if self.mode == "all":
+            disp_list.extend(self.left_set)
+            disp_list.extend(self.right_set)
+        elif self.mode == "right":
+            disp_list.extend(self.right_set)
+        else:
+            disp_list.extend(self.left_set)
 
         self.mixer.led_clean()
-        for t in xrange(disp_off_times[-1] + 1):
-            for i, off in enumerate(disp_off_times):
-                if t == off: 
-                    self.mixer.driver.stop(i)
-            for i, on in enumerate(disp_on_times):
-                if t == on: 
-                    self.mixer.driver.start(i)
-            sleep(1)
+        for disp in disp_list:
+            self.mixer.driver.start(disp)
+            sleep(self.STAGGER_DELAY)
+
+        sleep(CLEAN_DURATION)
+        for disp in disp_list:
+            self.mixer.driver.stop(disp)
+            sleep(self.STAGGER_DELAY)
+
         self.mixer.led_idle()
 
         for i in xrange(self.mixer.disp_count):

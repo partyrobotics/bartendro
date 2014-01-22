@@ -84,3 +84,25 @@ def ws_dispenser_clean():
 
     app.mixer.clean()
     return ""
+
+@app.route('/ws/clean/right')
+def ws_dispenser_clean_right():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    if app.mixer.get_state() == STATE_ERROR:
+        return "error state"
+
+    app.mixer.clean_right()
+    return ""
+
+@app.route('/ws/clean/left')
+def ws_dispenser_clean_left():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    if app.mixer.get_state() == STATE_ERROR:
+        return "error state"
+
+    app.mixer.clean_left()
+    return ""
