@@ -60,6 +60,7 @@ void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense);
 void set_motor_direction(uint8_t direction);
 void stop_motor(void);
+void pulse_motor_driver_retry(void);
 void adc_shutdown(void);
 uint8_t check_reset(void);
 void is_dispensing(void);
@@ -78,6 +79,7 @@ void set_led_pattern(uint8_t pattern);
    8  - PB0 - Hall 1 (pcint 0)
    9  - PB1 - Hall 2 (pcint 1) 
   10  - PB2 - Hall 3 (pcint 2)
+  14  - PB6 - /RTRY for motor driver
   A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
   A1  - PC1 - liquid level
 * A2  - PC2 - REV0
@@ -90,8 +92,9 @@ void setup(void)
 {
     serial_init();
 
-    // Set up LEDs & motor out
+    // Set up LEDs & motor control outputs
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5)|(1<<PD6);
+    DDRB |= (1<<PB6);
 
     // pull ups for hall sensors
     sbi(PORTD, 7);
@@ -424,6 +427,13 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
     sei();
 }
 
+void pulse_motor_driver_retry(void)
+{
+    cbi(PORTB, 6);
+    _delay_ms(2);
+    sbi(PORTB, 6);
+}
+
 void stop_motor(void)
 {
     adc_shutdown();
@@ -714,6 +724,7 @@ int main(void)
         setup();
         serial_init();
         stop_motor();
+        pulse_motor_driver_retry();
         set_led_rgb(0, 0, 255);
 
         sei();
