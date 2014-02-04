@@ -127,6 +127,9 @@ void setup(void)
     PCMSK1 |= (1 << PCINT8) | (1 << PCINT13);
     PCMSK2 |= (1 << PCINT23);
     PCICR |=  (1 << PCIE2) | (1 << PCIE1) | (1 << PCIE0);
+
+    // Set the motor driver RTRY line HIGH
+    sbi(PORTB, 6);
 }
 
 // update g_time
