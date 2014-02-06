@@ -182,7 +182,7 @@ ISR(PCINT0_vect)
     state = PINB & (1<<PINB7);
     if (state != g_button_state)
     {
-        g_button_state = state != 0;
+        g_button_state = state;
     }
     check_dispense_complete_isr();
 }
@@ -267,15 +267,23 @@ void idle(void)
     current_state = g_button_state;
     sei();
 
+#if 0
+    // Set the leds and motor speed accordingly when button is pressed
     if (current_state != user_button_state)
     {
-        if (current_state == 0)
+        if (current_state)
             set_motor_speed(0, 1);
         else
+        {   
+            set_led_rgb(255,128,0);
             set_motor_speed(255, 1);
+        }
 
         user_button_state = current_state;
     }
+       
+    if (animate && !user_button_state)
+#endif
 
     if (animate)
     {
