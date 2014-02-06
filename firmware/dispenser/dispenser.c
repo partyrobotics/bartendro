@@ -73,7 +73,7 @@ void set_led_pattern(uint8_t pattern);
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-*  5  - PD5 - motor control B (OC0B)
+   5  - PD5 - motor control B (OC0B)
    6  - PD6 - motor control A (OC0A)
    7  - PD7 - Hall 0 (pcint 23)
    8  - PB0 - Hall 1 (pcint 0)
@@ -698,6 +698,21 @@ void id_conflict(void)
         ;
 }
 
+void check_software_revision(void)
+{
+    uint8_t bit0 = PINC & (1<<PINC2);
+    uint8_t bit1 = PINC & (1<<PINC3);
+    uint8_t bit2 = PINC & (1<<PINC4);
+
+    // 011
+    if (bit0 && bit1 && !bit2)
+        return;
+
+    // Wrong software! I refuse to do shit!
+    set_led_rgb(255, 255, 255);
+    for(;;)
+        ;
+}
 
 int main(void)
 {
@@ -715,6 +730,9 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
+
+    // Ensure we're running the right software for this board
+    check_software_revision();
 
     // get the current liquid level 
     update_liquid_level();
