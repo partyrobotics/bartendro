@@ -517,6 +517,22 @@ void id_conflict(void)
         ;
 }
 
+void check_software_revision(void)
+{
+    uint8_t bit0 = PINC & (1<<PINC2);
+    uint8_t bit1 = PINC & (1<<PINC3);
+    uint8_t bit2 = PINC & (1<<PINC4);
+
+    // 010
+    if (!bit0 && bit1 && !bit2)
+        return;
+
+    // Wrong software! I refuse to do shit!
+    set_led_rgb(255, 255, 255);
+    for(;;)
+        ;
+}
+
 int main(void)
 {
     uint8_t  id, rec, i, cs;
@@ -533,6 +549,9 @@ int main(void)
         set_led_rgb(255, 255, 0);
         _delay_ms(50);
     }
+
+    // Ensure we're running the right software for this board
+    check_software_revision();
 
     // get the current liquid level 
     update_liquid_level();
