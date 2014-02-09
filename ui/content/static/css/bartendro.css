@@ -88,6 +88,18 @@
         width: 80% !important;
     }
 
+    .blend-slider {
+        margin-left: 10px;
+        width: 70%;
+    }
+
+    .blend-info {
+        text-align: right;
+        float: right;
+        font-size: 16pt;
+        width: 30%;
+    }
+
 }
 
 @media (min-width: 768px) {
@@ -177,6 +189,18 @@
 
     .ui-dialog {
         width: 40% !important;
+    }
+
+    .blend-slider {
+        margin-left: 10px;
+        width: 80%;
+    }
+
+    .blend-info {
+        text-align: right;
+        float: right;
+        font-size: 16pt;
+        width: 20%;
     }
 
 }
@@ -308,6 +332,12 @@ table {
 
 .dispenser-ok {
     display: inline;
+}
+
+.blend-title {
+    font-size: 14pt;
+    font-weight: bold;
+    padding-bottom: 10px;
 }
 
 .admin-box {

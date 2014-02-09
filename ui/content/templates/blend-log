@@ -1,0 +1,31 @@
+{% extends 'layout' %}
+{% block body %}
+<div id="scroll-pane">
+    <div class="row-fluid">	
+        <div class="span1"></div>
+        <div class="span10">	
+            <h2>Previous blends</h2>
+              <a href="/blend" style="float:right" class="btn btn-large btn-warning">make a new blend</a>
+              <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
+              <div id="blends">
+                 {% for blend in blends %}
+                     <div style="padding-bottom: 20px">
+                        <div><a href="{{ blend.url }}" style="font-size: 14pt; font-width: bold;">Blend # {{ blend.number }}</a></div>
+                        <table class="table-striped table-bordered">
+                        {% for booze in blend.blend %}
+                            <tr>
+                                <td width="60%">{{ booze.name}}</td>
+                                <td width="40%">{{ booze.value }}</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+                     </div>
+                 {% endfor %}
+             </div>
+        </div>
+        <div class="span1"></div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+{% endblock %}

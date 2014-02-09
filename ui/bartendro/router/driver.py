@@ -86,7 +86,7 @@ class RouterDriver(object):
         self.dispenser_ports = [255 for i in xrange(MAX_DISPENSERS)]
 
         if software_only:
-            self.num_dispensers = MAX_DISPENSERS
+            self.num_dispensers = 7
         else:
             self.num_dispensers = 0 
 
