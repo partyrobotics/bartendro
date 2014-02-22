@@ -211,7 +211,7 @@ function save()
     if (!$("#drink-form").valid())
         return;
 
-    drink = get_current_drink_dat();
+    drink = get_current_drink_data();
     $.ajax({
             url: "/ws/drink/" + drink['id'] + "/save",
             type: "POST",
@@ -220,9 +220,9 @@ function save()
             contentType: "application/json; charset=utf-8",
             success: function(json)
             {
+                load_form(json);
                 set_message(drink['name'] + " has been saved.");
                 update_drink_list(drink['id'], json['id'], drink['name']);
-                $("#drink-id").val(json['id']);
             },
             error: function(xhr, txtStatus, errorThrown)
             {

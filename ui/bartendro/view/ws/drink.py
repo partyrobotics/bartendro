@@ -64,7 +64,10 @@ def ws_drink_available(drink, state):
 
 @app.route('/ws/drink/<int:id>/load')
 @login_required
-def admin_drink_load(id):
+def ws_drink_load(id):
+    return drink_load(id)
+
+def drink_load(id):
     drink = Drink.query.filter_by(id=int(id)).first()
     boozes = []
     for booze in drink.drink_boozes:
@@ -144,7 +147,7 @@ def ws_drink_save(drink):
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
 
-    return json.dumps({ 'id' : drink.id });
+    return drink_load(drink.id) 
 
 @app.route('/ws/shots/<int:disp>')
 def ws_shots(disp):
