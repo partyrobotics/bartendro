@@ -11,3 +11,4 @@
 ui/logs
 dispenser/old
 master/old
+firmware/dispenser/last_pump_id.txt

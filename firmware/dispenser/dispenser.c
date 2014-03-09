@@ -434,9 +434,9 @@ void stop_motor(void)
     sei();
 }
 
-void run_motor_timed(uint32_t duration)
+void run_motor_timed(uint16_t duration)
 {
-    uint32_t t;
+    uint16_t t;
 
     if (duration == 0)
         return;
@@ -477,7 +477,7 @@ void is_dispensing(void)
     send_packet8_2(PACKET_IS_DISPENSING, dispensing, g_current_sense_detected);
 }
 
-#define MAX_CMD_LEN 32
+#define MAX_CMD_LEN 64
 // return true is a command was read, false if a reset was requested
 uint8_t receive_cmd(char *cmd)
 {
@@ -512,7 +512,7 @@ void text_interface(void)
     char cmd[MAX_CMD_LEN];
     uint8_t  speed, current_sense;
     uint16_t ticks;
-    uint32_t time;
+    uint16_t t;
     uint8_t  i, cs;
 
     for(i = 0; i < 5; i++)
@@ -563,11 +563,11 @@ void text_interface(void)
                 }
                 continue;
             }
-            if (sscanf(cmd, "timedisp %u", (unsigned int *)&time) == 1)
+            if (sscanf(cmd, "timedisp %hu", (short unsigned int *)&t) == 1)
             {
                 if (!cs)
                 {
-                    run_motor_timed(time);
+                    run_motor_timed(t);
                     flush_saved_tick_count(0);
                 }
                 continue;
@@ -765,7 +765,7 @@ int main(void)
                     case PACKET_TIME_DISPENSE:
                         if (!cs)
                         {
-                            run_motor_timed(p.p.uint32);
+                            run_motor_timed((uint16_t)p.p.uint32);
                             flush_saved_tick_count(0);
                         }
                         break;
