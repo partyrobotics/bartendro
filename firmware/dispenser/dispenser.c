@@ -43,6 +43,7 @@ static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_is_motor_on = 0;
 static volatile uint8_t g_motor_direction = MOTOR_DIRECTION_FORWARD;
+static volatile uint8_t g_button_state = 0;
 
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
@@ -60,6 +61,7 @@ void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense);
 void set_motor_direction(uint8_t direction);
 void stop_motor(void);
+void pulse_motor_driver_retry(void);
 void adc_shutdown(void);
 uint8_t check_reset(void);
 void is_dispensing(void);
@@ -72,17 +74,19 @@ void set_led_pattern(uint8_t pattern);
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-*  5  - PD5 - motor control B (OC0B)
+   5  - PD5 - motor control B (OC0B)
    6  - PD6 - motor control A (OC0A)
    7  - PD7 - Hall 0 (pcint 23)
    8  - PB0 - Hall 1 (pcint 0)
    9  - PB1 - Hall 2 (pcint 1) 
   10  - PB2 - Hall 3 (pcint 2)
+  14  - PB6 - /RTRY for motor driver
+  15  - PB7 - BUTTON (pcint7)
   A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
   A1  - PC1 - liquid level
-* A2  - PC2 - REV0
-* A3  - PC3 - REV1
-* A4  - PC4 - REV2
+  A2  - PC2 - REV0
+  A3  - PC3 - REV1
+  A4  - PC4 - REV2
   A5  - PC5 - SYNC (pcint13)
 
 */
@@ -90,8 +94,9 @@ void setup(void)
 {
     serial_init();
 
-    // Set up LEDs & motor out
+    // Set up LEDs & motor control outputs
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5)|(1<<PD6);
+    DDRB |= (1<<PB6);
 
     // pull ups for hall sensors
     sbi(PORTD, 7);
@@ -120,10 +125,13 @@ void setup(void)
     EIMSK |= (1 << INT0);
 
     // PCINT setup
-    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2);
+    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT7);;
     PCMSK1 |= (1 << PCINT8) | (1 << PCINT13);
     PCMSK2 |= (1 << PCINT23);
     PCICR |=  (1 << PCIE2) | (1 << PCIE1) | (1 << PCIE0);
+
+    // Set the motor driver RTRY line HIGH
+    sbi(PORTB, 6);
 }
 
 // update g_time
@@ -171,6 +179,11 @@ ISR(PCINT0_vect)
         g_hall3 = state;
         g_ticks++;
     }
+    state = PINB & (1<<PINB7);
+    if (state != g_button_state)
+    {
+        g_button_state = state;
+    }
     check_dispense_complete_isr();
 }
 
@@ -178,12 +191,6 @@ ISR(PCINT1_vect)
 {
     uint8_t      state;
 
-    state = PINC & (1<<PINC5);
-    if (state != g_sync)
-    {
-        g_sync_count++;
-        g_sync = state;
-    }
     state = PINC & (1<<PINC0);
     if (state != g_current_sense_state)
     {
@@ -197,6 +204,12 @@ ISR(PCINT1_vect)
             set_led_pattern(LED_PATTERN_CURRENT_SENSE);
             g_current_sense_detected = 1;
         }
+    }
+    state = PINC & (1<<PINC5);
+    if (state != g_sync)
+    {
+        g_sync_count++;
+        g_sync = state;
     }
     check_dispense_complete_isr();
 }
@@ -241,8 +254,9 @@ uint8_t check_reset(void)
 void idle(void)
 {
     color_t c;
-    uint8_t animate = 0;
+    uint8_t animate = 0, current_state = 0;
     uint32_t t = 0;
+    static uint8_t user_button_state = 0;
 
     cli();
     if (g_sync_count >= g_sync_divisor)
@@ -250,7 +264,26 @@ void idle(void)
         g_sync_count = 0;
         animate = 1;
     }
+    current_state = g_button_state;
     sei();
+
+#if 0
+    // Set the leds and motor speed accordingly when button is pressed
+    if (current_state != user_button_state)
+    {
+        if (current_state)
+            set_motor_speed(0, 1);
+        else
+        {   
+            set_led_rgb(255,128,0);
+            set_motor_speed(255, 1);
+        }
+
+        user_button_state = current_state;
+    }
+       
+    if (animate && !user_button_state)
+#endif
 
     if (animate)
     {
@@ -422,6 +455,13 @@ void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
     cli();
     g_is_motor_on = speed != 0;
     sei();
+}
+
+void pulse_motor_driver_retry(void)
+{
+    cbi(PORTB, 6);
+    _delay_ms(2);
+    sbi(PORTB, 6);
 }
 
 void stop_motor(void)
@@ -658,7 +698,6 @@ uint8_t address_exchange(void)
         if (ch == '!')
             text_interface();
     }
-    set_led_rgb(0, 255, 0);
 
     return id;
 }
@@ -685,6 +724,21 @@ void id_conflict(void)
         ;
 }
 
+void check_software_revision(void)
+{
+    uint8_t bit0 = PINC & (1<<PINC2);
+    uint8_t bit1 = PINC & (1<<PINC3);
+    uint8_t bit2 = PINC & (1<<PINC4);
+
+    // 011
+    if (bit0 && bit1 && !bit2)
+        return;
+
+    // Wrong software! I refuse to do shit!
+    set_led_rgb(255, 255, 255);
+    for(;;)
+        ;
+}
 
 int main(void)
 {
@@ -703,6 +757,9 @@ int main(void)
         _delay_ms(50);
     }
 
+    // Ensure we're running the right software for this board
+    check_software_revision();
+
     // get the current liquid level 
     update_liquid_level();
 
@@ -714,6 +771,7 @@ int main(void)
         setup();
         serial_init();
         stop_motor();
+        pulse_motor_driver_retry();
         set_led_rgb(0, 0, 255);
 
         sei();
