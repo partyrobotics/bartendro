@@ -22,6 +22,7 @@
 #define ee_liquid_low_threshold_offset    5
 #define ee_liquid_out_threshold_offset    7 
 
+#define USER_BUTTON_DURATION             10 // in clock ticks
 #define RESET_DURATION                    1
 #define SYNC_COUNT                       10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES                   5
@@ -43,6 +44,7 @@ static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_is_motor_on = 0;
 static volatile uint8_t g_motor_direction = MOTOR_DIRECTION_FORWARD;
+static volatile uint32_t g_button_time = 0;
 static volatile uint8_t g_button_state = 0;
 
 static volatile uint8_t g_hall0 = 0;
@@ -179,10 +181,14 @@ ISR(PCINT0_vect)
         g_hall3 = state;
         g_ticks++;
     }
-    state = PINB & (1<<PINB7);
+    state = (PINB & (1<<PINB7)) ? 0 : 1;
     if (state != g_button_state)
     {
-        g_button_state = state;
+        if (!g_button_time)
+        {
+            g_button_time = g_time + USER_BUTTON_DURATION;
+            g_button_state = state;
+        }
     }
     check_dispense_complete_isr();
 }
@@ -254,9 +260,8 @@ uint8_t check_reset(void)
 void idle(void)
 {
     color_t c;
-    uint8_t animate = 0, current_state = 0;
+    uint8_t animate = 0, current_state = 0, button_state_changed = 0;
     uint32_t t = 0;
-    static uint8_t user_button_state = 0;
 
     cli();
     if (g_sync_count >= g_sync_divisor)
@@ -264,28 +269,30 @@ void idle(void)
         g_sync_count = 0;
         animate = 1;
     }
-    current_state = g_button_state;
+
+    // read button state & check time
+    if (g_button_time > 0 && g_time >= g_button_time)
+    {
+        current_state = g_button_state;
+        g_button_time = 0;
+        button_state_changed = 1;
+    }
     sei();
 
-#if 0
     // Set the leds and motor speed accordingly when button is pressed
-    if (current_state != user_button_state)
+    if (button_state_changed)
     {
         if (current_state)
-            set_motor_speed(0, 1);
-        else
         {   
             set_led_rgb(255,128,0);
             set_motor_speed(255, 1);
         }
-
-        user_button_state = current_state;
+        else
+            set_motor_speed(0, 1);
     }
-       
-    if (animate && !user_button_state)
-#endif
-
-    if (animate)
+      
+    // run the animation if the current state 
+    if (animate && !current_state)
     {
         cli();
         t = g_pattern_t++;
@@ -748,6 +755,7 @@ int main(void)
 
     setup();
     stop_motor();
+
     sei();
     for(i = 0; i < 5; i++)
     {
@@ -768,6 +776,7 @@ int main(void)
         cli();
         g_reset = 0;
         g_current_sense_detected = 0;
+        g_motor_direction = MOTOR_DIRECTION_FORWARD;
         setup();
         serial_init();
         stop_motor();
