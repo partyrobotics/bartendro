@@ -60,8 +60,12 @@ def ws_dispenser_test(disp):
     if app.mixer.get_state() == STATE_ERROR:
         return "error state"
 
+    dispenser = db.session.query(Dispenser).filter_by(id=disp).first()
+    if not dispenser:
+        return "Cannot test dispenser. Incorrect dispenser."
+
     try:
-        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.test_dispense_ml)
+        is_cs, err = app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
         if is_cs:
             app.mixer.set_state(STATE_ERROR)
             return "error state"

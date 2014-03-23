@@ -13,7 +13,7 @@ from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
 
-def ws_make_drink(drink, speed):
+def ws_make_drink(drink):
     recipe = {}
     for arg in request.args:
         disp = int(arg[5:])
@@ -22,7 +22,7 @@ def ws_make_drink(drink, speed):
     if app.mixer.get_state() == STATE_ERROR:
         raise InternalServerError
     try:
-        err = app.mixer.make_drink(drink, recipe, speed)
+        err = app.mixer.make_drink(drink, recipe)
         if not err:
             return "ok\n"
         else:
@@ -36,21 +36,14 @@ def ws_drink(drink):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    return ws_make_drink(drink, 255)
+    return ws_make_drink(drink)
 
-@app.route('/ws/drink/<int:drink>/speed/<int:speed>')
-def ws_drink_at_speed(drink, speed):
+@app.route('/ws/drink/custom')
+def ws_custom_drink():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    return ws_make_drink(drink, speed)
-
-@app.route('/ws/drink/custom/speed/<int:speed>')
-def ws_custom_drink(speed):
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
-        return "login required"
-
-    return ws_make_drink(0, speed)
+    return ws_make_drink(0)
 
 @app.route('/ws/drink/<int:drink>/available/<int:state>')
 def ws_drink_available(drink, state):
@@ -149,17 +142,25 @@ def ws_drink_save(drink):
 
     return drink_load(drink.id) 
 
-@app.route('/ws/shots/<int:disp>')
-def ws_shots(disp):
+@app.route('/ws/shots/<int:booze>')
+def ws_shots(booze_id):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
     if app.mixer.get_state() == STATE_ERROR:
         return "error state"
 
-    dispenser = db.session.query(Dispenser).filter_by(id=disp).first()
+    dispensers = db.session.query(Dispenser).all()
+    dispenser = None
+    for d in dispensers:
+        if d.booze.id = booze_id:
+            dispenser = d
+
+    if not dispenser:
+        return "this booze is not available"
+
     try:
-        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.shot_size, dispenser.booze.id)
+        is_cs, err = app.mixer.dispense_shot(dispenser, app.options.shot_size)
         if is_cs:
             app.mixer.set_state(STATE_ERROR)
             return "error state"

@@ -158,7 +158,6 @@ var ing = [
    {% endfor %}
 ];
 
-var acceptable_speed = 1000;
 var start_time;
 var width, height;
 var elapsed;
@@ -356,13 +355,10 @@ function make_drink(drink, is_taster)
     lb = '<div class="lb-box"><h1>';
     url = "/ws/drink/" + drink;
     if (is_taster)
-    {
-        if ({{ options.taster_size }} < 20)
-            url += "/speed/128";
         lb += 'Now serving a taste of'
-    }
     else
         lb += 'Now serving your'
+
     lb += '</h1><div class="lb-drink">{{ drink.name.name }}</div>';
     lb += "</div>";
     $.modal(lb, { 'escClose' : false });

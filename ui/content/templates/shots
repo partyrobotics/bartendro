@@ -59,7 +59,7 @@
 function make_shot(disp)
 {
      $.ajax({ 
-            url: "/ws/shots/" + (disp+1),
+            url: "/ws/shots/" + disp.booze.id,
             success: function(html)
             {
                 if (html == "login required")

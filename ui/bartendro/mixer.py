@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import memcache
 from sqlalchemy.orm import mapper, relationship, backref
 from bartendro import db, app
+import bartendro.fsm 
 from bartendro.global_lock import STATE_INIT, STATE_READY, STATE_LOW, STATE_OUT, STATE_ERROR
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
@@ -41,6 +42,13 @@ def log_and_return(text):
     log.error(text)
     return text
 
+class Recipe(object):
+    ''' Define everything related to dispensing one or more liquids at the same time '''
+    def __init__(self):
+        self.data = {}
+        self.drink_id = 0   # Use for dispensing drinks
+        self.booze_id = 0   # Use for dispensing single shots of one booze
+
 class Mixer(object):
     '''The mixer object is the heart of Bartendro. This is where the state of the bot
        is managed, checked if drinks can be made, and actually make drinks. Everything
@@ -53,27 +61,205 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.check_liquid_levels()
 
+    def dispense_shot(self, dispenser, ml):
+        err = self._dispense(dispenser, ml)
+        if not err and log_shot:
+            t = int(time())
+            slog = ShotLog(dispenser.booze.id, t, ml)
+            db.session.add(slog)
+            db.session.commit()
+
+        return err
+
+    def dispense_ml(self, dispenser, ml):
+        r = Recipe()
+        r.data = { dispenser.booze.id : ml }
+        r.booze_id = booze_id
+        self.recipe = r
+
+        locked = self._lock_bartendro()
+        if not locked: raise BartendroBusyError
+
+        err = do_event(recipe)
+        self._unlock_bartendro()
+
+        return err
+
+    def make_drink(self, drink_id, recipe):
+
+        r = Recipe()
+        r.data = recipe
+        r.drink_id = drink_id
+        self.recipe = r
+
+        locked = self._lock_bartendro()
+        if not locked: raise BartendroBusyError
+
+        err = do_event(recipe)
+        self._unlock_bartendro()
+
+        if not err and drink_id:
+            t = int(time())
+            dlog = DrinkLog(drink_id, t, size)
+            db.session.add(dlog)
+            db.session.commit()
+
+        return err
+
+    def do_event(event, recipe = None):
+
+        cur_state = app.globals.get_state()
+        if cur_state not in [STATE_READY, STATE_LOW, STATE_OUT]:
+            return "Bartendro is not ready."
+
+        event = MAKE_DRINK
+    
+        while True:
+            next_state = None
+            for t_state, t_event, t_next_state in fsm.transition_table:
+                if t_state == cur_state and event == t_event:
+                    next_state = t_next_state
+                    break
+            
+            if not next_state:
+                return "Go home Bartendro, you're drunk!"
+
+            if next_state == STATE_PRE_POUR:
+                event = self._state_pre_pour()
+            elif next_state == STATE_CHECK:
+                event = self._state_check()
+            elif next_state == STATE_READY:
+                event = self._state_ready()
+            elif next_state == STATE_LOW:
+                event = self._state_low()
+            elif next_state == STATE_OUT:
+                event = self._state_out()
+            elif next_state == STATE_HARD_OUT:
+                event = self._state_hard_out()
+            elif next_state == STATE_POURING:
+                event = self._state_pouring()
+            elif next_state == STATE_POUR_DONE:
+                event = self._state_pour_done()
+            elif next_state == STATE_CURRENT_SENSE:
+                event = self._state_current_sense()
+            elif next_state == STATE_ERROR:
+                event = self._state_error()
+            else
+                return "No really Bartendro, you're drunk. Go home!"
+
+            cur_state = next_state
+            if cur_state in fsm.end_states:
+                break
+
+        app.globals.set_state(cur_state)
+
+        # TODO: How to pull errors throug?
+
+        return ""
+
+
+    def _state_check(self):
+        # if ll, check states
+        # update drink list accordingly
+
+    def _state_ready(self):
+        self.driver.led_idle()
+        self.driver.set_status_color(0, 1, 0)
+
+    def _state_low(self):
+        self.driver.led_idle()
+        self.driver.set_status_color(1, 1, 0)
+
+    def _state_out(self):
+        self.driver.led_idle()
+        self.driver.set_status_color(1, 0, 0)
+
+    # TODO: Make the hard out blink the status led
+    def _state_hard_out(self):
+        self.driver.led_idle()
+        self.driver.set_status_color(1, 0, 0)
+
+    def _state_pre_pour(self):
+        check levels
+        can still make drink?
+
+    def _state_pouring(self):
+        self.driver.led_dispense()
+
+        self.driver.dispense_ticks(disp, ml * TICKS_PER_ML)
+        if not self._wait_til_finished_dispensing(disp):
+            self.set_state(STATE_ERROR)
+            self._update_status_led()
+            self._unlock_bartendro()
+            return (1, "Dispenser is current limited")
+        self.led_idle()
+
+
+        self._unlock_bartendro()
+        return (0, "")
+
+        if id:
+            drink = Drink.query.filter_by(id=int(id)).first()
+        else:
+            drink = None
+
+        dispensers = Dispenser.query.order_by(Dispenser.id).all()
+
+        recipe = {}
+        size = 0
+        log_lines = {}
+        for booze_id in sorted(recipe_arg.keys()):
+            found = False
+            for i in xrange(self.disp_count):
+                disp = dispensers[i]
+
+                # if we're out of booze, don't consider this drink
+                if app.options.use_liquid_level_sensors and disp.out == DISPENSER_OUT:
+                    return log_and_return("Cannot make drink: Dispenser %d is out of booze." % (i+1))
+
+                if booze_id == disp.booze_id:
+                    found = True
+                    ml = recipe_arg[booze_id]
+                    if ml <= 0:
+                        log_lines[i] = "  %-2d %-32s %d ml (not dispensed)" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
+                        continue
+
+                    if ml > MAX_DISPENSE:
+                        return log_and_return("Cannot make drink. Invalid dispense quantity: %d ml. (Max %d ml)" % (ml, MAX_DISPENSE))
+
+                    recipe[i] =  ml
+                    size += ml
+                    log_lines[i] = "  %-2d %-32s %d ml" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
+                    continue
+
+            if not found:
+                return log_and_return("Cannot make drink. I don't have the required booze: %d" % booze_id)
+
+        ret = self.dispense_recipe(recipe, speed)
+        if ret:
+            return log_and_return(ret)
+
+        if drink:
+            log.info("Made cocktail: %s" % drink.name.name)
+        else:
+            log.info("Made custom drink:")
+        for line in sorted(log_lines.keys()):
+            log.info(log_lines[line])
+        log.info("%s ml dispensed. done." % size)
+
+        return ""
+    def _state_pour_done(self):
+        FlashGreenLeds(self).start()
+
+    def _state_current_sense(self):
+        pass 
+
+    def _state_error(self):
+        pass 
+
     def reset(self):
         self.set_state(STATE_INIT)
         self.check_liquid_levels()
-
-    def get_state(self):
-        return app.globals.get_state()
-
-    def set_state(self, state):
-        return app.globals.set_state(state)
-
-    def led_idle(self):
-        self.driver.led_idle()
-
-    def led_dispense(self):
-        self.driver.led_dispense()
-
-    def led_complete(self):
-        self.driver.led_complete()
-
-    def led_clean(self):
-        self.driver.led_clean()
 
     def clean(self):
         CleanCycle(self, "all").start()
@@ -84,6 +270,52 @@ class Mixer(object):
     def clean_left(self):
         CleanCycle(self, "left").start()
 
+    def make_drink(self, recipe = 255):
+
+
+    def dispense_recipe(self, recipe, speed):
+
+        locked = self._lock_bartendro()
+        if not locked: raise BartendroBusyError
+   
+        self.led_dispense()
+        active_disp = []
+        for disp in recipe:
+            if not recipe[disp]:
+                continue
+            ticks = int(recipe[disp] * TICKS_PER_ML)
+            if recipe[disp] < SLOW_DISPENSE_THRESHOLD and speed > HALF_SPEED: 
+                actual_speed = HALF_SPEED 
+            else:
+                actual_speed = speed 
+            if not self.driver.dispense_ticks(disp, ticks, actual_speed):
+                log.error("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, actual_speed, disp + 1))
+            active_disp.append(disp)
+            sleep(.01)
+
+        current_sense = False
+        for disp in active_disp:
+            if not self._wait_til_finished_dispensing(disp):
+                current_sense = True
+                break
+
+        if current_sense: 
+            self.set_state(STATE_ERROR)
+            self._update_status_led()
+            self._unlock_bartendro()
+            log.error("Current sense triggered on dispenser %d" % disp + 1)
+            return "One of the pumps did not operate properly. Your drink is broken. Sorry. :("
+
+        self.led_complete()
+
+        if app.options.use_liquid_level_sensors:
+            state = self.check_liquid_levels()
+            log.info("Post make drink. State is: %d" % state)
+
+        FlashGreenLeds(self).start()
+        self._unlock_bartendro()
+
+        return "" 
     def check_liquid_levels(self):
         """ Ask the dispense to update their own liquid levels and then fetch the levels
             and set the machine state accordingly. """
@@ -182,7 +414,7 @@ class Mixer(object):
         log.info("motor stopped at level: %d" % level)
 
     def get_available_drink_list(self):
-        if self.get_state() == STATE_ERROR:
+        if self.get_state() == fsm.STATE_ERROR:
             return []
 
         can_make = self.mc.get("available_drink_list")
@@ -231,149 +463,6 @@ class Mixer(object):
 
         self.mc.set("available_drink_list", can_make)
         return can_make
-
-    def dispense_ml(self, disp, ml, booze_id = -1):
-        if disp < 0 or disp >= self.driver.count():
-            return (0, "invalid dispenser")
-
-        if self.get_state() == STATE_ERROR:
-            return (0, "Bartendro is in error state")
-
-        locked = self._lock_bartendro()
-        if not locked: raise BartendroBusyError
-
-        self.led_dispense()
-        self.driver.dispense_ticks(disp, ml * TICKS_PER_ML)
-        if not self._wait_til_finished_dispensing(disp):
-            self.set_state(STATE_ERROR)
-            self._update_status_led()
-            self._unlock_bartendro()
-            return (1, "Dispenser is current limited")
-        self.led_idle()
-
-        # If we're given a booze_id, log this shot
-        if booze_id >= 0:
-            t = int(time())
-            slog = ShotLog(booze_id, t, ml)
-            db.session.add(slog)
-            db.session.commit()
-
-        self._unlock_bartendro()
-        return (0, "")
-
-    def make_drink(self, id, recipe_arg, speed = 255):
-        '''Make a drink! is is the drink id and its optional to make a "custom" drink that isn't in the drink
-           table. If no id is given, the drink will not be logged to the drink log.'''
-
-        log.debug("Make drink state: %d" % self.get_state())
-        if self.get_state() == STATE_ERROR:
-            return log_and_return("Cannot make a drink. Bartendro has encountered some error and is stopped. :(")
-
-        # start by updating liqid levels to make sure we have the right fluids
-        state = self.check_liquid_levels()
-        if state != STATE_READY and state != STATE_LOW:
-            return log_and_return("Cannot make drink. State is not low or out. :(")
-
-        if id:
-            drink = Drink.query.filter_by(id=int(id)).first()
-        else:
-            drink = None
-
-        dispensers = Dispenser.query.order_by(Dispenser.id).all()
-
-        recipe = {}
-        size = 0
-        log_lines = {}
-        for booze_id in sorted(recipe_arg.keys()):
-            found = False
-            for i in xrange(self.disp_count):
-                disp = dispensers[i]
-
-                # if we're out of booze, don't consider this drink
-                if app.options.use_liquid_level_sensors and disp.out == DISPENSER_OUT:
-                    return log_and_return("Cannot make drink: Dispenser %d is out of booze." % (i+1))
-
-                if booze_id == disp.booze_id:
-                    found = True
-                    ml = recipe_arg[booze_id]
-                    if ml <= 0:
-                        log_lines[i] = "  %-2d %-32s %d ml (not dispensed)" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
-                        continue
-
-                    if ml > MAX_DISPENSE:
-                        return log_and_return("Cannot make drink. Invalid dispense quantity: %d ml. (Max %d ml)" % (ml, MAX_DISPENSE))
-
-                    recipe[i] =  ml
-                    size += ml
-                    log_lines[i] = "  %-2d %-32s %d ml" % (i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
-                    continue
-
-            if not found:
-                return log_and_return("Cannot make drink. I don't have the required booze: %d" % booze_id)
-
-        ret = self.dispense_recipe(recipe, speed)
-        if ret:
-            return log_and_return(ret)
-
-        if drink:
-            log.info("Made cocktail: %s" % drink.name.name)
-        else:
-            log.info("Made custom drink:")
-        for line in sorted(log_lines.keys()):
-            log.info(log_lines[line])
-        log.info("%s ml dispensed. done." % size)
-
-        if drink:
-            t = int(time())
-            dlog = DrinkLog(drink.id, t, size)
-            db.session.add(dlog)
-            db.session.commit()
-
-        return ""
-
-    def dispense_recipe(self, recipe, speed):
-
-        locked = self._lock_bartendro()
-        if not locked: raise BartendroBusyError
-   
-        self.led_dispense()
-        active_disp = []
-        for disp in recipe:
-            if not recipe[disp]:
-                continue
-            ticks = int(recipe[disp] * TICKS_PER_ML)
-            if recipe[disp] < SLOW_DISPENSE_THRESHOLD and speed > HALF_SPEED: 
-                actual_speed = HALF_SPEED 
-            else:
-                actual_speed = speed 
-            if not self.driver.dispense_ticks(disp, ticks, actual_speed):
-                log.error("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, actual_speed, disp + 1))
-            active_disp.append(disp)
-            sleep(.01)
-
-        current_sense = False
-        for disp in active_disp:
-            if not self._wait_til_finished_dispensing(disp):
-                current_sense = True
-                break
-
-        if current_sense: 
-            self.set_state(STATE_ERROR)
-            self._update_status_led()
-            self._unlock_bartendro()
-            log.error("Current sense triggered on dispenser %d" % disp + 1)
-            return "One of the pumps did not operate properly. Your drink is broken. Sorry. :("
-
-        self.led_complete()
-
-        if app.options.use_liquid_level_sensors:
-            state = self.check_liquid_levels()
-            log.info("Post make drink. State is: %d" % state)
-
-        FlashGreenLeds(self).start()
-        self._unlock_bartendro()
-
-        return "" 
 
     # ----------------------------------------
     # Private methods
