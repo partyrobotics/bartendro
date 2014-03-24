@@ -100,11 +100,12 @@ void setup(void)
     DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5)|(1<<PD6);
     DDRB |= (1<<PB6);
 
-    // pull ups for hall sensors
+    // pull ups for hall sensors & for current sense
     sbi(PORTD, 7);
     sbi(PORTB, 0);
     sbi(PORTB, 1);
     sbi(PORTB, 2);
+    sbi(PORTC, 0);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= TIMER1_FLAGS;
