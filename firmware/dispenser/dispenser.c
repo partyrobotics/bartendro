@@ -284,16 +284,13 @@ void idle(void)
     if (button_state_changed)
     {
         if (current_state)
-        {   
-            set_led_rgb(255,128,0);
             set_motor_speed(255, 1);
-        }
         else
             set_motor_speed(0, 1);
     }
       
     // run the animation if the current state 
-    if (animate && !current_state)
+    if (animate)
     {
         cli();
         t = g_pattern_t++;
