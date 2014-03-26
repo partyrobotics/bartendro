@@ -62,5 +62,5 @@ except IOError, e:
 
 #cmd = "sudo avrdude -p m168 -P usb -c avrispmkII -U eeprom:w:%s:r -B 1.0" % sys.argv[1]
 #subprocess.check_output(cmd)
-print "Pump id %d written to %s" % (id, sys.argv[1])
+print "Pump id %x written to %s" % (id, sys.argv[1])
 sys.exit(0)
