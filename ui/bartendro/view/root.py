@@ -4,11 +4,11 @@ import random
 from sqlalchemy import func, asc
 from sqlalchemy.exc import OperationalError
 from bartendro import app, db
-from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request, render_template, redirect
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
+from bartendro import fsm
 
 def process_ingredients(drinks):
     for drink in drinks:
@@ -26,7 +26,7 @@ def filter_drink_list(can_make_dict, drinks):
 
 @app.route('/')
 def index():
-    if app.globals.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return render_template("index", 
                                options=app.options, 
                                top_drinks=[], 
@@ -44,9 +44,7 @@ def index():
                                error_message="Bartendro database errror.<br/><br/>There doesn't seem to be a valid database installed.",
                                title="Bartendro error")
         
-
-
-    if not len(can_make):
+    if not len(can_make) or app.globals.get_state() == fsm.STATE_HARD_OUT:
         return render_template("index", 
                                options=app.options, 
                                top_drinks=[], 

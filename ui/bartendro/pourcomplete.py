@@ -9,4 +9,4 @@ class PourCompleteDelay(Thread):
 
     def run(self):
         sleep(5);
-        self.mixer.led_idle()
+        self.mixer.driver.led_idle()

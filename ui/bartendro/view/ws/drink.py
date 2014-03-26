@@ -3,7 +3,6 @@ import json
 from time import sleep
 from operator import itemgetter
 from bartendro import app, db, mixer
-from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
@@ -12,14 +11,16 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
+from bartendro import fsm
 
-def ws_make_drink(drink):
+def ws_make_drink(drink_id):
     recipe = {}
     for arg in request.args:
         disp = int(arg[5:])
         recipe[disp] = int(request.args.get(arg))
 
-    if app.mixer.get_state() == STATE_ERROR:
+    drink = Drink.query.filter_by(id=int(drink_id)).first()
+    if app.globals.get_state() == fsm.STATE_ERROR:
         raise InternalServerError
     try:
         err = app.mixer.make_drink(drink, recipe)
@@ -147,7 +148,7 @@ def ws_shots(booze_id):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     dispensers = db.session.query(Dispenser).all()
@@ -162,7 +163,7 @@ def ws_shots(booze_id):
     try:
         is_cs, err = app.mixer.dispense_shot(dispenser, app.options.shot_size)
         if is_cs:
-            app.mixer.set_state(STATE_ERROR)
+            app.mixer.set_state(fsm.STATE_ERROR)
             return "error state"
         if err:
             err = "Failed to test dispense on dispenser %d: %s" % (disp, err)

@@ -1,4 +1,5 @@
 # States that Bartendro can be in
+STATE_START =         0
 STATE_CHECK =         1
 STATE_READY =         2
 STATE_LOW =           3
@@ -11,6 +12,7 @@ STATE_CURRENT_SENSE = 9
 STATE_ERROR =         10
 
 # Events that cause changes in Bartendro states
+EVENT_START =          0
 EVENT_LL_OK =          1
 EVENT_LL_LOW =         2
 EVENT_LL_OUT =         3
@@ -27,6 +29,8 @@ EVENT_DONE           = 12
 # Transition table for Bartendro
 transition_table = [
 #   Current state                     Event                         Next state
+    (STATE_START,                     EVENT_START,                  STATE_CHECK),
+
     (STATE_READY,                     EVENT_MAKE_DRINK,             STATE_PRE_POUR),
     (STATE_LOW,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),
     (STATE_OUT,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),

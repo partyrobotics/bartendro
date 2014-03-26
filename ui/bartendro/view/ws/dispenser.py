@@ -3,12 +3,12 @@ import logging
 from time import sleep
 from werkzeug.exceptions import ServiceUnavailable
 from bartendro import app, db, mixer
-from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request
 from flask.ext.login import current_user
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
+from bartendro import fsm
 
 log = logging.getLogger('bartendro')
 
@@ -17,12 +17,12 @@ def ws_dispenser_on(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     is_disp, is_cs = app.driver.is_dispensing(disp - 1)
     if is_cs:
-        app.mixer.set_state(STATE_ERROR)
+        app.mixer.set_state(fsm.STATE_ERROR)
         return "error state"
 
     if not app.driver.start(disp - 1):
@@ -37,12 +37,12 @@ def ws_dispenser_off(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     is_disp, is_cs = app.driver.is_dispensing(disp - 1)
     if is_cs:
-        app.mixer.set_state(STATE_ERROR)
+        app.mixer.set_state(fsm.STATE_ERROR)
         return "error state"
 
     if not app.driver.stop(disp - 1):
@@ -57,7 +57,7 @@ def ws_dispenser_test(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     dispenser = db.session.query(Dispenser).filter_by(id=disp).first()
@@ -67,7 +67,7 @@ def ws_dispenser_test(disp):
     try:
         is_cs, err = app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
         if is_cs:
-            app.mixer.set_state(STATE_ERROR)
+            app.mixer.set_state(fsm.STATE_ERROR)
             return "error state"
         if err:
             err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
@@ -83,7 +83,7 @@ def ws_dispenser_clean():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     app.mixer.clean()
@@ -94,7 +94,7 @@ def ws_dispenser_clean_right():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     app.mixer.clean_right()
@@ -105,7 +105,7 @@ def ws_dispenser_clean_left():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    if app.mixer.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
     app.mixer.clean_left()
