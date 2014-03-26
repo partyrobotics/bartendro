@@ -153,7 +153,7 @@ def ws_shots(booze_id):
     dispensers = db.session.query(Dispenser).all()
     dispenser = None
     for d in dispensers:
-        if d.booze.id = booze_id:
+        if d.booze.id == booze_id:
             dispenser = d
 
     if not dispenser:

@@ -22,6 +22,7 @@ EVENT_CURRENT_SENSE =  8
 EVENT_ERROR =          9
 EVENT_POST_POUR_DONE = 10
 EVENT_RESET          = 11
+EVENT_DONE           = 12
 
 # Transition table for Bartendro
 transition_table = [
