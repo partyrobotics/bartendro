@@ -14,6 +14,8 @@ from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
 from bartendro.model.shot_log import ShotLog
+from bartendro.global_lock import BartendroLock
+from bartendro.router.driver import LED_PATTERN_CUSTOM_1
 
 TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
@@ -36,15 +38,32 @@ LL_LOW     = 2
 log = logging.getLogger('bartendro')
 
 class BartendroBusyError(Exception):
-    pass
+    def __init__(self, err):
+        self.err = err
+        log.error(err)
+    def __str__(self):
+        return repr(self.err)
 
-class LiquidLevelReadError(Exception):
-    pass
+class BartendroBrokenError(Exception):
+    def __init__(self, err):
+        self.err = err
+        log.error(err)
+    def __str__(self):
+        return repr(self.err)
 
-def log_and_return(text):
-    ''' helper function to make code less cluttered '''
-    log.error(text)
-    return text
+class BartendroCantPourError(Exception):
+    def __init__(self, err):
+        self.err = err
+        log.error(err)
+    def __str__(self):
+        return repr(self.err)
+
+class BartendroCurrentSenseError(Exception):
+    def __init__(self, err):
+        self.err = err
+        log.error(err)
+    def __str__(self):
+        return repr(self.err)
 
 class Recipe(object):
     ''' Define everything related to dispensing one or more liquids at the same time '''
@@ -61,9 +80,13 @@ class Mixer(object):
     def __init__(self, driver, mc):
         self.driver = driver
         self.mc = mc
-        self.err = ""
         self.disp_count = self.driver.count()
         self.do_event(fsm.EVENT_START)
+        self.err = ""
+        self.driver.pattern_define(0, LED_PATTERN_CUSTOM_1)
+        self.driver.pattern_add_segment(0, 255, 0, 0, 35)
+        self.driver.pattern_add_segment(0, 90, 0, 0, 35)
+        self.driver.pattern_finish(0)
 
     def dispense_shot(self, dispenser, ml):
         r = Recipe()
@@ -71,19 +94,12 @@ class Mixer(object):
         r.booze = dispenser.booze
         self.recipe = r
 
-        locked = self._lock_bartendro()
-        if not locked: raise BartendroBusyError
-
-        err = self.do_event(EVENT_MAKE_DRINK)
-        if not err:
+        with BartendroLock(app.globals):
+            self.do_event(fsm.EVENT_MAKE_DRINK)
             t = int(time())
             slog = ShotLog(dispenser.booze.id, t, ml)
             db.session.add(slog)
             db.session.commit()
-
-        self._unlock_bartendro()
-
-        return err
 
     def dispense_ml(self, dispenser, ml):
         r = Recipe()
@@ -91,45 +107,29 @@ class Mixer(object):
         r.booze = dispenser.booze
         self.recipe = r
 
-        locked = self._lock_bartendro()
-        if not locked: raise BartendroBusyError
-
-        err = self.do_event(EVENT_MAKE_DRINK)
-        self._unlock_bartendro()
-
-        return err
+        with BartendroLock(app.globals):
+            self.do_event(fsm.EVENT_MAKE_DRINK)
 
     def make_drink(self, drink, recipe):
-
         r = Recipe()
         r.data = recipe
         r.drink = drink
         self.recipe = r
 
-        locked = self._lock_bartendro()
-        if not locked: raise BartendroBusyError
-
-        err = self.do_event(fsm.EVENT_MAKE_DRINK)
-        if not err:
-            print err
-        self._unlock_bartendro()
-
-        if not err and drink.id:
-            size = 0
-            for k in recipe.keys():
-                size += recipe[k] 
-            t = int(time())
-            dlog = DrinkLog(drink.id, t, size)
-            db.session.add(dlog)
-            db.session.commit()
-
-        return err
+        with BartendroLock(app.globals):
+            self.do_event(fsm.EVENT_MAKE_DRINK)
+            if drink.id:
+                size = 0
+                for k in recipe.keys():
+                    size += recipe[k] 
+                t = int(time())
+                dlog = DrinkLog(drink.id, t, size)
+                db.session.add(dlog)
+                db.session.commit()
 
     def do_event(self, event):
 
         cur_state = app.globals.get_state()
-        print "start state: %d event: %d" % (cur_state, event)
-        self.err = ""
     
         while True:
             next_state = None
@@ -139,45 +139,57 @@ class Mixer(object):
                     break
             
             if not next_state:
-                print "not found next state"
-                return "Go home Bartendro, you're drunk!"
+                raise BartendroBrokenError("Go home Bartendro, you're drunk!")
 
-            print "next state: %d" % next_state
+            try:
+                if next_state == fsm.STATE_PRE_POUR or next_state == fsm.STATE_CHECK:
+                    event = self._state_check()
+                elif next_state == fsm.STATE_READY:
+                    event = self._state_ready()
+                elif next_state == fsm.STATE_LOW:
+                    event = self._state_low()
+                elif next_state == fsm.STATE_OUT:
+                    event = self._state_out()
+                elif next_state == fsm.STATE_HARD_OUT:
+                    event = self._state_hard_out()
+                elif next_state == fsm.STATE_POURING:
+                    event = self._state_pouring()
+                elif next_state == fsm.STATE_POUR_DONE:
+                    event = self._state_pour_done()
+                elif next_state == fsm.STATE_CURRENT_SENSE:
+                    event = self._state_current_sense()
+                elif next_state == fsm.STATE_ERROR:
+                    event = self._state_error()
+                else:
+                    self._state_error()
+                    app.globals.set_state(fsm.STATE_ERROR)
+                    raise BartendroBrokenError("No really Bartendro, you're drunk. Go home!")
 
-            if next_state == fsm.STATE_PRE_POUR or next_state == fsm.STATE_CHECK:
-                event = self._state_check()
-            elif next_state == fsm.STATE_READY:
-                event = self._state_ready()
-            elif next_state == fsm.STATE_LOW:
-                event = self._state_low()
-            elif next_state == fsm.STATE_OUT:
-                event = self._state_out()
-            elif next_state == fsm.STATE_HARD_OUT:
-                event = self._state_hard_out()
-            elif next_state == fsm.STATE_POURING:
-                event = self._state_pouring()
-            elif next_state == fsm.STATE_POUR_DONE:
-                event = self._state_pour_done()
-            elif next_state == fsm.STATE_CURRENT_SENSE:
-                event = self._state_current_sense()
-            elif next_state == fsm.STATE_ERROR:
-                event = self._state_error()
-            else:
-                return "No really Bartendro, you're drunk. Go home!"
+            except BartendroBrokenError, err:
+                self._state_error()
+                app.globals.set_state(fsm.STATE_ERROR)
+                raise BartendroBrokenError(err)
+
+            except BartendroCantPourError, err:
+                print "can't pour!"
+                app.globals.set_state(fsm.STATE_CHECK)
+                raise BartendroCantPourError(err)
+                
+            except BartendroCurrentSenseError, err:
+                app.globals.set_state(fsm.STATE_CHECK)
+                raise BartendroCurrentSenseError(err)
 
             cur_state = next_state
             if cur_state in fsm.end_states:
                 break
 
         app.globals.set_state(cur_state)
-        return self.err
 
     def _state_check(self):
         try:
             ll = self.check_liquid_levels()
         except LiquidLevelReadError:
-            self.err = "Failed to read liquid levels"
-            return fsm.EVENT_ERROR
+            raise BartendroBrokenError("Failed to read liquid levels")
 
         # update the list of drinks we can make
         drinks = self.get_available_drink_list()
@@ -193,40 +205,34 @@ class Mixer(object):
         return fsm.EVENT_LL_OUT
 
     def _state_ready(self):
-        print "STATE READY"
-#        self.driver.led_idle()
         self.driver.set_status_color(0, 1, 0)
         return fsm.EVENT_DONE
 
     def _state_low(self):
-        print "STATE LOW"
         self.driver.led_idle()
         self.driver.set_status_color(1, 1, 0)
         return fsm.EVENT_DONE
 
     def _state_out(self):
-        print "STATE OUT"
         self.driver.led_idle()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 
     # TODO: Make the hard out blink the status led
     def _state_hard_out(self):
-        print "STATE HARD OUT"
         self.driver.led_idle()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 
     def _state_current_sense(self):
-        print "STATE CURRENT SENSE"
         return fsm.EVENT_DONE
 
     def _state_error(self):
-        print "STATE ERROR"
+        self.driver.led_custom_1()
+        self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 
     def _state_pouring(self):
-        print "STATE POURING"
         self.driver.led_dispense()
 
         recipe = {}
@@ -240,7 +246,7 @@ class Mixer(object):
 
                 # if we're out of booze, don't consider this drink
                 if app.options.use_liquid_level_sensors and disp.out == LL_OUT:
-                    return log_and_return("Cannot make drink: Dispenser %d is out of booze." % (i+1))
+                    raise BartendroBrokenError("Cannot make drink: Dispenser %d is out of booze." % (i+1))
 
                 if booze_id == disp.booze_id:
                     found = True
@@ -250,7 +256,7 @@ class Mixer(object):
                         continue
 
                     if ml > MAX_DISPENSE:
-                        return log_and_return("Cannot make drink. Invalid dispense quantity: %d ml. (Max %d ml)" % (ml, MAX_DISPENSE))
+                        raise BartendroCantPourError("Cannot make drink. Invalid dispense quantity: %d ml. (Max %d ml)" % (ml, MAX_DISPENSE))
 
                     recipe[i] =  ml
                     size += ml
@@ -258,7 +264,7 @@ class Mixer(object):
                     continue
 
             if not found:
-                return log_and_return("Cannot make drink. I don't have the required booze: %d" % booze_id)
+                raise BartendroCantPourErro("Cannot make drink. I don't have the required booze: %d" % booze_id)
 
         event = self._dispense_recipe(recipe)
         if event != fsm.EVENT_POUR_DONE:
@@ -286,7 +292,8 @@ class Mixer(object):
             else:
                 speed = FULL_SPEED 
             if not self.driver.dispense_ticks(disp, ticks, speed):
-                log.error("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
+                raise BartendroBrokenError("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
+
             active_disp.append(disp)
             sleep(.01)
 
@@ -297,13 +304,11 @@ class Mixer(object):
                 break
 
         if current_sense: 
-            self.err = "One of the pumps did not operate properly. Your drink is broken. Sorry. :("
-            return fsm.EVENT_CURRENT_SENSE
+            raise BartendroCurrentSenseError("One of the pumps did not operate properly. Your drink is broken. Sorry. :(")
 
         return fsm.EVENT_POUR_DONE
 
     def _state_pour_done(self):
-        print "STATE POUR DONE"
         self.driver.led_complete()
         PourCompleteDelay(self).start()
 
@@ -334,8 +339,7 @@ class Mixer(object):
         log.info("mixer.check_liquid_levels: check levels");
         # step 1: ask the dispensers to update their liquid levels
         if not self.driver.update_liquid_levels():
-            log.error("Failed to update liquid levels")
-            raise LiquidLevelReadError()
+            raise LiquidLevelReadError("Failed to update liquid levels")
 
         # wait for the dispensers to determine the levels
         sleep(.01)
@@ -351,8 +355,7 @@ class Mixer(object):
             dispenser.out = LL_OK
             level = self.driver.get_liquid_level(i)
             if level < 0:
-                log.error("Failed to read liquid levels from dispenser %d" % (i+1))
-                raise LiquidLevelReadError()
+                raise LiquidLevelReadError("Failed to read liquid levels from dispenser %d" % (i+1))
 
             log.info("dispenser %d level: %d" % (i, level))
 
@@ -386,8 +389,7 @@ class Mixer(object):
         log.info("Start liquid level test: (disp %s thres: %d)" % (dispenser, threshold))
 
         if not self.driver.update_liquid_levels():
-            log.error("Failed to update liquid levels")
-            return
+            raise BartendroBrokenError("Failed to update liquid levels")
         sleep(.01)
 
         level = self.driver.get_liquid_level(dispenser)
@@ -400,7 +402,7 @@ class Mixer(object):
         self.driver.start(dispenser)
         while level > threshold:
             if not self.driver.update_liquid_levels():
-                log.error("Failed to update liquid levels")
+                raise BartendroBrokenError("Failed to update liquid levels")
                 return
             sleep(.01)
             level = self.driver.get_liquid_level(dispenser)
@@ -469,12 +471,6 @@ class Mixer(object):
     # Private methods
     # ----------------------------------------
 
-    def _lock_bartendro(self):
-        return app.globals.lock_bartendro()
-
-    def _unlock_bartendro(self):
-        return app.globals.unlock_bartendro()
-
     def _can_make_drink(self, boozes, booze_dict):
         ok = True
         for booze in boozes:
@@ -498,7 +494,8 @@ class Mixer(object):
                 continue
 
             log.debug("is_disp %d, over_cur %d" % (is_dispensing, over_current))
-            if over_current: return False
+            if over_current:
+                raise BartendroCurrentSense
             if is_dispensing == 0: return True
 
             # This timeout count is here to counteract Issue #64 -- this can be removed once #64 is fixed

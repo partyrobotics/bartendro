@@ -11,7 +11,6 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
-from bartendro import fsm
 
 def ws_make_drink(drink_id):
     recipe = {}
@@ -20,16 +19,16 @@ def ws_make_drink(drink_id):
         recipe[disp] = int(request.args.get(arg))
 
     drink = Drink.query.filter_by(id=int(drink_id)).first()
-    if app.globals.get_state() == fsm.STATE_ERROR:
-        raise InternalServerError
     try:
-        err = app.mixer.make_drink(drink, recipe)
-        if not err:
-            return "ok\n"
-        else:
-            raise BadRequest(err)
-    except mixer.BartendroBusyError:
-        raise ServiceUnavailable("busy")
+        app.mixer.make_drink(drink, recipe)
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
+
+    return "ok\n"
 
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
@@ -55,6 +54,31 @@ def ws_drink_available(drink, state):
     db.session.flush()
     db.session.commit()
     return "ok\n"
+
+@app.route('/ws/shots/<int:booze_id>')
+def ws_shots(booze_id):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    dispensers = db.session.query(Dispenser).all()
+    dispenser = None
+    for d in dispensers:
+        if d.booze.id == booze_id:
+            dispenser = d
+
+    if not dispenser:
+        return "this booze is not available"
+
+    try:
+        app.mixer.dispense_shot(dispenser, app.options.shot_size)
+    except mixer.BartendroCantPourError:
+        raise BadRequest(mixer.err)
+    except mixer.BartendroBrokenError:
+        raise ServiceUnavailable(mixer.err)
+    except mixer.BartendroBusyError:
+        raise InternalServerError(mixer.err)
+
+    return ""
 
 @app.route('/ws/drink/<int:id>/load')
 @login_required
@@ -142,34 +166,3 @@ def ws_drink_save(drink):
     mc.delete("available_drink_list")
 
     return drink_load(drink.id) 
-
-@app.route('/ws/shots/<int:booze>')
-def ws_shots(booze_id):
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
-        return "login required"
-
-    if app.globals.get_state() == fsm.STATE_ERROR:
-        return "error state"
-
-    dispensers = db.session.query(Dispenser).all()
-    dispenser = None
-    for d in dispensers:
-        if d.booze.id == booze_id:
-            dispenser = d
-
-    if not dispenser:
-        return "this booze is not available"
-
-    try:
-        is_cs, err = app.mixer.dispense_shot(dispenser, app.options.shot_size)
-        if is_cs:
-            app.mixer.set_state(fsm.STATE_ERROR)
-            return "error state"
-        if err:
-            err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
-            log.error(err)
-            return err
-    except mixer.BartendroBusyError:
-        return "busy"
-
-    return ""

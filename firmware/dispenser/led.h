@@ -17,7 +17,10 @@ void led_pattern_next(uint32_t t, color_t *c);
 #define LED_PATTERN_DRINK_DONE    2
 #define LED_PATTERN_CLEAN         3
 #define LED_PATTERN_CURRENT_SENSE 4
-#define LED_PATTERN_LAST          5
+#define LED_PATTERN_CUSTOM_1      5
+#define LED_PATTERN_CUSTOM_2      6
+#define LED_PATTERN_CUSTOM_3      7
+#define LED_PATTERN_LAST          8
 
 // Define custom animations
 #define CUSTOM_PATTERN_OK           0

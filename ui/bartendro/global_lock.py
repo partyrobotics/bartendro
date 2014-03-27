@@ -7,6 +7,17 @@ try:
     have_uwsgi = True
 except ImportError:
     have_uwsgi = False
+
+class BartendroLock(object):
+    def __init__(self, globals):
+        self.globals = globals
+
+    def __enter__(self):
+        if not self.globals.lock_bartendro():
+            raise mixer.BartendroBusyError
+
+    def __exit__(self, type, value, traceback):
+        self.globals.unlock_bartendro()
     
 class BartendroGlobalLock(object):
     '''This class manages the few global settings that Bartendro needs including a global state and
