@@ -375,7 +375,7 @@ function make_drink(drink, is_taster)
             {
                 $.modal.close();
                 if (xmlhttp.status == 500)
-                    $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                    $("#error-state-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
                 else
                 if (xmlhttp.status == 503)
                     $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });

@@ -281,34 +281,6 @@ class Mixer(object):
 
         return event
 
-    def _dispense_recipe(self, recipe):
-
-        active_disp = []
-        for disp in recipe:
-            if not recipe[disp]:
-                continue
-            ticks = int(recipe[disp] * TICKS_PER_ML)
-            if recipe[disp] < SLOW_DISPENSE_THRESHOLD: 
-                speed = HALF_SPEED 
-            else:
-                speed = FULL_SPEED 
-            if not self.driver.dispense_ticks(disp, ticks, speed):
-                raise BartendroBrokenError("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
-
-            active_disp.append(disp)
-            sleep(.01)
-
-        current_sense = False
-        for disp in active_disp:
-            if not self._wait_til_finished_dispensing(disp):
-                current_sense = True
-                break
-
-        if current_sense: 
-            raise BartendroCurrentSenseError("One of the pumps did not operate properly. Your drink is broken. Sorry. :(")
-
-        return fsm.EVENT_POUR_DONE
-
     def _state_pour_done(self):
         self.driver.led_complete()
         PourCompleteDelay(self).start()
@@ -316,8 +288,9 @@ class Mixer(object):
         return fsm.EVENT_POST_POUR_DONE
 
     def reset(self):
-        self.set_state(fsm.STATE_INIT)
-        self.check_liquid_levels()
+        self.driver.led_idle()
+        app.globals.set_state(fsm.STATE_START)
+        self.do_event(fsm.EVENT_START)
 
     def clean(self):
         CleanCycle(self, "all").start()
@@ -471,6 +444,34 @@ class Mixer(object):
     # ----------------------------------------
     # Private methods
     # ----------------------------------------
+
+    def _dispense_recipe(self, recipe):
+
+        active_disp = []
+        for disp in recipe:
+            if not recipe[disp]:
+                continue
+            ticks = int(recipe[disp] * TICKS_PER_ML)
+            if recipe[disp] < SLOW_DISPENSE_THRESHOLD: 
+                speed = HALF_SPEED 
+            else:
+                speed = FULL_SPEED 
+            if not self.driver.dispense_ticks(disp, ticks, speed):
+                raise BartendroBrokenError("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
+
+            active_disp.append(disp)
+            sleep(.01)
+
+        current_sense = False
+        for disp in active_disp:
+            if not self._wait_til_finished_dispensing(disp):
+                current_sense = True
+                break
+
+        if current_sense: 
+            raise BartendroCurrentSenseError("One of the pumps did not operate properly. Your drink is broken. Sorry. :(")
+
+        return fsm.EVENT_POUR_DONE
 
     def _can_make_drink(self, boozes, booze_dict):
         ok = True

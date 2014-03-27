@@ -237,8 +237,6 @@ class RouterDriver(object):
 
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only: return True
-        if random.randint(1, 5) == 3:
-            return False
         return self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
 
     def led_off(self):

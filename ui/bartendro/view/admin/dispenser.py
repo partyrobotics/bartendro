@@ -60,11 +60,13 @@ def dispenser():
         state = "Bartendro is ready, but one or more boozes is low!"
     elif bstate == fsm.STATE_OUT:
         state = "Bartendro is ready, but one or more boozes is out!"
-    elif bstate == fsm.STATE_OUT:
+    elif bstate == fsm.STATE_HARD_OUT:
         state = "Bartendro cannot make any drinks; one or more boozes is out!"
     elif bstate == fsm.STATE_ERROR:
         state = "Bartendro is out of commission. Please reset Bartendro!"
         error = True
+    else:
+        state = "Bartendro is in bad state: %d" % bstate
 
     avail_drinks = app.mixer.get_available_drink_list()
     return render_template("admin/dispenser", 

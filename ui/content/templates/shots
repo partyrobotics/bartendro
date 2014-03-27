@@ -85,10 +85,12 @@ function make_shot(booze_id)
                 if (html == "login required")
                     $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
             },
-            error: function(xhr, txtStatus, errorThrown)
+            error: function(xmlhttp, txtStatus, errorThrown)
             {
                 if (xmlhttp.status == 500)
-                    $("#error-state--dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                {
+                    $("#error-state-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
+                }
                 else
                 if (xmlhttp.status == 503)
                     $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
