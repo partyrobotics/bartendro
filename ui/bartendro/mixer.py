@@ -83,10 +83,11 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.do_event(fsm.EVENT_START)
         self.err = ""
-        self.driver.pattern_define(0, LED_PATTERN_CUSTOM_1)
-        self.driver.pattern_add_segment(0, 255, 0, 0, 35)
-        self.driver.pattern_add_segment(0, 90, 0, 0, 35)
-        self.driver.pattern_finish(0)
+        for disp in xrange(self.disp_count):
+            self.driver.pattern_define(disp, LED_PATTERN_CUSTOM_1)
+            self.driver.pattern_add_segment(disp, 255, 0, 0, 25)
+            self.driver.pattern_add_segment(disp, 40, 0, 0, 25)
+            self.driver.pattern_finish(disp)
 
     def dispense_shot(self, dispenser, ml):
         r = Recipe()
