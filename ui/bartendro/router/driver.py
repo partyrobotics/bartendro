@@ -335,6 +335,7 @@ class RouterDriver(object):
         if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
             ack, value, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:
+#                return random.randint(50, 200)
                 return value
         return -1
 
@@ -417,20 +418,24 @@ class RouterDriver(object):
             log.error("send_packet: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE))
             return False
 
-        t0 = time()
-        written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
-        if written != RAW_PACKET_SIZE + 2:
-            log.error("Send timeout")
-            return False
+        try:
+            t0 = time()
+            written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
+            if written != RAW_PACKET_SIZE + 2:
+                log.error("Send timeout")
+                return False
 
-        if dest == DEST_BROADCAST:
-            return True
+            if dest == DEST_BROADCAST:
+                return True
 
-        ch = self.ser.read(1)
-        t1 = time()
-        log.debug("packet time: %f" % (t1 - t0))
-        if len(ch) < 1:
-            log.error("send packet: read timeout")
+            ch = self.ser.read(1)
+            t1 = time()
+            log.debug("packet time: %f" % (t1 - t0))
+            if len(ch) < 1:
+                log.error("send packet: read timeout")
+                return False
+        except SerialException, err:
+            log.error("SerialException: %s" % err);
             return False
 
         ack = ord(ch)

@@ -61,7 +61,7 @@ def dispenser():
     elif bstate == fsm.STATE_OUT:
         state = "Bartendro is ready, but one or more boozes is out!"
     elif bstate == fsm.STATE_HARD_OUT:
-        state = "Bartendro cannot make any drinks; one or more boozes is out!"
+        state = "Bartendro cannot make any drinks from the available booze!"
     elif bstate == fsm.STATE_ERROR:
         state = "Bartendro is out of commission. Please reset Bartendro!"
         error = True

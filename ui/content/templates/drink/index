@@ -374,6 +374,7 @@ function make_drink(drink, is_taster)
             error: function(xmlhttp, textStatus, error)
             {
                 $.modal.close();
+                console.log(xmlhttp.status);
                 if (xmlhttp.status == 500)
                     $("#error-state-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/"; } } ] });
                 else

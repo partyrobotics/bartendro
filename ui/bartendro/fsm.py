@@ -32,8 +32,11 @@ transition_table = [
     (STATE_START,                     EVENT_START,                  STATE_CHECK),
 
     (STATE_READY,                     EVENT_MAKE_DRINK,             STATE_PRE_POUR),
+    (STATE_READY,                     EVENT_CHECK_LEVELS,           STATE_CHECK),
     (STATE_LOW,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),
+    (STATE_LOW,                       EVENT_CHECK_LEVELS,           STATE_CHECK),
     (STATE_OUT,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),
+    (STATE_OUT,                       EVENT_CHECK_LEVELS,           STATE_CHECK),
     (STATE_HARD_OUT,                  EVENT_CHECK_LEVELS,           STATE_CHECK),
     (STATE_CURRENT_SENSE,             EVENT_RESET,                  STATE_CHECK),
     (STATE_ERROR,                     EVENT_RESET,                  STATE_CHECK),
@@ -56,4 +59,3 @@ transition_table = [
 ]
 
 end_states = [STATE_READY, STATE_LOW, STATE_OUT, STATE_HARD_OUT, STATE_CURRENT_SENSE, STATE_ERROR]
-
