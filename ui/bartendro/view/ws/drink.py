@@ -11,6 +11,7 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 def ws_make_drink(drink_id):
     recipe = {}
@@ -71,12 +72,12 @@ def ws_shots(booze_id):
 
     try:
         app.mixer.dispense_shot(dispenser, app.options.shot_size)
-    except mixer.BartendroCantPourError:
-        raise BadRequest(mixer.err)
-    except mixer.BartendroBrokenError:
-        raise ServiceUnavailable(mixer.err)
-    except mixer.BartendroBusyError:
-        raise InternalServerError(mixer.err)
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
 
     return ""
 

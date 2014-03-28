@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from bartendro import fsm
+from bartendro.error import BartendroBusyError
 
 try:
     import uwsgi
@@ -14,7 +15,7 @@ class BartendroLock(object):
 
     def __enter__(self):
         if not self.globals.lock_bartendro():
-            raise mixer.BartendroBusyError
+            raise BartendroBusyError("Bartendro is busy dispensing")
 
     def __exit__(self, type, value, traceback):
         self.globals.unlock_bartendro()

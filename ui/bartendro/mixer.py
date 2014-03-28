@@ -16,6 +16,7 @@ from bartendro.model.drink_log import DrinkLog
 from bartendro.model.shot_log import ShotLog
 from bartendro.global_lock import BartendroLock
 from bartendro.router.driver import LED_PATTERN_CUSTOM_1
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
@@ -36,34 +37,6 @@ LL_OUT     = 1
 LL_LOW     = 2
 
 log = logging.getLogger('bartendro')
-
-class BartendroBusyError(Exception):
-    def __init__(self, err):
-        self.err = err
-        log.error(err)
-    def __str__(self):
-        return repr(self.err)
-
-class BartendroBrokenError(Exception):
-    def __init__(self, err):
-        self.err = err
-        log.error(err)
-    def __str__(self):
-        return repr(self.err)
-
-class BartendroCantPourError(Exception):
-    def __init__(self, err):
-        self.err = err
-        log.error(err)
-    def __str__(self):
-        return repr(self.err)
-
-class BartendroCurrentSenseError(Exception):
-    def __init__(self, err):
-        self.err = err
-        log.error(err)
-    def __str__(self):
-        return repr(self.err)
 
 class Recipe(object):
     ''' Define everything related to dispensing one or more liquids at the same time '''
@@ -119,7 +92,7 @@ class Mixer(object):
 
         with BartendroLock(app.globals):
             self.do_event(fsm.EVENT_MAKE_DRINK)
-            if drink.id:
+            if drink and drink.id:
                 size = 0
                 for k in recipe.keys():
                     size += recipe[k] 
