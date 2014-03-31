@@ -12,6 +12,7 @@ from bartendro.form.dispenser import DispenserForm
 from bartendro.mixer import CALIBRATE_ML
 from operator import itemgetter
 from bartendro import fsm
+from bartendro.mixer import LL_OK
 
 @app.route('/admin')
 @login_required
@@ -33,7 +34,7 @@ def dispenser():
     if app.options.use_liquid_level_sensors:
         states = [dispenser.out for dispenser in dispensers]
     else:
-        states = [0 for dispenser in dispensers]
+        states = [LL_OK for dispenser in dispensers]
 
     kwargs = {}
     fields = []
