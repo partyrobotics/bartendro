@@ -252,6 +252,7 @@ class Mixer(object):
             if not found:
                 raise BartendroCantPourErro("Cannot make drink. I don't have the required booze: %d" % booze_id)
 
+        self.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD);
         self._dispense_recipe(recipe)
 
         if self.recipe.drink:
@@ -462,6 +463,7 @@ class Mixer(object):
                 speed = HALF_SPEED 
             else:
                 speed = FULL_SPEED 
+
             if not self.driver.dispense_ticks(disp, ticks, speed):
                 raise BartendroBrokenError("Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
 

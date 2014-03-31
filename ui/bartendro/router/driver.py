@@ -238,10 +238,12 @@ class RouterDriver(object):
 
     def start(self, dispenser):
         if self.software_only: return True
+        print "start motor"
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
 
     def stop(self, dispenser):
         if self.software_only: return True
+        print "stop motor"
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
@@ -348,9 +350,13 @@ class RouterDriver(object):
         if self.software_only: return True
         return self._send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
 
-    def set_motor_direction(self, dir):
+    def set_motor_direction(self, dispenser, dir):
         if self.software_only: return True
-        return self._send_packet8(DEST_BROADCAST, PACKET_SET_MOTOR_DIRECTION, dir)
+        if dir == MOTOR_DIRECTION_FORWARD:
+            print "Set direction forward on %d\n" % dispenser
+        else:
+            print "Set direction backward on %d\n" % dispenser
+        return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, dir)
 
     def get_dispenser_version(self, dispenser):
         if self.software_only: return DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY

@@ -39,16 +39,15 @@ def run_dispenser(disp, forward):
         app.mixer.set_state(fsm.STATE_ERROR)
         return "error state"
 
-    if not forward:
-        app.driver.set_motor_direction(MOTOR_DIRECTION_BACKWARD) 
+    if forward:
+        app.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD)
+    else:
+        app.driver.set_motor_direction(disp, MOTOR_DIRECTION_BACKWARD)
 
     err = ""
     if not app.driver.start(disp - 1):
         err = "Failed to start dispenser %d" % disp
         log.error(err)
-
-    if not forward:
-        app.driver.set_motor_direction(MOTOR_DIRECTION_FORWARD) 
 
     return err
 
@@ -65,12 +64,14 @@ def ws_dispenser_off(disp):
         app.mixer.set_state(fsm.STATE_ERROR)
         return "error state"
 
+    err = ""
     if not app.driver.stop(disp - 1):
         err = "Failed to stop dispenser %d" % disp
         log.error(err)
-        return err
+
+    app.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD) 
         
-    return ""
+    return err
 
 @app.route('/ws/dispenser/<int:disp>/test')
 def ws_dispenser_test(disp):
