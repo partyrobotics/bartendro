@@ -36,9 +36,6 @@ at some point.
 #define PACKET_PATTERN_DEFINE         23
 #define PACKET_PATTERN_ADD_SEGMENT    24
 #define PACKET_PATTERN_FINISH         25
-#define PACKET_LED_CUSTOM_1           27
-#define PACKET_LED_CUSTOM_2           28
-#define PACKET_LED_CUSTOM_3           29
 #define PACKET_COMM_TEST              0xFE
 
 #define DEST_BROADCAST         0xFF

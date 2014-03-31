@@ -10,7 +10,6 @@ from struct import pack, unpack
 import pack7
 import dispenser_select
 from bartendro.errors import SerialIOError
-import random
 
 BAUD_RATE       = 9600
 DEFAULT_TIMEOUT = 2 # in seconds
@@ -52,16 +51,9 @@ PACKET_TICK_SPEED_DISPENSE    = 22
 PACKET_PATTERN_DEFINE         = 23
 PACKET_PATTERN_ADD_SEGMENT    = 24
 PACKET_PATTERN_FINISH         = 25
-PACKET_LED_CUSTOM_1           = 27 
-PACKET_LED_CUSTOM_2           = 28 
-PACKET_LED_CUSTOM_3           = 29 
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
-
-LED_PATTERN_CUSTOM_1   =  5
-LED_PATTERN_CUSTOM_2   =  6
-LED_PATTERN_CUSTOM_3   =  7
 
 log = logging.getLogger('bartendro')
 
@@ -273,30 +265,6 @@ class RouterDriver(object):
         if self.software_only: return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
-        sleep(.01)
-        self._sync(1)
-        return True
-
-    def led_custom_1(self):
-        if self.software_only: return True
-        self._sync(0)
-        self._send_packet8(DEST_BROADCAST, PACKET_LED_CUSTOM_1, 0)
-        sleep(.01)
-        self._sync(1)
-        return True
-
-    def led_custom_2(self):
-        if self.software_only: return True
-        self._sync(0)
-        self._send_packet8(DEST_BROADCAST, PACKET_LED_CUSTOM_2, 0)
-        sleep(.01)
-        self._sync(1)
-        return True
-
-    def led_custom_3(self):
-        if self.software_only: return True
-        self._sync(0)
-        self._send_packet8(DEST_BROADCAST, PACKET_LED_CUSTOM_3, 0)
         sleep(.01)
         self._sync(1)
         return True

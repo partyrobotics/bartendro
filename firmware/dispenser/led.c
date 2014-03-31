@@ -76,23 +76,14 @@ static color_segment_t current_sense_segments[LED_CURRENT_SENSE_NUM_SEGMENTS] =
     { { 0,   0, 0},  0 }
 };
 
-#define LED_CUSTOM_NUM_SEGMENTS 1
-static color_segment_t custom_segments[LED_CUSTOM_NUM_SEGMENTS] =
-{
-    { { 0,   0, 0},  0 }
-};
-
-#define MAX_PATTERNS 8
+#define MAX_PATTERNS 5
 pattern_t g_pattern_table[MAX_PATTERNS] =
 { 
     { idle_segments,          LED_IDLE_NUM_SEGMENTS          },
     { dispense_segments,      LED_DISPENSE_NUM_SEGMENTS      },
     { drink_done_segments,    LED_DRINK_DONE_NUM_SEGMENTS    },
     { clean_segments,         LED_CLEAN_NUM_SEGMENTS         },
-    { current_sense_segments, LED_CURRENT_SENSE_NUM_SEGMENTS },
-    { custom_segments,        LED_CUSTOM_NUM_SEGMENTS        },
-    { custom_segments,        LED_CUSTOM_NUM_SEGMENTS        },
-    { custom_segments,        LED_CUSTOM_NUM_SEGMENTS        },
+    { current_sense_segments, LED_CURRENT_SENSE_NUM_SEGMENTS }
 };
 
 #define MAX_NUM_CUSTOM_SEGMENTS 32
@@ -220,9 +211,6 @@ void led_pattern_init(int8_t pattern)
         case LED_PATTERN_DRINK_DONE:
         case LED_PATTERN_CLEAN:
         case LED_PATTERN_CURRENT_SENSE:
-        case LED_PATTERN_CUSTOM_1:
-        case LED_PATTERN_CUSTOM_2:
-        case LED_PATTERN_CUSTOM_3:
             g_cur_segment = g_pattern_table[pattern].segments;
             g_num_segments = g_pattern_table[pattern].num;
             break;
