@@ -17,7 +17,6 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
 from bartendro.model.shot_log import ShotLog
 from bartendro.global_lock import BartendroLock
-#from bartendro.router.driver import LED_PATTERN_CUSTOM_1
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 import random # remove me
 
@@ -62,11 +61,6 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.do_event(fsm.EVENT_START)
         self.err = ""
-        for disp in xrange(self.disp_count):
-            self.driver.pattern_define(disp, LED_PATTERN_CLEAN)
-            self.driver.pattern_add_segment(disp, 255, 0, 0, 25)
-            self.driver.pattern_add_segment(disp, 40, 0, 0, 25)
-            self.driver.pattern_finish(disp)
 
     def check_levels(self):
         with BartendroLock(app.globals):
@@ -212,7 +206,7 @@ class Mixer(object):
 
     # TODO: Make the hard out blink the status led
     def _state_hard_out(self):
-        self.driver.led_idle()
+        self.driver.led_error()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 
@@ -220,7 +214,7 @@ class Mixer(object):
         return fsm.EVENT_DONE
 
     def _state_error(self):
-        self.driver.led_clean()
+        self.driver.led_error()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 

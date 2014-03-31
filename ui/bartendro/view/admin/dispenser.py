@@ -99,8 +99,5 @@ def save():
                 continue
         db.session.commit()
 
-    mc = app.mc
-    mc.delete("top_drinks")
-    mc.delete("other_drinks")
-    mc.delete("available_drink_list")
+    app.mixer.check_levels()
     return redirect('/admin?saved=1')

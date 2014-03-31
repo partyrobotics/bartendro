@@ -10,6 +10,7 @@ from struct import pack, unpack
 import pack7
 import dispenser_select
 from bartendro.errors import SerialIOError
+import random
 
 BAUD_RATE       = 9600
 DEFAULT_TIMEOUT = 2 # in seconds
@@ -54,6 +55,12 @@ PACKET_PATTERN_FINISH         = 25
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
+
+LED_PATTERN_IDLE          = 0
+LED_PATTERN_DISPENSE      = 1
+LED_PATTERN_DRINK_DONE    = 2
+LED_PATTERN_CLEAN         = 3
+LED_PATTERN_CURRENT_SENSE = 4
 
 log = logging.getLogger('bartendro')
 
@@ -263,6 +270,16 @@ class RouterDriver(object):
 
     def led_clean(self):
         if self.software_only: return True
+        self._program_clean_pattern()
+        self._sync(0)
+        self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
+        sleep(.01)
+        self._sync(1)
+        return True
+
+    def led_error(self):
+        if self.software_only: return True
+        self._program_error_pattern()
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
@@ -537,3 +554,16 @@ class RouterDriver(object):
         log.info(txt)
         self.startup_log += "%s\n" % txt
 
+    def _program_error_pattern(self):
+        for disp in xrange(self.num_dispensers):
+            self.pattern_define(disp, LED_PATTERN_CLEAN)
+            self.pattern_add_segment(disp, 255, 0, 0, 25)
+            self.pattern_add_segment(disp, 40, 0, 0, 25)
+            self.pattern_finish(disp)
+
+    def _program_clean_pattern(self):
+        for disp in xrange(self.num_dispensers):
+            self.pattern_define(disp, LED_PATTERN_CLEAN)
+            self.pattern_add_segment(disp, 255, 128, 0, 25)
+            self.pattern_add_segment(disp, 255, 0, 255, 25)
+            self.pattern_finish(disp)
