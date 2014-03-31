@@ -22,14 +22,18 @@
 #define ee_liquid_low_threshold_offset    5
 #define ee_liquid_out_threshold_offset    7 
 
+#define SOFTWARE_VERSION                  3
+
+#define USER_BUTTON_DURATION             10 // in clock ticks
 #define RESET_DURATION                    1
 #define SYNC_COUNT                       10 // Every SYNC_INIT ms we will change the color animation
 #define NUM_ADC_SAMPLES                   5
-#define MAX_CURRENT_SENSE_CYCLES         10
 #define TICKS_SAVE_THRESHOLD           1000
 #define DEFAULT_LIQUID_LOW_THRESHOLD    140
 #define DEFAULT_LIQUID_OUT_THRESHOLD     90
 #define DEFAULT_CURRENT_SENSE_THRESHOLD 610
+#define MOTOR_DIRECTION_FORWARD           1
+#define MOTOR_DIRECTION_BACKWARD          0
 
 // this (non volatile) variable keeps the current liquid level
 static uint16_t g_liquid_level = 0;
@@ -41,6 +45,9 @@ static volatile uint32_t g_ticks = 0;
 static volatile uint32_t g_dispense_target_ticks = 0;
 static volatile uint8_t g_is_dispensing = 0;
 static volatile uint8_t g_is_motor_on = 0;
+static volatile uint8_t g_motor_direction = MOTOR_DIRECTION_FORWARD;
+static volatile uint32_t g_button_time = 0;
+static volatile uint8_t g_button_state = 0;
 
 static volatile uint8_t g_hall0 = 0;
 static volatile uint8_t g_hall1 = 0;
@@ -50,13 +57,15 @@ static volatile uint8_t g_sync = 0;
 static volatile uint32_t g_sync_count = 0, g_pattern_t = 0;
 static volatile uint8_t g_sync_divisor = 10;
 
-static uint8_t  g_current_sense_num_cycles = 0;
-static uint16_t g_current_sense_threshold = DEFAULT_CURRENT_SENSE_THRESHOLD;
 static volatile uint8_t g_current_sense_detected = 0;
+static volatile uint8_t g_current_sense_state = 0;
+static volatile uint8_t g_current_sense_enabled = 1;
 
 void check_dispense_complete_isr(void);
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense);
+void set_motor_direction(uint8_t direction);
 void stop_motor(void);
+void pulse_motor_driver_retry(void);
 void adc_shutdown(void);
 uint8_t check_reset(void);
 void is_dispensing(void);
@@ -69,28 +78,36 @@ void set_led_pattern(uint8_t pattern);
    2  - PD2 - RESET
    3  - PD3 - LED clock
    4  - PD4 - LED data
-   5  - PD5 - motor PWM out
-   6  - PD6 - Hall 0 (pcint 22)
-   7  - PD7 - Hall 1 (pcint 23)
-   8  - PB0 - Hall 2 (pcint 0)
-   9  - PB1 - Hall 3 (pcint 1) 
-  10  - PB2 - SYNC (pcint 2)
-  A0  - PC0 - CS
+   5  - PD5 - motor control B (OC0B)
+   6  - PD6 - motor control A (OC0A)
+   7  - PD7 - Hall 0 (pcint 23)
+   8  - PB0 - Hall 1 (pcint 0)
+   9  - PB1 - Hall 2 (pcint 1) 
+  10  - PB2 - Hall 3 (pcint 2)
+  14  - PB6 - /RTRY for motor driver
+  15  - PB7 - BUTTON (pcint7)
+  A0  - PC0 - Current Sense (since v3 a digital function) (pcint 8)
   A1  - PC1 - liquid level
+  A2  - PC2 - REV0
+  A3  - PC3 - REV1
+  A4  - PC4 - REV2
+  A5  - PC5 - SYNC (pcint13)
 
 */
 void setup(void)
 {
     serial_init();
 
-    // Set up LEDs & motor out
-    DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5);
+    // Set up LEDs & motor control outputs
+    DDRD |= (1<<PD3)|(1<<PD4)|(1<<PD5)|(1<<PD6);
+    DDRB |= (1<<PB6);
 
-    // pull ups
-    sbi(PORTD, 6);
+    // pull ups for hall sensors & for current sense
     sbi(PORTD, 7);
     sbi(PORTB, 0);
     sbi(PORTB, 1);
+    sbi(PORTB, 2);
+    sbi(PORTC, 0);
 
     // Timer setup for reset pulse width measuring
     TCCR1B |= TIMER1_FLAGS;
@@ -98,12 +115,13 @@ void setup(void)
     TIMSK1 |= (1<<TOIE1);
 
     // Set to Phase correct PWM, compare output mode
-    TCCR0A |= _BV(WGM00) | _BV(COM0B1);
+    TCCR0A |= _BV(WGM00) | _BV(COM0A1) | _BV(COM0B1);
 
     // Set the clock source
     TCCR0B |= (0 << CS00) | (1 << CS01);
 
     // Reset timers and comparators
+    OCR0A = 0;
     OCR0B = 0;
     TCNT0 = 0;
 
@@ -112,9 +130,13 @@ void setup(void)
     EIMSK |= (1 << INT0);
 
     // PCINT setup
-    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2);
-    PCMSK2 |= (1 << PCINT22) | (1 << PCINT23);
-    PCICR |=  (1 << PCIE2) | (1 << PCIE0);
+    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT7);;
+    PCMSK1 |= (1 << PCINT8) | (1 << PCINT13);
+    PCMSK2 |= (1 << PCINT23);
+    PCICR |=  (1 << PCIE2) | (1 << PCIE1) | (1 << PCIE0);
+
+    // Set the motor driver RTRY line HIGH
+    sbi(PORTB, 6);
 }
 
 // update g_time
@@ -144,72 +166,75 @@ ISR(PCINT0_vect)
     uint8_t      state;
 
     state = PINB & (1<<PINB0);
+    if (state != g_hall1)
+    {
+        g_hall1 = state;
+        g_ticks++;
+    }
+
+    state = PINB & (1<<PINB1);
     if (state != g_hall2)
     {
         g_hall2 = state;
         g_ticks++;
     }
-
-    state = PINB & (1<<PINB1);
+    state = PINB & (1<<PINB2);
     if (state != g_hall3)
     {
         g_hall3 = state;
         g_ticks++;
     }
+    state = (PINB & (1<<PINB7)) ? 0 : 1;
+    if (state != g_button_state)
+    {
+        if (!g_button_time)
+        {
+            g_button_time = g_time + USER_BUTTON_DURATION;
+            g_button_state = state;
+        }
+    }
     check_dispense_complete_isr();
+}
 
-    state = PINB & (1<<PINB2);
+ISR(PCINT1_vect)
+{
+    uint8_t      state;
+
+    state = PINC & (1<<PINC0);
+    if (state != g_current_sense_state)
+    {
+        g_current_sense_state = state;
+
+        if (!state && g_current_sense_enabled)
+        {
+            stop_motor();
+            g_is_dispensing = 0;
+            g_dispense_target_ticks = 0;
+            set_led_pattern(LED_PATTERN_CURRENT_SENSE);
+            g_current_sense_detected = 1;
+        }
+    }
+    state = PINC & (1<<PINC5);
     if (state != g_sync)
     {
         g_sync_count++;
         g_sync = state;
     }
+    check_dispense_complete_isr();
 }
 
 ISR(PCINT2_vect)
 {
     uint8_t state;
 
-    state = PIND & (1<<PIND6);
+    state = PIND & (1<<PIND7);
     if (state != g_hall0)
     {
         g_hall0 = state;
         g_ticks++;
     }
 
-    state = PIND & (1<<PIND7);
-    if (state != g_hall1)
-    {
-        g_hall1 = state;
-        g_ticks++;
-    }
     check_dispense_complete_isr();
-}
-
-ISR(ADC_vect)
-{
-    uint8_t low, hi;
-    uint16_t data;
-
-    low = ADCL;
-    hi = ADCH;
-    data = (hi << 8) | low;
-
-    if (data >= g_current_sense_threshold)
-        g_current_sense_num_cycles++;
-
-    if (g_current_sense_num_cycles >= MAX_CURRENT_SENSE_CYCLES)
-    {
-        stop_motor();
-        g_is_dispensing = 0;
-        g_dispense_target_ticks = 0;
-        set_led_pattern(LED_PATTERN_CURRENT_SENSE);
-        g_current_sense_detected = 1;
-    }
-
-    // If we're still dispensing, then start another ADC conversion
-    if (g_is_dispensing || g_is_motor_on)
-        ADCSRA |= (1<<ADSC);
 }
 
 // this function is called from an ISR, so no need to turn off/on interrupts
@@ -238,7 +263,7 @@ uint8_t check_reset(void)
 void idle(void)
 {
     color_t c;
-    uint8_t animate = 0;
+    uint8_t animate = 0, current_state = 0, button_state_changed = 0;
     uint32_t t = 0;
 
     cli();
@@ -247,8 +272,26 @@ void idle(void)
         g_sync_count = 0;
         animate = 1;
     }
+
+    // read button state & check time
+    if (g_button_time > 0 && g_time >= g_button_time)
+    {
+        current_state = g_button_state;
+        g_button_time = 0;
+        button_state_changed = 1;
+    }
     sei();
 
+    // Set the leds and motor speed accordingly when button is pressed
+    if (button_state_changed)
+    {
+        if (current_state)
+            set_motor_speed(255, 1);
+        else
+            set_motor_speed(0, 1);
+    }
+      
+    // run the animation if the current state 
     if (animate)
     {
         cli();
@@ -345,17 +388,6 @@ void set_led_pattern(uint8_t pattern)
     sei();
 }
 
-void adc_current_sense_start(void)
-{
-    // Set up ADC conversion with interrupt enable
-    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2) | (1 << ADIE);
-    ADMUX = (1<<REFS0) | (0 << REFS1);
-    ADCSRA |= (1<<ADEN);
-
-    // Start a conversion
-    ADCSRA |= (1<<ADSC);
-}
-
 void adc_liquid_level_setup(void)
 {
     ADCSRA = (1 << ADPS1);
@@ -397,30 +429,61 @@ void get_liquid_level(void)
     send_packet16(PACKET_LIQUID_LEVEL, g_liquid_level, 0);
 }
 
+void set_motor_direction(uint8_t direction)
+{
+    if (direction != MOTOR_DIRECTION_FORWARD && direction != MOTOR_DIRECTION_BACKWARD)
+        return;
+
+    cli();
+    g_motor_direction = direction;
+    sei();
+}
+
 void set_motor_speed(uint8_t speed, uint8_t use_current_sense)
 {
-    if (use_current_sense)
-        adc_current_sense_start();
+    uint8_t direction;
 
-    OCR0B = 255 - speed;
+    cli();
+    g_current_sense_enabled = use_current_sense;
+    direction = g_motor_direction;
+    sei();
+
+    if (direction == MOTOR_DIRECTION_FORWARD)
+    {
+        OCR0A = speed;
+        OCR0B = 0;
+    }
+    else
+    {
+        OCR0A = 0;
+        OCR0B = speed;
+    }
 
     cli();
     g_is_motor_on = speed != 0;
     sei();
 }
 
+void pulse_motor_driver_retry(void)
+{
+    cbi(PORTB, 6);
+    _delay_ms(2);
+    sbi(PORTB, 6);
+}
+
 void stop_motor(void)
 {
     adc_shutdown();
-    OCR0B = 255;
+    OCR0A = 0;
+    OCR0B = 0;
     cli();
     g_is_motor_on = 0;
     sei();
 }
 
-void run_motor_timed(uint32_t duration)
+void run_motor_timed(uint16_t duration)
 {
-    uint32_t t;
+    uint16_t t;
 
     if (duration == 0)
         return;
@@ -461,6 +524,156 @@ void is_dispensing(void)
     send_packet8_2(PACKET_IS_DISPENSING, dispensing, g_current_sense_detected);
 }
 
+#define MAX_CMD_LEN 64
+// return true is a command was read, false if a reset was requested
+uint8_t receive_cmd(char *cmd)
+{
+    uint8_t num = 0, ch;
+
+    dprintf(">");
+
+    *cmd = 0;
+    for(; !check_reset();)
+    {
+        for(;!check_reset() && !serial_rx_nb(&ch);)
+            idle();
+
+        if (check_reset())
+            return 0;
+
+        serial_tx(ch);
+        if (ch == '\r')
+        {
+            serial_tx('\n');
+            cmd[num] = 0;
+            return 1;
+        }
+        cmd[num] = ch;
+        num++;
+    }
+    return 0;
+}
+
+void text_interface(void)
+{
+    char cmd[MAX_CMD_LEN];
+    uint8_t  speed, current_sense;
+    uint16_t ticks;
+    uint16_t t;
+    uint8_t  i, cs;
+
+    for(i = 0; i < 5; i++)
+    {
+        set_led_rgb(0, 0, 255);
+        _delay_ms(150);
+        set_led_rgb(0, 0, 0);
+        _delay_ms(150);
+    }
+    set_led_pattern(LED_PATTERN_IDLE);
+    for(;;)
+    {
+        cli();
+        g_reset = 0;
+        g_current_sense_detected = 0;
+        setup();
+        stop_motor();
+        serial_init();
+        cs = 0;
+        sei();
+
+        _delay_ms(10);
+        dprintf("\nParty Robotics Dispenser at your service!\n\n");
+
+        for(;;)
+        {
+            cli();
+            cs = g_current_sense_detected;
+            sei();
+            if (!receive_cmd(cmd))
+                break;
+
+            if (sscanf(cmd, "speed %hhu %hhu", &speed, &current_sense) == 2)
+            {
+                if (!cs)
+                    set_motor_speed(speed, current_sense);
+
+                if (current_sense == 0)
+                    flush_saved_tick_count(0);
+                continue;
+            }
+            if (sscanf(cmd, "tickdisp %hu %hhu", (short unsigned int *)&ticks, &speed) == 2)
+            {
+                if (!cs)
+                {
+                    dispense_ticks(ticks, speed);
+                    flush_saved_tick_count(0);
+                }
+                continue;
+            }
+            if (sscanf(cmd, "timedisp %hu", (short unsigned int *)&t) == 1)
+            {
+                if (!cs)
+                {
+                    run_motor_timed(t);
+                    flush_saved_tick_count(0);
+                }
+                continue;
+            }
+            if (strncmp(cmd, "forward", 7) == 0)
+            {
+                set_motor_direction(MOTOR_DIRECTION_FORWARD);
+                continue;
+            }
+            if (strncmp(cmd, "backward", 8) == 0)
+            {
+                set_motor_direction(MOTOR_DIRECTION_BACKWARD);
+                continue;
+            }
+            if (strncmp(cmd, "led_idle", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_IDLE);
+                continue;
+            }
+            if (strncmp(cmd, "led_dispense", 12) == 0)
+            {
+                set_led_pattern(LED_PATTERN_DISPENSE);
+                continue;
+            }
+            if (strncmp(cmd, "led_done", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_DRINK_DONE);
+                continue;
+            }
+            if (strncmp(cmd, "led_clean", 8) == 0)
+            {
+                set_led_pattern(LED_PATTERN_CLEAN);
+                continue;
+            }
+            if (strncmp(cmd, "help", 4) == 0)
+            {
+                dprintf("You can use these commands:\n");
+                dprintf("  speed <speed> <cs>\n");
+                dprintf("  tickdisp <ticks> <speed>\n");
+                dprintf("  timedisp <ms>\n");
+                dprintf("  forward\n");
+                dprintf("  backward\n");
+                dprintf("  reset\n");
+                dprintf("  led_idle\n");
+                dprintf("  led_dispense\n");
+                dprintf("  led_done\n");
+                dprintf("  led_clean\n\n");
+                dprintf("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
+                dprintf("ticks == number of quarter turns. ms == milliseconds\n");
+                continue;
+            }
+            if (strncmp(cmd, "reset", 5) == 0)
+                break;
+
+            dprintf("Unknown command. Use help to get, eh help. Duh.\n");
+        }
+    }
+}
+
 uint8_t address_exchange(void)
 {
     uint8_t  ch;
@@ -489,8 +702,9 @@ uint8_t address_exchange(void)
             break;
         if (ch == '?')
             serial_tx(id);
+        if (ch == '!')
+            text_interface();
     }
-    set_led_rgb(0, 255, 0);
 
     return id;
 }
@@ -523,8 +737,7 @@ void check_software_revision(void)
     uint8_t bit1 = PINC & (1<<PINC3);
     uint8_t bit2 = PINC & (1<<PINC4);
 
-    // 010
-    if (!bit0 && bit1 && !bit2)
+    if ((bit0 | bit1 | bit2) == SOFTWARE_VERSION)
         return;
 
     // Wrong software! I refuse to do shit!
@@ -541,6 +754,7 @@ int main(void)
 
     setup();
     stop_motor();
+
     sei();
     for(i = 0; i < 5; i++)
     {
@@ -561,10 +775,11 @@ int main(void)
         cli();
         g_reset = 0;
         g_current_sense_detected = 0;
-        g_current_sense_num_cycles = 0;
+        g_motor_direction = MOTOR_DIRECTION_FORWARD;
         setup();
         serial_init();
         stop_motor();
+        pulse_motor_driver_retry();
         set_led_rgb(0, 0, 255);
 
         sei();
@@ -591,12 +806,22 @@ int main(void)
                     case PACKET_PING:
                         break;
 
+                    case PACKET_GET_VERSION:
+                        send_packet8(PACKET_GET_VERSION, SOFTWARE_VERSION);
+                        break;
+
                     case PACKET_SET_MOTOR_SPEED:
                         if (!cs)
                             set_motor_speed(p.p.uint8[0], p.p.uint8[1]);
 
                         if (p.p.uint8[0] == 0)
                             flush_saved_tick_count(0);
+                        break;
+
+                    case PACKET_SET_MOTOR_DIRECTION:
+                        if (!cs)
+                            set_motor_direction(p.p.uint8[0]);
+
                         break;
 
                     case PACKET_TICK_DISPENSE:
@@ -610,7 +835,7 @@ int main(void)
                     case PACKET_TIME_DISPENSE:
                         if (!cs)
                         {
-                            run_motor_timed(p.p.uint32);
+                            run_motor_timed((uint16_t)p.p.uint32);
                             flush_saved_tick_count(0);
                         }
                         break;
@@ -660,7 +885,7 @@ int main(void)
                         break;
 
                     case PACKET_SET_CS_THRESHOLD:
-                        g_current_sense_threshold = p.p.uint16[0];
+                        // Only for v2 pumps
                         break;
 
                     case PACKET_SAVED_TICK_COUNT:

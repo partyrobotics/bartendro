@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 import os
 import collections
@@ -51,9 +50,13 @@ PACKET_TICK_SPEED_DISPENSE    = 22
 PACKET_PATTERN_DEFINE         = 23
 PACKET_PATTERN_ADD_SEGMENT    = 24
 PACKET_PATTERN_FINISH         = 25
+PACKET_SET_MOTOR_DIRECTION    = 26
 PACKET_COMM_TEST              = 0xFE
 
 DEST_BROADCAST         = 0xFF
+
+MOTOR_DIRECTION_FORWARD       = 1
+MOTOR_DIRECTION_BACKWARD      = 0
 
 log = logging.getLogger('bartendro')
 
@@ -219,13 +222,17 @@ class RouterDriver(object):
         if self.software_only: return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
 
+    def set_motor_direction(self, dispenser, direction):
+        if self.software_only: return True
+        return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, direction)
+
     def stop(self, dispenser):
         if self.software_only: return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
         if self.software_only: return True
-        return True
+        return self._send_packet32(dispenser, PACKET_TIME_DISPENSE, duration)
 
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only: return True
@@ -531,4 +538,3 @@ class RouterDriver(object):
     def _log_startup(self, txt):
         log.info(txt)
         self.startup_log += "%s\n" % txt
-

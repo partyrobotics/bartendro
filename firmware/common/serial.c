@@ -75,6 +75,23 @@ uint8_t serial_rx_nb(uint8_t *ch)
     return 0;
 }
 
+#define DEBUG_MAX 80 
+void dprintf(const char *fmt, ...)
+{
+    va_list va;
+    va_start (va, fmt);
+
+    char buffer[DEBUG_MAX];
+    char *ptr = buffer;
+    vsnprintf(buffer, DEBUG_MAX, fmt, va);
+    va_end (va);
+
+    for(ptr = buffer; *ptr; ptr++)
+    {
+        if (*ptr == '\n') serial_tx('\r');
+        serial_tx(*ptr);
+    }
+}
 #ifndef ROUTER
 
 uint8_t receive_packet(uint8_t id, packet_t *p)
@@ -277,5 +294,4 @@ uint8_t send_packet(packet_t *p)
     // whoops, we didn't succesfully send the packet. :-(
     return COMM_SEND_FAIL;
 }
-
 #endif
