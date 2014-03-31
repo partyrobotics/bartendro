@@ -871,21 +871,6 @@ int main(void)
                             set_led_pattern(LED_PATTERN_CLEAN);
                         break;
 
-                    case PACKET_LED_CUSTOM_1:
-                        if (!cs)
-                            set_led_pattern(LED_PATTERN_CUSTOM_1);
-                        break;
-
-                    case PACKET_LED_CUSTOM_2:
-                        if (!cs)
-                            set_led_pattern(LED_PATTERN_CUSTOM_2);
-                        break;
-
-                    case PACKET_LED_CUSTOM_3:
-                        if (!cs)
-                            set_led_pattern(LED_PATTERN_CUSTOM_3);
-                        break;
-
                     case PACKET_COMM_TEST:
                         comm_test();
                         break;
