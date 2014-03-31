@@ -2,7 +2,6 @@
 from sqlalchemy import func, asc
 import memcache
 from bartendro import app, db
-from bartendro.global_lock import STATE_INIT, STATE_READY, STATE_LOW, STATE_OUT, STATE_ERROR
 from flask import Flask, request, redirect, render_template
 from flask.ext.login import login_required
 from wtforms import Form, SelectField, IntegerField, validators
@@ -12,6 +11,8 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.form.dispenser import DispenserForm
 from bartendro.mixer import CALIBRATE_ML
 from operator import itemgetter
+from bartendro import fsm
+from bartendro.mixer import LL_OK
 
 @app.route('/admin')
 @login_required
@@ -33,7 +34,7 @@ def dispenser():
     if app.options.use_liquid_level_sensors:
         states = [dispenser.out for dispenser in dispensers]
     else:
-        states = [0 for dispenser in dispensers]
+        states = [LL_OK for dispenser in dispensers]
 
     kwargs = {}
     fields = []
@@ -52,17 +53,21 @@ def dispenser():
 
     bstate = app.globals.get_state()
     error = False
-    if bstate == STATE_INIT:
+    if bstate == fsm.STATE_START:
         state = "Bartendro is starting up."
-    elif bstate == STATE_READY:
+    elif bstate == fsm.STATE_READY:
         state = "Bartendro is ready!"
-    elif bstate == STATE_LOW:
+    elif bstate == fsm.STATE_LOW:
         state = "Bartendro is ready, but one or more boozes is low!"
-    elif bstate == STATE_OUT:
+    elif bstate == fsm.STATE_OUT:
         state = "Bartendro is ready, but one or more boozes is out!"
-    elif bstate == STATE_ERROR:
+    elif bstate == fsm.STATE_HARD_OUT:
+        state = "Bartendro cannot make any drinks from the available booze!"
+    elif bstate == fsm.STATE_ERROR:
         state = "Bartendro is out of commission. Please reset Bartendro!"
         error = True
+    else:
+        state = "Bartendro is in bad state: %d" % bstate
 
     avail_drinks = app.mixer.get_available_drink_list()
     return render_template("admin/dispenser", 
@@ -95,8 +100,5 @@ def save():
                 continue
         db.session.commit()
 
-    mc = app.mc
-    mc.delete("top_drinks")
-    mc.delete("other_drinks")
-    mc.delete("available_drink_list")
+    app.mixer.check_levels()
     return redirect('/admin?saved=1')

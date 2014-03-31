@@ -322,8 +322,7 @@ function taster()
         args += "booze" + drink.boozes[i][0] + "=" + ml;
     }
 
-    // Always dispense full speed, since the mixer will slow down pumps that dispense less than 20ml
-    url = "/ws/drink/custom/speed/255"; 
+    url = "/ws/drink/custom"; 
     $.ajax({
             url: url + args,
             success: function(html)

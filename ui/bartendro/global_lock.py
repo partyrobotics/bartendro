@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 
-# The states that Bartendro can be in:
-STATE_INIT  = 0   # Bartendro is initializing
-STATE_READY = 1   # Bartendro is ready. If liquid levels are enabled all bottles are above low threshold
-STATE_LOW   = 2   # If liquid levels are enabled, one or more bottles are low
-STATE_OUT   = 3   # If liquid levels are enabled, one or more bottles are out
-STATE_ERROR = 4   # Bartendro has encountered some serious problem and can't make shit right now.
+from bartendro import fsm
+from bartendro.error import BartendroBusyError
 
 try:
     import uwsgi
     have_uwsgi = True
 except ImportError:
     have_uwsgi = False
+
+class BartendroLock(object):
+    def __init__(self, globals):
+        self.globals = globals
+
+    def __enter__(self):
+        if not self.globals.lock_bartendro():
+            raise BartendroBusyError("Bartendro is busy dispensing")
+
+    def __exit__(self, type, value, traceback):
+        self.globals.unlock_bartendro()
     
 class BartendroGlobalLock(object):
     '''This class manages the few global settings that Bartendro needs including a global state and
@@ -19,7 +26,7 @@ class BartendroGlobalLock(object):
 
 
     def __init__(self):
-        self.state = STATE_INIT
+        self.state = fsm.STATE_START
 
     def lock_bartendro(self):
         """Call this function before making a drink or doing anything that where two users' action may conflict.
@@ -59,7 +66,7 @@ class BartendroGlobalLock(object):
         '''Get the current state of Bartendro'''
 
         # If we're not running inside uwsgi, then we can't keep global state
-        if not have_uwsgi: return STATE_READY
+        if not have_uwsgi: return fsm.STATE_READY
 
         uwsgi.lock()
         state = uwsgi.sharedarea_readbyte(1)
