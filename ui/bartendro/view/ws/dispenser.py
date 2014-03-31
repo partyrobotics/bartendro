@@ -11,14 +11,26 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.form.booze import BoozeForm
 from bartendro import fsm
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
+from bartendro.router.driver import MOTOR_DIRECTION_FORWARD, MOTOR_DIRECTION_BACKWARD
 
 log = logging.getLogger('bartendro')
+
 
 @app.route('/ws/dispenser/<int:disp>/on')
 def ws_dispenser_on(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
+    return run_dispenser(disp, True)
+
+@app.route('/ws/dispenser/<int:disp>/on/reverse')
+def ws_dispenser_reverse(disp):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    return run_dispenser(disp, False)
+
+def run_dispenser(disp, forward):
     if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
@@ -27,12 +39,18 @@ def ws_dispenser_on(disp):
         app.mixer.set_state(fsm.STATE_ERROR)
         return "error state"
 
+    if not forward:
+        app.driver.set_motor_direction(MOTOR_DIRECTION_BACKWARD) 
+
+    err = ""
     if not app.driver.start(disp - 1):
         err = "Failed to start dispenser %d" % disp
         log.error(err)
-        return err
 
-    return ""
+    if not forward:
+        app.driver.set_motor_direction(MOTOR_DIRECTION_FORWARD) 
+
+    return err
 
 @app.route('/ws/dispenser/<int:disp>/off')
 def ws_dispenser_off(disp):

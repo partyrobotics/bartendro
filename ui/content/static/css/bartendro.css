@@ -352,6 +352,10 @@ table {
     display: inline;
 }
 
+.motor-button {
+    width: 100px;
+}
+
 .admin-box {
     border: 2px solid #D9A180;
     padding: 10px; 

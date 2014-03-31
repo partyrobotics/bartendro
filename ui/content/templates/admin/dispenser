@@ -38,7 +38,8 @@
                             {% endif %}
                             </span>
                             {{ form["dispenser%s" % i](class="form select-field") }}
-                            <a class="btn btn-large btn-success" id="disp{{ i }}" onclick="toggle({{ i }})">turn on</a>
+                            <a class="btn btn-large btn-success motor-button" id="disp{{ i }}" onclick="toggle_forward({{ i }})">forward</a>
+                            <a class="btn btn-large btn-success motor-button" id="disp_reverse{{ i }}" onclick="toggle_reverse({{ i }})">reverse</a>
                             <a class="btn btn-large btn-success" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
                         </div>
                     {% endfor %}
@@ -102,7 +103,7 @@ function set_message(txt)
     $("#status-message").show();
 }
 
-function toggle(disp)
+function toggle_forward(disp)
 {
     if (disp < 1 || disp > 15)
         return;
@@ -115,7 +116,7 @@ function toggle(disp)
                  if (dispensers[disp-1] == true)
                      $("#disp" + disp).text('turn off');
                  else
-                     $("#disp" + disp).text('turn on');
+                     $("#disp" + disp).text('forward');
 
                  if (html == "error state")
                      window.location = "/admin";
@@ -125,7 +126,7 @@ function toggle(disp)
                  else
                  {
                     if (dispensers[disp-1] == true)
-                        set_message("Turned on dispenser " + disp);
+                        set_message("Dispenser " + disp + " running forward");
                     else
                         set_message("Turned off dispenser " + disp);
                  }
@@ -135,7 +136,45 @@ function toggle(disp)
                  if (dispensers[disp-1] == true)
                      $("#disp" + disp).text('turn off');
                  else
-                     $("#disp" + disp).text('turn on');
+                     $("#disp" + disp).text('forward on');
+                 set_message("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
+            }
+    });
+}
+function toggle_reverse(disp)
+{
+    if (disp < 1 || disp > 15)
+        return;
+
+    dispensers[disp-1] = !dispensers[disp-1];
+    $.ajax({
+            url: "/ws/dispenser/" + disp + "/" + (dispensers[disp-1] ? "on/reverse" : "off") ,
+            success: function(html)
+            {
+                 if (dispensers[disp-1] == true)
+                     $("#disp_reverse" + disp).text('turn off');
+                 else
+                     $("#disp_reverse" + disp).text('reverse');
+
+                 if (html == "error state")
+                     window.location = "/admin";
+                 else
+                 if (html != "")
+                     set_message(html)
+                 else
+                 {
+                    if (dispensers[disp-1] == true)
+                        set_message("Dispenser " + disp + " running reverse");
+                    else
+                        set_message("Turned off dispenser " + disp);
+                 }
+            },
+            error: function(xmlhttp, txtStatus, errorThrown)
+            {
+                 if (dispensers[disp-1] == true)
+                     $("#disp_reverse" + disp).text('turn off');
+                 else
+                     $("#disp_reverse" + disp).text('reverse');
                  set_message("Failed to turn on/off dispensers. Server status: " + xmlhttp.status);
             }
     });
