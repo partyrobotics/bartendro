@@ -10,6 +10,7 @@ STATE_POURING  =      7
 STATE_POUR_DONE =     8
 STATE_CURRENT_SENSE = 9
 STATE_ERROR =         10
+STATE_TEST_DISPENSE = 11
 
 # Events that cause changes in Bartendro states
 EVENT_START =          0
@@ -25,6 +26,7 @@ EVENT_ERROR =          9
 EVENT_POST_POUR_DONE = 10
 EVENT_RESET          = 11
 EVENT_DONE           = 12
+EVENT_TEST_DISPENSE  = 13
 
 # Transition table for Bartendro
 transition_table = [
@@ -33,13 +35,20 @@ transition_table = [
 
     (STATE_READY,                     EVENT_MAKE_DRINK,             STATE_PRE_POUR),
     (STATE_READY,                     EVENT_CHECK_LEVELS,           STATE_CHECK),
+    (STATE_READY,                     EVENT_TEST_DISPENSE,          STATE_TEST_DISPENSE),
     (STATE_LOW,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),
     (STATE_LOW,                       EVENT_CHECK_LEVELS,           STATE_CHECK),
+    (STATE_LOW,                       EVENT_TEST_DISPENSE,          STATE_TEST_DISPENSE),
     (STATE_OUT,                       EVENT_MAKE_DRINK,             STATE_PRE_POUR),
     (STATE_OUT,                       EVENT_CHECK_LEVELS,           STATE_CHECK),
+    (STATE_OUT,                       EVENT_TEST_DISPENSE,          STATE_TEST_DISPENSE),
     (STATE_HARD_OUT,                  EVENT_CHECK_LEVELS,           STATE_CHECK),
+    (STATE_HARD_OUT,                  EVENT_TEST_DISPENSE,          STATE_TEST_DISPENSE),
     (STATE_CURRENT_SENSE,             EVENT_RESET,                  STATE_CHECK),
     (STATE_ERROR,                     EVENT_RESET,                  STATE_CHECK),
+    (STATE_ERROR,                     EVENT_TEST_DISPENSE,          STATE_TEST_DISPENSE),
+
+    (STATE_TEST_DISPENSE,             EVENT_POUR_DONE,              STATE_CHECK),
 
     (STATE_PRE_POUR,                  EVENT_LL_OK,                  STATE_POURING),
     (STATE_PRE_POUR,                  EVENT_LL_LOW,                 STATE_POURING),

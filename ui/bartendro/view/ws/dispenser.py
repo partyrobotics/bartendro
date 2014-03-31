@@ -7,8 +7,10 @@ from flask import Flask, request
 from flask.ext.login import current_user
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
+from bartendro.model.dispenser import Dispenser
 from bartendro.form.booze import BoozeForm
 from bartendro import fsm
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 log = logging.getLogger('bartendro')
 
@@ -65,16 +67,9 @@ def ws_dispenser_test(disp):
         return "Cannot test dispenser. Incorrect dispenser."
 
     try:
-        is_cs, err = app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
-        if is_cs:
-            app.mixer.set_state(fsm.STATE_ERROR)
-            return "error state"
-        if err:
-            err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
-            log.error(err)
-            return err
-    except mixer.BartendroBusyError:
-        return "busy"
+        app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
+    except BartendroBrokenError:
+        raise InternalServerError
 
     return ""
 
@@ -88,11 +83,11 @@ def ws_dispenser_clean():
 
     try:
         app.mixer.clean()
-    except mixer.BartendroCantPourError, err:
+    except BartendroCantPourError, err:
         raise BadRequest(err)
-    except mixer.BartendroBrokenError, err:
+    except BartendroBrokenError, err:
         raise InternalServerError(err)
-    except mixer.BartendroBusyError, err:
+    except BartendroBusyError, err:
         raise ServiceUnavailable(err)
 
     return ""
@@ -107,11 +102,11 @@ def ws_dispenser_clean_right():
 
     try:
         app.mixer.clean_right()
-    except mixer.BartendroCantPourError, err:
+    except BartendroCantPourError, err:
         raise BadRequest(err)
-    except mixer.BartendroBrokenError, err:
+    except BartendroBrokenError, err:
         raise InternalServerError(err)
-    except mixer.BartendroBusyError, err:
+    except BartendroBusyError, err:
         raise ServiceUnavailable(err)
     return ""
 
@@ -125,11 +120,11 @@ def ws_dispenser_clean_left():
 
     try:
         app.mixer.clean_left()
-    except mixer.BartendroCantPourError, err:
+    except BartendroCantPourError, err:
         raise BadRequest(err)
-    except mixer.BartendroBrokenError, err:
+    except BartendroBrokenError, err:
         raise InternalServerError(err)
-    except mixer.BartendroBusyError, err:
+    except BartendroBusyError, err:
         raise ServiceUnavailable(err)
 
     return ""

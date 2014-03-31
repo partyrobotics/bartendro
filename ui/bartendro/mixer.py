@@ -84,7 +84,7 @@ class Mixer(object):
         self.recipe = r
 
         with BartendroLock(app.globals):
-            self.do_event(fsm.EVENT_MAKE_DRINK)
+            self.do_event(fsm.EVENT_TEST_DISPENSE)
 
     def make_drink(self, drink, recipe):
         r = Recipe()
@@ -104,7 +104,6 @@ class Mixer(object):
                 db.session.commit()
 
     def do_event(self, event):
-
         cur_state = app.globals.get_state()
     
         while True:
@@ -137,10 +136,13 @@ class Mixer(object):
                     event = self._state_current_sense()
                 elif next_state == fsm.STATE_ERROR:
                     event = self._state_error()
+                elif next_state == fsm.STATE_TEST_DISPENSE:
+                    event = self._state_test_dispense()
                 else:
                     self._state_error()
                     app.globals.set_state(fsm.STATE_ERROR)
-                    raise BartendroBrokenError("No really Bartendro, you're drunk. Go home!")
+                    log.error("Current state: %d, event %d. Can't find next state." % (cur_state, event))
+                    raise BartendroBrokenError("Internal error. Bartendro has had one too many.")
 
             except BartendroBrokenError, err:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -259,6 +261,21 @@ class Mixer(object):
         for line in sorted(log_lines.keys()):
             log.info(log_lines[line])
         log.info("%s ml dispensed. done." % size)
+
+        return fsm.EVENT_POUR_DONE
+
+    def _state_test_dispense(self):
+        self.driver.led_dispense()
+
+        booze_id = self.recipe.data.keys()[0]
+        ml = self.recipe.data[booze_id]
+
+        recipe = {}
+        dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
+        for i in xrange(self.disp_count):
+            if booze_id == dispensers[i].booze_id:
+                recipe[i] =  ml
+                self._dispense_recipe(recipe, True)
 
         return fsm.EVENT_POUR_DONE
 
@@ -434,14 +451,14 @@ class Mixer(object):
 
         return ll_state
 
-    def _dispense_recipe(self, recipe):
+    def _dispense_recipe(self, recipe, always_fast = False):
 
         active_disp = []
         for disp in recipe:
             if not recipe[disp]:
                 continue
             ticks = int(recipe[disp] * TICKS_PER_ML)
-            if recipe[disp] < SLOW_DISPENSE_THRESHOLD: 
+            if recipe[disp] < SLOW_DISPENSE_THRESHOLD and not always_fast:
                 speed = HALF_SPEED 
             else:
                 speed = FULL_SPEED 
