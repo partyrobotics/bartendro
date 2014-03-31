@@ -86,7 +86,15 @@ def ws_dispenser_clean():
     if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
-    app.mixer.clean()
+    try:
+        app.mixer.clean()
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
+
     return ""
 
 @app.route('/ws/clean/right')
@@ -97,7 +105,14 @@ def ws_dispenser_clean_right():
     if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
-    app.mixer.clean_right()
+    try:
+        app.mixer.clean_right()
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
     return ""
 
 @app.route('/ws/clean/left')
@@ -108,5 +123,13 @@ def ws_dispenser_clean_left():
     if app.globals.get_state() == fsm.STATE_ERROR:
         return "error state"
 
-    app.mixer.clean_left()
+    try:
+        app.mixer.clean_left()
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
+
     return ""

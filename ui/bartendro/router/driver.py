@@ -270,7 +270,6 @@ class RouterDriver(object):
 
     def led_clean(self):
         if self.software_only: return True
-        self._program_clean_pattern()
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
@@ -279,7 +278,6 @@ class RouterDriver(object):
 
     def led_error(self):
         if self.software_only: return True
-        self._program_error_pattern()
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
@@ -553,17 +551,3 @@ class RouterDriver(object):
     def _log_startup(self, txt):
         log.info(txt)
         self.startup_log += "%s\n" % txt
-
-    def _program_error_pattern(self):
-        for disp in xrange(self.num_dispensers):
-            self.pattern_define(disp, LED_PATTERN_CLEAN)
-            self.pattern_add_segment(disp, 255, 0, 0, 25)
-            self.pattern_add_segment(disp, 40, 0, 0, 25)
-            self.pattern_finish(disp)
-
-    def _program_clean_pattern(self):
-        for disp in xrange(self.num_dispensers):
-            self.pattern_define(disp, LED_PATTERN_CLEAN)
-            self.pattern_add_segment(disp, 255, 128, 0, 25)
-            self.pattern_add_segment(disp, 255, 0, 255, 25)
-            self.pattern_finish(disp)

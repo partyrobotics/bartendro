@@ -29,8 +29,6 @@ HALF_SPEED = 128
 SLOW_DISPENSE_THRESHOLD = 20 # ml
 MAX_DISPENSE = 1000 # ml max dispense per call. Just for sanity. :)
 
-CLEAN_DURATION = 10 # seconds
-
 LIQUID_OUT_THRESHOLD   = 75
 LIQUID_LOW_THRESHOLD   = 120 
 
@@ -206,7 +204,7 @@ class Mixer(object):
 
     # TODO: Make the hard out blink the status led
     def _state_hard_out(self):
-        self.driver.led_error()
+        self.driver.led_idle()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 
@@ -214,7 +212,7 @@ class Mixer(object):
         return fsm.EVENT_DONE
 
     def _state_error(self):
-        self.driver.led_error()
+        self.driver.led_idle()
         self.driver.set_status_color(1, 0, 0)
         return fsm.EVENT_DONE
 

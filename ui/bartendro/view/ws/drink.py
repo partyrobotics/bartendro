@@ -25,7 +25,6 @@ def ws_make_drink(drink_id):
     except mixer.BartendroCantPourError, err:
         raise BadRequest(err)
     except mixer.BartendroBrokenError, err:
-        print "500: %s" % err
         raise InternalServerError(err)
     except mixer.BartendroBusyError, err:
         raise ServiceUnavailable(err)

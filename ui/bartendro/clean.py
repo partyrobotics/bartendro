@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
 from time import sleep, time
 from threading import Thread
 from bartendro import db, app
+from bartendro.error import BartendroBrokenError
+
+CLEAN_DURATION = 10 # seconds
+
+log = logging.getLogger('bartendro')
 
 class CleanCycle(Thread):
     left_set = [4, 5, 6, 7, 8, 9, 10]
@@ -16,15 +22,20 @@ class CleanCycle(Thread):
     def run(self):
 
         disp_list = []
-        if self.mode == "all":
-            disp_list.extend(self.left_set)
-            disp_list.extend(self.right_set)
-        elif self.mode == "right":
-            disp_list.extend(self.right_set)
-        else:
-            disp_list.extend(self.left_set)
 
-        self.mixer.led_clean()
+        if self.mixer.disp_count == 15:
+            if self.mode == "all":
+                disp_list.extend(self.left_set)
+                disp_list.extend(self.right_set)
+            elif self.mode == "right":
+                disp_list.extend(self.right_set)
+            else:
+                disp_list.extend(self.left_set)
+        else:
+            for d in xrange(self.mixer.disp_count):
+                disp_list.append(d)
+
+        self.mixer.driver.led_clean()
         for disp in disp_list:
             self.mixer.driver.start(disp)
             sleep(self.STAGGER_DELAY)
@@ -34,11 +45,10 @@ class CleanCycle(Thread):
             self.mixer.driver.stop(disp)
             sleep(self.STAGGER_DELAY)
 
-        self.mixer.led_idle()
+        # Give bartendro a moment to collect himself
+        sleep(.1)
 
-        for i in xrange(self.mixer.disp_count):
-            (is_dispensing, over_current) = app.driver.is_dispensing(i)
-            if over_current:
-                app.mixer.set_state(STATE_ERROR)
-                app.mixer._update_status_led()
-                break
+        try:
+            self.mixer.check_levels()
+        except BartendroBrokenError, msg:
+            log.error("Post clean: %s" % msg) 

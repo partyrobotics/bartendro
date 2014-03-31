@@ -225,11 +225,11 @@ function clean(url)
                                         url: url,
                                         success: function(html)
                                         {
-                                             if (html == "error state")
-                                                 window.location = "/admin";
+                                             set_message("Cleaning cycle started.");
                                         },
                                         error: function(xhr, txtStatus, errorThrown)
                                         {
+                                             set_message("Server error.")
                                         }
                                 });
                                 $( this ).dialog( "close" ); 
