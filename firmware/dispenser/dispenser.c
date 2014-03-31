@@ -22,6 +22,8 @@
 #define ee_liquid_low_threshold_offset    5
 #define ee_liquid_out_threshold_offset    7 
 
+#define SOFTWARE_VERSION                  3
+
 #define USER_BUTTON_DURATION             10 // in clock ticks
 #define RESET_DURATION                    1
 #define SYNC_COUNT                       10 // Every SYNC_INIT ms we will change the color animation
@@ -735,8 +737,7 @@ void check_software_revision(void)
     uint8_t bit1 = PINC & (1<<PINC3);
     uint8_t bit2 = PINC & (1<<PINC4);
 
-    // 011
-    if (bit0 && bit1 && !bit2)
+    if ((bit0 | bit1 | bit2) != SOFTWARE_VERSION)
         return;
 
     // Wrong software! I refuse to do shit!
@@ -803,6 +804,10 @@ int main(void)
                 switch(p.type)
                 {
                     case PACKET_PING:
+                        break;
+
+                    case PACKET_GET_VERSION:
+                        send_packet8(PACKET_GET_VERSION, SOFTWARE_VERSION);
                         break;
 
                     case PACKET_SET_MOTOR_SPEED:
