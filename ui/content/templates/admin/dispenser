@@ -39,7 +39,9 @@
                             </span>
                             {{ form["dispenser%s" % i](class="form select-field") }}
                             <a class="btn btn-large btn-success motor-button" id="disp{{ i }}" onclick="toggle_forward({{ i }})">forward</a>
-                            <a class="btn btn-large btn-success motor-button" id="disp_reverse{{ i }}" onclick="toggle_reverse({{ i }})">reverse</a>
+                            {% if dispenser_version > 2 %}
+                                <a class="btn btn-large btn-success motor-button" id="disp_reverse{{ i }}" onclick="toggle_reverse({{ i }})">reverse</a>
+                            {% endif %}
                             <a class="btn btn-large btn-success" id="test{{ i }}" onclick="test_dispense({{ i }})">dispense {{ options.test_dispense_ml }}ml</a>
                         </div>
                     {% endfor %}

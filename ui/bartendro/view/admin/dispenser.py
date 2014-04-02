@@ -81,6 +81,7 @@ def dispenser():
                            updated=updated,
                            num_drinks=len(avail_drinks),
                            options=app.options,
+                           dispenser_version=driver.dispenser_version,
                            states=states)
 
 @app.route('/admin/save', methods=['POST'])

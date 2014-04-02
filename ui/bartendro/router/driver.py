@@ -110,6 +110,9 @@ class RouterDriver(object):
 
     def get_startup_log(self):
         return self.startup_log
+    
+    def get_dispenser_version(self):
+        return self.dispenser_version
 
     def reset(self):
         """Reset the hardware. Do this if there is shit going wrong. All motors will be stopped
