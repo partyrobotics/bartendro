@@ -733,11 +733,11 @@ void id_conflict(void)
 
 void check_software_revision(void)
 {
-    uint8_t bit0 = PINC & (1<<PINC2);
-    uint8_t bit1 = PINC & (1<<PINC3);
-    uint8_t bit2 = PINC & (1<<PINC4);
+    uint8_t bit0 = PINC & (1<<PINC2) ? 1 : 0;
+    uint8_t bit1 = PINC & (1<<PINC3) ? 1 : 0;;
+    uint8_t bit2 = PINC & (1<<PINC4) ? 1 : 0;;
 
-    if ((bit0 | bit1 | bit2) == SOFTWARE_VERSION)
+    if ((bit0 | bit1 << 1 | bit2 << 2) == SOFTWARE_VERSION)
         return;
 
     // Wrong software! I refuse to do shit!

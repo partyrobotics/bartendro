@@ -277,6 +277,7 @@ class Mixer(object):
             if booze_id == dispensers[i].booze_id:
                 recipe[i] =  ml
                 self._dispense_recipe(recipe, True)
+                break
 
         return fsm.EVENT_POUR_DONE
 

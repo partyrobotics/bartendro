@@ -208,7 +208,7 @@ class RouterDriver(object):
         self.dispenser_version = self.get_dispenser_version(0)
         if self.dispenser_version < 0:
             self.dispenser_version = DISPENSER_DEFAULT_VERSION 
-        print "Detected dispensers version %d. (Only checked first dispenser)" % self.dispenser_version
+        log.info("Detected dispensers version %d. (Only checked first dispenser)" % self.dispenser_version)
 
         self.led_idle()
 
@@ -240,7 +240,6 @@ class RouterDriver(object):
 
     def start(self, dispenser):
         if self.software_only: return True
-        print "start motor"
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
 
     def set_motor_direction(self, dispenser, direction):
@@ -249,7 +248,6 @@ class RouterDriver(object):
 
     def stop(self, dispenser):
         if self.software_only: return True
-        print "stop motor"
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
@@ -358,10 +356,6 @@ class RouterDriver(object):
 
     def set_motor_direction(self, dispenser, dir):
         if self.software_only: return True
-        if dir == MOTOR_DIRECTION_FORWARD:
-            print "Set direction forward on %d\n" % dispenser
-        else:
-            print "Set direction backward on %d\n" % dispenser
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, dir)
 
     def get_dispenser_version(self, dispenser):

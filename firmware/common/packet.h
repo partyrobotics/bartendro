@@ -37,7 +37,7 @@ at some point.
 #define PACKET_PATTERN_ADD_SEGMENT    24
 #define PACKET_PATTERN_FINISH         25
 #define PACKET_SET_MOTOR_DIRECTION    26
-#define PACKET_GET_VERSION            27
+#define PACKET_GET_VERSION            27 // requires reponse
 #define PACKET_COMM_TEST              0xFE
 
 #define DEST_BROADCAST         0xFF

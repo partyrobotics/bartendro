@@ -40,9 +40,9 @@ def run_dispenser(disp, forward):
         return "error state"
 
     if forward:
-        app.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD)
+        app.driver.set_motor_direction(disp - 1, MOTOR_DIRECTION_FORWARD)
     else:
-        app.driver.set_motor_direction(disp, MOTOR_DIRECTION_BACKWARD)
+        app.driver.set_motor_direction(disp - 1, MOTOR_DIRECTION_BACKWARD)
 
     err = ""
     if not app.driver.start(disp - 1):
