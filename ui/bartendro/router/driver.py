@@ -95,6 +95,7 @@ class RouterDriver(object):
         self.dispenser_select = None
         self.dispenser_version = DISPENSER_DEFAULT_VERSION
         self.startup_log = ""
+        self.debug_levels = [ 200, 180, 120 ]
 
         # dispenser_ids are the ids the dispensers have been assigned. These are logical ids 
         # used for dispenser communication.
@@ -341,7 +342,10 @@ class RouterDriver(object):
         if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
             ack, value, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:
-                return random.randint(50, 200)
+                # Returning a random value as below is really useful for testing. :)
+                #self.debug_levels[dispenser] = max(self.debug_levels[dispenser] - 20, 50)
+                #return self.debug_levels[dispenser]
+                #return random.randint(50, 200)
                 return value
         return -1
 

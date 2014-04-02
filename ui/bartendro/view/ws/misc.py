@@ -8,7 +8,7 @@ from flask.ext.login import login_required
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
-from bartendro.error import BartendroLiquidLevelReadError
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 log = logging.getLogger('bartendro')
 
@@ -41,13 +41,13 @@ def ws_check_levels():
     mixer = app.mixer
     try:
         mixer.check_levels()
-    except BartendroLiquidLevelReadError, msg:
-        raise InternalServerError("Failed to read liquid level sensors")
+    except BartendroCantPourError, err:
+        raise BadRequest(err)
+    except BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except BartendroBusyError, err:
+        raise ServiceUnavailable(err)
 
-    mc = app.mc
-    mc.delete("top_drinks")
-    mc.delete("other_drinks")
-    mc.delete("available_drink_list")
     return ""
 
 @app.route('/ws/download/bartendro.db')

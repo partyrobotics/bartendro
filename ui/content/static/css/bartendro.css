@@ -356,6 +356,10 @@ table {
     width: 100px;
 }
 
+.test-dispense-button {
+    width: 130px;
+}
+
 .admin-box {
     border: 2px solid #D9A180;
     padding: 10px; 
