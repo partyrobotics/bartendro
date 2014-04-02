@@ -31,14 +31,6 @@ def ws_dispenser_reverse(disp):
     return run_dispenser(disp, False)
 
 def run_dispenser(disp, forward):
-    if app.globals.get_state() == fsm.STATE_ERROR:
-        return "error state"
-
-    is_disp, is_cs = app.driver.is_dispensing(disp - 1)
-    if is_cs:
-        app.mixer.set_state(fsm.STATE_ERROR)
-        return "error state"
-
     if forward:
         app.driver.set_motor_direction(disp - 1, MOTOR_DIRECTION_FORWARD)
     else:
@@ -55,14 +47,6 @@ def run_dispenser(disp, forward):
 def ws_dispenser_off(disp):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
-
-    if app.globals.get_state() == fsm.STATE_ERROR:
-        return "error state"
-
-    is_disp, is_cs = app.driver.is_dispensing(disp - 1)
-    if is_cs:
-        app.mixer.set_state(fsm.STATE_ERROR)
-        return "error state"
 
     err = ""
     if not app.driver.stop(disp - 1):
