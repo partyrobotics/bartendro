@@ -144,8 +144,8 @@ class RouterDriver(object):
                                      parity=serial.PARITY_NONE, 
                                      stopbits=serial.STOPBITS_ONE,
                                      timeout=.01)
-        except serial.serialutil.SerialException:
-            raise SerialIOError
+        except serial.serialutil.SerialException, e:
+            raise SerialIOError(e)
 
         log.info("Done.\n")
 
