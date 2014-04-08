@@ -44,14 +44,6 @@ def index():
                                other_drinks=[],
                                error_message="Bartendro database errror.<br/><br/>There doesn't seem to be a valid database installed.",
                                title="Bartendro error")
-        
-    if not len(can_make) or app.globals.get_state() == fsm.STATE_HARD_OUT:
-        return render_template("index", 
-                               options=app.options, 
-                               top_drinks=[], 
-                               other_drinks=[],
-                               error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
-                               title="Bartendro error")
 
     can_make_dict = {}
     for drink in can_make:
@@ -63,16 +55,9 @@ def index():
                         .filter(Drink.popular == 1)  \
                         .filter(Drink.available == 1)  \
                         .order_by(asc(func.lower(DrinkName.name))).all() 
+
     top_drinks = filter_drink_list(can_make_dict, top_drinks)
     process_ingredients(top_drinks)
-
-    if app.options.show_feeling_lucky:
-        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
-        lucky.name = DrinkName("I'm feeling lucky!")
-        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
-        lucky.set_lucky(True)
-        lucky.set_ingredients_text("Pour a random drink now")
-        top_drinks.insert(0, lucky)
 
     other_drinks = db.session.query(Drink) \
                         .join(DrinkName) \
@@ -82,7 +67,25 @@ def index():
                         .order_by(asc(func.lower(DrinkName.name))).all() 
     other_drinks = filter_drink_list(can_make_dict, other_drinks)
     process_ingredients(other_drinks)
+
+    print "%d, %d" % (len(top_drinks), len(other_drinks))
+
+    if (not len(top_drinks) and not len(other_drinks)) or app.globals.get_state() == fsm.STATE_HARD_OUT:
+        return render_template("index", 
+                               options=app.options, 
+                               top_drinks=[], 
+                               other_drinks=[],
+                               error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
             
+    if app.options.show_feeling_lucky:
+        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
+        lucky.name = DrinkName("I'm feeling lucky!")
+        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
+        lucky.set_lucky(True)
+        lucky.set_ingredients_text("Pour a random drink now")
+        top_drinks.insert(0, lucky)
+
     return render_template("index", 
                            options=app.options, 
                            top_drinks=top_drinks, 
