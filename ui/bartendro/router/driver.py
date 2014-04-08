@@ -8,7 +8,7 @@ import serial
 from struct import pack, unpack
 import pack7
 import dispenser_select
-from bartendro.errors import SerialIOError
+from bartendro.error import SerialIOError
 import random
 
 DISPENSER_DEFAULT_VERSION = 2

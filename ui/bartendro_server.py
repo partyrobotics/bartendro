@@ -9,7 +9,7 @@ import sys
 from bartendro.global_lock import BartendroGlobalLock
 from bartendro.router import driver
 from bartendro import mixer
-from bartendro.errors import SerialIOError, I2CIOError
+from bartendro.error import I2CIOError, SerialIOError
 from bartendro.options import load_options
 import argparse
 

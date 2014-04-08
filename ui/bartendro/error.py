@@ -32,3 +32,9 @@ class BartendroLiquidLevelReadError(Exception):
         self.err = err
     def __str__(self):
         return repr(self.err)
+
+class I2CIOError(Exception):
+    pass
+
+class SerialIOError(Exception):
+    pass

@@ -4,7 +4,7 @@ import sys
 import os
 import logging
 from time import sleep
-from bartendro.errors import I2CIOError
+from bartendro.error import I2CIOError
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
