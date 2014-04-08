@@ -324,13 +324,13 @@ class Mixer(object):
         self.do_event(fsm.EVENT_START)
 
     def clean(self):
-        CleanCycle(self, "all").start()
+        CleanCycle(self, "all").clean()
 
     def clean_right(self):
-        CleanCycle(self, "right").start()
+        CleanCycle(self, "right").clean()
 
     def clean_left(self):
-        CleanCycle(self, "left").start()
+        CleanCycle(self, "left").clean()
 
     def liquid_level_test(self, dispenser, threshold):
         if app.globals.get_state() == fsm.STATE_ERROR:

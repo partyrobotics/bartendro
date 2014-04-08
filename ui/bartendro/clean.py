@@ -9,18 +9,16 @@ CLEAN_DURATION = 10 # seconds
 
 log = logging.getLogger('bartendro')
 
-class CleanCycle(Thread):
+class CleanCycle(object):
     left_set = [4, 5, 6, 7, 8, 9, 10]
     right_set = [0, 1, 2, 3, 11, 12, 13, 14]
     STAGGER_DELAY = .150 # ms
 
     def __init__(self, mixer, mode):
-        Thread.__init__(self)
         self.mixer = mixer
         self.mode = mode
 
-    def run(self):
-
+    def clean(self):
         disp_list = []
 
         if self.mixer.disp_count == 15:

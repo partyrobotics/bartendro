@@ -268,6 +268,7 @@ function clean_left()
 
 function clean(url)
 {
+    set_message("Clean cycle started...");
     $("#cleaning-dialog").dialog({ 
               buttons: [ 
                          { text: "Ok", click: function() { 
@@ -275,7 +276,7 @@ function clean(url)
                                         url: url,
                                         success: function(html)
                                         {
-                                             set_message("Cleaning cycle started.");
+                                             set_message("Cleaning cycle complete.");
                                         },
                                         error: function(xhr, txtStatus, errorThrown)
                                         {
