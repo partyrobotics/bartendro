@@ -1,5 +1,5 @@
-Upgrade instructions for Bartendro software beta 2014-0408
-==========================================================
+Upgrade instructions for Bartendro software beta 2014-04-08
+===========================================================
 
 This software release is BETA quality, meaning that you may encounter bugs in the software.
 Please do not use this for important parties. :)
