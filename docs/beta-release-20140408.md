@@ -6,10 +6,14 @@ Please do not use this for important parties. :)
 
 If you find problems with the new software, please report them here:
 
-   https://github.com/partyrobotics/bartendro/issues
+https://github.com/partyrobotics/bartendro/issues/new
 
-**IMPORTANT:** We recommend using a separate empty 4GB SD Card for this beta release. **WE DO NOT
+**REALLY IMPORTANT NOTES -- Please read the following before proceeding!**
+
+* PLEASE READ THE WHOLE INSTRUCTIONS BEFORE YOU BEGIN!
+* We recommend using a separate empty 4GB SD Card for this beta release. **WE DO NOT
 RECOMMEND THAT YOU OVERWRITE YOUR CURRENT BARTENDRO SD CARD!!**
+
 
 Download the beta release
 -------------------------
@@ -27,7 +31,7 @@ in the admin interface for Bartendro ( /admin/options ). You should do this usin
 so that you can download Bartendro's database and save it to your machine. On the options
 screen, look for the Database box and then click on the "Download Database" button. This will cause
 the Bartendro database file to be downloaded to your local computer. Save this file in a location
-where you can find it later. Ideally, check it into something like DropBox for safe keeping.
+where you can find it later. Ideally, drop it into something like DropBox for safe keeping.
 
 When the download of the software update finishes, extract the .img file by double clicking on
 the .zip file. Most modern OSes will extract the .img file and place it into the same directory
@@ -40,12 +44,18 @@ We recommend SanDisk (they fail less often) and the speed class 10 -- this will 
 run nice and fast. You may also use a larger capacity SD card, but it won't make a real difference 
 how Bartendro runs.
 
+Write the image to the new SD Card
+----------------------------------
+
 Next, write the image you downloaded onto the SD Card. These instructions cover all the bases for
 getting this job done. Please note that you can skip the part about "Downloading an Image", "Choose
 your Operating System" and "Choose your distribution". You're going to write the .img file you've 
-already downloaded:
+already downloaded. Other than that, follow these instructions exactly:
 
 http://learn.adafruit.com/downloads/pdf/adafruit-raspberry-pi-lesson-1-preparing-and-sd-card-for-your-raspberry-pi.pdf
+
+Install the new SD Card into Bartendro
+--------------------------------------
 
 Once you've managed to write the SD Card, you're ready to swap out the current SD Card for the one
 in your Bartendro. IMPORTANT: Turn off your Bartendro. If you fail to turn off your Bartendro before
@@ -83,8 +93,13 @@ the Options page. Ihe Database box, click the red "upload a database" button and
 upload the bartendro.db file that you downloaded earlier. After this Bartendro will reboot and your Bartendro
 software update should be complete.
 
-Bartendro is now ready to use again. If you find any bugs, please report them here:
+Bartendro is now ready to use again. 
 
-https://github.com/partyrobotics/bartendro/issues
+Reporting bugs
+--------------
+
+If you find any bugs (issues), please report them here:
+
+https://github.com/partyrobotics/bartendro/issues/new
 
 If you run into trouble during this update, give us a shout here: http://partyrobotics.com/contact-us/
