@@ -1,5 +1,5 @@
-Upgrade instructions for Bartendro software beta 2014-0408
-==========================================================
+Upgrade instructions for Bartendro software beta 2014-04-08
+===========================================================
 
 This software release is BETA quality, meaning that you may encounter bugs in the software.
 Please do not use this for important parties. :)
@@ -8,19 +8,19 @@ If you find problems with the new software, please report them here:
 
    https://github.com/partyrobotics/bartendro/issues
 
-IMPORTANT: We recommend using a separate empty 4GB SD Card for this beta release. WE DO NOT
-RECOMMEND THAT YOU OVERWRITE YOUR CURRENT BARTENDRO SD CARD!!
+**IMPORTANT:** We recommend using a separate empty 4GB SD Card for this beta release. **WE DO NOT
+RECOMMEND THAT YOU OVERWRITE YOUR CURRENT BARTENDRO SD CARD!!**
 
 Download the beta release
 -------------------------
 
 To start, download this file:
 
-    ftp://download.partyrobotics.com/pub/partyrobotics/bartendro/images/beta-release-20140408.zip
+ftp://download.partyrobotics.com/pub/partyrobotics/bartendro/images/beta-release-20140408.zip
 
 Alternatively, if you know how to use 7zip, you can download this much smaller file:
 
-    ftp://download.partyrobotics.com/pub/partyrobotics/bartendro/images/beta-release-20140408.7z
+ftp://download.partyrobotics.com/pub/partyrobotics/bartendro/images/beta-release-20140408.7z
 
 While one of the above files downloads, fire up your Bartendro and go to the options tab
 in the admin interface for Bartendro ( /admin/options ). You should do this using a laptop or a PC
@@ -34,7 +34,7 @@ the .zip file. Most modern OSes will extract the .img file and place it into the
 where you downloaded the zip file. For the new step, you'll need a separate 4GB SD card like
 this one:
 
-  http://www.amazon.com/SanDisk-Ultra-Class-Memory-SDSDU-032G-AFFP
+http://www.amazon.com/SanDisk-Ultra-Class-Memory-SDSDU-032G-AFFP
 
 We recommend SanDisk (they fail less often) and the speed class 10 -- this will make your Bartendro
 run nice and fast. You may also use a larger capacity SD card, but it won't make a real difference 
@@ -45,13 +45,13 @@ getting this job done. Please note that you can skip the part about "Downloading
 your Operating System" and "Choose your distribution". You're going to write the .img file you've 
 already downloaded:
 
-  http://learn.adafruit.com/downloads/pdf/adafruit-raspberry-pi-lesson-1-preparing-and-sd-card-for-your-raspberry-pi.pdf
+http://learn.adafruit.com/downloads/pdf/adafruit-raspberry-pi-lesson-1-preparing-and-sd-card-for-your-raspberry-pi.pdf
 
 Once you've managed to write the SD Card, you're ready to swap out the current SD Card for the one
 in your Bartendro. IMPORTANT: Turn off your Bartendro. If you fail to turn off your Bartendro before
 swapping out the cards, you're going to damage the Raspberry Pi that runs everything. 
 
-AGAIN: Turn off Bartendro. In fact, unplug it from wall-power!
+**AGAIN: Turn off Bartendro. In fact, unplug it from wall-power!**
 
 If you have a Bartendro 7 or Bartendro 15, it might be easier to perform the next step with Bartendro
 set upside down on its head. This next step is somewhat fiddely, due to the limited space inside the
@@ -61,7 +61,7 @@ Bartendro 1 & Bartendro 3 are a cake -- the Raspberry Pi board is easily accessi
 
 Here is a view of my Bartendro 7's SD Card:
 
-   https://www.flickr.com/photos/mayhem/13743267415/
+https://www.flickr.com/photos/mayhem/13743267415/
 
 In order to get access to the SD Card, you may need to disconnect a few dispenser cables as I did. Once
 you have access to the SD Card, remove the SD Card be sliding it to the right. It should pop right out. But,
@@ -85,6 +85,6 @@ software update should be complete.
 
 Bartendro is now ready to use again. If you find any bugs, please report them here:
 
-   https://github.com/partyrobotics/bartendro/issues
+https://github.com/partyrobotics/bartendro/issues
 
 If you run into trouble during this update, give us a shout here: http://partyrobotics.com/contact-us/
