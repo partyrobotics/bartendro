@@ -66,7 +66,7 @@ class BartendroGlobalLock(object):
         '''Get the current state of Bartendro'''
 
         # If we're not running inside uwsgi, then we can't keep global state
-        if not have_uwsgi: return fsm.STATE_READY
+        if not have_uwsgi: return self.state
 
         uwsgi.lock()
         state = uwsgi.sharedarea_readbyte(1)
@@ -78,7 +78,9 @@ class BartendroGlobalLock(object):
         """Set the current state of Bartendro"""
 
         # If we're not running inside uwsgi, then don't try to use the lock
-        if not have_uwsgi: return
+        if not have_uwsgi: 
+            self.state = state
+            return
 
         uwsgi.lock()
         uwsgi.sharedarea_writebyte(1, state)
