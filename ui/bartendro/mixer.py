@@ -19,7 +19,6 @@ from bartendro.model.drink_log import DrinkLog
 from bartendro.model.shot_log import ShotLog
 from bartendro.global_lock import BartendroLock
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
-import random # remove me
 
 TICKS_PER_ML = 2.78
 CALIBRATE_ML = 60 
