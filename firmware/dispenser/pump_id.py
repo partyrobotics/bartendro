@@ -23,6 +23,10 @@ def get_pump_id():
     try:
         id_file = open(PUMP_ID_FILE, "r")
         id = int(id_file.readline().strip()) + 1
+
+        # Roll over the id, avoiding 255 and 0
+        if id == 255:
+            id = 1
     except IOError:
         pass
     except ValueError:
