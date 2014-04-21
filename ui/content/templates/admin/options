@@ -121,20 +121,24 @@
             <a class="btn btn-large btn-primary submit-button" onclick="save()">save and reboot</a>
         </div>
     </div>
-    <div class="span4 admin-box-full" style="margin-bottom: 25px">
-        <h2>Network info</h2>
-        <div>
-        WiFi address: {{ wlan0 }}<br/>
-        Network address: {{ eth0 }} 
-        </div>
-        {% if show_passwd_recovery %}
-            <h4>Ooops</h4>
-            <div>
-            <a href="/admin/lost-passwd">I lost my username/password.</a>
-            </div>
-        {% endif %}
-    </div>  
     <div class="span4 admin-box-full">
+        <h2>Network info</h2>
+        <div style="margin-bottom: 30px">
+            <div>
+            WiFi address: {{ wlan0 }}<br/>
+            Network address: {{ eth0 }} 
+            </div>
+            {% if show_passwd_recovery %}
+                <h4>Ooops</h4>
+                <div>
+                <a href="/admin/lost-passwd">I lost my username/password.</a>
+                </div>
+            {% endif %}
+        </div>
+        <h2>Software</h2>
+        <div style="margin-bottom: 30px">
+        Your software version is: {{ version }}
+        </div>
         <h2>Database</h2>
         <h4>Current schema</h4>
         <div>

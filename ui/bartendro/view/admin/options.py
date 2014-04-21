@@ -33,6 +33,7 @@ def admin_options():
                            title="Options", 
                            eth0=eth0,
                            wlan0=wlan0,
+                           version = app.version,
                            schema = ver.schema)
 
 @app.route('/admin/lost-passwd')

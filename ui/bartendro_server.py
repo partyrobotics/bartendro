@@ -12,6 +12,17 @@ from bartendro import mixer
 from bartendro.error import I2CIOError, SerialIOError
 from bartendro.options import load_options
 import argparse
+import subprocess
+
+if os.path.exists("version.txt"):
+    with open("version.txt", "r") as f:
+        version = f.read()
+else:
+    version = subprocess.check_output(["git", "rev-parse", "HEAD"])
+    if version:
+        version = version[:10]
+    else:
+        version = "[unknown]"
 
 LOG_SIZE = 1024 * 500  # 500k maximum log file size
 LOG_FILES_SAVED = 3    # number of log files to compress and save
@@ -97,6 +108,7 @@ if app.software_only:
 
 logging.info("Bartendro starting")
 app.debug = args.debug
+app.version = version
 
 if __name__ == '__main__':
     app.run(host=args.host, port=args.port)
