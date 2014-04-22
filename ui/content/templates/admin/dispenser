@@ -51,10 +51,10 @@
                           <a onclick="check_levels()" class="btn btn-large">update liquid levels</a>
                       {% endif %}
                       {% if count != 15 %} 
-                          <a onclick="clean_all()" class="btn btn-large btn-success" style="margin-right: 22px">clean</a>
+                          <a onclick="clean_all()" id="clean" class="btn btn-large btn-success" style="margin-right: 22px">clean</a>
                       {% else %}
                           <div class="btn-group">
-                            <a class="btn dropdown-toggle btn-large btn-success" data-toggle="dropdown" href="#">
+                            <a class="btn dropdown-toggle btn-large btn-success" id="clean" data-toggle="dropdown" href="#">
                                 clean
                                 <span class="caret"></span>
                             </a>
@@ -66,9 +66,9 @@
                           </div>
                       {% endif %}
                       {% if options.use_liquid_level_sensors %}
-                          {{ form.save(class="btn btn-large btn-primary") }}
+                          {{ form.save(class="btn btn-large btn-primary", id="save") }}
                       {% else %}
-                          {{ form.save(class="btn btn-large btn-primary", style="margin-left: 138px") }}
+                          {{ form.save(class="btn btn-large btn-primary", id="save", style="margin-left: 138px") }}
                       {% endif %}
                     </div>
                    </form>
@@ -88,6 +88,10 @@
 <script type="text/javascript" src="/static/js/bootstrap-dropdown-2.3.0.js"></script>
 <script type="text/javascript">
 var dispensers = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+var forward_running = -1;
+var backward_running = -1;
+var test_running = -1;
+var clean_running = -1;
 
 $(document).ready(function() 
 {
@@ -105,10 +109,66 @@ function set_message(txt)
     $("#status-message").show();
 }
 
+function update_button_states()
+{
+    {% for i in range(1, count + 1) %}
+       if ((forward_running >= 0 && forward_running != {{ i }}) ||
+           backward_running >= 0 || test_running >= 0 || clean_running >= 0)
+       {
+           $("#disp{{ i }}").attr("disabled", "disabled");
+       }
+       if ((backward_running >= 0 && backward_running != {{ i }}) ||
+           forward_running >= 0 || test_running >= 0 || clean_running >= 0)
+       {
+           $("#disp_reverse{{ i }}").attr("disabled", "disabled");
+       }
+       if (forward_running || backward_running || test_running >= 0 || clean_running >= 0)
+           $("#test{{ i }}").attr("disabled", "disabled");
+    {% endfor %}
+
+    {% for i in range(1, count + 1) %}
+       if (forward_running < 0 && backward_running < 0 && test_running < 0 && clean_running < 0)
+       {
+           $("#disp{{ i }}").removeAttr("disabled");
+           $("#disp_reverse{{ i }}").removeAttr("disabled");
+           $("#test{{ i }}").removeAttr("disabled");
+       }
+    {% endfor %}
+
+    if (forward_running >= 0 || backward_running >= 0 || test_running >= 0 || clean_running >= 0)
+    {
+        $("#clean").attr("disabled", "disabled");
+        $("#save").attr("disabled", "disabled");
+    }
+    else
+    {
+        $("#clean").removeAttr("disabled");
+        $("#save").removeAttr("disabled");
+    }
+}
+
 function toggle_forward(disp)
 {
     if (disp < 1 || disp > 15)
         return;
+
+    // Check to see if we're getting messages from buttons that shouldn't be pressed
+    if (backward_running >= 0 || test_running >= 0 || clean_running >= 0)
+        return;
+
+    if (forward_running >= 0 && forward_running != disp)
+        return;
+
+    if (dispensers[disp-1])
+    {
+        forward_running = -1;
+        update_button_states();
+    }
+    else
+    {
+        forward_running = disp;
+        update_button_states();
+    }
 
     dispensers[disp-1] = !dispensers[disp-1];
     $.ajax({
@@ -148,6 +208,23 @@ function toggle_reverse(disp)
     if (disp < 1 || disp > 15)
         return;
 
+    // Check to see if we're getting messages from buttons that shouldn't be pressed
+    if (forward_running >= 0 || test_running >= 0 || clean_running >= 0)
+        return;
+
+    if (backward_running >= 0 && backward_running != disp)
+        return;
+
+    if (dispensers[disp-1])
+    {
+        backward_running = -1;
+        update_button_states();
+    }
+    else
+    {
+        backward_running = disp;
+        update_button_states();
+    }
     dispensers[disp-1] = !dispensers[disp-1];
     $.ajax({
             url: "/ws/dispenser/" + disp + "/" + (dispensers[disp-1] ? "on/reverse" : "off") ,
@@ -186,14 +263,19 @@ function test_dispense(disp)
     if (disp < 1 || disp > 15)
         return;
 
+    // Check to see if we're getting messages from buttons that shouldn't be pressed
+    if (backward_running >= 0 || forward_running >= 0 || test_running >= 0 || clean_running >= 0)
+        return;
+
     $("#test" + disp).text('dispensing');
-    $("#test" + disp).toggleClass('disabled');
+    test_running = disp;
+    update_button_states();
+
     $.ajax({
             url: "/ws/dispenser/" + disp + "/test" ,
             success: function(html)
             {
                  $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
-                 $("#test" + disp).toggleClass('disabled');
                  if (html == "busy")
                      set_message("Already testing a dispense. Chill!");
                  else
@@ -204,12 +286,17 @@ function test_dispense(disp)
                      set_message(html);
                  else
                      set_message("Test dispensed on dispenser " + disp);
+
+                 test_running = -1;
+                 update_button_states();
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
                  $("#test" + disp).text('dispense {{ options.test_dispense_ml }}ml');
-                 $("#test" + disp).toggleClass('disabled');
                  set_message("Failed to test dispensers. Server status: " + xmlhttp.status);
+
+                 test_running = -1;
+                 update_button_states();
             }
     });
 }
@@ -268,7 +355,9 @@ function clean_left()
 
 function clean(url)
 {
-    set_message("Clean cycle started...");
+    if (forward_running >= 0 || backward_running >= 0 || test_running >= 0 || clean_running >= 0)
+        return
+
     $("#cleaning-dialog").dialog({ 
               buttons: [ 
                          { text: "Ok", click: function() { 
@@ -277,13 +366,20 @@ function clean(url)
                                         success: function(html)
                                         {
                                              set_message("Cleaning cycle complete.");
+                                             clean_running = -1;
+                                             update_button_states();
                                         },
                                         error: function(xhr, txtStatus, errorThrown)
                                         {
                                              set_message("Server error.")
+                                             clean_running = -1;
+                                             update_button_states();
                                         }
                                 });
                                 $( this ).dialog( "close" ); 
+                                clean_running = 1;
+                                set_message("Clean cycle started...");
+                                update_button_states();
                          } },
                          { text: "Cancel", click: function() { $( this ).dialog( "close" ); } }
                        ] 
