@@ -6,13 +6,15 @@ import logging.handlers
 import os
 import memcache
 import sys
+import argparse
+import subprocess
+import traceback
+
 from bartendro.global_lock import BartendroGlobalLock
 from bartendro.router import driver
 from bartendro import mixer
 from bartendro.error import I2CIOError, SerialIOError
 from bartendro.options import load_options
-import argparse
-import subprocess
 
 if os.path.exists("version.txt"):
     with open("version.txt", "r") as f:
@@ -20,7 +22,7 @@ if os.path.exists("version.txt"):
 else:
     version = subprocess.check_output(["git", "rev-parse", "HEAD"])
     if version:
-        version = version[:10]
+        version = "git commit " + version[:10]
     else:
         version = "[unknown]"
 
@@ -82,33 +84,57 @@ app.mc.flush_all()
 # Create the Bartendro globals to prevent multiple people from using it at the same time.
 app.globals = BartendroGlobalLock()
 
+startup_err = ""
 # Start the driver, which talks to the hardware
 try:
     app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()
+    logging.info("Found %d dispensers." % app.driver.count())
 except I2CIOError:
-    print
-    print "Cannot open I2C interface to a router board."
-    print
-    print_software_only_notice()
-    sys.exit(-1)
+    logging.error(err)
+    err = "Cannot open I2C interface to a router board."
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
 except SerialIOError:
-    print
-    print "Cannot open serial interface to a router board."
-    print
-    print_software_only_notice()
-    sys.exit(-1)
+    err = "Cannot open serial interface to a router board."
+    logging.error(err)
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
+except:
+    err = traceback.format_exc()
+    logging.error(err)
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
 
-logging.info("Found %d dispensers." % app.driver.count())
+app.startup_err = startup_err
+print app.startup_err
+if not app.startup_err:
+    app.options = load_options()
+    app.mixer = mixer.Mixer(app.driver, app.mc)
+    if app.software_only:
+        logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 
-app.options = load_options()
-app.mixer = mixer.Mixer(app.driver, app.mc)
-if app.software_only:
-    logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
-
-logging.info("Bartendro starting")
-app.debug = args.debug
-app.version = version
+    logging.info("Bartendro starting")
+    app.debug = args.debug
+    app.version = version
 
 if __name__ == '__main__':
     app.run(host=args.host, port=args.port)

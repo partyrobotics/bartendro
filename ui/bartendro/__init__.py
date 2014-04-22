@@ -66,3 +66,9 @@ from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \
 from bartendro.view.drink import drink
 from bartendro.view.ws import booze as ws_booze, dispenser as ws_dispenser, drink as ws_drink, \
                               misc as ws_misc, liquidlevel, option as ws_options
+
+@app.before_request
+def before_request(exception=None):
+    if not app.startup_err or request.path.startswith("/static"):
+        return
+    return render_template("startup_error", startup_err = app.startup_err)
