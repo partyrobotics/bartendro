@@ -46,6 +46,8 @@ class CleanCycle(object):
         # Give bartendro a moment to collect himself
         sleep(.1)
 
+        self.mixer.driver.led_idle()
+
         try:
             self.mixer.check_levels()
         except BartendroBrokenError, msg:
