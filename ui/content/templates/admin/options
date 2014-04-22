@@ -111,7 +111,10 @@
                         </div>
                         <div>
                             <label for="option-strength-steps">Number of strength steps to show</label>
-                            <input id="option-strength-steps" name="option-strength-steps" type="text" class="required" minlength="1"></input>
+                            <select id="option-strength-steps" name="option-strength-steps">
+                               <option value="1">1</option>
+                               <option value="2">2</option>
+                            </select>
                         </div>
                     </div>
                 {% endif %}
@@ -342,6 +345,7 @@ function save()
     options['show_size'] = $("#option-show-drink-size").prop("checked") ? 1 : 0;
     options['show_strength'] = $("#option-show-strength").prop("checked") ? 1 : 0;
     options['strength_steps'] = $("#option-strength-steps").val();
+    console.log("steps: " + options['strength_steps'])
 
     j = {}
     j['options'] = options;
