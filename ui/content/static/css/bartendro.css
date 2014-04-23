@@ -449,6 +449,13 @@ table {
     font-size: 13pt;
 }
 
+.shots-warning {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
 .ui-dialog .ui-dialog-buttonpane button 
 {
     float: right; 

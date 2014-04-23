@@ -21,9 +21,7 @@
                     {{ "%.1f" % (options.shot_size / 30) }} fl oz
                 {% endif %}
                 shots. 
-                <br/>
-                <br/>
-                <b>Make sure there is a glass under the spout, the shot will pour immediately!</b>
+                <div class="shots-warning">Make sure there is a glass under the spout, the shot will pour immediately!</div>
                 </span>
              </div>
         </div>
@@ -34,7 +32,7 @@
                 <div class="span10">
                   <div class="row-fluid">
                     <div class="span6">
-                       <button class="btn btn-success button-border shotbot-button" onclick="make_shot({{ shots[i].id }})">{{ shots[i].name }}</button>
+                       <button class="btn btn-success button-border shotbot-button" onclick="make_shot({{ shots[i].id }}, '{{ shots[i].name }}')">{{ shots[i].name }}</button>
                     </div>
                     <div class="span6 shotbot-text" style="padding-top: 10px">
                        {{ shots[i].desc }} 
@@ -91,18 +89,25 @@
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript">
-function make_shot(booze_id)
+function make_shot(booze_id, booze_name)
 {
-     $.ajax({ 
+    lb = '<div class="lb-box"><h1>Serving shot!</h1>';
+    lb += '</h1><div class="lb-drink">' + booze_name + '</div>';
+    lb += "</div>";
+    $.modal(lb, { 'escClose' : false });
+    $.ajax({ 
             url: "/ws/shots/" + booze_id,
             success: function(html)
             {
                 if (html == "login required")
                     $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+
+                $.modal.close();
                 window.location.reload();
             },
             error: function(xmlhttp, txtStatus, errorThrown)
             {
+                $.modal.close();
                 if (xmlhttp.status == 500)
                 {
                     $("#error-state-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/shots"; } } ] });
@@ -121,4 +126,5 @@ function make_shot(booze_id)
      });
 }
 </script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
 {% endblock %}
