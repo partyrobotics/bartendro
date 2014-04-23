@@ -4,6 +4,7 @@ from time import sleep, time
 from threading import Thread
 from bartendro import db, app
 from bartendro.error import BartendroBrokenError
+from bartendro.router.driver import MOTOR_DIRECTION_FORWARD
 
 CLEAN_DURATION = 10 # seconds
 
@@ -35,6 +36,7 @@ class CleanCycle(object):
 
         self.mixer.driver.led_clean()
         for disp in disp_list:
+            self.mixer.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD);
             self.mixer.driver.start(disp)
             sleep(self.STAGGER_DELAY)
 

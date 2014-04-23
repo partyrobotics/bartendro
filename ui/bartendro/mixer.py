@@ -120,7 +120,9 @@ class Mixer(object):
             #print "cur state: %d event: %d next state: %d" % (cur_state, event, next_state)
 
             try:
-                if next_state == fsm.STATE_PRE_POUR or next_state == fsm.STATE_CHECK:
+                if next_state == fsm.STATE_PRE_POUR:
+                    event = self._state_pre_pour()
+                elif next_state == fsm.STATE_CHECK:
                     event = self._state_check()
                 elif next_state == fsm.STATE_PRE_SHOT:
                     event = self._state_pre_shot()
@@ -190,7 +192,24 @@ class Mixer(object):
 
         return fsm.EVENT_LL_OUT
 
-        return ll
+    def _state_pre_pour(self):
+        try:
+            ll = self._check_liquid_levels()
+        except BartendroLiquidLevelReadError:
+            raise BartendroBrokenError("Failed to read liquid levels")
+
+        # update the list of drinks we can make
+        drinks = self.get_available_drink_list()
+        if len(drinks) == 0:
+            raise BartendroCantPourError("Cannot make this drink now.")
+
+        if ll == LL_OK:
+            return fsm.EVENT_LL_OK
+
+        if ll == LL_LOW:
+            return fsm.EVENT_LL_LOW
+
+        return LL_OUT
 
     def _state_pre_shot(self):
 

@@ -345,7 +345,6 @@ function save()
     options['show_size'] = $("#option-show-drink-size").prop("checked") ? 1 : 0;
     options['show_strength'] = $("#option-show-strength").prop("checked") ? 1 : 0;
     options['strength_steps'] = $("#option-strength-steps").val();
-    console.log("steps: " + options['strength_steps'])
 
     j = {}
     j['options'] = options;
