@@ -297,7 +297,6 @@ class Mixer(object):
         return fsm.EVENT_POUR_DONE
 
     def _state_test_dispense(self):
-        self.driver.led_dispense()
 
         booze_id = self.recipe.data.keys()[0]
         ml = self.recipe.data[booze_id]
