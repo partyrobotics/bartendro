@@ -65,6 +65,7 @@ handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.l
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger('bartendro')
 logger.addHandler(handler)
+logger.info("Bartendro start up sequence:")
 
 try: 
     app.software_only = args.software_only or int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
@@ -91,7 +92,6 @@ try:
     app.driver.open()
     logging.info("Found %d dispensers." % app.driver.count())
 except I2CIOError:
-    logging.error(err)
     err = "Cannot open I2C interface to a router board."
     if have_uwsgi:
         startup_err = err
@@ -103,7 +103,6 @@ except I2CIOError:
         sys.exit(-1)
 except SerialIOError:
     err = "Cannot open serial interface to a router board."
-    logging.error(err)
     if have_uwsgi:
         startup_err = err
     else:
@@ -114,7 +113,6 @@ except SerialIOError:
         sys.exit(-1)
 except:
     err = traceback.format_exc()
-    logging.error(err)
     if have_uwsgi:
         startup_err = err
     else:
@@ -125,14 +123,16 @@ except:
         sys.exit(-1)
 
 app.startup_err = startup_err
-print app.startup_err
-if not app.startup_err:
+if app.startup_err:
+    logger.info("Bartendro failed to start:")
+    logger.error(err)
+else:
     app.options = load_options()
     app.mixer = mixer.Mixer(app.driver, app.mc)
     if app.software_only:
         logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 
-    logging.info("Bartendro starting")
+    logging.info("Bartendro started")
     app.debug = args.debug
     app.version = version
 
