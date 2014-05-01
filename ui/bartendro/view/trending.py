@@ -27,21 +27,26 @@ def trending_drinks_detail(hours):
 
     title = "Trending drinks"
     log = db.session.query(DrinkLog).order_by(desc(DrinkLog.time)).first() or 0
-    if not log.time:
-        enddate = int(time.time())
-    else:
-        enddate = log.time
+    if log:
+        if not log.time:
+            enddate = int(time.time())
+        else:
+            enddate = log.time
+    
+        try:
+            txt = display_info[hours]
+        except IndexError:
+            txt = "Drinks poured in the last %d hours" % hours
 
-    try:
-        txt = display_info[hours]
-    except IndexError:
-        txt = "Drinks poured in the last %d hours" % hours
-
-    # if a number of hours is 0, then show for "all time"
-    if hours:
-        begindate = enddate - (hours * 60 * 60)
+        # if a number of hours is 0, then show for "all time"
+        if hours:
+            begindate = enddate - (hours * 60 * 60)
+        else:
+            begindate = 0
     else:
-        begindate = 0
+	begindate = 0
+        enddate = 0
+        txt = ""
 
     total_number = db.session.query("number")\
                  .from_statement("""SELECT count(*) as number
