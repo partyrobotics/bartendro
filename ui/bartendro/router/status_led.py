@@ -17,8 +17,8 @@ class StatusLED(object):
 
     # pin definitions
     red = 18
-    green = 16 
-    blue = 22
+    green = 22
+    blue = 16
 
     def __init__(self, software_only):
         self.software_only = software_only
