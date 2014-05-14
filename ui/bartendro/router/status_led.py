@@ -36,10 +36,9 @@ class StatusLED(object):
         gpio.setup(self.green, gpio.OUT)
         gpio.setup(self.blue, gpio.OUT)
 
-    def swap_blue_green(self, swap_b_g):
-        if swap_b_g:
-            self.green = 22
-            self.blue = 16
+    def swap_blue_green(self):
+        self.green = 22
+        self.blue = 16
 
     def set_color(self, red, green, blue):
         if self.software_only: return
