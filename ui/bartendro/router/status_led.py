@@ -17,8 +17,8 @@ class StatusLED(object):
 
     # pin definitions
     red = 18
-    green = 22
-    blue = 16
+    green = 16
+    blue = 22
 
     def __init__(self, software_only):
         self.software_only = software_only
@@ -35,6 +35,11 @@ class StatusLED(object):
         gpio.setup(self.red, gpio.OUT)
         gpio.setup(self.green, gpio.OUT)
         gpio.setup(self.blue, gpio.OUT)
+
+    def swap_blue_green(self, swap_b_g):
+        if swap_b_g:
+            self.green = 22
+            self.blue = 16
 
     def set_color(self, red, green, blue):
         if self.software_only: return

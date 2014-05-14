@@ -212,6 +212,8 @@ class RouterDriver(object):
         self.dispenser_version = self.get_dispenser_version(0)
         if self.dispenser_version < 0:
             self.dispenser_version = DISPENSER_DEFAULT_VERSION 
+        else:
+            self.status_led.swap_blue_green()
         log.info("Detected dispensers version %d. (Only checked first dispenser)" % self.dispenser_version)
 
         self.led_idle()
