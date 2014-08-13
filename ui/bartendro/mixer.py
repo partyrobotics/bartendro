@@ -13,6 +13,7 @@ from bartendro import fsm
 from bartendro.clean import CleanCycle
 from bartendro.pourcomplete import PourCompleteDelay
 from bartendro.router.driver import MOTOR_DIRECTION_FORWARD
+from bartendro.router.switches import Switches
 from bartendro.model.drink import Drink
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
@@ -59,6 +60,9 @@ class Mixer(object):
         self.disp_count = self.driver.count()
         self.do_event(fsm.EVENT_START)
         self.err = ""
+
+        self.switches = Switches(driver, False)
+        self.switches.start()
 
     def check_levels(self):
         with BartendroLock(app.globals):

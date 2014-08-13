@@ -9,7 +9,7 @@ DRINKS = [
    [ 100, 60, 40 ],
    [ 100, 50, 0  ],
    [ 100, 100, 0 ]
-}
+]
 
 try:
     import RPi.GPIO as gpio
@@ -35,7 +35,7 @@ class Switches(Thread):
         if self.software_only: return
 
         if gpio_missing:
-            loglogerror("You must install the RPi.GPIO module")
+            log.error("You must install the RPi.GPIO module")
             sys.exit(-1)
 
         # select the method by which we want to identify GPIO pins
@@ -47,7 +47,7 @@ class Switches(Thread):
         gpio.setup(self.switch1, gpio.IN)
         gpio.setup(self.switch2, gpio.IN)
 
-    def check_switch(self, switch, percents)
+    def check_switch(self, switch, percents):
         # If switch is not pressed, bail
         if gpio.input(switch):
             return
