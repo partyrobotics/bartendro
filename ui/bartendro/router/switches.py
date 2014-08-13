@@ -47,10 +47,14 @@ class Switches(Thread):
         gpio.setup(self.switch1, gpio.IN)
         gpio.setup(self.switch2, gpio.IN)
 
+        log.info("switches module initialized")
+
     def check_switch(self, switch, percents):
         # If switch is not pressed, bail
         if gpio.input(switch):
             return
+
+        log.info("switch on pin %d pressed" % switch)
 
         sleep(.05)
 
@@ -58,21 +62,29 @@ class Switches(Thread):
         if gpio.input(switch):
             return
 
+        log.info("switch on pin %d debounced. Starting cocktails!" % switch)
+
         # Switch is still pressed, it must be cocktail time!
         # Turn on the motors
         for i, p, in enumerate(percents):
+            log.info("Turn on dispenser %d to %d", dispenser, p * 255 // 100)
             self.driver.start(i, p * 255 // 100)
 
         # Wait for the switch to be released
         while not gpio.input(switch):
             pass
 
+        log.info("switch released")
+
         # Turn the motors off
         for i in xrange(len(percents)):
+            log.info("turn off dispenser %d" % dispenser)
             self.driver.stop(i)
 
         # Sleep for a second to get things to calm down again
         sleep(1)
+
+        log.sleep("Cocktail donw. bottoms up")
 
     def run(self):
         while True:

@@ -61,6 +61,7 @@ class Mixer(object):
         self.do_event(fsm.EVENT_START)
         self.err = ""
 
+        log.info("create Switches object")
         self.switches = Switches(driver, False)
         self.switches.start()
 
