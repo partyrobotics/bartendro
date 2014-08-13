@@ -40,7 +40,7 @@ class Switches(Thread):
 
         # select the method by which we want to identify GPIO pins
         gpio.setmode(gpio.BOARD)
-        gpio.setwarnings(False)
+#        gpio.setwarnings(False)
 
         # set our gpio pins to OUTPUT
         gpio.setup(self.switch0, gpio.IN)
@@ -60,7 +60,7 @@ class Switches(Thread):
 
         # Switch is still pressed, it must be cocktail time!
         # Turn on the motors
-        for i, p, in enumater(percents):
+        for i, p, in enumerate(percents):
             self.driver.start(i, p * 255 // 100)
 
         # Wait for the switch to be released
