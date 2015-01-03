@@ -530,7 +530,7 @@ uint8_t receive_cmd(char *cmd)
 {
     uint8_t num = 0, ch;
 
-    dprintf(">");
+    dprint(">");
 
     *cmd = 0;
     for(; !check_reset();)
@@ -554,6 +554,7 @@ uint8_t receive_cmd(char *cmd)
     return 0;
 }
 
+#if 1
 void text_interface(void)
 {
     char cmd[MAX_CMD_LEN];
@@ -582,7 +583,7 @@ void text_interface(void)
         sei();
 
         _delay_ms(10);
-        dprintf("\nParty Robotics Dispenser at your service!\n\n");
+        dprint("\nParty Robotics Dispenser at your service!\n\n");
 
         for(;;)
         {
@@ -649,30 +650,14 @@ void text_interface(void)
                 set_led_pattern(LED_PATTERN_CLEAN);
                 continue;
             }
-            if (strncmp(cmd, "help", 4) == 0)
-            {
-                dprintf("You can use these commands:\n");
-                dprintf("  speed <speed> <cs>\n");
-                dprintf("  tickdisp <ticks> <speed>\n");
-                dprintf("  timedisp <ms>\n");
-                dprintf("  forward\n");
-                dprintf("  backward\n");
-                dprintf("  reset\n");
-                dprintf("  led_idle\n");
-                dprintf("  led_dispense\n");
-                dprintf("  led_done\n");
-                dprintf("  led_clean\n\n");
-                dprintf("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
-                dprintf("ticks == number of quarter turns. ms == milliseconds\n");
-                continue;
-            }
             if (strncmp(cmd, "reset", 5) == 0)
                 break;
 
-            dprintf("Unknown command. Use help to get, eh help. Duh.\n");
+            dprint("Unknown cmd\n");
         }
     }
 }
+#endif
 
 uint8_t address_exchange(void)
 {
