@@ -554,7 +554,6 @@ uint8_t receive_cmd(char *cmd)
     return 0;
 }
 
-#if 1
 void text_interface(void)
 {
     char cmd[MAX_CMD_LEN];
@@ -670,11 +669,10 @@ void text_interface(void)
             if (strncmp(cmd, "reset", 5) == 0)
                 break;
 
-            dprint("Unknown cmd\n");
+            dprint("Unknown command. Use help to get, eh help. Duh.\n");
         }
     }
 }
-#endif
 
 uint8_t address_exchange(void)
 {
