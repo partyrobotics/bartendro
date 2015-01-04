@@ -650,6 +650,23 @@ void text_interface(void)
                 set_led_pattern(LED_PATTERN_CLEAN);
                 continue;
             }
+            if (strncmp(cmd, "help", 4) == 0)
+            {
+                dprint("You can use these commands:\n");
+                dprint("  speed <speed> <cs>\n");
+                dprint("  tickdisp <ticks> <speed>\n");
+                dprint("  timedisp <ms>\n");
+                dprint("  forward\n");
+                dprint("  backward\n");
+                dprint("  reset\n");
+                dprint("  led_idle\n");
+                dprint("  led_dispense\n");
+                dprint("  led_done\n");
+                dprint("  led_clean\n\n");
+                dprint("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
+                dprint("ticks == number of quarter turns. ms == milliseconds\n");
+                continue;
+            }
             if (strncmp(cmd, "reset", 5) == 0)
                 break;
 
@@ -662,7 +679,7 @@ void text_interface(void)
 uint8_t address_exchange(void)
 {
     uint8_t  ch;
-    uint8_t  id;
+    uint8_t  id, text_cmd = 0;
 
     set_led_rgb(0, 0, 255);
     id = eeprom_read_byte((uint8_t *)ee_pump_id_offset);
@@ -688,6 +705,8 @@ uint8_t address_exchange(void)
         if (ch == '?')
             serial_tx(id);
         if (ch == '!')
+            text_cmd++;
+        if (ch == '!' && text_cmd == 3)
             text_interface();
     }
 
