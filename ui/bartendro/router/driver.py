@@ -449,7 +449,8 @@ class RouterDriver(object):
             t0 = time()
             written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
             if written != RAW_PACKET_SIZE + 2:
-                log.error("Send timeout")
+                log.error("*** send timeout")
+                log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
                 return False
 
             if dest == DEST_BROADCAST:
@@ -459,7 +460,8 @@ class RouterDriver(object):
             t1 = time()
             log.debug("packet time: %f" % (t1 - t0))
             if len(ch) < 1:
-                log.error("send packet: read timeout")
+                log.error("*** send packet: read timeout")
+                log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
                 return False
         except SerialException, err:
             log.error("SerialException: %s" % err);
@@ -469,48 +471,60 @@ class RouterDriver(object):
         if ack == PACKET_ACK_OK: 
             return True
         if ack == PACKET_CRC_FAIL: 
-            log.error("send packet: packet ack crc fail")
+            log.error("*** send_packet: packet ack crc fail")
+            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
             return False
         if ack == PACKET_ACK_TIMEOUT: 
-            log.error("send_packet: ack timeout")
+            log.error("*** send_packet: ack timeout")
+            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
             return False
         if ack == PACKET_ACK_INVALID: 
-            log.error("send_packet: dispenser received invalid packet")
+            log.error("*** send_packet: dispenser received invalid packet")
+            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
             return False
         if ack == PACKET_ACK_INVALID_HEADER: 
-            log.error("send_packet: dispenser received invalid header")
+            log.error("*** send_packet: dispenser received invalid header")
+            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
             return False
         if ack == PACKET_ACK_HEADER_IN_PACKET:
-            log.error("send_packet: header in packet error")
+            log.error("*** send_packet: header in packet error")
+            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
             return False
 
         # if we get an invalid ack code, it might be ok. 
         log.error("send_packet: Invalid ACK code %d" % ord(ch))
+        log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
         return False
 
-    def _send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
+    def _get_dispenser_id(self, dest):
         if dest != DEST_BROADCAST: 
-            dispenser_id = self.dispenser_ids[dest]
-            if dispenser_id == 255: return False
+            try:
+                return self.dispenser_ids[dest]
+            except IndexError:
+                log.error("*** send_packet to dispenser %d (of %d dispensers)" % (dest + 1, len(self.dispenser_ids)))
+                return 255
         else:
-            dispenser_id = dest
+            return dest
+
+    def _send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
+        dispenser_id = self._get_dispenser_id(dest)
+        if dispenser_id == 255: 
+            return False
 
         return self._send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
 
     def _send_packet16(self, dest, type, val0, val1):
-        if dest != DEST_BROADCAST: 
-            dispenser_id = self.dispenser_ids[dest]
-            if dispenser_id == 255: return False
-        else:
-            dispenser_id = dest
+        dispenser_id = self._get_dispenser_id(dest)
+        if dispenser_id == 255: 
+            return False
+
         return self._send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
 
     def _send_packet32(self, dest, type, val):
-        if dest != DEST_BROADCAST: 
-            dispenser_id = self.dispenser_ids[dest]
-            if dispenser_id == 255: return False
-        else:
-            dispenser_id = dest
+        dispenser_id = self._get_dispenser_id(dest)
+        if dispenser_id == 255: 
+            return False
+
         return self._send_packet(dest, pack("<BBI", dispenser_id, type, val))
 
     def _receive_packet(self, quiet = False):
