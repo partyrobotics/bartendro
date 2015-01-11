@@ -262,7 +262,14 @@ class RouterDriver(object):
 
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only: return True
-        return self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+        ret = self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+
+        # if it fails, re-try once.
+        if not ret:
+            log.error("*** dispense command failed. re-trying once.")
+            ret = self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+
+        return ret
 
     def led_off(self):
         if self.software_only: return True
