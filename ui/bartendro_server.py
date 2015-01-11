@@ -13,7 +13,7 @@ import traceback
 from bartendro.global_lock import BartendroGlobalLock
 from bartendro.router import driver
 from bartendro import mixer
-from bartendro.error import I2CIOError, SerialIOError
+from bartendro.error import BartendroBrokenError, SerialIOError
 from bartendro.options import load_options
 
 if os.path.exists("version.txt"):
@@ -91,8 +91,8 @@ try:
     app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()
     logging.info("Found %d dispensers." % app.driver.count())
-except I2CIOError:
-    err = "Cannot open I2C interface to a router board."
+except BartendroBrokenError:
+    err = "Cannot open I2C interface to a router board. If a router board is connected, please turn off Bartendro, wait 3 seconds and then turn back on."
     if have_uwsgi:
         startup_err = err
     else:

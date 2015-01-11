@@ -4,7 +4,7 @@ import sys
 import os
 import logging
 from time import sleep
-from bartendro.error import I2CIOError
+from bartendro.error import BartendroBrokenError
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
@@ -37,7 +37,11 @@ class DispenserSelect(object):
 
     def reset(self):
         if self.software_only: return
-        self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
+        try:
+            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
+        except IOError:
+            app.globals.set_state(fsm.STATE_ERROR)
+            raise BartendroBrokenError 
         sleep(.15)
 
     def select(self, dispenser):
@@ -49,15 +53,23 @@ class DispenserSelect(object):
         # for each packet we send.
         if dispenser < self.max_dispensers:
             self.selected = dispenser
-            self.router.write_byte(ROUTER_ADDRESS, dispenser)
+            try:
+                self.router.write_byte(ROUTER_ADDRESS, dispenser)
+            except IOError:
+                app.globals.set_state(fsm.STATE_ERROR)
+                raise BartendroBrokenError 
             sleep(.01)
 
     def sync(self, state):
         if self.software_only: return
-        if (state):
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
-        else:
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
+        try:
+            if (state):
+                self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
+            else:
+                self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
+        except IOError:
+            app.globals.set_state(fsm.STATE_ERROR)
+            raise BartendroBrokenError 
 
     def count(self):
         return self.num_dispensers
@@ -75,7 +87,8 @@ class DispenserSelect(object):
         try:
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
-            raise I2CIOError
+            app.globals.set_state(fsm.STATE_ERROR)
+            raise BartendroBrokenError 
         log.info("Done.")
 
 if __name__ == "__main__":
