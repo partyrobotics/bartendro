@@ -530,7 +530,7 @@ uint8_t receive_cmd(char *cmd)
 {
     uint8_t num = 0, ch;
 
-    dprintf(">");
+    dprint(">");
 
     *cmd = 0;
     for(; !check_reset();)
@@ -582,7 +582,7 @@ void text_interface(void)
         sei();
 
         _delay_ms(10);
-        dprintf("\nParty Robotics Dispenser at your service!\n\n");
+        dprint("\nParty Robotics Dispenser at your service!\n\n");
 
         for(;;)
         {
@@ -651,25 +651,25 @@ void text_interface(void)
             }
             if (strncmp(cmd, "help", 4) == 0)
             {
-                dprintf("You can use these commands:\n");
-                dprintf("  speed <speed> <cs>\n");
-                dprintf("  tickdisp <ticks> <speed>\n");
-                dprintf("  timedisp <ms>\n");
-                dprintf("  forward\n");
-                dprintf("  backward\n");
-                dprintf("  reset\n");
-                dprintf("  led_idle\n");
-                dprintf("  led_dispense\n");
-                dprintf("  led_done\n");
-                dprintf("  led_clean\n\n");
-                dprintf("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
-                dprintf("ticks == number of quarter turns. ms == milliseconds\n");
+                dprint("You can use these commands:\n");
+                dprint("  speed <speed> <cs>\n");
+                dprint("  tickdisp <ticks> <speed>\n");
+                dprint("  timedisp <ms>\n");
+                dprint("  forward\n");
+                dprint("  backward\n");
+                dprint("  reset\n");
+                dprint("  led_idle\n");
+                dprint("  led_dispense\n");
+                dprint("  led_done\n");
+                dprint("  led_clean\n\n");
+                dprint("speed is from 0 - 255. cs = current sense and is 0 or 1.\n");
+                dprint("ticks == number of quarter turns. ms == milliseconds\n");
                 continue;
             }
             if (strncmp(cmd, "reset", 5) == 0)
                 break;
 
-            dprintf("Unknown command. Use help to get, eh help. Duh.\n");
+            dprint("Unknown command. Use help to get, eh help. Duh.\n");
         }
     }
 }
@@ -677,7 +677,7 @@ void text_interface(void)
 uint8_t address_exchange(void)
 {
     uint8_t  ch;
-    uint8_t  id;
+    uint8_t  id, text_cmd = 0;
 
     set_led_rgb(0, 0, 255);
     id = eeprom_read_byte((uint8_t *)ee_pump_id_offset);
@@ -703,6 +703,8 @@ uint8_t address_exchange(void)
         if (ch == '?')
             serial_tx(id);
         if (ch == '!')
+            text_cmd++;
+        if (ch == '!' && text_cmd == 3)
             text_interface();
     }
 
