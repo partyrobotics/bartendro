@@ -197,7 +197,7 @@ class RouterDriver(object):
         duplicate_ids = [x for x, y in collections.Counter(self.dispenser_ids).items() if y > 1]
         if len(duplicate_ids):
             for dup in duplicate_ids:
-                if dup == 255: continue
+                if dup == -1: continue
                 self._log_startup("ERROR: Dispenser id conflict!\n")
                 sent = False
                 for i, d in enumerate(self.dispenser_ids):
