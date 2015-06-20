@@ -5,6 +5,7 @@ import os
 import logging
 from time import sleep
 from bartendro.error import BartendroBrokenError
+from bartendro import fsm
 from bartendro import app
 
 ROUTER_BUS              = 1
@@ -46,7 +47,7 @@ class DispenserSelect(object):
                 self.router.write_byte(address, byte)
             except IOError:
                 app.globals.set_state(fsm.STATE_ERROR)
-                raise BartendroBrokenError 
+                raise BartendroBrokenError("Failed to communicate to router")
 
     def reset(self):
         if self.software_only: return
@@ -74,7 +75,7 @@ class DispenserSelect(object):
                 self._write_byte_with_retry(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
         except IOError:
             app.globals.set_state(fsm.STATE_ERROR)
-            raise BartendroBrokenError 
+            raise BartendroBrokenError("Failed to set SYNC on router")
 
     def count(self):
         return self.num_dispensers
@@ -93,7 +94,7 @@ class DispenserSelect(object):
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
             app.globals.set_state(fsm.STATE_ERROR)
-            raise BartendroBrokenError 
+            raise BartendroBrokenError("Failed to open router.")
         log.info("Done.")
 
 if __name__ == "__main__":
