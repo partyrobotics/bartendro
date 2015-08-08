@@ -4,7 +4,8 @@ import sys
 import os
 import logging
 from time import sleep
-from bartendro.error import I2CIOError
+from bartendro.error import BartendroBrokenError
+from bartendro import app
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4
@@ -35,9 +36,21 @@ class DispenserSelect(object):
         self.num_dispensers = 3
         self.selected = 255 
 
+    def _write_byte_with_retry(self, address, byte):
+        try:
+            self.router.write_byte(address, byte)
+        except IOError, e:
+            # if we get an error, try again, just once
+            try:
+                log.error("*** router send: error while sending. Retrying. " + repr(e))
+                self.router.write_byte(address, byte)
+            except IOError:
+                app.globals.set_state(fsm.STATE_ERROR)
+                raise BartendroBrokenError 
+
     def reset(self):
         if self.software_only: return
-        self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_RESET)
+        self._write_byte_with_retry(ROUTER_ADDRESS, ROUTER_CMD_RESET)
         sleep(.15)
 
     def select(self, dispenser):
@@ -49,15 +62,19 @@ class DispenserSelect(object):
         # for each packet we send.
         if dispenser < self.max_dispensers:
             self.selected = dispenser
-            self.router.write_byte(ROUTER_ADDRESS, dispenser)
+            self._write_byte_with_retry(ROUTER_ADDRESS, dispenser)
             sleep(.01)
 
     def sync(self, state):
         if self.software_only: return
-        if (state):
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
-        else:
-            self.router.write_byte(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
+        try:
+            if (state):
+                self._write_byte_with_retry(ROUTER_ADDRESS, ROUTER_CMD_SYNC_ON)
+            else:
+                self._write_byte_with_retry(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
+        except IOError:
+            app.globals.set_state(fsm.STATE_ERROR)
+            raise BartendroBrokenError 
 
     def count(self):
         return self.num_dispensers
@@ -75,7 +92,8 @@ class DispenserSelect(object):
         try:
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
-            raise I2CIOError
+            app.globals.set_state(fsm.STATE_ERROR)
+            raise BartendroBrokenError 
         log.info("Done.")
 
 if __name__ == "__main__":
