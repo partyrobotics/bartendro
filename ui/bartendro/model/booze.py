@@ -8,7 +8,7 @@ BOOZE_TYPE_UNKNOWN = 0
 BOOZE_TYPE_ALCOHOL = 1
 BOOZE_TYPE_TART = 2
 BOOZE_TYPE_SWEET = 3
-BOOZE_TYPE_EXTERNAL = 3
+BOOZE_TYPE_EXTERNAL = 4
 booze_types = [
                (0, "Unknown"),
                (1, "Alcohol"),

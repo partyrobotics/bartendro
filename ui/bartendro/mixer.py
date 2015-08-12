@@ -14,6 +14,7 @@ from bartendro.clean import CleanCycle
 from bartendro.pourcomplete import PourCompleteDelay
 from bartendro.router.driver import MOTOR_DIRECTION_FORWARD
 from bartendro.model.drink import Drink
+from bartendro.model.booze import BOOZE_TYPE_EXTERNAL
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink_log import DrinkLog
 from bartendro.model.shot_log import ShotLog
@@ -273,11 +274,24 @@ class Mixer(object):
         recipe = {}
         size = 0
         log_lines = {}
+        sql = "SELECT id FROM booze WHERE type = :d"
+        ext_booze_list = db.session.query("id") \
+                        .from_statement(sql) \
+                        .params(d=BOOZE_TYPE_EXTERNAL).all()
+        ext_boozes = {}
+        for booze in ext_booze_list:
+            ext_boozes[booze[0]] = 1
+
         dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
         for booze_id in sorted(self.recipe.data.keys()):
+            # Skip external boozes
+            if booze_id in ext_boozes:
+                continue
+
             found = False
             for i in xrange(self.disp_count):
                 disp = dispensers[i]
+
 
                 if booze_id == disp.booze_id:
                     # if we're out of booze, don't consider this drink
@@ -300,7 +314,7 @@ class Mixer(object):
                     continue
 
             if not found:
-                raise BartendroCantPourErro("Cannot make drink. I don't have the required booze: %d" % booze_id)
+                raise BartendroCantPourError("Cannot make drink. I don't have the required booze: %d" % booze_id)
 
         self._dispense_recipe(recipe)
 
@@ -409,6 +423,13 @@ class Mixer(object):
                         .from_statement(sql) \
                         .params(d=self.disp_count).all()
         boozes.extend(add_boozes)
+
+        # Load whatever external boozes we have and add them to this list
+        sql = "SELECT id FROM booze WHERE type = :d"
+        ext_boozes = db.session.query("id") \
+                        .from_statement(sql) \
+                        .params(d=BOOZE_TYPE_EXTERNAL).all()
+        boozes.extend(ext_boozes)
 
         booze_dict = {}
         for booze_id in boozes:
