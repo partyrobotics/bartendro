@@ -30,6 +30,12 @@
                         </div>
                     {% endif %}
                     <div>
+                        <label for="turbo-mode" class="checkbox">
+                             <input id="turbo-mode" name="turbo-mode" type="checkbox"></input>
+                             Immediately dispense drinks from main menu.
+                        </label>
+                    </div>
+                    <div>
                         <label class="checkbox">
                              <input id="option-metric" name="option-metric" type="checkbox"></input>
                              Use metric for all units shown in Bartendro
@@ -283,6 +289,10 @@ function set_options(opts)
         $("#option-use-liquid-sensors").prop("checked", true);
     else
         $("#option-use-liquid-sensors").prop("checked", false);
+    if (opts['turbo_mode'])
+        $("#turbo-mode").prop("checked", true);
+    else
+        $("#turbo-mode").prop("checked", false);
     if (opts['use_shotbot_ui'])
         $("#option-use-shotbot-ui").prop("checked", true);
     else
@@ -332,6 +342,7 @@ function save()
     options = {};
     options['use_liquid_level_sensors'] = $("#option-use-liquid-sensors").prop("checked") ? 1 : 0;
     options['use_shotbot_ui'] = $("#option-use-shotbot-ui").prop("checked") ? 1 : 0;
+    options['turbo_mode'] = $("#turbo-mode").prop("checked") ? 1 : 0;
     options['show_feeling_lucky'] = $("#option-show-feeling-lucky").prop("checked") ? 1 : 0;
     options['metric'] = $("#option-metric").prop("checked") ? 1 : 0;
     options['must_login_to_dispense'] = $("#option-must-login-to-dispense").prop("checked") ? 1 : 0;
