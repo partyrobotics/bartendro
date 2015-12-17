@@ -75,8 +75,16 @@ uint8_t serial_rx_nb(uint8_t *ch)
     return 0;
 }
 
-#ifndef ROUTER
+void dprint(const char *ptr)
+{
+    for(; *ptr; ptr++)
+    {
+        if (*ptr == '\n') serial_tx('\r');
+        serial_tx(*ptr);
+    }
+}
 
+#ifndef ROUTER
 uint8_t receive_packet(uint8_t id, packet_t *p)
 {
     uint16_t crc = 0;
@@ -277,5 +285,4 @@ uint8_t send_packet(packet_t *p)
     // whoops, we didn't succesfully send the packet. :-(
     return COMM_SEND_FAIL;
 }
-
 #endif

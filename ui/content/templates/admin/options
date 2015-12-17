@@ -17,14 +17,22 @@
                     <div>
                         <label for="option-use-shotbot-ui" class="checkbox">
                              <input id="option-use-shotbot-ui" name="option-use-shotbot-ui" type="checkbox"></input>
-                             Use ShotBot interface to dispense shots of booze, instead of mixed drinks.
+                             Allow users to use the Shots interface to dispense individual shots of booze.
                         </label>
                     </div>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-show-feeling-lucky" class="checkbox">
+                                 <input id="option-show-feeling-lucky" name="option-show-feeling-lucky" type="checkbox"></input>
+                                 Show the <em>I'm feeling lucky button</em> to give the users the option to immediately
+                                 pour a random drink.
+                            </label>
+                        </div>
+                    {% endif %}
                     <div>
-                        <label for="option-show-feeling-lucky" class="checkbox">
-                             <input id="option-show-feeling-lucky" name="option-show-feeling-lucky" type="checkbox"></input>
-                             Show the <em>I'm feeling lucky button</em> to give the users the option to immediately
-                             pour a random drink.
+                        <label for="turbo-mode" class="checkbox">
+                             <input id="turbo-mode" name="turbo-mode" type="checkbox"></input>
+                             Immediately dispense drinks from main menu.
                         </label>
                     </div>
                     <div>
@@ -33,7 +41,7 @@
                              Use metric for all units shown in Bartendro
                         </label>
                     </div>
-                    <div class="div-spacer"/>
+                    <div class="div-spacer"></div>
                     <span class="help-block">
                         The username and password that must be given to use the admin features of Bartendro:
                     </span>
@@ -46,8 +54,8 @@
                         <input id="login-passwd" name="login-passwd" type="password"></input>
                     </div>
                     <span class="help-block">
-                        If you trust all of the users of Bartendro to "do the right thing", you can allow 
-                        anyone to pour drinks from Bartendro. If you'd like to only allow devices that are 
+                        If you trust all the people in the wireless reach of Bartendro to not abuse it and/or 
+                        waste booze, you can allow anyone to pour drinks. If you'd like to only allow devices that are 
                         logged into Bartendro to dispense drinks, enable this feature. Logging into the 
                         admin section of Bartendro will allow that logged in user to dispense drinks:
                     </span>
@@ -58,62 +66,88 @@
                         </label>
                     </div>
                 </div>
-                <div class="div-spacer"/>
+                <div class="div-spacer"></div>
                 <h4>Size options</h4>
-                <span class="help-block">
-                    All values here are in milliliters (ml).
-                </span>
                 <div style="margin-left: 15px">
-                    <div>
-                        <label for="option-drink-size">Default drink size</label>
-                        <input id="option-drink-size" name="option-drink-size" type="text"></input>
-                    </div>
+                    <span class="help-block">
+                        All values here are in milliliters (ml).
+                    </span>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-drink-size">Default drink size</label>
+                            <input id="option-drink-size" name="option-drink-size" type="text"></input>
+                        </div>
+                    {% endif %}
                     <div>
                         <label for="option-shot-size">Shot size (for ShotBot interface)</label>
                         <input id="option-shot-size" name="option-shot-size" type="text"></input>
                     </div>
-                    <div>
-                        <label for="option-taster-size">Taster size</label>
-                        <input id="option-taster-size" name="option-taster-size" type="text"></input>
-                    </div>
+                    {% if not options.i_am_shotbot %}
+                        <div>
+                            <label for="option-taster-size">Taster size</label>
+                            <input id="option-taster-size" name="option-taster-size" type="text"></input>
+                        </div>
+                    {% endif %}
                     <div>
                         <label for="option-test-dispense-size">Test dispense size</label>
                         <input id="option-test-dispense-size" name="option-test-dispense-size" type="text"></input>
                     </div>
                 </div>
                 <div class="div-spacer"/>
-                <h4>Drink options</h4>
-                <div style="margin-left: 15px">
-                    <div>
-                        <label for="option-show-taster" class="checkbox">
-                            <input id="option-show-taster" name="option-show-taster" type="checkbox"></input>
-                            Show taster button
-                        </label>
+                {% if not options.i_am_shotbot %}
+                    <h4>Drink options</h4>
+                    <div style="margin-left: 15px">
+                        <div>
+                            <label for="option-show-taster" class="checkbox">
+                                <input id="option-show-taster" name="option-show-taster" type="checkbox"></input>
+                                Show taster button
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-show-drink-size" class="checkbox">
+                                <input id="option-show-drink-size" name="option-show-drink-size" type="checkbox"></input>
+                                Allow users to change the drink size
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-show-strength" class="checkbox">
+                                <input id="option-show-strength" name="option-show-strength" type="checkbox"></input>
+                                Allow users to change the strength of their drinks
+                            </label>
+                        </div>
+                        <div>
+                            <label for="option-strength-steps">Number of strength steps to show</label>
+                            <select id="option-strength-steps" name="option-strength-steps">
+                               <option value="1">1</option>
+                               <option value="2">2</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label for="option-show-drink-size" class="checkbox">
-                            <input id="option-show-drink-size" name="option-show-drink-size" type="checkbox"></input>
-                            Allow users to change the drink size
-                        </label>
-                    </div>
-                    <div>
-                        <label for="option-show-strength" class="checkbox">
-                            <input id="option-show-strength" name="option-show-strength" type="checkbox"></input>
-                            Allow users to change the strength of their drinks
-                        </label>
-                    </div>
-                    <div>
-                        <label for="option-strength-steps">Number of strength steps to show</label>
-                        <input id="option-strength-steps" name="option-strength-steps" type="text" class="required" minlength="1"></input>
-                    </div>
-                </div>
+                {% endif %}
             </fieldset>
         </form>
         <div class="div-spacer">
-            <a class="btn btn-large btn-primary submit-button" onclick="save()">save</a>
+            <a class="btn btn-large btn-primary submit-button" onclick="save()">save and reboot</a>
         </div>
     </div>
     <div class="span4 admin-box-full">
+        <h2>Network info</h2>
+        <div style="margin-bottom: 30px">
+            <div>
+            WiFi address: {{ wlan0 }}<br/>
+            Network address: {{ eth0 }} 
+            </div>
+            {% if show_passwd_recovery %}
+                <h4>Ooops</h4>
+                <div>
+                <a href="/admin/lost-passwd">I lost my username/password.</a>
+                </div>
+            {% endif %}
+        </div>
+        <h2>Software</h2>
+        <div style="margin-bottom: 30px">
+        Your software version is: {{ version }}
+        </div>
         <h2>Database</h2>
         <h4>Current schema</h4>
         <div>
@@ -122,30 +156,34 @@
         <div class="div-spacer"></div>
         <h4>Database download</h4>
         <div>
-        You should do this periodically and certainly before you upgrade your Bartendro software!
+        <p>
+        Bartendro's database contains all the information needed to run your Bartendro, including booze you've added, 
+        your drink recipes and a log of your drinks poured. This information is <b>not</b> automatically backed up
+        and you should make period backups of this data base using the two buttons below.
+        </p>
+
+        Download Bartendro's database to your local machine. We recommend saving this file to a DropBox account!
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
-        <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">Download your database</a>
+        <a class="btn btn-big" href="/ws/download/bartendro.db" id="database-download">download your database</a>
         </div>
         <div class="div-spacer"></div>
         <h4>Database upload</h4>
         <div>
-        If you've previously downloaded a database and would like to upload it.
+        <p>
+        If you've previously saved your Bartendro database and would like to upload this database to Bartendro,
+        use the button below.
+        </p>
+        <b>Warning:</b> This will overwrite your current database! All changes made to Bartendro's
+        database will be lost! We recommend downloading a copy of the database and stashing it in a safe place before
+        proceeding.
         </div>
         <div class="div-spacer"></div>
         <div style="text-align: center">
-        <a class="btn btn-big" href="/admin/upload" id="database-upload">Upload a database</a>
+        <a class="btn btn-big btn-danger" href="/admin/upload" id="database-upload">upload a database</a>
         </div>
     </div>
-    {% if show_passwd_recovery %}
-    <div class="span4 admin-box-full" style="margin-top: 25px">
-        <h2>Ooops</h2>
-        <div>
-        <a href="/admin/lost-passwd">I lost my username/password.</a>
-        </div>
-    </div>  
-    {% endif %}
 </div>
 <div id="reload-dialog" title="Bartendro" style="display: none; text-align: center;">
   <p>
@@ -251,6 +289,10 @@ function set_options(opts)
         $("#option-use-liquid-sensors").prop("checked", true);
     else
         $("#option-use-liquid-sensors").prop("checked", false);
+    if (opts['turbo_mode'])
+        $("#turbo-mode").prop("checked", true);
+    else
+        $("#turbo-mode").prop("checked", false);
     if (opts['use_shotbot_ui'])
         $("#option-use-shotbot-ui").prop("checked", true);
     else
@@ -300,6 +342,7 @@ function save()
     options = {};
     options['use_liquid_level_sensors'] = $("#option-use-liquid-sensors").prop("checked") ? 1 : 0;
     options['use_shotbot_ui'] = $("#option-use-shotbot-ui").prop("checked") ? 1 : 0;
+    options['turbo_mode'] = $("#turbo-mode").prop("checked") ? 1 : 0;
     options['show_feeling_lucky'] = $("#option-show-feeling-lucky").prop("checked") ? 1 : 0;
     options['metric'] = $("#option-metric").prop("checked") ? 1 : 0;
     options['must_login_to_dispense'] = $("#option-must-login-to-dispense").prop("checked") ? 1 : 0;

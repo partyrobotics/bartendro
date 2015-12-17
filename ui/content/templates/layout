@@ -10,15 +10,44 @@
     <link rel="stylesheet" type="text/css" href="/static/css/bartendro-theme/jquery-ui-1.10.3.custom.min.css" />
   </head>
   <body>
-      <div class="container-fluid fill">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <ul class="nav">
+          {% if not options.i_am_shotbot %}
+             <li
+             {% if active == "index" %}
+                class="active"
+             {% endif %}
+             ><a href="/" class="slim-nav-item">Cocktails</a></li>
+          {% endif %}
+          {% if options.use_shotbot_ui %}
+             <li
+             {% if active == "shots" %}
+                class="active"
+             {% endif %}
+             ><a href="/shots" class="slim-nav-item">Shots</a></li>
+          {% endif %}
+          <li
+          {% if active == "trending" %}
+             class="active"
+          {% endif %}
+          ><a href="/trending" class="slim-nav-item">Trending</a></li>
+        </ul>
+        <div class="bartendro-logo">
+            <a href="/admin"><img class="bartendro-logo-img" src="/static/images/bartendro-logo.png"></a>
+        </div>
+        <div class="party-robot">
+            <a href="/admin"><img class="party-robot-img" src="/static/images/partyrobot.png"></a>
+        </div>
+      </div>
+    </div>
+      <div class="container-fluid">
         <div id="moar">
-            <div id="content">
                 <div class="orange-border">
                     <div class="dark-border">
                        {% block body %}{% endblock %}
                     </div>
                 </div>
-             </div>
           </div>
       </div>
   </body>

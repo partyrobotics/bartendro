@@ -6,12 +6,25 @@ import logging.handlers
 import os
 import memcache
 import sys
+import argparse
+import subprocess
+import traceback
+
 from bartendro.global_lock import BartendroGlobalLock
 from bartendro.router import driver
 from bartendro import mixer
-from bartendro.errors import SerialIOError, I2CIOError
+from bartendro.error import BartendroBrokenError, SerialIOError
 from bartendro.options import load_options
-import argparse
+
+if os.path.exists("version.txt"):
+    with open("version.txt", "r") as f:
+        version = f.read()
+else:
+    version = subprocess.check_output(["git", "rev-parse", "HEAD"])
+    if version:
+        version = "git commit " + version[:10]
+    else:
+        version = "[unknown]"
 
 LOG_SIZE = 1024 * 500  # 500k maximum log file size
 LOG_FILES_SAVED = 3    # number of log files to compress and save
@@ -52,8 +65,7 @@ handler = logging.handlers.RotatingFileHandler(os.path.join("logs", "bartendro.l
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger('bartendro')
 logger.addHandler(handler)
-
-app.options = load_options()
+logger.info("Bartendro start up sequence:")
 
 try: 
     app.software_only = args.software_only or int(os.environ['BARTENDRO_SOFTWARE_ONLY'])
@@ -73,34 +85,56 @@ app.mc.flush_all()
 # Create the Bartendro globals to prevent multiple people from using it at the same time.
 app.globals = BartendroGlobalLock()
 
+startup_err = ""
 # Start the driver, which talks to the hardware
 try:
     app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
     app.driver.open()
-except I2CIOError:
-    print
-    print "Cannot open I2C interface to a router board."
-    print
-    print_software_only_notice()
-    sys.exit(-1)
+    logging.info("Found %d dispensers." % app.driver.count())
+except BartendroBrokenError:
+    err = "Cannot open I2C interface to a router board. If a router board is connected, please turn off Bartendro, wait 3 seconds and then turn back on."
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
 except SerialIOError:
-    print
-    print "Cannot open serial interface to a router board."
-    print
-    print_software_only_notice()
-    sys.exit(-1)
+    err = "Cannot open serial interface to a router board."
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
+except:
+    err = traceback.format_exc()
+    if have_uwsgi:
+        startup_err = err
+    else:
+        print
+        print err
+        print
+        print_software_only_notice()
+        sys.exit(-1)
 
-logging.info("Found %d dispensers." % app.driver.count())
+app.startup_err = startup_err
+if app.startup_err:
+    logger.info("Bartendro failed to start:")
+    logger.error(err)
+else:
+    app.options = load_options()
+    app.mixer = mixer.Mixer(app.driver, app.mc)
+    if app.software_only:
+        logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
 
-if app.driver.count() == 1:
-    app.options.use_shotbot_ui = True
-
-app.mixer = mixer.Mixer(app.driver, app.mc)
-if app.software_only:
-    logging.info("Running SOFTWARE ONLY VERSION. No communication between software and hardware chain will happen!")
-
-logging.info("Bartendro starting")
-app.debug = args.debug
+    logging.info("Bartendro started")
+    app.debug = args.debug
+    app.version = version
 
 if __name__ == '__main__':
     app.run(host=args.host, port=args.port)

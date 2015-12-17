@@ -22,7 +22,8 @@ bartendro_options = {
     u'show_taster'             : False,
     u'strength_steps'          : 2,
     u'use_shotbot_ui'          : False,
-    u'show_feeling_lucky'      : False
+    u'show_feeling_lucky'      : False,
+    u'turbo_mode'              : False
 }
 
 class BadConfigOptionsError(Exception):
@@ -86,15 +87,25 @@ def load_options():
 
     options = Options()
     for o in db.session.query(Option).all():
-        if isinstance(bartendro_options[o.key], int):
-           value = int(o.value)
-        elif isinstance(bartendro_options[o.key], unicode):
-           value = unicode(o.value)
-        elif isinstance(bartendro_options[o.key], boolean):
-           value = boolean(o.value)
-        else:
-            raise BadConfigOptionsError
+        try:
+            if isinstance(bartendro_options[o.key], int):
+               value = int(o.value)
+            elif isinstance(bartendro_options[o.key], unicode):
+               value = unicode(o.value)
+            elif isinstance(bartendro_options[o.key], boolean):
+               value = boolean(o.value)
+            else:
+                raise BadConfigOptionsError
+        except KeyError:
+            # Ignore options we don't understand
+            pass
 
         setattr(options, o.key, value)
+
+    if app.driver.count() == 1:
+        setattr(options, "i_am_shotbot", True)
+        setattr(options, "use_shotbot_ui", True)
+    else:
+        setattr(options, "i_am_shotbot", False)
 
     return options

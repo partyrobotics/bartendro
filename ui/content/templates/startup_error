@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{ title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="/static/images/icon.ico">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bartendro.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bartendro-theme/jquery-ui-1.10.3.custom.min.css" />
+  </head>
+  <body>
+      <div class="container-fluid">
+        <div id="moar">
+                <div class="orange-border">
+                    <div class="dark-border">
+                        <div id="scroll-pane">
+                        Bartendro failed to start up, likely due to a hardware or misconfiguration issue.
+                        Please send the following debugging information to <a href="mailto:support@partyrobotics.com">support@partyrobotics.com</a>:
+                        <pre>{{ startup_err }}</pre>
+                        </div>
+                    </div>
+                </div>
+          </div>
+      </div>
+  </body>
+</html>

@@ -80,8 +80,8 @@
     .stack-element-title {
         color: #005991;
         font-weight: normal;
-        font-size: 19pt;
-        padding-left: 10px;
+        font-size: 17pt;
+        padding-left: 5px;
     }
 
     .ui-dialog {
@@ -98,6 +98,10 @@
         float: right;
         font-size: 16pt;
         width: 30%;
+    }
+
+    .smaller-font {
+        font-size: 16px;
     }
 
 }
@@ -203,6 +207,40 @@
         width: 20%;
     }
 
+    .smaller-font {
+        font-size: 17.5px;
+    }
+
+}
+
+@media (min-width: 530px) {
+    .bartendro-logo {
+        float: right;
+    }
+    .bartendro-logo-img {
+        width: 150px;
+        padding-top: 10px;
+    }
+    .party-robot {
+        display: none
+    }
+}
+
+@media (max-width: 530px) {
+    .bartendro-logo {
+        display: none;
+    }
+    .party-robot {
+        width: 20px;
+        float: right;
+    }
+    .party-robot-img {
+        width: 20px;
+        padding-top: 8px;
+    }
+    .slim-nav-item {
+        padding: 10px 10px 10px !important;
+    }
 }
 
 .trending-drinks {
@@ -235,6 +273,10 @@ h3 {
     font-size: 16pt;
     margin: 0px;
     padding: 20px 0 0 0;
+}
+
+.navbar .nav > .active > a {
+    color: #0088cc;
 }
 
 .ingredients {
@@ -301,23 +343,23 @@ table {
     font-weight: bold;
 }
 
-.dispense-button {
-}
-
 .dispense-buttons {
     margin: 40px 0 20px 0;
 }
 
 .dispense-buttons-left {
+    width: 30%;
 }
 
 .dispense-buttons-middle {
     text-align: center;
+    width: 30%;
 }
 
 .dispense-buttons-right {
     font-weight: bold;
     text-align: right;
+    width: 30%;
 }
 
 .dispenser-out {
@@ -338,6 +380,14 @@ table {
     font-size: 14pt;
     font-weight: bold;
     padding-bottom: 10px;
+}
+
+.motor-button {
+    width: 100px;
+}
+
+.test-dispense-button {
+    width: 130px;
 }
 
 .admin-box {
@@ -427,6 +477,13 @@ table {
 
 .shotbot-text {
     font-size: 13pt;
+}
+
+.shots-warning {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .ui-dialog .ui-dialog-buttonpane button 

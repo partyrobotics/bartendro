@@ -44,8 +44,9 @@ Then, once you're ready, run:
 
    # sudo ./bartendro_server --debug
 
-That should start the server on all interfaces on your machine. Before we start shipping
-the actual complete bots, we're going to tighten this up to only run on localhost.
+That should start the server on all interfaces on your machine. Bartendro's WiFi address is 
+always 10.0.0.1 and the wired ethernet ip address is assigned by DHCP. To see the addresses
+for Bartendro, see the Network Info box on the options page.
 
 Software only mode
 ------------------

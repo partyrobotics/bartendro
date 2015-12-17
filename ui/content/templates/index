@@ -1,11 +1,13 @@
 {% extends 'layout' %}
+{% set active = "index" %}
 {% block body %}
 <div id="scroll-pane">
     {% if top_drinks or other_drinks %}
         <div class="row-fluid">
            <div class="span6">
-                <span class="trending-drinks"><a href="/trending">What's popular now?</a></span>
                 <h1>the essentials</h1>
+           </div>
+           <div class="span6">
            </div>
         </div>
         {{ drink_table(top_drinks) }}
@@ -27,14 +29,13 @@
         </div>
     {% endif %}
 </div>
-<div>
-<a href="/admin" style="color: #Fafafa">admin</a>
-</div>
 <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
 // defining flags
 var isCtrl = false;
 var isShift = false;
+
+console.log({{ options.turbo_mode }});
  
 $(document).ready(function() {
     // action on key up
@@ -69,8 +70,8 @@ $(document).ready(function() {
       {% endif %}
       <div class="span6 menuitem">
          <a class="btn btn-large btn-block drink-btn button-border
-         {% if drink.am_lucky %} btn-danger {% else %} btn-warning {% endif %}" style="margin-bottom: 8px;" 
-                type="button" href="/drink/{{ drink.id }}{% if drink.am_lucky %}/go{% endif %}">{{ drink.name.name }}</a>
+         {% if drink.am_lucky or options.turbo_mode %} btn-success {% else %} btn-warning {% endif %}" style="margin-bottom: 8px;" 
+                type="button" href="/drink/{{ drink.id }}{% if drink.am_lucky or options.turbo_mode %}/go{% endif %}">{{ drink.name.name }}</a>
          <div class="ingredients">
             {% for ing in drink.ingredients %}
                {{ ing.name }}{% if not loop.last %}, {% endif %}

@@ -12,16 +12,19 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.dispenser import Dispenser
 from bartendro import constant 
 
-@app.route('/drink/<id>')
+@app.route('/drink/<int:id>')
 def normal_drink(id):
     return drink(id, 0)
 
-@app.route('/drink/<id>/go')
+@app.route('/drink/<int:id>/go')
 def lucky_drink(id):
     return drink(id, 1)
 
 def drink(id, go):
     """If go is True, tell the web page to pour the drink right away. No dallying!"""
+
+    # can we make this drink??
+    can_make = id in app.mixer.get_available_drink_list()
 
     drink = db.session.query(Drink) \
                           .filter(Drink.id == id) \
@@ -61,7 +64,8 @@ def drink(id, go):
                                show_sweet_tart=show_sweet_tart,
                                show_sobriety=show_sobriety,
                                can_change_strength=show_strength,
-                               go=go)
+                               go=go,
+                               can_make=can_make)
 
     dispensers = db.session.query(Dispenser).all()
     disp_boozes = {}
@@ -93,7 +97,8 @@ def drink(id, go):
                            show_sweet_tart=show_sweet_tart,
                            show_sobriety=show_sobriety,
                            can_change_strength=show_strength,
-                           go=go)
+                           go=go,
+                           can_make=can_make)
 
 @app.route('/drink/sobriety')
 def drink_sobriety():

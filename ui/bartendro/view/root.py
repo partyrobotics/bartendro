@@ -4,11 +4,12 @@ import random
 from sqlalchemy import func, asc
 from sqlalchemy.exc import OperationalError
 from bartendro import app, db
-from bartendro.global_lock import STATE_ERROR
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from bartendro.model.dispenser import Dispenser
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
+from bartendro import fsm
+from bartendro.mixer import LL_LOW, LL_OK
 
 def process_ingredients(drinks):
     for drink in drinks:
@@ -26,11 +27,9 @@ def filter_drink_list(can_make_dict, drinks):
 
 @app.route('/')
 def index():
-    if app.options.use_shotbot_ui:
-        return shotbot()
-
-    if app.globals.get_state() == STATE_ERROR:
+    if app.globals.get_state() == fsm.STATE_ERROR:
         return render_template("index", 
+                               options=app.options, 
                                top_drinks=[], 
                                other_drinks=[],
                                error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
@@ -40,18 +39,10 @@ def index():
         can_make = app.mixer.get_available_drink_list()
     except OperationalError:
         return render_template("index", 
+                               options=app.options, 
                                top_drinks=[], 
                                other_drinks=[],
                                error_message="Bartendro database errror.<br/><br/>There doesn't seem to be a valid database installed.",
-                               title="Bartendro error")
-        
-
-
-    if not len(can_make):
-        return render_template("index", 
-                               top_drinks=[], 
-                               other_drinks=[],
-                               error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
                                title="Bartendro error")
 
     can_make_dict = {}
@@ -64,16 +55,9 @@ def index():
                         .filter(Drink.popular == 1)  \
                         .filter(Drink.available == 1)  \
                         .order_by(asc(func.lower(DrinkName.name))).all() 
+
     top_drinks = filter_drink_list(can_make_dict, top_drinks)
     process_ingredients(top_drinks)
-
-    if app.options.show_feeling_lucky:
-        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
-        lucky.name = DrinkName("I'm feeling lucky!")
-        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
-        lucky.set_lucky(True)
-        lucky.set_ingredients_text("Pour a random drink now")
-        top_drinks.insert(0, lucky)
 
     other_drinks = db.session.query(Drink) \
                         .join(DrinkName) \
@@ -83,17 +67,61 @@ def index():
                         .order_by(asc(func.lower(DrinkName.name))).all() 
     other_drinks = filter_drink_list(can_make_dict, other_drinks)
     process_ingredients(other_drinks)
+
+    print "%d, %d" % (len(top_drinks), len(other_drinks))
+
+    if (not len(top_drinks) and not len(other_drinks)) or app.globals.get_state() == fsm.STATE_HARD_OUT:
+        return render_template("index", 
+                               options=app.options, 
+                               top_drinks=[], 
+                               other_drinks=[],
+                               error_message="Drinks can't be made with the available boozes.<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
             
+    if app.options.show_feeling_lucky:
+        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
+        lucky.name = DrinkName("I'm feeling lucky!")
+        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
+        lucky.set_lucky(True)
+        lucky.set_ingredients_text("Pour a random drink now")
+        top_drinks.insert(0, lucky)
+
     return render_template("index", 
+                           options=app.options, 
                            top_drinks=top_drinks, 
                            other_drinks=other_drinks,
                            title="Bartendro")
 
-def shotbot():
-    disp = db.session.query(Dispenser).all()
-    disp = disp[:app.driver.count()]
-    return render_template("shotbot", 
+@app.route('/shots')
+def shots():
+
+    if not app.options.use_shotbot_ui:
+        return redirect("/")
+
+    if app.globals.get_state() == fsm.STATE_ERROR:
+        return render_template("shots", 
+                               num_shots_ready=0,
+                               options=app.options, 
+                               error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
+
+    dispensers = db.session.query(Dispenser).all()
+    dispensers = dispensers[:app.driver.count()]
+
+    shots = []
+    for disp in dispensers:
+        if disp.out == LL_OK or disp.out == LL_LOW or not app.options.use_liquid_level_sensors:
+            shots.append(disp.booze)
+
+    if len(shots) == 0:
+        return render_template("shots", 
+                               num_shots_ready=0,
+                               options=app.options, 
+                               error_message="Bartendro is out of all boozes. Oh no!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
+
+    return render_template("shots", 
+                           num_shots_ready= len(shots),
                            options=app.options, 
-                           dispensers=disp, 
-                           count=app.driver.count(), 
-                           title="ShotBot")
+                           shots=shots, 
+                           title="Shots")

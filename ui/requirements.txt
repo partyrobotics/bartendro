@@ -1,0 +1,9 @@
+werkzeug
+#smbus
+#sqlite3
+python-memcached
+flask
+flask-sqlalchemy
+flask-login
+wtforms
+pyserial

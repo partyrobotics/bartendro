@@ -22,14 +22,18 @@ def ws_options():
         options = Option.query.order_by(asc(func.lower(Option.key)))
         data = {}
         for o in options:
-            if isinstance(bartendro_options[o.key], int):
-               value = int(o.value)
-            elif isinstance(bartendro_options[o.key], unicode):
-               value = unicode(o.value)
-            elif isinstance(bartendro_options[o.key], boolean):
-               value = boolean(o.value)
-            else:
-                raise InternalServerError
+            try:    
+                if isinstance(bartendro_options[o.key], int):
+                   value = int(o.value)
+                elif isinstance(bartendro_options[o.key], unicode):
+                   value = unicode(o.value)
+                elif isinstance(bartendro_options[o.key], boolean):
+                   value = boolean(o.value)
+                else:
+                    raise InternalServerError
+            except KeyError:
+                pass
+
             data[o.key] = value
 
         return json.dumps({ 'options' : data });

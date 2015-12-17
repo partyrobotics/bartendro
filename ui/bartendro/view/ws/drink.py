@@ -3,7 +3,6 @@ import json
 from time import sleep
 from operator import itemgetter
 from bartendro import app, db, mixer
-from bartendro.global_lock import STATE_ERROR
 from flask import Flask, request
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
@@ -12,18 +11,25 @@ from bartendro.model.drink_name import DrinkName
 from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
-def ws_make_drink(drink, recipe, speed = 255):
-    if app.mixer.get_state() == STATE_ERROR:
-        raise InternalServerError
+def ws_make_drink(drink_id):
+    recipe = {}
+    for arg in request.args:
+        disp = int(arg[5:])
+        recipe[disp] = int(request.args.get(arg))
+
+    drink = Drink.query.filter_by(id=int(drink_id)).first()
     try:
-        err = app.mixer.make_drink(drink, recipe, speed)
-        if not err:
-            return "ok\n"
-        else:
-            raise BadRequest(err)
-    except mixer.BartendroBusyError:
-        raise ServiceUnavailable("busy")
+        app.mixer.make_drink(drink, recipe)
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
+
+    return "ok\n"
 
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
@@ -31,22 +37,14 @@ def ws_drink(drink):
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    recipe = {}
-    for arg in request.args:
-        recipe[arg] = int(request.args.get(arg))
+    return ws_make_drink(drink)
 
-    return ws_make_drink(drink, recipe)
-
-@app.route('/ws/drink/<int:drink>/speed/<int:speed>')
-def ws_drink_at_speed(drink, speed):
+@app.route('/ws/drink/custom')
+def ws_custom_drink():
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
-    recipe = {}
-    for arg in request.args:
-        recipe[arg] = int(request.args.get(arg))
-
-    return ws_make_drink(drink, recipe, speed)
+    return ws_make_drink(0)
 
 @app.route('/ws/drink/<int:drink>/available/<int:state>')
 def ws_drink_available(drink, state):
@@ -58,9 +56,37 @@ def ws_drink_available(drink, state):
     db.session.commit()
     return "ok\n"
 
+@app.route('/ws/shots/<int:booze_id>')
+def ws_shots(booze_id):
+    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+        return "login required"
+
+    dispensers = db.session.query(Dispenser).all()
+    dispenser = None
+    for d in dispensers:
+        if d.booze.id == booze_id:
+            dispenser = d
+
+    if not dispenser:
+        return "this booze is not available"
+
+    try:
+        app.mixer.dispense_shot(dispenser, app.options.shot_size)
+    except mixer.BartendroCantPourError, err:
+        raise BadRequest(err)
+    except mixer.BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except mixer.BartendroBusyError, err:
+        raise ServiceUnavailable(err)
+
+    return ""
+
 @app.route('/ws/drink/<int:id>/load')
 @login_required
-def admin_drink_load(id):
+def ws_drink_load(id):
+    return drink_load(id)
+
+def drink_load(id):
     drink = Drink.query.filter_by(id=int(id)).first()
     boozes = []
     for booze in drink.drink_boozes:
@@ -140,27 +166,4 @@ def ws_drink_save(drink):
     mc.delete("other_drinks")
     mc.delete("available_drink_list")
 
-    return json.dumps({ 'id' : drink.id });
-
-@app.route('/ws/shotbot/<int:disp>')
-def ws_shotbot(disp):
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
-        return "login required"
-
-    if app.mixer.get_state() == STATE_ERROR:
-        return "error state"
-
-    dispenser = db.session.query(Dispenser).filter_by(id=disp).first()
-    try:
-        is_cs, err = app.mixer.dispense_ml(disp - 1, app.options.shot_size, dispenser.booze.id)
-        if is_cs:
-            app.mixer.set_state(STATE_ERROR)
-            return "error state"
-        if err:
-            err = "Failed to test dispense on dispenser %d: %s" % (disp, err)
-            log.error(err)
-            return err
-    except mixer.BartendroBusyError:
-        return "busy"
-
-    return ""
+    return drink_load(drink.id) 

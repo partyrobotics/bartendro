@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import logging
-from werkzeug.exceptions import ServiceUnavailable
+from werkzeug.exceptions import ServiceUnavailable, InternalServerError
 from bartendro import app, db, STATIC_FOLDER
 from flask import Flask, request, Response
 from flask.ext.login import login_required
 from bartendro.model.drink import Drink
 from bartendro.model.booze import Booze
 from bartendro.form.booze import BoozeForm
+from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 log = logging.getLogger('bartendro')
 
@@ -38,15 +39,15 @@ def ws_test_chain():
 @login_required
 def ws_check_levels():
     mixer = app.mixer
-    if not mixer.check_liquid_levels():
-        error = "Check levels failed."
-        log.error(error)
-        return error
+    try:
+        mixer.check_levels()
+    except BartendroCantPourError, err:
+        raise BadRequest(err)
+    except BartendroBrokenError, err:
+        raise InternalServerError(err)
+    except BartendroBusyError, err:
+        raise ServiceUnavailable(err)
 
-    mc = app.mc
-    mc.delete("top_drinks")
-    mc.delete("other_drinks")
-    mc.delete("available_drink_list")
     return ""
 
 @app.route('/ws/download/bartendro.db')
