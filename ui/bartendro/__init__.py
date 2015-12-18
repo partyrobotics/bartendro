@@ -60,6 +60,11 @@ CustomDrink.drink = relationship(Drink, backref=backref("custom_drink"))
 DrinkLog.drink = relationship(Drink)
 ShotLog.booze = relationship(Booze)
 
+if not os.path.exists(SQLALCHEMY_DATABASE_FILE):
+    print "Creating an empty database..."
+    db.create_all()
+    db.session.commit()
+
 # Import views
 from bartendro.view import root, trending, blend
 from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \

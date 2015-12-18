@@ -13,7 +13,6 @@ from bartendro.model.blend_log import BlendLog
 @app.route('/blend')
 def blend():
     driver = app.driver
-    count = driver.count()
 
     recipe = {}
     for arg in request.args:
@@ -21,6 +20,7 @@ def blend():
         recipe[n] = int(request.args.get(arg))
 
     dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
+    count = len(dispensers)
     boozes = db.session.query(Booze).order_by(Booze.id).all()
 
     return render_template("blend", 

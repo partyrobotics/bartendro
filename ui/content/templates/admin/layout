@@ -13,7 +13,7 @@
     <div class="navbar-inner">
         <ul class="nav">
             <li><a href="/">menu</a></li>
-            {% if current_user.is_authenticated() %}
+            {% if current_user.is_authenticated %}
                 <li><a href="/admin">dispensers</a></li>
                 {% if not options.i_am_shotbot %}
                     <li><a href="/admin/drink">drinks</a></li>

@@ -7,24 +7,28 @@
             <h2>Blend designer</h2>
               <div class="alert" id="status-message" style="visibility: hidden">&lt;3</div>
               <div id="dispensers">
-                 <form method="POST" action="/admin/save">
-                    {% for i in range(1, count + 1) %}
-                        <div style="padding-bottom: 30px">
-                            <div class="blend-title">{{ dispensers[i - 1].booze.name }}</div>
-                            <div id="blend_info{{ i }}" class="blend-info">0 %</div>
-                            <div>
-                                <a class="btn btn-large btn-warning drink-plus-minus button-border">-</a>
-                                <div id="slider{{ i }}" class="blend-slider"></div>
-                                <a class="btn btn-large btn-warning drink-plus-minus button-border">+</a>
+                 {% if not dispensers|count or not boozes|count %}
+                     Bartendro is not set up for blending yet.
+                 {% else %}
+                     <form method="POST" action="/admin/save">
+                        {% for i in range(1, count + 1) %}
+                            <div style="padding-bottom: 30px">
+                                <div class="blend-title">{{ dispensers[i - 1].booze.name }}</div>
+                                <div id="blend_info{{ i }}" class="blend-info">0 %</div>
+                                <div>
+                                    <a class="btn btn-large btn-warning drink-plus-minus button-border">-</a>
+                                    <div id="slider{{ i }}" class="blend-slider"></div>
+                                    <a class="btn btn-large btn-warning drink-plus-minus button-border">+</a>
+                                </div>
                             </div>
+                        {% endfor %}
+                        <div class="div-spacer">
+                          <a onclick="pour()" style="float: right" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
+                          <a href="/blend/log" style="float: left" class="btn btn-large btn-warning">see past blends</a>
+                          <a onclick="zero()" class="btn btn-large btn-warning" style="margin-left: 15px">zero all</a>
                         </div>
-                    {% endfor %}
-                    <div class="div-spacer">
-                      <a onclick="pour()" style="float: right" class="btn btn-large btn-success" style="margin-left: 5px">pour blend!</a>
-                      <a href="/blend/log" style="float: left" class="btn btn-large btn-warning">see past blends</a>
-                      <a onclick="zero()" class="btn btn-large btn-warning" style="margin-left: 15px">zero all</a>
-                    </div>
-                   </form>
+                     </form>
+                 {% endif %}
                 </div>
            </div>
         </div>
