@@ -8,7 +8,10 @@ import serial
 from struct import pack, unpack
 import pack7
 import dispenser_select
+from bartendro import db
 from bartendro.error import SerialIOError
+from bartendro.model.booze import Booze
+from bartendro.model.dispenser import Dispenser
 import random
 
 DISPENSER_DEFAULT_VERSION = 2
@@ -106,6 +109,7 @@ class RouterDriver(object):
 
         if software_only:
             self.num_dispensers = 7
+            self.insert_dispenser_rows()
         else:
             self.num_dispensers = 0 
 
@@ -214,6 +218,8 @@ class RouterDriver(object):
             self.dispenser_version = DISPENSER_DEFAULT_VERSION 
         else:
             self.status.swap_blue_green()
+
+        self.insert_dispenser_rows()
         log.info("Detected dispensers version %d. (Only checked first dispenser)" % self.dispenser_version)
 
         self.led_idle()
@@ -234,6 +240,18 @@ class RouterDriver(object):
             self.cl.flush()
         except IOError:
             pass
+
+    def insert_dispenser_rows(self):
+        dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
+        booze = db.session.query(Booze).order_by(Booze.id).first()
+        if not booze:
+            booze = Booze("Vodka", "", "The critical ingredient to any bar!", abv=40)
+            db.session.add(booze)
+
+        if len(dispensers) < self.num_dispensers:
+            for i in xrange(self.num_dispensers - len(dispensers)):
+                db.session.add(Dispenser(booze, 0))
+            db.session.commit()
 
     def make_shot(self):
         if self.software_only: return True
