@@ -6,23 +6,38 @@
 {% if booze %}
     <div class="row-fluid">
         <div class="span12">
-        <h2>{{ title }}: {{booze.name}}</h2>
-            <div class="attention">
-                {{booze.brand}}<br>
-                {{booze.desc}}<br>
-                ABV: {{booze.abv}}<br>
-                Type: {{booze.type}}<br>
-                </li>
+        <div class="drink-heading">
+            {{ title }}: {{booze.name}}
+        </div>
+        <div class="dispense-drink-detail">
+            <div class="pour-desc">
+                {{ booze.desc }}<p>
+            </div>
+            Brand: {{booze.brand}} ABV: {{booze.abv}} Type: {{booze.type}}<br>
 
                 <h2>Drinks we can make with {{booze.name}}</h2>
-                (This is all drinks! Need to filter on can_make)
+
+                {% if can_make_drink_list %}
+                    <table class="table table-striped table-bordered">
+                        {% for drink in can_make_drink_list %}
+                            <tr>
+                                <td><a href="/drink/{{drink.id}}">{{ drink.name.name }}</a> </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}  
+                    ({{booze.name}} is not loaded, or maybe there are no drinks which use it, so we can't make any drinks with {{booze.name}}.)
+                {% endif %}
+
+                <h2>All possible drinks one could make with {{booze.name}}</h2>
                 <table class="table table-striped table-bordered">
-                    {% for drink in drink_list %}
+                    {% for drink in all_drink_list %}
                         <tr>
                             <td><a href="/drink/{{drink.id}}">{{ drink.name.name }}</a> </td>
                         </tr>
                     {% endfor %}
                 </table>
+
             </div>
         </div>
     </div>
