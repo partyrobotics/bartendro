@@ -8,10 +8,21 @@
         <div class="span12">
         <h2>{{ title }}: {{booze.name}}</h2>
             <div class="attention">
-            {{booze.brand}}<br>
-            {{booze.desc}}<br>
-            ABV: {{booze.abv}}<br>
-            Type: {{booze.type}}<br>
+                {{booze.brand}}<br>
+                {{booze.desc}}<br>
+                ABV: {{booze.abv}}<br>
+                Type: {{booze.type}}<br>
+                </li>
+
+                <h2>Drinks we can make with {{booze.name}}</h2>
+                (This is all drinks! Need to filter on can_make)
+                <table class="table table-striped table-bordered">
+                    {% for drink in drink_list %}
+                        <tr>
+                            <td><a href="/drink/{{drink.id}}">{{ drink.name.name }}</a> </td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         </div>
     </div>
@@ -24,7 +35,7 @@
        <table class="table table-striped table-bordered">
           <th>Booze! (dispenser #)</th>
           {% for booze in loaded_boozes %}
-            <tr><td><a href="/booze/{{booze.id}}">{{ booze.name }}</a> ({{booze.dispenser}})
+            <tr><td><a href="/booze/{{booze.id}}">{{ booze.name }}</a> ({{booze.dispenser}})</td></tr>
             </li>
           {% endfor %}
         </table>

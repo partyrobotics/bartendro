@@ -33,9 +33,7 @@
           {% endif %}
           ><a href="/trending" class="slim-nav-item">Trending</a></li>
           <li>
-          <a href="/booze" class="slim-nav-item">Explore booze</a></li>
-          <li>
-          <a href="/explore" class="slim-nav-item">Explore</a></li>
+          <a href="/booze" class="slim-nav-item">Explore Booze</a></li>
 
         </ul>
         <div class="bartendro-logo">
