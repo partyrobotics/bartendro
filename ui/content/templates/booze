@@ -14,8 +14,7 @@
                 {{ booze.desc }}<p>
             </div>
             Brand: {{booze.brand}} ABV: {{booze.abv}} Type: {{booze.type}}<br>
-
-                <h2>Drinks we can make with {{booze.name}}</h2>
+                <h2>Drinks we can make NOW with {{booze.name}}</h2>
 
                 {% if can_make_drink_list %}
                     <table class="table table-striped table-bordered">
