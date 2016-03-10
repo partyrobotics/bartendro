@@ -41,8 +41,6 @@ def trending_drinks_date():
     if (len(begindate) > 0) :
         begin_ts = time.mktime(datetime.datetime.strptime(begindate, "%Y-%m-%d").timetuple())
         begin_ts = begin_ts + BARTENDRO_DAY_START_TIME 
-        #begindate = datetime.datetime.fromtimestamp(begin_ts).strftime('%Y-%m-%d %H:%M:%S')
-
         begindate = datetime.datetime.fromtimestamp(begin_ts).strftime('%c')
     else:
         begin_ts = 0 
@@ -56,11 +54,10 @@ def trending_drinks_date():
     else:
         end_ts = time.mktime(datetime.datetime.strptime(enddate, "%Y-%m-%d").timetuple())
         end_ts = end_ts + 24*60*60+BARTENDRO_DAY_START_TIME  - 1
-        #begin_ts = time.mktime(datetime.datetime.strptime(enddate, "%YYYY-m/-%d").timetuple())
         enddate = datetime.datetime.fromtimestamp(end_ts).strftime('%c')
 
     try:
-        txt = "Drinks poured from %s to %s <p>begin_ts: %i end_ts: %i" % (begindate, enddate,begin_ts, end_ts)
+        txt = "Drinks poured from %s to %s " % (begindate, enddate)
     except IndexError:
         txt = "Drinks poured by date"
 
@@ -130,7 +127,7 @@ def trending_drinks_detail(begindate, enddate, txt='', hours=''):
                  .params(begin=begindate, end=enddate).all()
 
     drinks_by_date = db.session.query("date",  "number", "volume")\
-                 .from_statement("""SELECT date(time-43200,'unixepoch') as date, 
+                 .from_statement("""SELECT date(time- :BARTENDRO_DAY_START_TIME,'unixepoch') as date, 
                                            count(drink_log.drink_id) AS number, 
                                            sum(drink_log.size) AS volume 
                                       FROM drink_log, drink_name, drink 
@@ -138,7 +135,7 @@ def trending_drinks_detail(begindate, enddate, txt='', hours=''):
                                        AND drink_name.id = drink.id
                                   GROUP BY date 
                                   ORDER BY date desc;""")\
-                 .params().all()
+                 .params(BARTENDRO_DAY_START_TIME=BARTENDRO_DAY_START_TIME).all()
 
     return render_template("trending", top_drinks = top_drinks, 
                                        drinks_by_date = drinks_by_date,
