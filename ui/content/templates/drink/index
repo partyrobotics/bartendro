@@ -18,6 +18,9 @@
                          <td id="booze_unit{{ ing.id }}"></td>
                       </tr>
                   {% endfor %}
+                      <tr>
+                        <td class="main-td"><div class="adjust-middle" id="size-text">{{ options.drink_size }}</div></td>
+                      </tr>
                 </table>
              </div>
           </div>

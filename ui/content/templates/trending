@@ -2,7 +2,8 @@
 {% set active = "trending" %}
 {% block body %}
 <div id="scroll-pane">
-    {% if top_drinks %}
+    <!-- { % if top_drinks %} -->
+    {% if 1%}
         <div class="row-fluid">
            <div class="span6">
                 <h1>{{ title }}</h1>
@@ -38,11 +39,27 @@
                {% endif %}
            </div>
         </div>
+
         <table class="table table-striped table-bordered">
            <tr><th>drink</th><th>number</th><th>volume</th></tr>
            {% for id, name, number, volume in top_drinks %}
                 <tr><td><a href="/drink/{{ id }}">{{ name }}</a></td><td>{{ number }}</td>
                 <td>
+                    {% if options.metric %}
+                        {{ "%.2f" | format((volume / 1000)|float) }} liters
+                    {% else %}
+                        {{ "%.2f" | format((volume / 1000) / 3.81|float) }} gallons
+                    {% endif %}
+           {% endfor %}
+        </table>
+        <h2>Drinks by Date</h2>
+        (A day starts at BARTENDRO_DAY_START_TIME, and lasts until BARTENDRO_DAY_START_TIME the next day)
+        <table class="table table-striped table-bordered">
+           <tr><th>date</th><th>number</th><th>volume</th></tr>
+           {% for date, number, volume in drinks_by_date %}
+                <tr><td><a href="/trending/date?begindate={{ date }}">{{ date }}</a></td><td>{{ number }}</td>
+                <td>
+
                     {% if options.metric %}
                         {{ "%.2f" | format((volume / 1000)|float) }} liters
                     {% else %}
@@ -56,6 +73,7 @@
          <a href="/" class="btn btn-large btn-warning button-border">Main menu</a>
        </div>
     {% endif %}
+
 </div>
 </script>
 {% endblock %}
