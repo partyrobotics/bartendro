@@ -8,7 +8,7 @@
             <fieldset>
                 <input type="hidden" id="drink-id"" value="0"></input>
                 <div>
-                    <label>Name</label>
+                    <label>Name (If you change the name this will be saved as a new drink) </label>
                     <input id="drink-name" name="drink-name" type="text"  style="width: 75%"></input>
                 </div>
                 <div>
