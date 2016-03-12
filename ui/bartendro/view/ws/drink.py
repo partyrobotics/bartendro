@@ -109,6 +109,14 @@ def ws_drink_save(drink):
     id = int(data["id"] or 0)
     if id > 0:
         drink = Drink.query.filter_by(id=int(id)).first()
+        # If the drink name has changed copy to a new drink
+        if drink.name != data['name'] :
+            id = 0
+            drink = Drink()
+            for booze in data['boozes']:
+                # clear the old_booze_id's 
+                booze[2] = 0
+            db.session.add(drink)
     else:
         id = 0
         drink = Drink()
