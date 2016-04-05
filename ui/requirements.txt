@@ -1,9 +1,9 @@
 werkzeug
-#smbus
-#sqlite3
+jinja2
+wtforms
+sqlalchemy
 python-memcached
 flask
-flask-sqlalchemy
 flask-login
-wtforms
+flask-sqlalchemy
 pyserial
