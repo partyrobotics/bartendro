@@ -6,6 +6,7 @@ import logging
 from time import sleep
 from bartendro.error import BartendroBrokenError
 from bartendro import app
+from bartendro import fsm
 
 ROUTER_BUS              = 1
 ROUTER_ADDRESS          = 4

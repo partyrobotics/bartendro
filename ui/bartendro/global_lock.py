@@ -37,11 +37,11 @@ class BartendroGlobalLock(object):
         if not have_uwsgi: return True
 
         uwsgi.lock()
-        is_locked = uwsgi.sharedarea_readbyte(0)
+        is_locked = uwsgi.sharedarea_read8(0, 0)
         if is_locked:
            uwsgi.unlock()
            return False
-        uwsgi.sharedarea_writebyte(0, 1)
+        uwsgi.sharedarea_write8(0, 0, 1)
         uwsgi.unlock()
 
         return True
@@ -53,11 +53,11 @@ class BartendroGlobalLock(object):
         if not have_uwsgi: return True
 
         uwsgi.lock()
-        is_locked = uwsgi.sharedarea_readbyte(0)
+        is_locked = uwsgi.sharedarea_read8(0, 0)
         if not is_locked:
            uwsgi.unlock()
            return False
-        uwsgi.sharedarea_writebyte(0, 0)
+        uwsgi.sharedarea_write8(0, 0, 0)
         uwsgi.unlock()
 
         return True
@@ -69,7 +69,7 @@ class BartendroGlobalLock(object):
         if not have_uwsgi: return self.state
 
         uwsgi.lock()
-        state = uwsgi.sharedarea_readbyte(1)
+        state = uwsgi.sharedarea_read8(0, 1)
         uwsgi.unlock()
 
         return state
@@ -83,7 +83,7 @@ class BartendroGlobalLock(object):
             return
 
         uwsgi.lock()
-        uwsgi.sharedarea_writebyte(1, state)
+        uwsgi.sharedarea_write8(0, 1, state)
         uwsgi.unlock()
 
         return True
