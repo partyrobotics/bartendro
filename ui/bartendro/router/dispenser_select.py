@@ -47,7 +47,7 @@ class DispenserSelect(object):
                 self.router.write_byte(address, byte)
             except IOError:
                 app.globals.set_state(fsm.STATE_ERROR)
-                raise BartendroBrokenError 
+                raise BartendroBrokenError("Cannot write to I2C interface.")
 
     def reset(self):
         if self.software_only: return
@@ -75,7 +75,7 @@ class DispenserSelect(object):
                 self._write_byte_with_retry(ROUTER_ADDRESS, ROUTER_CMD_SYNC_OFF)
         except IOError:
             app.globals.set_state(fsm.STATE_ERROR)
-            raise BartendroBrokenError 
+            raise BartendroBrokenError("Cannot write to I2C interface.")
 
     def count(self):
         return self.num_dispensers
@@ -94,7 +94,7 @@ class DispenserSelect(object):
             self.router = smbus.SMBus(ROUTER_BUS)
         except IOError:
             app.globals.set_state(fsm.STATE_ERROR)
-            raise BartendroBrokenError 
+            raise BartendroBrokenError("Cannot open I2C interface.")
         log.info("Done.")
 
 if __name__ == "__main__":
