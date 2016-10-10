@@ -22,7 +22,7 @@
 #define ee_liquid_low_threshold_offset    5
 #define ee_liquid_out_threshold_offset    7 
 
-#define SOFTWARE_VERSION                  3
+#define SOFTWARE_VERSION                  4
 
 #define USER_BUTTON_DURATION             10 // in clock ticks
 #define RESET_DURATION                    1
@@ -736,8 +736,8 @@ void id_conflict(void)
 void check_software_revision(void)
 {
     uint8_t bit0 = PINC & (1<<PINC2) ? 1 : 0;
-    uint8_t bit1 = PINC & (1<<PINC3) ? 1 : 0;;
-    uint8_t bit2 = PINC & (1<<PINC4) ? 1 : 0;;
+    uint8_t bit1 = PINC & (1<<PINC3) ? 1 : 0;
+    uint8_t bit2 = PINC & (1<<PINC4) ? 1 : 0;
 
     if ((bit0 | bit1 << 1 | bit2 << 2) == SOFTWARE_VERSION)
         return;
