@@ -190,9 +190,9 @@ void set_led_color(color_t *color)
 void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
 {
     uint8_t led[3];
-    led[0] = green;
+    led[0] = blue;
     led[1] = red;
-    led[2] = blue;
+    led[2] = green;
     set_led_bytes(led);
     delay_us(COLOR_LATCH_DURATION);
 }
