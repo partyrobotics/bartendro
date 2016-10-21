@@ -16,6 +16,29 @@ from bartendro import mixer
 from bartendro.error import BartendroBrokenError, SerialIOError
 from bartendro.options import load_options
 
+RPI_CPU_IDS_FOR_TTYAMA0 = [ "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "000d",
+    "000e", "000f", "0010", "0013", "0011", "0012", "a01041", "a21041", "900092" ]
+DEFAULT_SERIAL_DEVICE = "/dev/ttyS0"
+LEGACY_SERIAL_DEVICE = "/dev/ttyAMA0"
+
+def determine_serial_device():
+
+    f = open("/proc/cpuinfo", "r")
+    if not f:
+        return DEFAULT_SERIAL_DEVICE
+
+    for line in f.readlines():
+        if line.startswith("Revision"):
+            line = line.strip()
+	    ver = line[11:]
+            if ver in RPI_CPU_IDS_FOR_TTYAMA0:
+                f.close()
+                return LEGACY_SERIAL_DEVICE
+
+    f.close()
+    return DEFAULT_SERIAL_DEVICE
+
+
 if os.path.exists("version.txt"):
     with open("version.txt", "r") as f:
         version = f.read()
@@ -85,10 +108,12 @@ app.mc.flush_all()
 # Create the Bartendro globals to prevent multiple people from using it at the same time.
 app.globals = BartendroGlobalLock()
 
+device = determine_serial_device()
+
 startup_err = ""
 # Start the driver, which talks to the hardware
 try:
-    app.driver = driver.RouterDriver("/dev/ttyAMA0", app.software_only);
+    app.driver = driver.RouterDriver(device, app.software_only);
     app.driver.open()
     logging.info("Found %d dispensers." % app.driver.count())
 except BartendroBrokenError:
