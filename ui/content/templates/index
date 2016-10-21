@@ -45,8 +45,6 @@
 var isCtrl = false;
 var isShift = false;
 
-console.log({{ options.turbo_mode }});
- 
 $(document).ready(function() {
     // action on key up
     $(document).keyup(function(e) {
