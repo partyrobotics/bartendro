@@ -23,8 +23,9 @@ LEGACY_SERIAL_DEVICE = "/dev/ttyAMA0"
 
 def determine_serial_device():
 
-    f = open("/proc/cpuinfo", "r")
-    if not f:
+    try:
+        f = open("/proc/cpuinfo", "r")
+    except IOError:
         return DEFAULT_SERIAL_DEVICE
 
     for line in f.readlines():
