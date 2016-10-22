@@ -99,7 +99,7 @@ class RouterDriver(object):
 
         # dispenser_ids are the ids the dispensers have been assigned. These are logical ids 
         # used for dispenser communication.
-        self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
+        self.dispenser_ids = [-1 for i in xrange(MAX_DISPENSERS)]
 
         # dispenser_ports are the ports the dispensers have been plugged into.
         self.dispenser_ports = [255 for i in xrange(MAX_DISPENSERS)]
@@ -178,6 +178,11 @@ class RouterDriver(object):
                     if data[0] != data[1] or data[0] != data[2]:
                         self._log_startup("  %s -- inconsistent" % ll)
                         continue
+
+                    if ord(data[0]) == 0:
+                        self._log_startup("  ignoring dispenser id 0.")
+                        break
+
                     id = ord(data[0])
                     self.dispenser_ids[self.num_dispensers] = id
                     self.dispenser_ports[self.num_dispensers] = port
@@ -197,7 +202,7 @@ class RouterDriver(object):
         duplicate_ids = [x for x, y in collections.Counter(self.dispenser_ids).items() if y > 1]
         if len(duplicate_ids):
             for dup in duplicate_ids:
-                if dup == 255: continue
+                if dup == -1: continue
                 self._log_startup("ERROR: Dispenser id conflict!\n")
                 sent = False
                 for i, d in enumerate(self.dispenser_ids):
@@ -206,7 +211,7 @@ class RouterDriver(object):
                             self._send_packet8(i, PACKET_ID_CONFLICT, 0)
                             sent = True
                         self._log_startup("  dispenser %d has id %d\n" % (i, d))
-                        self.dispenser_ids[i] = 255
+                        self.dispenser_ids[i] = -1
                         self.num_dispensers -= 1
 
         self.dispenser_version = self.get_dispenser_version(0)
@@ -515,21 +520,21 @@ class RouterDriver(object):
 
     def _send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id < 0:
             return False
 
         return self._send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
 
     def _send_packet16(self, dest, type, val0, val1):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id < 0:
             return False
 
         return self._send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
 
     def _send_packet32(self, dest, type, val):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id < 0:
             return False
 
         return self._send_packet(dest, pack("<BBI", dispenser_id, type, val))
