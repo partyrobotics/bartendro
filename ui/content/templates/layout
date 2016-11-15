@@ -32,6 +32,9 @@
              class="active"
           {% endif %}
           ><a href="/trending" class="slim-nav-item">Trending</a></li>
+          <li>
+          <a href="/booze" class="slim-nav-item">Explore Booze</a></li>
+
         </ul>
         <div class="bartendro-logo">
             <a href="/admin"><img class="bartendro-logo-img" src="/static/images/bartendro-logo.png"></a>

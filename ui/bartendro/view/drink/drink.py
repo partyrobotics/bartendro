@@ -103,3 +103,4 @@ def drink(id, go):
 @app.route('/drink/sobriety')
 def drink_sobriety():
     return render_template("drink/sobriety")
+
