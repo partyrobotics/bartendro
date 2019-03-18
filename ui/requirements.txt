@@ -3,7 +3,8 @@ werkzeug
 #sqlite3
 python-memcached
 flask
-flask-sqlalchemy
+#flask-sqlalchemy
+Flask-SQLAlchemy
 flask-login
 wtforms
 pyserial

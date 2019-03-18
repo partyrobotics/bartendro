@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pdb
 import logging
 import sys
 import traceback
@@ -55,10 +56,11 @@ class Mixer(object):
        else in Bartendro lives for *this* *code*. :) '''
 
     def __init__(self, driver, mc):
-        self.driver = driver
-        self.mc = mc
-        self.disp_count = self.driver.count()
-        self.do_event(fsm.EVENT_START)
+        if driver:
+            self.driver = driver
+            self.mc = mc
+            self.disp_count = self.driver.count()
+            self.do_event(fsm.EVENT_START)
         self.err = ""
 
     def check_levels(self):
@@ -561,6 +563,7 @@ class Mixer(object):
                 sleep(.1)
 
     def _can_make_drink(self, boozes, booze_dict):
+        log.info("in _can_make_drink")
         ok = True
         for booze in boozes:
             try:

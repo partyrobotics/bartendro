@@ -81,9 +81,11 @@ def index():
     if app.options.show_feeling_lucky:
         lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
         lucky.name = DrinkName("I'm feeling lucky!")
-        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
+        # Todo: This generates an error with 'Drink' conflicting with a persistent drink?
+        # FlushError: New instance <Drink at 0x10adcc710> with identity key (<class 'bartendro.model.drink.Drink'>, (54,)) conflicts with persistent instance <Drink at 0x10adf7990>
+        #lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
         lucky.set_lucky(True)
-        lucky.set_ingredients_text("Pour a random drink now")
+        lucky.set_ingredients_text("Pour a random drink now (possibly broken see root.py line 88")
         top_drinks.insert(0, lucky)
 
     return render_template("index", 

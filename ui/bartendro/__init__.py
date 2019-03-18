@@ -31,6 +31,7 @@ from bartendro.model.custom_drink import CustomDrink
 from bartendro.model.drink_name import DrinkName
 from bartendro.model.drink_booze import DrinkBooze
 
+
 from bartendro.model.booze import Booze
 from bartendro.model.booze_group import BoozeGroup
 from bartendro.model.booze_group_booze import BoozeGroupBooze
@@ -62,6 +63,7 @@ ShotLog.booze = relationship(Booze)
 # Import views
 from bartendro.view import root, trending
 from bartendro.view import booze
+from bartendro.view import snooze
 from bartendro.view.admin import booze as booze_admin, drink as drink_admin, \
                                  dispenser as admin_dispenser, report, liquidlevel, user, options, debug
 from bartendro.view.drink import drink

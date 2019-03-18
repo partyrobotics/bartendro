@@ -1,0 +1,6 @@
+{% extends 'layout' %}
+{% set active = "explore" %}
+{% block body %}
+
+<p>Here we are in snooze-just a sample of adding an end point</p>
+{% endblock %}
