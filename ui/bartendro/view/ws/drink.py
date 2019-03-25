@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+
+# ---
+from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+#import atext
+mh = Adafruit_MotorHAT(addr=0x60)
+
+# hardcoded horror
+myMotor = mh.getMotor(1)
+
+# set the speed to start, from 0 (off) to 255 (max speed)
+myMotor.setSpeed(255)
+
+
+# ---
 import json
 from time import sleep
 from operator import itemgetter
@@ -14,6 +28,10 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
 def ws_make_drink(drink_id):
+    myMotor.run(Adafruit_MotorHAT.FORWARD);
+    time.sleep(5)
+    myMotor.run(Adafruit_MotorHAT.RELEASE);
+    return
     recipe = {}
     for arg in request.args:
         disp = int(arg[5:])

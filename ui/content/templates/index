@@ -85,9 +85,11 @@ $(document).ready(function() {
     {% else %}
         <div>No drinks from this section can currently be made.</div>
     {% endfor %}
+
     {% if (drinks|count % 2 == 1) %}
        <div class="row-fluid">
           <div class="span6">&nbsp;</div>
        </div>
     {% endif %}
+
 {% endmacro %}

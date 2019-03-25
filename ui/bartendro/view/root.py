@@ -79,12 +79,15 @@ def index():
                                title="Bartendro error")
             
     if app.options.show_feeling_lucky:
-        lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
-        lucky.name = DrinkName("I'm feeling lucky!")
-        lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
-        lucky.set_lucky(True)
-        lucky.set_ingredients_text("Pour a random drink now")
-        top_drinks.insert(0, lucky)
+        #lucky = Drink("<em>Make sure there is a cup under the spout, the drink will pour immediately!</em>")
+        #lucky.name = DrinkName("I'm feeling lucky!")
+        #lucky.id = can_make[int(random.randint(0, len(can_make) - 1))]
+	#lucky.id = 1
+        #lucky.set_lucky(True)
+        #lucky.set_ingredients_text("Pour a random drink now")
+        #top_drinks.insert(0, lucky)
+	# Todo: I'm feeling lucky is broken for me.
+	pass
 
     return render_template("index", 
                            options=app.options, 
