@@ -17,6 +17,7 @@ bartendro_options = {
     u'taster_size'             : 30,
     u'shot_size'               : 30,
     u'test_dispense_ml'        : 10,
+    u'dispenser_count'         : 4,
     u'show_strength'           : True,
     u'show_size'               : True,
     u'show_taster'             : False,

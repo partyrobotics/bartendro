@@ -14,65 +14,67 @@ import random
 DISPENSER_DEFAULT_VERSION = 2
 DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY = 3
 
-BAUD_RATE       = 9600
-DEFAULT_TIMEOUT = 2 # in seconds
+BAUD_RATE = 9600
+DEFAULT_TIMEOUT = 2  # in seconds
 
-MAX_DISPENSERS = 15
-SHOT_TICKS     = 20
+MAX_DISPENSERS = 4
+#MAX_DISPENSERS = 15
+SHOT_TICKS = 20
 
-RAW_PACKET_SIZE      = 10
-PACKET_SIZE          =  8
+RAW_PACKET_SIZE = 10
+PACKET_SIZE = 8
 
-PACKET_ACK_OK               = 0
-PACKET_CRC_FAIL             = 1
-PACKET_ACK_TIMEOUT          = 2
-PACKET_ACK_INVALID          = 3
-PACKET_ACK_INVALID_HEADER   = 4
+PACKET_ACK_OK = 0
+PACKET_CRC_FAIL = 1
+PACKET_ACK_TIMEOUT = 2
+PACKET_ACK_INVALID = 3
+PACKET_ACK_INVALID_HEADER = 4
 PACKET_ACK_HEADER_IN_PACKET = 5
-PACKET_ACK_CRC_FAIL         = 6
+PACKET_ACK_CRC_FAIL = 6
 
-PACKET_PING                   = 3
-PACKET_SET_MOTOR_SPEED        = 4
-PACKET_TICK_DISPENSE          = 5
-PACKET_TIME_DISPENSE          = 6
-PACKET_LED_OFF                = 7
-PACKET_LED_IDLE               = 8
-PACKET_LED_DISPENSE           = 9
-PACKET_LED_DRINK_DONE         = 10
-PACKET_IS_DISPENSING          = 11
-PACKET_LIQUID_LEVEL           = 12
-PACKET_UPDATE_LIQUID_LEVEL    = 13
-PACKET_ID_CONFLICT            = 14
-PACKET_LED_CLEAN              = 15
-PACKET_SET_CS_THRESHOLD       = 16
-PACKET_SAVED_TICK_COUNT       = 17
+PACKET_PING = 3
+PACKET_SET_MOTOR_SPEED = 4
+PACKET_TICK_DISPENSE = 5
+PACKET_TIME_DISPENSE = 6
+PACKET_LED_OFF = 7
+PACKET_LED_IDLE = 8
+PACKET_LED_DISPENSE = 9
+PACKET_LED_DRINK_DONE = 10
+PACKET_IS_DISPENSING = 11
+PACKET_LIQUID_LEVEL = 12
+PACKET_UPDATE_LIQUID_LEVEL = 13
+PACKET_ID_CONFLICT = 14
+PACKET_LED_CLEAN = 15
+PACKET_SET_CS_THRESHOLD = 16
+PACKET_SAVED_TICK_COUNT = 17
 PACKET_RESET_SAVED_TICK_COUNT = 18
-PACKET_GET_LIQUID_THRESHOLDS  = 19
-PACKET_SET_LIQUID_THRESHOLDS  = 20
+PACKET_GET_LIQUID_THRESHOLDS = 19
+PACKET_SET_LIQUID_THRESHOLDS = 20
 PACKET_FLUSH_SAVED_TICK_COUNT = 21
-PACKET_TICK_SPEED_DISPENSE    = 22
-PACKET_PATTERN_DEFINE         = 23
-PACKET_PATTERN_ADD_SEGMENT    = 24
-PACKET_PATTERN_FINISH         = 25
-PACKET_SET_MOTOR_DIRECTION    = 26
-PACKET_GET_VERSION            = 27
-PACKET_COMM_TEST              = 0xFE
+PACKET_TICK_SPEED_DISPENSE = 22
+PACKET_PATTERN_DEFINE = 23
+PACKET_PATTERN_ADD_SEGMENT = 24
+PACKET_PATTERN_FINISH = 25
+PACKET_SET_MOTOR_DIRECTION = 26
+PACKET_GET_VERSION = 27
+PACKET_COMM_TEST = 0xFE
 
-DEST_BROADCAST         = 0xFF
+DEST_BROADCAST = 0xFF
 
-MOTOR_DIRECTION_FORWARD       = 1
-MOTOR_DIRECTION_BACKWARD      = 0
+MOTOR_DIRECTION_FORWARD = 1
+MOTOR_DIRECTION_BACKWARD = 0
 
-LED_PATTERN_IDLE          = 0
-LED_PATTERN_DISPENSE      = 1
-LED_PATTERN_DRINK_DONE    = 2
-LED_PATTERN_CLEAN         = 3
+LED_PATTERN_IDLE = 0
+LED_PATTERN_DISPENSE = 1
+LED_PATTERN_DRINK_DONE = 2
+LED_PATTERN_CLEAN = 3
 LED_PATTERN_CURRENT_SENSE = 4
 
-MOTOR_DIRECTION_FORWARD         = 1
-MOTOR_DIRECTION_BACKWARD        = 0
+MOTOR_DIRECTION_FORWARD = 1
+MOTOR_DIRECTION_BACKWARD = 0
 
 log = logging.getLogger('bartendro')
+
 
 def crc16_update(crc, a):
     crc ^= a
@@ -82,6 +84,7 @@ def crc16_update(crc, a):
         else:
             crc = (crc >> 1)
     return crc
+
 
 class RouterDriver(object):
     '''This object interacts with the bartendro router controller.'''
@@ -95,9 +98,9 @@ class RouterDriver(object):
         self.dispenser_select = None
         self.dispenser_version = DISPENSER_DEFAULT_VERSION
         self.startup_log = ""
-        self.debug_levels = [ 200, 180, 120 ]
+        self.debug_levels = [200, 180, 120]
 
-        # dispenser_ids are the ids the dispensers have been assigned. These are logical ids 
+        # dispenser_ids are the ids the dispensers have been assigned. These are logical ids
         # used for dispenser communication.
         self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
 
@@ -107,18 +110,19 @@ class RouterDriver(object):
         if software_only:
             self.num_dispensers = MAX_DISPENSERS
         else:
-            self.num_dispensers = 0 
+            self.num_dispensers = 0
 
     def get_startup_log(self):
         return self.startup_log
-    
+
     def get_dispenser_version(self):
         return self.dispenser_version
 
     def reset(self):
         """Reset the hardware. Do this if there is shit going wrong. All motors will be stopped
            and reset."""
-        if self.software_only: return
+        if self.software_only:
+            return
 
         self.close()
         self.open()
@@ -132,16 +136,17 @@ class RouterDriver(object):
     def open(self):
         '''Open the serial connection to the router'''
 
-        if self.software_only: return
+        if self.software_only:
+            return
 
         self._clear_startup_log()
 
         try:
             log.info("Opening %s" % self.device)
-            self.ser = serial.Serial(self.device, 
-                                     BAUD_RATE, 
-                                     bytesize=serial.EIGHTBITS, 
-                                     parity=serial.PARITY_NONE, 
+            self.ser = serial.Serial(self.device,
+                                     BAUD_RATE,
+                                     bytesize=serial.EIGHTBITS,
+                                     parity=serial.PARITY_NONE,
                                      stopbits=serial.STOPBITS_ONE,
                                      timeout=.01)
         except serial.serialutil.SerialException, e:
@@ -153,11 +158,12 @@ class RouterDriver(object):
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
 
-        self.dispenser_select = dispenser_select.DispenserSelect(MAX_DISPENSERS, self.software_only)
+        self.dispenser_select = dispenser_select.DispenserSelect(
+            MAX_DISPENSERS, self.software_only)
         self.dispenser_select.open()
         self.dispenser_select.reset()
 
-        # This primes the communication line. 
+        # This primes the communication line.
         self.ser.write(chr(170) + chr(170) + chr(170))
         sleep(.001)
 
@@ -169,12 +175,12 @@ class RouterDriver(object):
             sleep(.01)
             while True:
                 self.ser.flushInput()
-                self.ser.write("???") 
+                self.ser.write("???")
                 data = self.ser.read(3)
                 ll = ""
                 for ch in data:
                     ll += "%02X " % ord(ch)
-                if len(data) == 3: 
+                if len(data) == 3:
                     if data[0] != data[1] or data[0] != data[2]:
                         self._log_startup("  %s -- inconsistent" % ll)
                         continue
@@ -182,44 +188,51 @@ class RouterDriver(object):
                     self.dispenser_ids[self.num_dispensers] = id
                     self.dispenser_ports[self.num_dispensers] = port
                     self.num_dispensers += 1
-                    self._log_startup("  %s -- Found dispenser with pump id %02X, index %d" % (ll, id, self.num_dispensers))
+                    self._log_startup(
+                        "  %s -- Found dispenser with pump id %02X, index %d" % (ll, id, self.num_dispensers))
                     break
                 elif len(data) > 1:
-                    self._log_startup("  %s -- Did not receive 3 characters back. Trying again." % ll)
+                    self._log_startup(
+                        "  %s -- Did not receive 3 characters back. Trying again." % ll)
                     sleep(.5)
                 else:
                     break
 
         self._select(0)
         self.set_timeout(DEFAULT_TIMEOUT)
-        self.ser.write(chr(255));
+        self.ser.write(chr(255))
 
-        duplicate_ids = [x for x, y in collections.Counter(self.dispenser_ids).items() if y > 1]
+        duplicate_ids = [x for x, y in collections.Counter(
+            self.dispenser_ids).items() if y > 1]
         if len(duplicate_ids):
             for dup in duplicate_ids:
-                if dup == 255: continue
+                if dup == 255:
+                    continue
                 self._log_startup("ERROR: Dispenser id conflict!\n")
                 sent = False
                 for i, d in enumerate(self.dispenser_ids):
-                    if d == dup: 
-                        if not sent: 
+                    if d == dup:
+                        if not sent:
                             self._send_packet8(i, PACKET_ID_CONFLICT, 0)
                             sent = True
-                        self._log_startup("  dispenser %d has id %d\n" % (i, d))
+                        self._log_startup(
+                            "  dispenser %d has id %d\n" % (i, d))
                         self.dispenser_ids[i] = 255
                         self.num_dispensers -= 1
 
         self.dispenser_version = self.get_dispenser_version(0)
         if self.dispenser_version < 0:
-            self.dispenser_version = DISPENSER_DEFAULT_VERSION 
+            self.dispenser_version = DISPENSER_DEFAULT_VERSION
         else:
             self.status.swap_blue_green()
-        log.info("Detected dispensers version %d. (Only checked first dispenser)" % self.dispenser_version)
+        log.info("Detected dispensers version %d. (Only checked first dispenser)" %
+                 self.dispenser_version)
 
         self.led_idle()
 
     def close(self):
-        if self.software_only: return
+        if self.software_only:
+            return
         self.ser.close()
         self.ser = None
         self.status = None
@@ -227,58 +240,71 @@ class RouterDriver(object):
 
     def log(self, msg):
         return
-        if self.software_only: return
+        if self.software_only:
+            return
         try:
             t = localtime()
-            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
+            self.cl.write("%d-%d-%d %d:%02d %s" % (t.tm_year,
+                                                   t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, msg))
             self.cl.flush()
         except IOError:
             pass
 
     def make_shot(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._send_packet32(0, PACKET_TICK_DISPENSE, 90)
         return True
 
     def ping(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet32(dispenser, PACKET_PING, 0)
 
     def start(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 255, True)
 
     def set_motor_direction(self, dispenser, direction):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, direction)
 
     def stop(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
 
     def dispense_time(self, dispenser, duration):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet32(dispenser, PACKET_TIME_DISPENSE, duration)
 
     def dispense_ticks(self, dispenser, ticks, speed=255):
-        if self.software_only: return True
-        ret = self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+        if self.software_only:
+            return True
+        ret = self._send_packet16(
+            dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
 
         # if it fails, re-try once.
         if not ret:
             log.error("*** dispense command failed. re-trying once.")
-            ret = self._send_packet16(dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+            ret = self._send_packet16(
+                dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
 
         return ret
 
     def led_off(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_OFF, 0)
         return True
 
     def led_idle(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_IDLE, 0)
         sleep(.01)
@@ -286,7 +312,8 @@ class RouterDriver(object):
         return True
 
     def led_dispense(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_DISPENSE, 0)
         sleep(.01)
@@ -294,7 +321,8 @@ class RouterDriver(object):
         return True
 
     def led_complete(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_DRINK_DONE, 0)
         sleep(.01)
@@ -302,7 +330,8 @@ class RouterDriver(object):
         return True
 
     def led_clean(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
@@ -310,7 +339,8 @@ class RouterDriver(object):
         return True
 
     def led_error(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         self._sync(0)
         self._send_packet8(DEST_BROADCAST, PACKET_LED_CLEAN, 0)
         sleep(.01)
@@ -326,15 +356,16 @@ class RouterDriver(object):
         Returns a tuple of (dispensing, is_over_current) 
         """
 
-        if self.software_only: return (False, False)
+        if self.software_only:
+            return (False, False)
 
         # Sometimes the motors can interfere with communications.
-        # In such cases, assume the motor is still running and 
+        # In such cases, assume the motor is still running and
         # then assume the caller will again to see if it is still running
         self.set_timeout(.1)
         ret = self._send_packet8(dispenser, PACKET_IS_DISPENSING, 0)
         self.set_timeout(DEFAULT_TIMEOUT)
-        if ret: 
+        if ret:
             ack, value0, value1 = self._receive_packet8_2()
             if ack == PACKET_ACK_OK:
                 return (value0, value1)
@@ -343,39 +374,45 @@ class RouterDriver(object):
         return (True, False)
 
     def update_liquid_levels(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(DEST_BROADCAST, PACKET_UPDATE_LIQUID_LEVEL, 0)
 
     def get_liquid_level(self, dispenser):
-        if self.software_only: return 100
+        if self.software_only:
+            return 100
         if self._send_packet8(dispenser, PACKET_LIQUID_LEVEL, 0):
             ack, value, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:
                 # Returning a random value as below is really useful for testing. :)
                 #self.debug_levels[dispenser] = max(self.debug_levels[dispenser] - 20, 50)
-                #return self.debug_levels[dispenser]
-                #return random.randint(50, 200)
+                # return self.debug_levels[dispenser]
+                # return random.randint(50, 200)
                 return value
         return -1
 
     def get_liquid_level_thresholds(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         if self._send_packet8(dispenser, PACKET_GET_LIQUID_THRESHOLDS, 0):
             ack, low, out = self._receive_packet16()
             if ack == PACKET_ACK_OK:
                 return (low, out)
         return (-1, -1)
-                
+
     def set_liquid_level_thresholds(self, dispenser, low, out):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet16(dispenser, PACKET_SET_LIQUID_THRESHOLDS, low, out)
 
     def set_motor_direction(self, dispenser, dir):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, dir)
 
     def get_dispenser_version(self, dispenser):
-        if self.software_only: return DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY
+        if self.software_only:
+            return DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY
         if self._send_packet8(dispenser, PACKET_GET_VERSION, 0):
             # set a short timeout, in case its a v2 dispenser
             self.set_timeout(.1)
@@ -386,12 +423,15 @@ class RouterDriver(object):
         return -1
 
     def set_status_color(self, red, green, blue):
-        if self.software_only: return
-        if not self.status: return
+        if self.software_only:
+            return
+        if not self.status:
+            return
         self.status.set_color(red, green, blue)
 
     def get_saved_tick_count(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         if self._send_packet8(dispenser, PACKET_SAVED_TICK_COUNT, 0):
             ack, ticks, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:
@@ -399,47 +439,54 @@ class RouterDriver(object):
         return -1
 
     def flush_saved_tick_count(self):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(DEST_BROADCAST, PACKET_FLUSH_SAVED_TICK_COUNT, 0)
 
     def pattern_define(self, dispenser, pattern):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_PATTERN_DEFINE, pattern)
 
     def pattern_add_segment(self, dispenser, red, green, blue, steps):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_PATTERN_ADD_SEGMENT, red, green, blue, steps)
 
     def pattern_finish(self, dispenser):
-        if self.software_only: return True
+        if self.software_only:
+            return True
         return self._send_packet8(dispenser, PACKET_PATTERN_FINISH, 0)
 
     # -----------------------------------------------
-    # Past this point we only have private functions. 
+    # Past this point we only have private functions.
     # -----------------------------------------------
 
     def _sync(self, state):
         """Turn on/off the sync signal from the router. This signal is used to syncronize the LEDs"""
 
-        if self.software_only: return
+        if self.software_only:
+            return
         self.dispenser_select.sync(state)
 
     def _select(self, dispenser):
         """Private function to select a dispenser."""
 
-        if self.software_only: return True
+        if self.software_only:
+            return True
 
         # If for broadcast, then ignore this select
-        if dispenser == 255: return
+        if dispenser == 255:
+            return
 
         port = self.dispenser_ports[dispenser]
         self.dispenser_select.select(port)
 
-
     def _send_packet(self, dest, packet):
-        if self.software_only: return True
+        if self.software_only:
+            return True
 
-        self._select(dest);
+        self._select(dest)
         self.ser.flushInput()
         self.ser.flushOutput()
 
@@ -449,7 +496,8 @@ class RouterDriver(object):
 
         encoded = pack7.pack_7bit(packet + pack("<H", crc))
         if len(encoded) != RAW_PACKET_SIZE:
-            log.error("send_packet: Encoded packet size is wrong: %d vs %s" % (len(encoded), RAW_PACKET_SIZE))
+            log.error("send_packet: Encoded packet size is wrong: %d vs %s" % (
+                len(encoded), RAW_PACKET_SIZE))
             return False
 
         try:
@@ -457,7 +505,8 @@ class RouterDriver(object):
             written = self.ser.write(chr(0xFF) + chr(0xFF) + encoded)
             if written != RAW_PACKET_SIZE + 2:
                 log.error("*** send timeout")
-                log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+                log.error("*** dispenser: %d, type: %d" %
+                          (dest + 1, ord(packet[1:2])))
                 return False
 
             if dest == DEST_BROADCAST:
@@ -468,74 +517,82 @@ class RouterDriver(object):
             log.debug("packet time: %f" % (t1 - t0))
             if len(ch) < 1:
                 log.error("*** send packet: read timeout")
-                log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+                log.error("*** dispenser: %d, type: %d" %
+                          (dest + 1, ord(packet[1:2])))
                 return False
         except SerialException, err:
-            log.error("SerialException: %s" % err);
+            log.error("SerialException: %s" % err)
             return False
 
         ack = ord(ch)
-        if ack == PACKET_ACK_OK: 
+        if ack == PACKET_ACK_OK:
             return True
-        if ack == PACKET_CRC_FAIL: 
+        if ack == PACKET_CRC_FAIL:
             log.error("*** send_packet: packet ack crc fail")
-            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+            log.error("*** dispenser: %d, type: %d" %
+                      (dest + 1, ord(packet[1:2])))
             return False
-        if ack == PACKET_ACK_TIMEOUT: 
+        if ack == PACKET_ACK_TIMEOUT:
             log.error("*** send_packet: ack timeout")
-            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+            log.error("*** dispenser: %d, type: %d" %
+                      (dest + 1, ord(packet[1:2])))
             return False
-        if ack == PACKET_ACK_INVALID: 
+        if ack == PACKET_ACK_INVALID:
             log.error("*** send_packet: dispenser received invalid packet")
-            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+            log.error("*** dispenser: %d, type: %d" %
+                      (dest + 1, ord(packet[1:2])))
             return False
-        if ack == PACKET_ACK_INVALID_HEADER: 
+        if ack == PACKET_ACK_INVALID_HEADER:
             log.error("*** send_packet: dispenser received invalid header")
-            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+            log.error("*** dispenser: %d, type: %d" %
+                      (dest + 1, ord(packet[1:2])))
             return False
         if ack == PACKET_ACK_HEADER_IN_PACKET:
             log.error("*** send_packet: header in packet error")
-            log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
+            log.error("*** dispenser: %d, type: %d" %
+                      (dest + 1, ord(packet[1:2])))
             return False
 
-        # if we get an invalid ack code, it might be ok. 
+        # if we get an invalid ack code, it might be ok.
         log.error("send_packet: Invalid ACK code %d" % ord(ch))
         log.error("*** dispenser: %d, type: %d" % (dest + 1, ord(packet[1:2])))
         return False
 
     def _get_dispenser_id(self, dest):
-        if dest != DEST_BROADCAST: 
+        if dest != DEST_BROADCAST:
             try:
                 return self.dispenser_ids[dest]
             except IndexError:
-                log.error("*** send_packet to dispenser %d (of %d dispensers)" % (dest + 1, len(self.dispenser_ids)))
+                log.error("*** send_packet to dispenser %d (of %d dispensers)" %
+                          (dest + 1, len(self.dispenser_ids)))
                 return 255
         else:
             return dest
 
     def _send_packet8(self, dest, type, val0, val1=0, val2=0, val3=0):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id == 255:
             return False
 
         return self._send_packet(dest, pack("BBBBBB", dispenser_id, type, val0, val1, val2, val3))
 
     def _send_packet16(self, dest, type, val0, val1):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id == 255:
             return False
 
         return self._send_packet(dest, pack("<BBHH", dispenser_id, type, val0, val1))
 
     def _send_packet32(self, dest, type, val):
         dispenser_id = self._get_dispenser_id(dest)
-        if dispenser_id == 255: 
+        if dispenser_id == 255:
             return False
 
         return self._send_packet(dest, pack("<BBI", dispenser_id, type, val))
 
-    def _receive_packet(self, quiet = False):
-        if self.software_only: return True
+    def _receive_packet(self, quiet=False):
+        if self.software_only:
+            return True
 
         header = 0
         while True:
@@ -591,7 +648,7 @@ class RouterDriver(object):
         else:
             return (ack, "")
 
-    def _receive_packet8(self, quiet = False):
+    def _receive_packet8(self, quiet=False):
         ack, packet = self._receive_packet(quiet)
         if ack == PACKET_ACK_OK:
             data = unpack("BBBBBB", packet)
@@ -599,7 +656,7 @@ class RouterDriver(object):
         else:
             return (ack, 0)
 
-    def _receive_packet8_2(self, quiet = False):
+    def _receive_packet8_2(self, quiet=False):
         ack, packet = self._receive_packet(quiet)
         if ack == PACKET_ACK_OK:
             data = unpack("BBBBBB", packet)
@@ -607,7 +664,7 @@ class RouterDriver(object):
         else:
             return (ack, 0, 0)
 
-    def _receive_packet16(self, quiet = False):
+    def _receive_packet16(self, quiet=False):
         ack, packet = self._receive_packet(quiet)
         if ack == PACKET_ACK_OK:
             data = unpack("<BBHH", packet)

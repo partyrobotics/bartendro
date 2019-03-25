@@ -124,6 +124,18 @@
                         </div>
                     </div>
                 {% endif %}
+                 <div class="div-spacer"/>
+                 <!-- hello drinkbot options -->
+                {% if 1 %}
+                    <h4>Hello Drinkbot options</h4>
+                     <div style="margin-left: 15px">
+                        <div>
+                            <label for="dispenser_count">Number of dispensers?</label>
+                            <input id="option-dispenser_count" name="option-dispenser_count" type="text"></input>
+                            <input id="option-dispenser_count" name="dispenser_count" type="text"></input>
+                        </div>
+                    </div>
+                {% endif %}
             </fieldset>
         </form>
         <div class="div-spacer">
