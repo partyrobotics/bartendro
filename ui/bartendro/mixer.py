@@ -435,6 +435,8 @@ class Mixer(object):
                                                          FROM booze_group_booze bgb, dispenser 
                                                         WHERE bgb.booze_id = dispenser.booze_id)"""))
 
+	if app.options.use_liquid_level_sensors:
+            sql = "SELECT booze_id FROM dispenser WHERE out == 1 or out == 2 ORDER BY id LIMIT :d"
         else:
             sql = text("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d")
 
