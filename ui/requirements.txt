@@ -2,9 +2,11 @@ werkzeug
 #smbus
 #sqlite3
 python-memcached
-flask
+#flask
 #flask-sqlalchemy
-Flask-SQLAlchemy
-flask-login
+#flask-login
+Flask==0.10.1
+Flask-Login==0.3.2
+Flask-SQLAlchemy==2.1
 wtforms
 pyserial
