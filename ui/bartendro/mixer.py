@@ -558,7 +558,6 @@ class Mixer(object):
             else:
                 speed = FULL_SPEED
             self.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD)
-            pdb.set_trace()
             if not self.driver.dispense_ticks(disp, ticks, speed):
                 raise BartendroBrokenError(
                     "Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))

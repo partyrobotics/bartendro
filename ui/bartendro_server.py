@@ -11,7 +11,8 @@ import subprocess
 import traceback
 
 from bartendro.global_lock import BartendroGlobalLock
-from bartendro.router import driver
+#from bartendro.router import driver
+from bartendro.router import hello_drinkbot_driver as driver
 from bartendro import mixer
 from bartendro.error import BartendroBrokenError, SerialIOError
 from bartendro.options import load_options

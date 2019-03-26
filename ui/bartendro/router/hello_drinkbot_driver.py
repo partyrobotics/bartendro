@@ -1,4 +1,5 @@
 import sys
+import pdb
 import os
 import collections
 import logging
@@ -11,6 +12,9 @@ import dispenser_select
 from bartendro.error import SerialIOError
 import random
 
+import threading
+
+
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     mh = Adafruit_MotorHAT(addr=0x60)
@@ -19,7 +23,7 @@ try:
 except:
     pass
 
-#import atext
+# import atext
 
 DISPENSER_DEFAULT_VERSION = 2
 DISPENSER_DEFAULT_VERSION_SOFTWARE_ONLY = 3
@@ -28,7 +32,7 @@ BAUD_RATE = 9600
 DEFAULT_TIMEOUT = 2  # in seconds
 
 MAX_DISPENSERS = 4
-#MAX_DISPENSERS = 15
+# MAX_DISPENSERS = 15
 SHOT_TICKS = 20
 
 RAW_PACKET_SIZE = 10
@@ -83,7 +87,15 @@ LED_PATTERN_CURRENT_SENSE = 4
 MOTOR_DIRECTION_FORWARD = 1
 MOTOR_DIRECTION_BACKWARD = 0
 
+# logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('bartendro')
+
+# todo: put this in a start() method
+try:
+    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+    pass
+except:
+    log.info('no motor hat')
 
 
 def crc16_update(crc, a):
@@ -97,9 +109,47 @@ def crc16_update(crc, a):
 
 
 class RouterDriver(object):
-    '''This object interacts with the bartendro router controller.'''
+    ''' plug in replacement for Bartendro RouterDriver to control the naive
+    peristlatic pumps from Hello Drinkbot project. Provides a layer above
+    the AdaFruit motor library which understands pumps'''
 
-    def __init__(self, device, software_only):
+    def __init__(self, device,  software_only=False):
+        ''' device is ignored, it is required for bartendro hardware'''
+        self.__doc__ = 'foo'
+        self.dispenser_cnt = 8
+        self.software_only = software_only
+
+        if not software_only:
+            self.mh1 = Adafruit_MotorHAT(addr=0x60)
+            self.ports = [self.mh1.getMotor(range(1, 5))]
+            for motor in range(4):
+                self.ports[motor].setSpeed(255)
+
+            # Add a second motor hat, with a second  address. Comment the
+            # above lines, replace with something like this:
+            # self.mh1 = Adafruit_MotorHAT(addr=0x60)
+            # self.mh2 = Adafruit_MotorHAT(addr=0xXX)
+            # self.ports = [self.mh1.getMotor(range(1,9))]
+            # for motor in range(8):
+            #    self.ports[motor].setSpeed(255)
+
+        else:
+            self.ports = [i for i in range(1, 5)]
+
+        self.num_dispensers = MAX_DISPENSERS
+        self.dispensers = [
+            {'port': None, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 1, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 1, 'direction': MOTOR_DIRECTION_BACKWARD},
+            {'port': 2, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 2, 'direction': MOTOR_DIRECTION_BACKWARD},
+            {'port': 3, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 3, 'direction': MOTOR_DIRECTION_BACKWARD},
+            {'port': 4, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 4, 'direction': MOTOR_DIRECTION_BACKWARD},
+        ]
+
+    def __initOld__(self, device, software_only):
         self.device = device
         self.ser = None
         self.msg = ""
@@ -281,31 +331,69 @@ class RouterDriver(object):
             return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, direction)
 
-    def stop(self, dispenser):
+    def stop(self, dispenser=None):
+        """ turn one or all dispensers off """
+        log.info('\tdispenser_off  %r:%r ' %
+                 (self.dispensers[dispenser]['port'], dispenser))
         if self.software_only:
             return True
-        return self._send_packet8(dispenser, PACKET_SET_MOTOR_SPEED, 0)
+        # if dispenser==None turn them all off
+        if not dispenser:
+            for disp in (range(1, 4)):
+                self.ports[disp]['timer'] = None
+                self.ports[disp].run(Adafruit_MotorHAT.RELEASE)
+        else:
+            self.ports[dispenser]['timer'] = None
+            self.ports[dispenser].run(Adafruit_MotorHAT.RELEASE)
 
     def dispense_time(self, dispenser, duration):
-        if self.software_only:
-            return True
-        return self._send_packet32(dispenser, PACKET_TIME_DISPENSE, duration)
+        direction = dispenser % 2
+        log.info('%r:%r direction: %r duration: %r' % (
+            self.dispensers[dispenser]['port'], dispenser, self.dispensers[dispenser]['direction'], duration))
+        # can we dispense? Are we dispensing, or is our port-sibling dispensing?
+        try:
+            if self.dispensers[dispenser]['timer'].isAlive():
+                log.info('Error: %r:%r dispenser in use. Not starting duplicate.' % (
+                    self.dispensers[dispenser]['port'], dispenser))
+                return False
+        except:
+            pass
+
+        port = dispenser // 2 + dispenser % 2
+        sib = port*2 - (1-dispenser % 2)
+        try:
+            if self.dispensers[sib]['timer'].isAlive():
+                log.info('\tWarning: %r:%r port in use. Waiting to start.' % (
+                    self.dispensers[dispenser]['port'], dispenser))
+                self.dispensers[dispenser]['timerwait'] = threading.Timer(
+                    1, self.dispense_time, [dispenser, duration])
+                self.dispensers[dispenser]['timerwait'].start()
+                return True
+        except:
+            pass
+
+        if not self.software_only:
+            if (dispenser % 2):
+                self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
+            else:
+                self.ports[dispenser].run(Adafruit_MotorHAT.REVERSE)
+
+        self.dispensers[dispenser]['timer'] = threading.Timer(
+            duration, self.stop, [dispenser])
+        self.dispensers[dispenser]['timer'].start()
+        return True
 
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only:
-            myMotor.run(Adafruit_MotorHAT.FORWARD)
-            time.sleep(5)
-            myMotor.run(Adafruit_MotorHAT.RELEASE)
-            return True
+            pass
+            # return True
 
-        ret = self._send_packet16(
-            dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
+        log.info('need to convert ticks to time')
+        ret = self.dispense_time(dispenser, 5)
 
-        # if it fails, re-try once.
+        # if it fails, do something?
         if not ret:
             log.error("*** dispense command failed. re-trying once.")
-            ret = self._send_packet16(
-                dispenser, PACKET_TICK_SPEED_DISPENSE, ticks, speed)
 
         return ret
 
@@ -399,7 +487,7 @@ class RouterDriver(object):
             ack, value, dummy = self._receive_packet16()
             if ack == PACKET_ACK_OK:
                 # Returning a random value as below is really useful for testing. :)
-                #self.debug_levels[dispenser] = max(self.debug_levels[dispenser] - 20, 50)
+                # self.debug_levels[dispenser] = max(self.debug_levels[dispenser] - 20, 50)
                 # return self.debug_levels[dispenser]
                 # return random.randint(50, 200)
                 return value
@@ -692,3 +780,25 @@ class RouterDriver(object):
     def _log_startup(self, txt):
         log.info(txt)
         self.startup_log += "%s\n" % txt
+
+
+if __name__ == '__main__':
+
+    pdb.set_trace()
+    # timer_test()
+    log.info("in main")
+    pump = RouterDriver('', True)
+    pump.dispense_time(1, 6)
+    pump.dispense_time(1, 10)
+    pump.dispense_time(2, 4)
+    pump.dispense_time(3, 4)
+    pump.dispense_time(4, 4)
+    pump.dispense_time(5, 4)
+    pump.dispense_time(6, 4)
+    pump.dispense_time(7, 4)
+    pump.dispense_time(8, 4)
+
+    # print("look at pump.dispensers[1]['timer']",  pump.dispensers[1]['timer'])
+    # print("dir(pump.dispensers[1]['timer'])",  dir(pump.dispensers[1]['timer']))
+    # pdb.set_trace()
+    # pump.dispense_time(3,2)
