@@ -14,12 +14,11 @@ import random
 
 import threading
 
-
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
-    mh = Adafruit_MotorHAT(addr=0x60)
-    myMotor = mh.getMotor(1)
-    myMotor.setSpeed(255)
+    #mh = Adafruit_MotorHAT(addr=0x60)
+    #myMotor = mh.getMotor(1)
+    #myMotor.setSpeed(255)
 except:
     pass
 
@@ -115,16 +114,21 @@ class RouterDriver(object):
 
     def __init__(self, device,  software_only=False):
         ''' device is ignored, it is required for bartendro hardware'''
+        self.device = device
         self.__doc__ = 'foo'
         self.dispenser_cnt = 8
         self.software_only = software_only
+        self.mh1 = Adafruit_MotorHAT(addr=0x60)
+        self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
+        for motor in range(4):
+            self.ports[motor].setSpeed(255)
 
         if not software_only:
-            self.mh1 = Adafruit_MotorHAT(addr=0x60)
-            self.ports = [self.mh1.getMotor(range(1, 5))]
-            for motor in range(4):
-                self.ports[motor].setSpeed(255)
-
+            #self.mh1 = Adafruit_MotorHAT(addr=0x60)
+            #self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
+            #for motor in range(4):
+                #self.ports[motor].setSpeed(255)
+	    pass
             # Add a second motor hat, with a second  address. Comment the
             # above lines, replace with something like this:
             # self.mh1 = Adafruit_MotorHAT(addr=0x60)
@@ -134,7 +138,8 @@ class RouterDriver(object):
             #    self.ports[motor].setSpeed(255)
 
         else:
-            self.ports = [i for i in range(1, 5)]
+            #self.ports = [i for i in range(1, 5)]
+	    pass
 
         self.num_dispensers = MAX_DISPENSERS
         self.dispensers = [
@@ -335,16 +340,20 @@ class RouterDriver(object):
         """ turn one or all dispensers off """
         log.info('\tdispenser_off  %r:%r ' %
                  (self.dispensers[dispenser]['port'], dispenser))
-        if self.software_only:
-            return True
+        #if self.software_only:
+            #return True
         # if dispenser==None turn them all off
         if not dispenser:
+	    log.info('\tstop no dispenser passed, turn off all')
+
             for disp in (range(1, 4)):
-                self.ports[disp]['timer'] = None
-                self.ports[disp].run(Adafruit_MotorHAT.RELEASE)
+                #self.ports[disp]['timer'] = None
+            	self.ports[dispenser].run(Adafruit_MotorHAT.RELEASE)
         else:
-            self.ports[dispenser]['timer'] = None
+	    log.info('\tstop dispenser %r' % dispenser)
+            #self.ports[dispenser]['timer'] = None
             self.ports[dispenser].run(Adafruit_MotorHAT.RELEASE)
+            #self.dispensers[dispenser]['port'].run(Adafruit_MotorHAT.RELEASE)
 
     def dispense_time(self, dispenser, duration):
         direction = dispenser % 2
@@ -372,11 +381,16 @@ class RouterDriver(object):
         except:
             pass
 
+        if (dispenser % 2):
+	    self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
+        else:
+	    self.ports[dispenser].run(Adafruit_MotorHAT.BACKWARD)
         if not self.software_only:
             if (dispenser % 2):
                 self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
             else:
-                self.ports[dispenser].run(Adafruit_MotorHAT.REVERSE)
+                self.ports[dispenser].run(Adafruit_MotorHAT.BACKWARD)
+
 
         self.dispensers[dispenser]['timer'] = threading.Timer(
             duration, self.stop, [dispenser])
