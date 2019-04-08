@@ -14,13 +14,10 @@ import random
 
 import threading
 
-try:
-    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
-    #mh = Adafruit_MotorHAT(addr=0x60)
-    #myMotor = mh.getMotor(1)
-    #myMotor.setSpeed(255)
-except:
-    pass
+#try:
+#    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+#except:
+#    pass
 
 # import atext
 
@@ -298,6 +295,7 @@ class RouterDriver(object):
     def close(self):
         if self.software_only:
             return
+        #TODO: change to adafruit all off
         self.ser.close()
         self.ser = None
         self.status = None
@@ -318,6 +316,7 @@ class RouterDriver(object):
     def make_shot(self):
         if self.software_only:
             return True
+        # TODO: change to use dispense_ticks()
         self._send_packet32(0, PACKET_TICK_DISPENSE, 90)
         return True
 
