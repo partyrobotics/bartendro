@@ -197,7 +197,6 @@ class RouterDriver(object):
 
     def open(self):
         '''Open the serial connection to the router'''
-
         if self.software_only:
             return
 
@@ -295,9 +294,9 @@ class RouterDriver(object):
     def close(self):
         if self.software_only:
             return
-        #TODO: change to adafruit all off
-        self.ser.close()
-        self.ser = None
+        # change to adafruit all motors off off
+        for port in self.ports:
+            port.run(Adafruit_MotorHAT.RELEASE)
         self.status = None
         self.dispenser_select = None
 
@@ -399,7 +398,6 @@ class RouterDriver(object):
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only:
             pass
-            # return True
 
         log.info('need to convert ticks to time')
         ret = self.dispense_time(dispenser, 5)
