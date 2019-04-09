@@ -395,6 +395,15 @@ class RouterDriver(object):
         self.dispensers[dispenser]['timer'].start()
         return True
 
+    # todo: Add dispense_ml, which calls dispense_time with a conversion factor
+    def dispense_ml(self, dispenser, ml, speed=255):
+        if self.software_only:
+            pass
+        SECONDS_PER_ML = 60/100. # pump dispenses 100 ml in 60 seconds as a first approximation
+        time = ml*SECONDS_PER_ML
+        ret = self.dispense_time(dispenser,time)
+        return ret
+
     def dispense_ticks(self, dispenser, ticks, speed=255):
         if self.software_only:
             pass

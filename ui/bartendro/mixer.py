@@ -559,9 +559,11 @@ class Mixer(object):
             else:
                 speed = FULL_SPEED
             self.driver.set_motor_direction(disp, MOTOR_DIRECTION_FORWARD)
-            if not self.driver.dispense_ticks(disp, ticks, speed):
+            # todo: create dispense_ml, why do we care about 'ticks'?
+            #if not self.driver.dispense_ticks(disp, ticks, speed):
+            if not self.driver.dispense_ml(disp, ticks, speed):
                 raise BartendroBrokenError(
-                    "Dispense error. Dispense %d ticks, speed %d on dispenser %d failed." % (ticks, speed, disp + 1))
+                    "Dispense error. Dispense %d ml, speed %d on dispenser %d failed." % (recipe[disp], speed, disp + 1))
 
             active_disp.append(disp)
             sleep(.01)
