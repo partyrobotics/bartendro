@@ -115,12 +115,14 @@ class RouterDriver(object):
         self.__doc__ = 'foo'
         self.dispenser_cnt = 8
         self.software_only = software_only
-        self.mh1 = Adafruit_MotorHAT(addr=0x60)
-        self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
-        for motor in range(4):
-            self.ports[motor].setSpeed(255)
+
+        self.dispenser_version = DISPENSER_DEFAULT_VERSION
 
         if not software_only:
+            self.mh1 = Adafruit_MotorHAT(addr=0x60)
+            self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
+            for motor in range(4):
+                self.ports[motor].setSpeed(255)
             #self.mh1 = Adafruit_MotorHAT(addr=0x60)
             #self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
             #for motor in range(4):
