@@ -400,6 +400,7 @@ class RouterDriver(object):
         if self.software_only:
             pass
         SECONDS_PER_ML = 60/100. # pump dispenses 100 ml in 60 seconds as a first approximation
+        SECONDS_PER_ML = 30/100. # huh? 
         time = ml*SECONDS_PER_ML
         ret = self.dispense_time(dispenser,time)
         return ret
