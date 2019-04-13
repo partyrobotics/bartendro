@@ -4,7 +4,8 @@ from time import sleep, time
 from threading import Thread
 from bartendro import db, app
 from bartendro.error import BartendroBrokenError
-from bartendro.router.driver import MOTOR_DIRECTION_FORWARD
+#from bartendro.router.driver import MOTOR_DIRECTION_FORWARD
+from bartendro.router.hello_drinkbot_driver import MOTOR_DIRECTION_FORWARD
 
 CLEAN_DURATION = 10 # seconds
 
