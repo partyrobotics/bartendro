@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from bartendro import app, db
-from sqlalchemy import func, asc
+from sqlalchemy import func, asc, text
 from flask import Flask, request, redirect, render_template
 from flask.ext.login import login_required
 from bartendro.model.drink import Drink, DrinkName
@@ -13,14 +13,14 @@ from bartendro.view.root import filter_drink_list
 
 def load_loaded_boozes():
     loaded = db.session.query("id", "name", "abv", "type","dispenser")\
-                 .from_statement("""SELECT booze.id, 
+                 .from_statement(text("""SELECT booze.id, 
                                            booze.name,
                                            booze.abv,
                                            booze.type,
                                            dispenser.id as dispenser
                                       FROM booze, dispenser
                                      WHERE booze.id = dispenser.booze_id
-                                  ORDER BY booze.name ;""")\
+                                  ORDER BY booze.name ;"""))\
                  .params(foo='', bar='').all()
     return loaded
 

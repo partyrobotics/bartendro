@@ -118,14 +118,16 @@ class RouterDriver(object):
 
         self.dispenser_version = DISPENSER_DEFAULT_VERSION
 
-        if not software_only:
+	# I need a hellodrinkbot switch
+        #if not software_only:
+	if 1:
             self.mh1 = Adafruit_MotorHAT(addr=0x60)
             self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
             for motor in range(4):
                 self.ports[motor].setSpeed(255)
             #self.mh1 = Adafruit_MotorHAT(addr=0x60)
             #self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
-            #for motor in range(4):
+            #for motor in range(8):
                 #self.ports[motor].setSpeed(255)
 	    pass
             # Add a second motor hat, with a second  address. Comment the
@@ -346,18 +348,24 @@ class RouterDriver(object):
         if not dispenser:
 	    log.info('\tstop no dispenser passed, turn off all')
 
-            for disp in (range(1, 4)):
+            #for disp in (range(1, 4)):
+            for disp in (range(5)):
                 #self.ports[disp]['timer'] = None
-            	self.ports[dispenser].run(Adafruit_MotorHAT.RELEASE)
+		try:
+	  	    self.ports[disp].run(Adafruit_MotorHAT.RELEASE)
+                except:
+		    pass
         else:
 	    log.info('\tstop dispenser %r' % dispenser)
             #self.ports[dispenser]['timer'] = None
-            self.ports[dispenser].run(Adafruit_MotorHAT.RELEASE)
+
+            port = dispenser // 2 + dispenser % 2
+            self.ports[port].run(Adafruit_MotorHAT.RELEASE)
             #self.dispensers[dispenser]['port'].run(Adafruit_MotorHAT.RELEASE)
 
     def dispense_time(self, dispenser, duration):
         direction = dispenser % 2
-        log.info('%r:%r direction: %r duration: %r' % (
+        log.info('port: %r dispenser: %r direction: %r duration: %r' % (
             self.dispensers[dispenser]['port'], dispenser, self.dispensers[dispenser]['direction'], duration))
         # can we dispense? Are we dispensing, or is our port-sibling dispensing?
         try:
@@ -382,16 +390,18 @@ class RouterDriver(object):
             pass
 
         if (dispenser % 2):
-	    self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
+	    self.ports[port].run(Adafruit_MotorHAT.FORWARD)
         else:
-	    self.ports[dispenser].run(Adafruit_MotorHAT.BACKWARD)
-        if not self.software_only:
-            if (dispenser % 2):
-                self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
-            else:
-                self.ports[dispenser].run(Adafruit_MotorHAT.BACKWARD)
+	    #pdb.set_trace()
+	    self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
 
+        #if not self.software_only:
+        #    if (dispenser % 2):
+        #        self.ports[dispenser].run(Adafruit_MotorHAT.FORWARD)
+        #    else:
+        #        self.ports[dispenser].run(Adafruit_MotorHAT.BACKWARD)
 
+	log.info('setting stop callback to dispenser: %r ' % dispenser)
         self.dispensers[dispenser]['timer'] = threading.Timer(
             duration, self.stop, [dispenser])
         self.dispensers[dispenser]['timer'].start()
@@ -401,8 +411,7 @@ class RouterDriver(object):
     def dispense_ml(self, dispenser, ml, speed=255):
         if self.software_only:
             pass
-        SECONDS_PER_ML = 60/100. # pump dispenses 100 ml in 60 seconds as a first approximation
-        #SECONDS_PER_ML = 30/100. # huh? 
+        SECONDS_PER_ML = 18/100. # huh? 
         time = ml*SECONDS_PER_ML
         ret = self.dispense_time(dispenser,time)
         return ret
