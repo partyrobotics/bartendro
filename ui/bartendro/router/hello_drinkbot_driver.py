@@ -8,8 +8,8 @@ from time import sleep, localtime, time
 import serial
 from struct import pack, unpack
 import pack7
-import dispenser_select
-from bartendro.error import SerialIOError
+#import dispenser_select
+#from bartendro.error import SerialIOError
 import random
 
 import threading
@@ -120,9 +120,10 @@ class RouterDriver(object):
 
 	# I need a hellodrinkbot switch
         #if not software_only:
+
 	if 1:
             self.mh1 = Adafruit_MotorHAT(addr=0x60)
-            self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
+            self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
             for motor in range(4):
                 self.ports[motor].setSpeed(255)
             #self.mh1 = Adafruit_MotorHAT(addr=0x60)
@@ -144,39 +145,16 @@ class RouterDriver(object):
 
         self.num_dispensers = MAX_DISPENSERS
         self.dispensers = [
-            {'port': None, 'direction': MOTOR_DIRECTION_FORWARD},
+            #{'port': None, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 0, 'direction': MOTOR_DIRECTION_FORWARD},
+            {'port': 0, 'direction': MOTOR_DIRECTION_BACKWARD},
             {'port': 1, 'direction': MOTOR_DIRECTION_FORWARD},
             {'port': 1, 'direction': MOTOR_DIRECTION_BACKWARD},
             {'port': 2, 'direction': MOTOR_DIRECTION_FORWARD},
             {'port': 2, 'direction': MOTOR_DIRECTION_BACKWARD},
             {'port': 3, 'direction': MOTOR_DIRECTION_FORWARD},
             {'port': 3, 'direction': MOTOR_DIRECTION_BACKWARD},
-            {'port': 4, 'direction': MOTOR_DIRECTION_FORWARD},
-            {'port': 4, 'direction': MOTOR_DIRECTION_BACKWARD},
         ]
-
-    def __initOld__(self, device, software_only):
-        self.device = device
-        self.ser = None
-        self.msg = ""
-        self.ret = 0
-        self.software_only = software_only
-        self.dispenser_select = None
-        self.dispenser_version = DISPENSER_DEFAULT_VERSION
-        self.startup_log = ""
-        self.debug_levels = [200, 180, 120]
-
-        # dispenser_ids are the ids the dispensers have been assigned. These are logical ids
-        # used for dispenser communication.
-        self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
-
-        # dispenser_ports are the ports the dispensers have been plugged into.
-        self.dispenser_ports = [255 for i in xrange(MAX_DISPENSERS)]
-
-        if software_only:
-            self.num_dispensers = MAX_DISPENSERS
-        else:
-            self.num_dispensers = 0
 
     def get_startup_log(self):
         return self.startup_log
@@ -215,7 +193,8 @@ class RouterDriver(object):
                                      stopbits=serial.STOPBITS_ONE,
                                      timeout=.01)
         except serial.serialutil.SerialException, e:
-            raise SerialIOError(e)
+            #raise SerialIOError(e)
+	    pass
 
         log.info("Done.\n")
 
@@ -223,10 +202,10 @@ class RouterDriver(object):
         self.status = status_led.StatusLED(self.software_only)
         self.status.set_color(0, 0, 1)
 
-        self.dispenser_select = dispenser_select.DispenserSelect(
-            MAX_DISPENSERS, self.software_only)
-        self.dispenser_select.open()
-        self.dispenser_select.reset()
+        #self.dispenser_select = dispenser_select.DispenserSelect(
+        #    MAX_DISPENSERS, self.software_only)
+        #self.dispenser_select.open()
+        #self.dispenser_select.reset()
 
         # This primes the communication line.
         self.ser.write(chr(170) + chr(170) + chr(170))
@@ -236,7 +215,7 @@ class RouterDriver(object):
         self.num_dispensers = 0
         for port in xrange(MAX_DISPENSERS):
             self._log_startup("port %d:" % port)
-            self.dispenser_select.select(port)
+            #self.dispenser_select.select(port)
             sleep(.01)
             while True:
                 self.ser.flushInput()
@@ -338,10 +317,25 @@ class RouterDriver(object):
             return True
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, direction)
 
+    def dispenser_port(self, disp):
+        """ Take a dispenser, return the port """
+
+        port = disp/2
+	print('disp: %i port: %i' % (disp, port))
+ 	#pdb.set_trace()
+        return port
+
+    def dispenser_sibling(self, disp):
+        if (disp % 2):
+    	    sibling = disp - 1
+        else:
+            sibling = disp + 1
+        return sibling
+
     def stop(self, dispenser=None):
         """ turn one or all dispensers off """
-        log.info('\tdispenser_off  %r:%r ' %
-                 (self.dispensers[dispenser]['port'], dispenser))
+        log.info('\tdispenser_off  %r ' %
+                 ( dispenser))
         #if self.software_only:
             #return True
         # if dispenser==None turn them all off
@@ -349,7 +343,7 @@ class RouterDriver(object):
 	    log.info('\tstop no dispenser passed, turn off all')
 
             #for disp in (range(1, 4)):
-            for disp in (range(5)):
+            for disp in (range(9)):
                 #self.ports[disp]['timer'] = None
 		try:
 	  	    self.ports[disp].run(Adafruit_MotorHAT.RELEASE)
@@ -359,14 +353,13 @@ class RouterDriver(object):
 	    log.info('\tstop dispenser %r' % dispenser)
             #self.ports[dispenser]['timer'] = None
 
-            port = dispenser // 2 + dispenser % 2
+            port = self.dispenser_port(dispenser)
             self.ports[port].run(Adafruit_MotorHAT.RELEASE)
-            #self.dispensers[dispenser]['port'].run(Adafruit_MotorHAT.RELEASE)
 
     def dispense_time(self, dispenser, duration):
-        direction = dispenser % 2
-        log.info('port: %r dispenser: %r direction: %r duration: %r' % (
-            self.dispensers[dispenser]['port'], dispenser, self.dispensers[dispenser]['direction'], duration))
+        log.info('dispense_time dispenser: %r port: %r ' % (
+            dispenser, self.dispensers[dispenser]['port']))
+
         # can we dispense? Are we dispensing, or is our port-sibling dispensing?
         try:
             if self.dispensers[dispenser]['timer'].isAlive():
@@ -376,10 +369,12 @@ class RouterDriver(object):
         except:
             pass
 
-        port = dispenser // 2 + dispenser % 2
-        sib = port*2 - (1-dispenser % 2)
+	print('dispenser: %i ' % dispenser)
+        port = self.dispenser_port(dispenser)
+	sibling = self.dispenser_sibling(dispenser)
+
         try:
-            if self.dispensers[sib]['timer'].isAlive():
+            if self.dispensers[sibling]['timer'].isAlive():
                 log.info('\tWarning: %r:%r port in use. Waiting to start.' % (
                     self.dispensers[dispenser]['port'], dispenser))
                 self.dispensers[dispenser]['timerwait'] = threading.Timer(
@@ -392,7 +387,6 @@ class RouterDriver(object):
         if (dispenser % 2):
 	    self.ports[port].run(Adafruit_MotorHAT.FORWARD)
         else:
-	    #pdb.set_trace()
 	    self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
 
         #if not self.software_only:
@@ -816,12 +810,23 @@ class RouterDriver(object):
 
 if __name__ == '__main__':
 
-    pdb.set_trace()
     # timer_test()
     log.info("in main")
     pump = RouterDriver('', True)
-    pump.dispense_time(1, 6)
-    pump.dispense_time(1, 10)
+    print('Hello Drinkbot Driver')
+    # there are four ports, 0-3. 
+    # Pump 1=Port 0 FORWARD
+    # Pump 2=Port 0 BACKWARD
+    # und so weiter
+    # Pump 7=Port 3 FORWARD
+    # Pump 8=Port 3 BACKWARD
+
+
+    # pump.ports[3].run(Adafruit_MotorHAT.FORWARD)
+    # pump.ports[3].run(Adafruit_MotorHAT.BACKWARD)
+    # pump.ports[3].run(Adafruit_MotorHAT.RELEASE)
+    pdb.set_trace()
+    pump.dispense_time(1, 1)
     pump.dispense_time(2, 4)
     pump.dispense_time(3, 4)
     pump.dispense_time(4, 4)
@@ -834,3 +839,5 @@ if __name__ == '__main__':
     # print("dir(pump.dispensers[1]['timer'])",  dir(pump.dispensers[1]['timer']))
     # pdb.set_trace()
     # pump.dispense_time(3,2)
+    print('this is the end')
+    pdb.set_trace()
