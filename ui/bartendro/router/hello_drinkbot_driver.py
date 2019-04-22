@@ -385,9 +385,9 @@ class RouterDriver(object):
             pass
 
         if (dispenser % 2):
-	    self.ports[port].run(Adafruit_MotorHAT.FORWARD)
-        else:
 	    self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        else:
+	    self.ports[port].run(Adafruit_MotorHAT.FORWARD)
 
         #if not self.software_only:
         #    if (dispenser % 2):
@@ -813,7 +813,8 @@ if __name__ == '__main__':
     # timer_test()
     log.info("in main")
     pump = RouterDriver('', True)
-    print('Hello Drinkbot Driver')
+    print('Hello Drinkbot Driver now dispensing from pumps 1-8')
+
     # there are four ports, 0-3. 
     # Pump 1=Port 0 FORWARD
     # Pump 2=Port 0 BACKWARD
@@ -826,18 +827,17 @@ if __name__ == '__main__':
     # pump.ports[3].run(Adafruit_MotorHAT.BACKWARD)
     # pump.ports[3].run(Adafruit_MotorHAT.RELEASE)
     pdb.set_trace()
-    pump.dispense_time(1, 1)
-    pump.dispense_time(2, 4)
-    pump.dispense_time(3, 4)
-    pump.dispense_time(4, 4)
-    pump.dispense_time(5, 4)
-    pump.dispense_time(6, 4)
-    pump.dispense_time(7, 4)
-    pump.dispense_time(8, 4)
 
-    # print("look at pump.dispensers[1]['timer']",  pump.dispensers[1]['timer'])
+
+    # todo: why doesn't this work?
+    pump.dispense_time(0, 1)
+    pump.dispense_time(1, 1)
+    pump.dispense_time(2, 1)
+    pump.dispense_time(3, 1)
+    pump.dispense_time(4, 1)
+    pump.dispense_time(5, 1)
+    pump.dispense_time(6, 1)
+    pump.dispense_time(7, 1)
+
     # print("dir(pump.dispensers[1]['timer'])",  dir(pump.dispensers[1]['timer']))
-    # pdb.set_trace()
-    # pump.dispense_time(3,2)
     print('this is the end')
-    pdb.set_trace()

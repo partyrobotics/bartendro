@@ -72,7 +72,9 @@ def ws_dispenser_test(disp):
     try:
         app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
     except BartendroBrokenError:
-        raise InternalServerError
+	pass
+	# todo: Handle errors correctly
+        #raise InternalServerError
 
     return ""
 
