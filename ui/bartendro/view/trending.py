@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time, datetime
 from bartendro import app, db
-from sqlalchemy import desc
+from sqlalchemy import desc, text
 from flask import Flask, request, render_template
 from flask.ext.login import login_required
 from bartendro.model.drink import Drink
@@ -100,21 +100,21 @@ def trending_drinks_detail(begindate, enddate, txt='', hours=''):
     #import pdb
     #pdb.set_trace()
     total_number = db.session.query("number")\
-                 .from_statement("""SELECT count(*) as number
+                 .from_statement(text("""SELECT count(*) as number
                                       FROM drink_log 
                                      WHERE drink_log.time >= :begin 
-                                       AND drink_log.time <= :end""")\
+                                       AND drink_log.time <= :end"""))\
                  .params(begin=begindate, end=enddate).first()
 
     total_volume = db.session.query("volume")\
-                 .from_statement("""SELECT sum(drink_log.size) as volume 
+                 .from_statement(text("""SELECT sum(drink_log.size) as volume 
                                       FROM drink_log 
                                      WHERE drink_log.time >= :begin 
-                                       AND drink_log.time <= :end""")\
+                                       AND drink_log.time <= :end"""))\
                  .params(begin=begindate, end=enddate).first()
 
     top_drinks = db.session.query("id", "name", "number", "volume")\
-                 .from_statement("""SELECT drink.id, 
+                 .from_statement(text("""SELECT drink.id, 
                                            drink_name.name,
                                            count(drink_log.drink_id) AS number, 
                                            sum(drink_log.size) AS volume 
@@ -123,18 +123,18 @@ def trending_drinks_detail(begindate, enddate, txt='', hours=''):
                                        AND drink_name.id = drink.id
                                        AND drink_log.time >= :begin AND drink_log.time <= :end 
                                   GROUP BY drink_name.name 
-                                  ORDER BY count(drink_log.drink_id) desc;""")\
+                                  ORDER BY count(drink_log.drink_id) desc;"""))\
                  .params(begin=begindate, end=enddate).all()
 
     drinks_by_date = db.session.query("date",  "number", "volume")\
-                 .from_statement("""SELECT date(time- :BARTENDRO_DAY_START_TIME,'unixepoch') as date, 
+                 .from_statement(text("""SELECT date(time- :BARTENDRO_DAY_START_TIME,'unixepoch') as date, 
                                            count(drink_log.drink_id) AS number, 
                                            sum(drink_log.size) AS volume 
                                       FROM drink_log, drink_name, drink 
                                      WHERE drink_log.drink_id = drink_name.id 
                                        AND drink_name.id = drink.id
                                   GROUP BY date 
-                                  ORDER BY date desc;""")\
+                                  ORDER BY date desc;"""))\
                  .params(BARTENDRO_DAY_START_TIME=BARTENDRO_DAY_START_TIME).all()
 
     return render_template("trending", top_drinks = top_drinks, 

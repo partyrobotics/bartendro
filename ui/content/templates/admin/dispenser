@@ -258,7 +258,7 @@ function toggle_reverse(disp)
             }
     });
 }
-function test_dispense(disp)
+function test_dispense(disp, mult)
 {
     if (disp < 1 || disp > 15)
         return;

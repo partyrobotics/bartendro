@@ -10,3 +10,4 @@ Flask-Login==0.3.2
 Flask-SQLAlchemy==2.1
 wtforms
 pyserial
+Adafruit_MotorHAT
