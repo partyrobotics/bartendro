@@ -27,6 +27,7 @@ class Booze(db.Model):
     name = Column(UnicodeText, nullable=False)
     brand = Column(UnicodeText, nullable=True)
     desc = Column(UnicodeText, nullable=False)
+    image = Column(UnicodeText, nullable=True)
     abv = Column(Integer, default=0)
     type = Column(Integer, default=0)
 

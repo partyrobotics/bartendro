@@ -1,0 +1,139 @@
+{% extends 'layout' %}
+{% set active = "shots" %}
+{% block body %}
+<!-- alter table booze add image TEXT; -->
+<div id="scroll-pane">
+<div class="row-fluid">
+   <div class="span12">
+    {% if num_shots_ready > 0 %}
+        <div class="row-fluid">
+             <div class="span12">
+                  <h1>Shots, but with pictures</h1>
+             </div>
+          </div>
+        </div>
+        <div class="row-fluid">
+             <div class="span12">
+                <span class="shotbot-text">
+                Now serving 
+                {% if options.metric %}
+                    {{ options.shot_size }} ml
+                {% else %}
+                    {{ "%.1f" % (options.shot_size / 30) }} fl oz
+                {% endif %}
+                shots. 
+                <div class="shots-warning">Make sure there is a glass under the spout, the shot will pour immediately!</div>
+                </span>
+             </div>
+        </div>
+        <div class="div-spacer"></div>
+        {% for i in range(0, num_shots_ready) %}
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+                  <div class="row-fluid">
+
+                    <div class="span5 shotbot-text" style="padding-top: 10px">
+                       <button class="btn btn-success button-border shotbot-button" onclick="make_shot({{ shots[i].id }}, '{{ shots[i].name }}')">
+
+
+<img src="/static/images/{{ shots[i].image }}">
+</button>
+
+
+                    </div>
+                    <div class="span5 shotbot-text" style="padding-top: 10px">
+		       {{ shots[i].name }}
+                       {{ shots[i].desc }} 
+                    </div>
+                  </div>
+                </div>
+                <div class="span1"></div>
+            </div>
+            <div style="margin-bottom: 10px"></div>
+        {% endfor %}
+        <a href="/admin" style="color: #Fafafa">admin</a>
+        </div>
+    {% else %}
+        <div class="row-fluid">
+           <div class="span2"></div>
+           <div class="span6" style="height: 200px; margin-top: 50px;">
+              <p style="font-size: 15pt; font-weight: bold; text-align: center">{{ error_message }}</p>
+           </div>
+           <div class="span4" style="text-align: center;">
+              <img style="height: 200px" src="/static/images/sick_party_robot.png">
+           </div>
+        </div>
+        <div class="row-fluid">
+           <div class="span12" style="text-align: center"><a href="/trending">What was popular before Bartendro broke?</a></div>
+        </div>
+    {% endif %}
+</div>
+</div>
+<div id="log-in-required-dialog" title="Bartendro log in required" style="display: none; text-align: center;">
+  <p style="font-size: 14pt; line-height: 18pt;">
+      Sorry, but you need to be logged into Bartendro to dispense shots.
+  </p>
+</div>
+<div id="busy-dialog" title="Bartendro is busy" style="display: none; text-align: center">
+  <p>
+      Bartendro is already busy dispensing another drink. Please wait your turn!
+  </p>
+</div>
+<div id="error-state-dialog" title="Bartendro is broken" style="display: none; text-align: center">
+  <p>
+      Bartendro has hit a snag and can't make shots right now. Sorry!
+  </p>
+</div>
+<div id="cant-make-dialog" title="Drink selection error" style="display: none; text-align: center">
+  <p>
+      Bartendro can't make this shot right now. Sorry!
+  </p>
+</div>
+<div id="error-dialog" title="Bartendro error" style="display: none; text-align: center">
+  <p>
+      Bartendro has encountered an error making this drink. Sorry!
+  </p>
+</div>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript">
+function make_shot(booze_id, booze_name)
+{
+    lb = '<div class="lb-box"><h1>Serving shot!</h1>';
+    lb += '</h1><div class="lb-drink">' + booze_name + '</div>';
+    lb += "</div>";
+    $.modal(lb, { 'escClose' : false });
+    $.ajax({ 
+            url: "/ws/shots/" + booze_id,
+            success: function(html)
+            {
+                if (html == "login required")
+                    $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+
+                $.modal.close();
+                window.location.reload();
+            },
+            error: function(xmlhttp, txtStatus, errorThrown)
+            {
+                $.modal.close();
+                if (xmlhttp.status == 500)
+                {
+                    $("#error-state-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close"); window.location = "/shots"; } } ] });
+                }
+                else
+                if (xmlhttp.status == 503)
+                    $("#busy-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+                else
+                if (xmlhttp.status == 400)
+                {
+                    $("#cant-make-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/shots"; } } ] });
+                }
+                else
+                    $("#error-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); window.location = "/shots"; } } ] });
+            }
+     });
+}
+</script>
+<script type="text/javascript" src="/static/js/jquery.simplemodal.1.4.4.min.js"></script>
+{% endblock %}

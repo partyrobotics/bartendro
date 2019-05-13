@@ -104,13 +104,13 @@ def index():
                            title="Bartendro")
 
 @app.route('/shots')
-def shots():
+def shots(template='shots'):
 
     if not app.options.use_shotbot_ui:
         return redirect("/")
 
     if app.globals.get_state() == fsm.STATE_ERROR:
-        return render_template("shots", 
+        return render_template(template, 
                                num_shots_ready=0,
                                options=app.options, 
                                error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
@@ -125,14 +125,52 @@ def shots():
             shots.append(disp.booze)
 
     if len(shots) == 0:
-        return render_template("shots", 
+        return render_template(template, 
                                num_shots_ready=0,
                                options=app.options, 
                                error_message="Bartendro is out of all boozes. Oh no!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
                                title="Bartendro error")
 
-    return render_template("shots", 
+    return render_template(template, 
                            num_shots_ready= len(shots),
                            options=app.options, 
                            shots=shots, 
                            title="Shots")
+
+@app.route('/graphical_shots')
+def graphical_shots():
+    template='graphical_shots'
+    # not sure why I can't do this.
+    #return shots('graphical_shots')
+
+    if not app.options.use_shotbot_ui:
+        return redirect("/")
+
+    if app.globals.get_state() == fsm.STATE_ERROR:
+        return render_template(template, 
+                               num_shots_ready=0,
+                               options=app.options, 
+                               error_message="Bartendro is in trouble!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
+
+    dispensers = db.session.query(Dispenser).all()
+    dispensers = dispensers[:app.driver.count()]
+
+    shots = []
+    for disp in dispensers:
+        if disp.out == LL_OK or disp.out == LL_LOW or not app.options.use_liquid_level_sensors:
+            shots.append(disp.booze)
+
+    if len(shots) == 0:
+        return render_template(template, 
+                               num_shots_ready=0,
+                               options=app.options, 
+                               error_message="Bartendro is out of all boozes. Oh no!<br/><br/>I need some attention! Please find my master, so they can make me feel better.",
+                               title="Bartendro error")
+
+    return render_template(template, 
+                           num_shots_ready= len(shots),
+                           options=app.options, 
+                           shots=shots, 
+                           title="Shots")
+

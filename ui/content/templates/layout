@@ -26,6 +26,12 @@
                 class="active"
              {% endif %}
              ><a href="/shots" class="slim-nav-item">Shots</a></li>
+             <li
+             {% if active == "shots" %}
+                class="active"
+             {% endif %}
+             ><a href="/graphical_shots" class="slim-nav-item">Shots with pictures</a></li>
+
           {% endif %}
           <li
           {% if active == "trending" %}
