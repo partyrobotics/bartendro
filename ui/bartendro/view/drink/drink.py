@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from bartendro import app, db
 from flask import Flask, request, render_template
+from flask import Response
+import json
 from bartendro.model.drink import Drink
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.custom_drink import CustomDrink
@@ -93,6 +95,7 @@ def drink(id, go):
                            title=drink.name.name,
                            is_custom=1,
                            custom_drink=drink.custom_drink[0],
+
                            booze_group=booze_group,
                            show_sweet_tart=show_sweet_tart,
                            show_sobriety=show_sobriety,
@@ -106,5 +109,16 @@ def drink_sobriety():
 
 @app.route('/drink/all')
 def drink_all():
-    return render_template("drink/sobriety")
+    data = [{'id':d.id, 'name':d.name.name, 'description':d.desc} for d in Drink.query.all()]
+    js = json.dumps(data)
+    resp = Response(js, status=200, mimetype='application/json')
+    return resp
+
+@app.route('/drink/available')
+def drink_available():
+    available = app.mixer.get_available_drink_list()
+    data = [{'id':d.id, 'name':d.name.name, 'description':d.desc} for d in Drink.query.all() if d.id in available]
+    js = json.dumps(data)
+    resp = Response(js, status=200, mimetype='application/json')
+    return resp
 
