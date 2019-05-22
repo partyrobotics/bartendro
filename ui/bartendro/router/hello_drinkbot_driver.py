@@ -117,20 +117,26 @@ class RouterDriver(object):
         self.software_only = software_only
 
         self.dispenser_version = DISPENSER_DEFAULT_VERSION
+        self.startup_log = ""
 
-	# I need a hellodrinkbot switch
+        # I need a hellodrinkbot switch
         #if not software_only:
 
-	if 1:
-            self.mh1 = Adafruit_MotorHAT(addr=0x60)
-            self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
-            for motor in range(4):
-                self.ports[motor].setSpeed(255)
+        if 1:
+            try:
+                self.mh1 = Adafruit_MotorHAT(addr=0x60)
+                self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
+                for motor in range(4):
+                    self.ports[motor].setSpeed(255)
+            except:
+                # no motor hat, but that might be fine
+                log.info("No Motor Hat?")
+
             #self.mh1 = Adafruit_MotorHAT(addr=0x60)
             #self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
             #for motor in range(8):
                 #self.ports[motor].setSpeed(255)
-	    pass
+            pass
             # Add a second motor hat, with a second  address. Comment the
             # above lines, replace with something like this:
             # self.mh1 = Adafruit_MotorHAT(addr=0x60)
@@ -141,7 +147,7 @@ class RouterDriver(object):
 
         else:
             #self.ports = [i for i in range(1, 5)]
-	    pass
+            pass
 
         self.num_dispensers = MAX_DISPENSERS
         self.dispensers = [
