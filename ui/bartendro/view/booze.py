@@ -2,6 +2,8 @@
 from bartendro import app, db
 from sqlalchemy import func, asc, text
 from flask import Flask, request, redirect, render_template
+from flask import Response
+import json
 from flask.ext.login import login_required
 from bartendro.model.drink import Drink, DrinkName
 from bartendro.model.drink_booze import DrinkBooze
@@ -12,12 +14,13 @@ from bartendro.model.dispenser import Dispenser
 from bartendro.view.root import filter_drink_list
 
 def load_loaded_boozes():
+    # this assumes we have 16 dispensers, or, this doesn't care what max dispensers is
     loaded = db.session.query("id", "name", "abv", "type","dispenser")\
                  .from_statement(text("""SELECT booze.id, 
                                            booze.name,
                                            booze.abv,
                                            booze.type,
-					   booze.image
+					   booze.image,
                                            dispenser.id as dispenser
                                       FROM booze, dispenser
                                      WHERE booze.id = dispenser.booze_id
@@ -56,7 +59,7 @@ def booze():
     
     return render_template("booze", options=app.options, all_drink_list=all_drink_list, all_boozes=all_boozes, loaded_boozes=loaded_boozes, can_make_drink_list=can_make_drink_list, title="Explore Booze")
 
-@app.route('/booze/<id>')
+@app.route('/booze/<int:id>')
 @login_required
 def booze_detail(id):
     booze = Booze.query.filter_by(id=int(id)).first()
@@ -69,3 +72,20 @@ def booze_detail(id):
     drink_list = load_drink_list(booze.id)
     (all_drink_list, can_make_drink_list) = load_drink_list(booze.id)
     return render_template("booze", options=app.options, all_drink_list=all_drink_list, all_boozes=all_boozes, loaded_boozes=loaded_boozes, can_make_drink_list=can_make_drink_list, title="Explore Booze", booze=booze )
+
+@app.route('/booze/all')
+def booze_all():
+    data = Booze.query.order_by(asc(func.lower(Booze.name)))
+    lst = [{'id':b.id, 'name':b.name} for b in data]
+    js = json.dumps(lst)
+    resp = Response(js, status=200, mimetype="application/json")
+    return resp
+
+@app.route('/booze/loaded')
+def booze_loaded():
+    data = Booze.query.order_by(asc(func.lower(Booze.name)))
+    data = load_loaded_boozes()
+    lst = [{'id':b.id, 'name':b.name} for b in data]
+    js = json.dumps(lst)
+    resp = Response(js, status=200, mimetype="application/json")
+    return resp
