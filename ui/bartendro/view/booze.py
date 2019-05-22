@@ -17,6 +17,7 @@ def load_loaded_boozes():
                                            booze.name,
                                            booze.abv,
                                            booze.type,
+					   booze.image
                                            dispenser.id as dispenser
                                       FROM booze, dispenser
                                      WHERE booze.id = dispenser.booze_id

@@ -35,7 +35,7 @@ class Booze(db.Model):
     UniqueConstraint('name', name='booze_name_undx')
  
     query = db.session.query_property()
-    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, out = 0, data = None):
+    def __init__(self, name = u'', brand = u'', desc = u'', abv = 0, type = 0, out = 0, image=None, data = None):
         if data: 
             self.update(data)
             return
@@ -45,6 +45,7 @@ class Booze(db.Model):
         self.abv = abv
         self.type = type
         self.out = out
+        self.image = image
 
     def update(self, data):
         self.name = data['name']
@@ -52,6 +53,7 @@ class Booze(db.Model):
         self.brand = data['brand']
         self.abv = int(data['abv'])
         self.type = int(data['type'])
+        self.image = int(data['image'])
 
     def is_abstract(self):
         return len(self.booze_group)
