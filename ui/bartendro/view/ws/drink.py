@@ -5,7 +5,7 @@ import json
 from time import sleep
 from operator import itemgetter
 from bartendro import app, db, mixer
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask.ext.login import login_required, current_user
 from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
 from bartendro.model.drink import Drink
@@ -15,13 +15,31 @@ from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
 
+import pdb
 def ws_make_drink(drink_id):
     recipe = {}
-    for arg in request.args:
-        disp = int(arg[5:])
-        recipe[disp] = int(request.args.get(arg))
-
+    size=0
     drink = Drink.query.filter_by(id=int(drink_id)).first()
+    for arg in request.args:
+        if arg[0:4] == 'size':
+            size = int(request.args.get(arg))
+        else:
+            booze = int(arg[5:])
+            recipe[booze] = int(request.args.get(arg))
+
+    # todo: add values for recipe_return array for drinks which use the
+    # normal menu. OTOH, you won't see the response unless you are calling 
+    # ws_make_drink from the API
+    recipe_return = []
+    if size:
+        # figure out the recipe based on the drink
+        size_unit = 150 / sum([db.value for db in drink.drink_boozes])
+        # recipe is a dict of {booze_id:quantity, }
+        recipe = {b.booze_id:b.value*size_unit for b in drink.drink_boozes}
+        recipe_return = [ {'booze_id':b.booze_id, 'booze_name':b.booze.name, 'quantity':b.value*size_unit} for b in drink.drink_boozes]
+
+    js = json.dumps({'drink_name':drink.name.name,'drink_description':drink.desc, 'boozes':recipe_return})
+
     try:
         app.mixer.make_drink(drink, recipe)
     except mixer.BartendroCantPourError, err:
@@ -31,7 +49,11 @@ def ws_make_drink(drink_id):
     except mixer.BartendroBusyError, err:
         raise ServiceUnavailable(err)
 
-    return "ok\n"
+    # todo: I'd like to return more than ok
+
+    resp = Response(js, status=200, mimetype='application/json')
+    return resp
+    #return "%r\nok\n" % recipe
 
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):

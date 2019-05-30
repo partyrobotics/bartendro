@@ -126,9 +126,9 @@ class Mixer(object):
             if not next_state:
                 log.error("Current state %d, event %d. No next state." %
                           (cur_state, event))
+                print "cur state: %d event: %d next state: %d" % (cur_state, event, next_state)
                 raise BartendroBrokenError(
                     "Bartendro is unable to pour drinks right now. Sorry.")
-            #print "cur state: %d event: %d next state: %d" % (cur_state, event, next_state)
 
             try:
                 if next_state == fsm.STATE_PRE_POUR:

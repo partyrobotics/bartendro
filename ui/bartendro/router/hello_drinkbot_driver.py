@@ -90,7 +90,15 @@ log = logging.getLogger('bartendro')
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     pass
+
 except:
+
+    class Adafruit_MotorHAT:
+        FORWARD = 1
+        BACKWARD = 2
+        BRAKE = 3
+        RELEASE = 4
+
     log.info('no motor hat')
 
 
@@ -102,6 +110,27 @@ def crc16_update(crc, a):
         else:
             crc = (crc >> 1)
     return crc
+
+class Fake_Motor():
+    def __init__(self, num):
+        self.num = num
+
+    def setSpeed(self, speed):
+        self.speed = speed
+
+    def run(self, command=None):
+        log.info('run fake motor %s' % self.num)
+
+class Fake_MotorHAT():
+
+    def __init__(self):
+        self.port = 0x60
+        self.motors = [Fake_Motor(i) for i in range(9)]
+
+    def getMotor(self, num):
+
+        return self.motors[num]
+
 
 
 class RouterDriver(object):
@@ -125,17 +154,18 @@ class RouterDriver(object):
         if 1:
             try:
                 self.mh1 = Adafruit_MotorHAT(addr=0x60)
-                self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
-                for motor in range(4):
-                    self.ports[motor].setSpeed(255)
+                #self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
+                #for motor in range(4):
+                    #self.ports[motor].setSpeed(255)
             except:
                 # no motor hat, but that might be fine
+                self.mh1 = Fake_MotorHAT()
                 log.info("No Motor Hat?")
 
-            #self.mh1 = Adafruit_MotorHAT(addr=0x60)
-            #self.ports = [self.mh1.getMotor(foo) for foo in range(1, 5)]
-            #for motor in range(8):
-                #self.ports[motor].setSpeed(255)
+            self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
+            for motor in range(4):
+                self.ports[motor].setSpeed(255)
+
             pass
             # Add a second motor hat, with a second  address. Comment the
             # above lines, replace with something like this:
@@ -162,6 +192,7 @@ class RouterDriver(object):
             {'port': 3, 'direction': MOTOR_DIRECTION_BACKWARD},
         ]
 
+     
     def get_startup_log(self):
         return self.startup_log
 

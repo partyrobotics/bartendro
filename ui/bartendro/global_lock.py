@@ -68,9 +68,10 @@ class BartendroGlobalLock(object):
         # If we're not running inside uwsgi, then we can't keep global state
         if not have_uwsgi: return self.state
 
-        uwsgi.lock()
-        state = uwsgi.sharedarea_readbyte(1)
-        uwsgi.unlock()
+        # this gaves me an error under uwsgi, so comment it out.
+        #uwsgi.lock()
+        #state = uwsgi.sharedarea_readbyte(1)
+        #uwsgi.unlock()
 
         return state
 

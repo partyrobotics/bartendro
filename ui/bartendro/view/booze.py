@@ -24,6 +24,7 @@ def load_loaded_boozes():
                                            dispenser.id as dispenser
                                       FROM booze, dispenser
                                      WHERE booze.id = dispenser.booze_id
+                                     AND dispenser.id < 9
                                   ORDER BY booze.name ;"""))\
                  .params(foo='', bar='').all()
     return loaded
