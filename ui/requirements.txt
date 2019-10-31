@@ -1,4 +1,4 @@
-werkzeug==0.12.2
+werkzeug==0.15.3
 jinja2==2.9.6
 wtforms==2.1
 sqlalchemy==1.1.14
