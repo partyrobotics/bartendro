@@ -27,18 +27,22 @@
              {% endif %}
              ><a href="/shots" class="slim-nav-item">Shots</a></li>
              <li
-             {% if active == "shots" %}
+             {% if active == "shots_with_pictures" %}
                 class="active"
              {% endif %}
-             ><a href="/graphical_shots" class="slim-nav-item">Shots with pictures</a></li>
-
+             ><a href="/graphical_shots" class="slim-nav-item">Shots with pictures</a>
+             </li>
           {% endif %}
           <li
           {% if active == "trending" %}
              class="active"
           {% endif %}
           ><a href="/trending" class="slim-nav-item">Trending</a></li>
-          <li>
+          <li
+          {% if active == "explore" %}
+             class="active"
+          {% endif %}
+          >
           <a href="/booze" class="slim-nav-item">Explore Booze</a></li>
 
         </ul>
