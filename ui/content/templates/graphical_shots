@@ -1,5 +1,5 @@
 {% extends 'layout' %}
-{% set active = "shots" %}
+{% set active = "shots_with_pictures" %}
 {% block body %}
 <!-- alter table booze add image TEXT; -->
 <div id="scroll-pane">
@@ -34,7 +34,7 @@
                   <div class="row-fluid">
 
                     <div class="span5 shotbot-text" style="padding-top: 10px">
-                       <button class="btn btn-success button-border shotbot-button" onclick="make_shot({{ shots[i].id }}, '{{ shots[i].name }}')">
+                       <button class="btn btn-light button-border shotbot-button" onclick="make_shot({{ shots[i].id }}, '{{ shots[i].name }}')">
 
 
 <img src="/static/images/{{ shots[i].image }}">
