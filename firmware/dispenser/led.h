@@ -25,6 +25,7 @@ void led_pattern_next(uint32_t t, color_t *c);
 #define CUSTOM_PATTERN_INVALID      2
 #define CUSTOM_PATTERN_FULL         3
 
+void set_swap_green_blue(uint8_t swap);
 uint8_t pattern_define(uint8_t pattern);
 uint8_t pattern_add_segment(color_t *color, uint8_t steps);
 uint8_t pattern_finish(void);

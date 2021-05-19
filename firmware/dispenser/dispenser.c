@@ -23,6 +23,7 @@
 #define ee_liquid_out_threshold_offset    7 
 
 #define SOFTWARE_VERSION                  4
+#define ALT_SOFTWARE_VERSION              3
 
 #define USER_BUTTON_DURATION             10 // in clock ticks
 #define RESET_DURATION                    1
@@ -739,8 +740,16 @@ void check_software_revision(void)
     uint8_t bit1 = PINC & (1<<PINC3) ? 1 : 0;
     uint8_t bit2 = PINC & (1<<PINC4) ? 1 : 0;
 
+    // Check our software version
     if ((bit0 | bit1 << 1 | bit2 << 2) == SOFTWARE_VERSION)
         return;
+
+    // But we'll also work with older boards that have blue/green leds swapped
+    if ((bit0 | bit1 << 1 | bit2 << 2) == ALT_SOFTWARE_VERSION)
+    {
+        set_swap_green_blue(1);
+        return;
+    }
 
     // Wrong software! I refuse to do shit!
     set_led_rgb(255, 255, 255);

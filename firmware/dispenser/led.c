@@ -86,6 +86,8 @@ pattern_t g_pattern_table[MAX_PATTERNS] =
     { current_sense_segments, LED_CURRENT_SENSE_NUM_SEGMENTS }
 };
 
+uint8_t swap_green_blue = 0;
+
 #define MAX_NUM_CUSTOM_SEGMENTS 32
 color_segment_t  g_custom_segments[MAX_NUM_CUSTOM_SEGMENTS];
 uint8_t          g_num_custom_segments = 0;
@@ -98,6 +100,11 @@ static color_segment_t *g_cur_segment = NULL;
 static uint8_t          g_num_segments = 0;
 static uint8_t          g_segment_index = 0;
 static uint8_t          g_segment_step = 255;
+
+void set_swap_green_blue(uint8_t swap)
+{
+    swap_green_blue = swap;
+}
 
 uint8_t pattern_define(uint8_t pattern)
 {
@@ -190,9 +197,17 @@ void set_led_color(color_t *color)
 void set_led_rgb(uint8_t red, uint8_t green, uint8_t blue)
 {
     uint8_t led[3];
-    led[0] = blue;
+    if (swap_green_blue)
+    {
+        led[0] = green;
+        led[2] = blue;
+    }
+    else
+    {
+        led[0] = blue;
+        led[2] = green;
+    }
     led[1] = red;
-    led[2] = green;
     set_led_bytes(led);
     delay_us(COLOR_LATCH_DURATION);
 }
