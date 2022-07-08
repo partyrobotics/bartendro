@@ -23,7 +23,7 @@ if os.path.exists("version.txt"):
 else:
     version = subprocess.check_output(["git", "rev-parse", "HEAD"])
     if version:
-        version = "git commit " + version[:10]
+        version = "git commit " + version[:10].decode()
     else:
         version = "[unknown]"
 
@@ -46,7 +46,7 @@ except ImportError:
     have_uwsgi = False
 
 def print_software_only_notice():
-    print """If you're trying to run this code without having Bartendro hardware,
+    print("""If you're trying to run this code without having Bartendro hardware,
 you can still run the software portion of it in a simulation mode. In this mode no 
 communication with the Bartendro hardware will happen to allow the software to run.
 To enable this mode, set the BARTENDRO_SOFTWARE_ONLY environment variable to 1 and 
@@ -54,7 +54,7 @@ try again:
 
     > export BARTENDRO_SOFTWARE_ONLY=1
 
-"""
+""")
 
 # Set up logging
 if not os.path.exists("logs"):
@@ -75,8 +75,8 @@ except KeyError:
     app.software_only = 0
 
 if not os.path.exists("bartendro.db"):
-    print "bartendro.db file not found. Please copy bartendro.db.default to "
-    print "bartendro.db in order to provide Bartendro with a starting database."
+    print( "bartendro.db file not found. Please copy bartendro.db.default to ")
+    print( "bartendro.db in order to provide Bartendro with a starting database.")
     sys.exit(-1)
 
 # Create a memcache connection and flush everything
@@ -97,9 +97,9 @@ except BartendroBrokenError:
     if have_uwsgi:
         startup_err = err
     else:
-        print
-        print err
-        print
+        print()
+        print(err)
+        print()
         print_software_only_notice()
         sys.exit(-1)
 except SerialIOError:
@@ -107,9 +107,9 @@ except SerialIOError:
     if have_uwsgi:
         startup_err = err
     else:
-        print
-        print err
-        print
+        print()
+        print(err)
+        print()
         print_software_only_notice()
         sys.exit(-1)
 except:
@@ -117,9 +117,9 @@ except:
     if have_uwsgi:
         startup_err = err
     else:
-        print
-        print err
-        print
+        print()
+        print(err)
+        print()
         print_software_only_notice()
         sys.exit(-1)
 

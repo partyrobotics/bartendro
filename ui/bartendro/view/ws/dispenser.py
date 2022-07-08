@@ -72,8 +72,8 @@ def ws_dispenser_test(disp):
     try:
         app.mixer.dispense_ml(dispenser, app.options.test_dispense_ml)
     except BartendroBrokenError:
-	pass
-	# todo: Handle errors correctly
+        pass
+        # todo: Handle errors correctly
         #raise InternalServerError
 
     return ""
@@ -88,11 +88,11 @@ def ws_dispenser_clean():
 
     try:
         app.mixer.clean()
-    except BartendroCantPourError, err:
+    except BartendroCantPourError as err:
         raise BadRequest(err)
-    except BartendroBrokenError, err:
+    except BartendroBrokenError as err:
         raise InternalServerError(err)
-    except BartendroBusyError, err:
+    except BartendroBusyError as err:
         raise ServiceUnavailable(err)
 
     return ""
@@ -107,11 +107,11 @@ def ws_dispenser_clean_right():
 
     try:
         app.mixer.clean_right()
-    except BartendroCantPourError, err:
+    except BartendroCantPourError as err:
         raise BadRequest(err)
-    except BartendroBrokenError, err:
+    except BartendroBrokenError as err:
         raise InternalServerError(err)
-    except BartendroBusyError, err:
+    except BartendroBusyError as err:
         raise ServiceUnavailable(err)
     return ""
 
@@ -125,11 +125,11 @@ def ws_dispenser_clean_left():
 
     try:
         app.mixer.clean_left()
-    except BartendroCantPourError, err:
+    except BartendroCantPourError as err:
         raise BadRequest(err)
-    except BartendroBrokenError, err:
+    except BartendroBrokenError as err:
         raise InternalServerError(err)
-    except BartendroBusyError, err:
+    except BartendroBusyError as err:
         raise ServiceUnavailable(err)
 
     return ""

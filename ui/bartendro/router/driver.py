@@ -6,8 +6,8 @@ from subprocess import call
 from time import sleep, localtime, time
 import serial
 from struct import pack, unpack
-import pack7
-import dispenser_select
+import bartendro.router.pack7
+import bartendro.router.dispenser_select
 from bartendro.error import SerialIOError
 import random
 
@@ -159,7 +159,7 @@ class RouterDriver(object):
                                      parity=serial.PARITY_NONE,
                                      stopbits=serial.STOPBITS_ONE,
                                      timeout=.01)
-        except serial.serialutil.SerialException, e:
+        except (serial.serialutil.SerialException, e):
             raise SerialIOError(e)
 
         log.info("Done.\n")
@@ -534,7 +534,7 @@ class RouterDriver(object):
                 log.error("*** dispenser: %d, type: %d" %
                           (dest + 1, ord(packet[1:2])))
                 return False
-        except SerialException, err:
+        except (SerialException, err):
             log.error("SerialException: %s" % err)
             return False
 

@@ -17,13 +17,15 @@ ROUTER_CMD_COUNT        = 254
 ROUTER_CMD_RESET        = 255
 
 log = logging.getLogger('bartendro')
-
 try:
     import smbus
     smbus_missing = 0
-except ImportError, e:
-    if e.message != 'No module named smbus':
-        raise
+except ImportError as e:
+    if e.msg != 'No module named smbus':
+        #raise
+        # TODO: smbus appears to work under python 2.7, but not 3.*
+        # for hello drinkbot purposes this code is not used, so just pass
+        pass
     smbus_missing = 1
 
 class DispenserSelect(object):
@@ -39,7 +41,7 @@ class DispenserSelect(object):
     def _write_byte_with_retry(self, address, byte):
         try:
             self.router.write_byte(address, byte)
-        except IOError, e:
+        except IOError as e:
             # if we get an error, try again, just once
             try:
                 log.error("*** router send: error while sending. Retrying. " + repr(e))

@@ -29,9 +29,9 @@ def ws_reset():
 def ws_test_chain():
     driver = app.driver
     for disp in xrange(driver.count()):
-	if not driver.ping(disp):
+        if not driver.ping(disp):
             log.error("Dispense %d failed ping" % (disp + 1))
-	    return "Dispenser %d failed ping." % (disp + 1)
+            return "Dispenser %d failed ping." % (disp + 1)
 
     return ""
 
@@ -41,11 +41,11 @@ def ws_check_levels():
     mixer = app.mixer
     try:
         mixer.check_levels()
-    except BartendroCantPourError, err:
+    except BartendroCantPourError as err:
         raise BadRequest(err)
-    except BartendroBrokenError, err:
+    except BartendroBrokenError as err:
         raise InternalServerError(err)
-    except BartendroBusyError, err:
+    except BartendroBusyError as err:
         raise ServiceUnavailable(err)
 
     return ""
@@ -62,7 +62,7 @@ def ws_download_db():
         fh = open("bartendro.db", "r")
         db_data = fh.read()
         fh.close()
-    except IOError, e:
+    except IOError as e:
         raise ServiceUnavailable("Error: downloading database failed: %s" % e)
 
     r = Response(db_data, mimetype='application/x-sqlite')

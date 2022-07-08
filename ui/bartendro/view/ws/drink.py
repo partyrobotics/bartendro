@@ -42,11 +42,11 @@ def ws_make_drink(drink_id):
 
     try:
         app.mixer.make_drink(drink, recipe)
-    except mixer.BartendroCantPourError, err:
+    except mixer.BartendroCantPourError as err:
         raise BadRequest(err)
-    except mixer.BartendroBrokenError, err:
+    except mixer.BartendroBrokenError as err:
         raise InternalServerError(err)
-    except mixer.BartendroBusyError, err:
+    except mixer.BartendroBusyError as err:
         raise ServiceUnavailable(err)
 
     # todo: I'd like to return more than ok
@@ -96,11 +96,11 @@ def ws_shots(booze_id):
 
     try:
         app.mixer.dispense_shot(dispenser, app.options.shot_size)
-    except mixer.BartendroCantPourError, err:
+    except mixer.BartendroCantPourError as err:
         raise BadRequest(err)
-    except mixer.BartendroBrokenError, err:
+    except mixer.BartendroBrokenError as err:
         raise InternalServerError(err)
-    except mixer.BartendroBusyError, err:
+    except mixer.BartendroBusyError as err:
         raise ServiceUnavailable(err)
 
     return ""

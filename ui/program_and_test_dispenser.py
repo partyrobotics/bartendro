@@ -21,7 +21,7 @@ def test(ll):
     try:
         subprocess.check_call(["make", "-C", "../firmware/dispenser", "dispenser"])
     except subprocess.CalledProcessError:
-        print "Failed to program dispenser!"
+        print("Failed to program dispenser!")
         sys.exit(-1)
 
     sleep(1)
@@ -30,41 +30,41 @@ def test(ll):
     dt.open()
     sleep(.1)
     if dt.ping(0):
-        print "ping ok"
+        print( "ping ok")
     else:
-        print "ping failed"
+        print( "ping failed")
         sys.exit(-1)
 
     dt.set_motor_direction(0, driver.MOTOR_DIRECTION_FORWARD)
 
-    print "timed forward"
+    print("timed forward")
     if not dt.dispense_time(0, 950):
-        print "timed dispense forward failed."
+        print( "timed dispense forward failed.")
         sys.exit(-1)
 
     sleep(1.5)
 
     dt.set_motor_direction(0, driver.MOTOR_DIRECTION_BACKWARD)
 
-    print "ticks backward"
+    print( "ticks backward")
     if not dt.dispense_ticks(0, 24):
-        print "ticks dispense backward failed."
+        print( "ticks dispense backward failed.")
         sys.exit(-1)
     sleep(1.5)
 
     dt.set_motor_direction(0, driver.MOTOR_DIRECTION_FORWARD)
 
-    print "ticks forward"
+    print("ticks forward")
     if not dt.dispense_ticks(0, 24):
-        print "tick dispense forward failed."
+        print( "tick dispense forward failed.")
         sys.exit(-1)
     sleep(1.5)
 
     dt.set_motor_direction(0, driver.MOTOR_DIRECTION_BACKWARD)
 
-    print "time backward"
+    print( "time backward")
     if not dt.dispense_time(0, 950):
-        print "timed dispense backward failed."
+        print("timed dispense backward failed.")
         sys.exit(-1)
     sleep(1.5)
 
@@ -77,21 +77,21 @@ def test(ll):
                 break
 
             if not dt.update_liquid_levels():
-                print "updating liquid levels failed."
+                print("updating liquid levels failed.")
                 sys.exit(-1)
 
             sleep(.1)
            
             ll = dt.get_liquid_level(0)
             if ll < 0:
-                print "updating liquid levels failed."
+                print( "updating liquid levels failed.")
                 sys.exit(-1)
 
-            print "Current level: %d" % ll
-
-    print "All tests passed!"
-    print
-    print
+            print( "Current level: %d" % ll)
+                    
+    print( "All tests passed!")
+    print()
+    print()
 
 while True:
     test(args.ll)

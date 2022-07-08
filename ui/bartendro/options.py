@@ -89,15 +89,24 @@ def load_options():
 
     options = Options()
     for o in db.session.query(Option).all():
+
+        #import pdb
+        #pdb.set_trace()
+
         try:
-            if isinstance(bartendro_options[o.key], int):
-               value = int(o.value)
-            elif isinstance(bartendro_options[o.key], unicode):
-               value = unicode(o.value)
-            elif isinstance(bartendro_options[o.key], boolean):
-               value = boolean(o.value)
-            else:
-                raise BadConfigOptionsError
+            value = o.value
+            # TODO: if we care to keep python 2.7, then revisit this code.
+            
+            #if isinstance(bartendro_options[o.key], int):
+            #   value = int(o.value)
+            #elif isinstance(bartendro_options[o.key], unicode):
+            #   value = unicode(o.value)
+            #elif isinstance(bartendro_options[o.key], boolean):
+            #   value = boolean(o.value)
+            #else:
+            #    #raise BadConfigOptionsError
+            #    pass
+
         except KeyError:
             # Ignore options we don't understand
             pass

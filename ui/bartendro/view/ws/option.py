@@ -88,8 +88,8 @@ def ws_upload():
 @login_required
 def ws_upload_confirm():
     file_name = request.json['file_name']
-    print file_name
-    print "Move file '%s' into place." % file_name
+    print( file_name)
+    print( "Move file '%s' into place." % file_name)
 
     if not os.path.exists(DB_BACKUP_DIR):
         try:

@@ -53,5 +53,5 @@ class CleanCycle(object):
 
         try:
             self.mixer.check_levels()
-        except BartendroBrokenError, msg:
+        except BartendroBrokenError as msg:
             log.error("Post clean: %s" % msg) 

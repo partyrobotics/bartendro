@@ -68,7 +68,7 @@ def index():
     other_drinks = filter_drink_list(can_make_dict, other_drinks)
     process_ingredients(other_drinks)
 
-    print "%d, %d" % (len(top_drinks), len(other_drinks))
+    print( "%d, %d" % (len(top_drinks), len(other_drinks)))
 
     if (not len(top_drinks) and not len(other_drinks)) or app.globals.get_state() == fsm.STATE_HARD_OUT:
         return render_template("index", 

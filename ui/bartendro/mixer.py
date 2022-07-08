@@ -131,7 +131,7 @@ class Mixer(object):
             if not next_state:
                 log.error("Current state %d, event %d. No next state." %
                           (cur_state, event))
-                print "cur state: %d event: %d next state: %d" % (cur_state, event, next_state)
+                print( "cur state: %d event: %d next state: %d" % (cur_state, event, next_state))
                 raise BartendroBrokenError(
                     "Bartendro is unable to pour drinks right now. Sorry.")
 
@@ -168,19 +168,20 @@ class Mixer(object):
                     raise BartendroBrokenError(
                         "Internal error. Bartendro has had one too many.")
 
-            except BartendroBrokenError, err:
+            except BartendroBrokenError as err:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 # traceback.print_tb(exc_traceback)
                 self._state_error()
                 app.globals.set_state(fsm.STATE_ERROR)
                 raise
 
-            except BartendroCantPourError, err:
+            except BartendroCantPourError as err:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 # traceback.print_tb(exc_traceback)
                 raise
 
-            except BartendroCurrentSenseError, err:
+            except BartendroCurrentSenseError as err:
+
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 # traceback.print_tb(exc_traceback)
                 raise BartendroBrokenError(err)
@@ -440,7 +441,7 @@ class Mixer(object):
                                                          FROM booze_group_booze bgb, dispenser 
                                                         WHERE bgb.booze_id = dispenser.booze_id)"""))
 
-	if app.options.use_liquid_level_sensors:
+        if app.options.use_liquid_level_sensors:
             sql = "SELECT booze_id FROM dispenser WHERE out == 1 or out == 2 ORDER BY id LIMIT :d"
         else:
             sql = text("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d")
