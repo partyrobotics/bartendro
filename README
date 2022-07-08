@@ -8,7 +8,7 @@ distribution vector)
 
 
 
-- git clone https://github.com/RichGibson/hellodrinkbot.git
+- git clone https://github.com/RichGibson/bartendro.git
 - cd bartendro/ui
 - #this requires python 2.7, for now. If you use Conda this works:
 - conda create --name py27 python=2.7
