@@ -1,5 +1,23 @@
 This is a forked version of the original Bartendro software which 
-supports the [Hello Drinkbot](http://hellodrinkbot.com) project
+supports the [Hello Drinkbot](https://www.facebook.com/groups/602734573508700) project
+
+(the original hellodrinkbot.com domain was lost, and now appears to be a malware 
+distribution vector)
+
+# Quickstart for Hello Drinkbot fork
+
+
+
+- git clone https://github.com/RichGibson/hellodrinkbot.git
+- cd bartendro/ui
+- #this requires python 2.7, for now. If you use Conda this works:
+- conda create --name py27 python=2.7
+- conda activate py27
+- pip install -r requirements.txt
+- cp bartendro.db.default bartendro.db
+- sh ./start_bartendro.sh
+
+Got to http://http://127.0.0.1:8080/
 
 ----
 
