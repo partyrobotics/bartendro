@@ -38,7 +38,8 @@ class Options(object):
 
 def setup_options_table():
     '''Check to make sure the options table is present'''
-
+    # this fails with the 'wrong' version of Flask-SQLAlchemy is loaded
+    # if it fails for you, look there.
     if not db.engine.dialect.has_table(db.engine.connect(), "option"):
         log.info("Creating options table")
         option = Option()

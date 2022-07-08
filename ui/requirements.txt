@@ -7,7 +7,10 @@ python-memcached
 #flask-login
 Flask==0.10.1
 Flask-Login==0.3.2
-Flask-SQLAlchemy==2.1
+#Flask-SQLAlchemy==1.3.23
+Flask-SQLAlchemy
+#Flask-SQLAlchemy==2.5
+#Flask-SQLAlchemy to >= 2.5 
 wtforms
 pyserial
 Adafruit_MotorHAT
