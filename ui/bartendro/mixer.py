@@ -433,13 +433,22 @@ class Mixer(object):
         if can_make:
             return can_make
 
-        add_boozes = db.session.query(text("abstract_booze_id")) \
-                            .from_statement(text("""SELECT bg.abstract_booze_id 
+        import pdb
+        pdb.set_trace()
+        add_boozes = db.session.query("abstract_booze_id") \
+                            .from_statement("""SELECT bg.abstract_booze_id 
                                                  FROM booze_group bg 
                                                 WHERE id 
                                                    IN (SELECT distinct(bgb.booze_group_id) 
                                                          FROM booze_group_booze bgb, dispenser 
-                                                        WHERE bgb.booze_id = dispenser.booze_id)"""))
+                                                        WHERE bgb.booze_id = dispenser.booze_id)""")
+        #add_boozes = db.session.query("abstract_booze_id") \
+        #                    .from_statement(text("""SELECT bg.abstract_booze_id 
+        #                                         FROM booze_group bg 
+        #                                        WHERE id 
+        #                                           IN (SELECT distinct(bgb.booze_group_id) 
+        #                                                 FROM booze_group_booze bgb, dispenser 
+        #                                                WHERE bgb.booze_id = dispenser.booze_id)"""))
 
         if app.options.use_liquid_level_sensors:
             sql = "SELECT booze_id FROM dispenser WHERE out == 1 or out == 2 ORDER BY id LIMIT :d"
