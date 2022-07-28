@@ -105,7 +105,7 @@ except:
 
 def crc16_update(crc, a):
     crc ^= a
-    for i in xrange(0, 8):
+    for i in range(0, 8):
         if crc & 1:
             crc = (crc >> 1) ^ 0xA001
         else:
@@ -251,7 +251,7 @@ class RouterDriver(object):
 
         log.info("Discovering dispensers")
         self.num_dispensers = 0
-        for port in xrange(MAX_DISPENSERS):
+        for port in range(MAX_DISPENSERS):
             self._log_startup("port %d:" % port)
             #self.dispenser_select.select(port)
             sleep(.01)
@@ -358,9 +358,8 @@ class RouterDriver(object):
     def dispenser_port(self, disp):
         """ Take a dispenser, return the port """
 
-        port = disp/2
+        port = disp//2
         print('disp: %i port: %i' % (disp, port))
-        #pdb.set_trace()
         return port
 
     def dispenser_sibling(self, disp):
@@ -409,6 +408,8 @@ class RouterDriver(object):
 
         print('dispenser: %i ' % dispenser)
         port = self.dispenser_port(dispenser)
+        print('port', port)
+        print(type(port))
         sibling = self.dispenser_sibling(dispenser)
 
         try:
@@ -864,7 +865,6 @@ if __name__ == '__main__':
     # pump.ports[3].run(Adafruit_MotorHAT.FORWARD)
     # pump.ports[3].run(Adafruit_MotorHAT.BACKWARD)
     # pump.ports[3].run(Adafruit_MotorHAT.RELEASE)
-    pdb.set_trace()
 
 
     # todo: why doesn't this work?

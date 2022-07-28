@@ -28,7 +28,7 @@ def ws_reset():
 @login_required
 def ws_test_chain():
     driver = app.driver
-    for disp in xrange(driver.count()):
+    for disp in range(driver.count()):
         if not driver.ping(disp):
             log.error("Dispense %d failed ping" % (disp + 1))
             return "Dispenser %d failed ping." % (disp + 1)

@@ -21,6 +21,7 @@ display_info = {
 
 @app.route('/trending')
 def trending_drinks():
+    ''' The trending drinks page '''
     return trending_drinks_detail(DEFAULT_TIME,'')
 
 # figure out begindate and enddate

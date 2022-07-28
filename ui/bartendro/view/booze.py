@@ -54,6 +54,8 @@ def load_drink_list(booze_id):
 @app.route('/booze')
 @login_required
 def booze():
+    ''' Page showing all booze, and all loaded booze '''
+
     all_boozes = Booze.query.order_by(asc(func.lower(Booze.name)))
     loaded_boozes = load_loaded_boozes()
     (all_drink_list, can_make_drink_list) = load_drink_list(0)
@@ -63,6 +65,8 @@ def booze():
 @app.route('/booze/<int:id>')
 @login_required
 def booze_detail(id):
+    ''' Page showing the selected booze, and drinks that can be made with that booze.'''
+
     booze = Booze.query.filter_by(id=int(id)).first()
     # what is your booze_types
     #import pdb
@@ -76,6 +80,8 @@ def booze_detail(id):
 
 @app.route('/booze/all')
 def booze_all():
+    ''' Returns json of all booze in our database. '''
+
     data = Booze.query.order_by(asc(func.lower(Booze.name)))
     lst = [{'id':b.id, 'name':b.name} for b in data]
     js = json.dumps(lst)
@@ -84,6 +90,7 @@ def booze_all():
 
 @app.route('/booze/loaded')
 def booze_loaded():
+    ''' Returns json of all loaded booze. But does not show the dispenser where it is loaded.'''
     data = Booze.query.order_by(asc(func.lower(Booze.name)))
     data = load_loaded_boozes()
     lst = [{'id':b.id, 'name':b.name} for b in data]

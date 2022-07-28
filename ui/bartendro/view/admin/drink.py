@@ -13,6 +13,8 @@ from bartendro.model.drink_name import DrinkName
 @app.route('/admin/drink')
 @login_required
 def admin_drink_new():
+    ''' shows the admin drink page '''
+
     drinks = db.session.query(Drink).join(DrinkName).filter(Drink.name_id == DrinkName.id) \
                                  .order_by(asc(func.lower(DrinkName.name))).all()
 

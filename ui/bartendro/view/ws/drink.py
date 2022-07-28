@@ -7,6 +7,7 @@ from operator import itemgetter
 from bartendro import app, db, mixer
 from flask import Flask, request, Response
 from flask.ext.login import login_required, current_user
+from sqlalchemy.sql import text
 from werkzeug.exceptions import ServiceUnavailable, BadRequest, InternalServerError
 from bartendro.model.drink import Drink
 from bartendro.model.drink_name import DrinkName
@@ -14,8 +15,21 @@ from bartendro.model.booze import Booze
 from bartendro.model.drink_booze import DrinkBooze
 from bartendro.model.dispenser import Dispenser
 from bartendro.error import BartendroBusyError, BartendroBrokenError, BartendroCantPourError, BartendroCurrentSenseError
+import json
 
-import pdb
+
+@app.route('/ws/drink/match/<str>')
+def ws_drink_match(str):
+    ''' Does a case insensitive search on drinks for the partial string.
+    entering 'equ' will find all of the tequilla sunrises. '''
+    str = "%%%s%%" % str
+    drinks = db.session.query("id", "name").from_statement(text("SELECT id, name FROM drink_name  WHERE name LIKE :s")).params(s=str).all()
+    js = json.dumps(drinks)
+    resp=Response(js, status=200, mimetype="application/json")
+    return resp
+
+
+
 def ws_make_drink(drink_id):
     recipe = {}
     size=0

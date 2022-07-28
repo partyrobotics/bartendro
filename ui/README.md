@@ -33,9 +33,7 @@ the required tables for you to start playing with.
 Configuration
 -------------
 
-You'll need to copy the config.py.default file to config.py . This will assume
-the basic sane setting for your Bartendro configuration. These settings will be migrated
-to the DB soon, so please take a look at the file to see what can be changed.
+Configuration has been moved from a config.py file to the option table.
 
 Starting
 --------

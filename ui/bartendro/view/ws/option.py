@@ -25,8 +25,10 @@ def ws_options():
             try:    
                 if isinstance(bartendro_options[o.key], int):
                    value = int(o.value)
-                elif isinstance(bartendro_options[o.key], unicode):
-                   value = unicode(o.value)
+                # str are unicode in python 3, so this should work.
+                #elif isinstance(bartendro_options[o.key], unicode):
+                elif isinstance(bartendro_options[o.key], str):
+                   value = str(o.value)
                 elif isinstance(bartendro_options[o.key], boolean):
                    value = boolean(o.value)
                 else:

@@ -9,7 +9,7 @@ LOG_LINES_TO_SHOW = 1000
 @app.route('/admin/debug')
 @login_required
 def debug_index():
-
+    ''' debugging page with additional information and ability to test dispensers '''
     startup_log = app.driver.get_startup_log()
     try:
         b_log = open("logs/bartendro.log", "r")

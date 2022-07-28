@@ -88,7 +88,7 @@ log = logging.getLogger('bartendro')
 
 def crc16_update(crc, a):
     crc ^= a
-    for i in xrange(0, 8):
+    for i in range(0, 8):
         if crc & 1:
             crc = (crc >> 1) ^ 0xA001
         else:
@@ -112,10 +112,10 @@ class RouterDriver(object):
 
         # dispenser_ids are the ids the dispensers have been assigned. These are logical ids
         # used for dispenser communication.
-        self.dispenser_ids = [255 for i in xrange(MAX_DISPENSERS)]
+        self.dispenser_ids = [255 for i in range(MAX_DISPENSERS)]
 
         # dispenser_ports are the ports the dispensers have been plugged into.
-        self.dispenser_ports = [255 for i in xrange(MAX_DISPENSERS)]
+        self.dispenser_ports = [255 for i in range(MAX_DISPENSERS)]
 
         if software_only:
             self.num_dispensers = MAX_DISPENSERS
@@ -179,7 +179,7 @@ class RouterDriver(object):
 
         log.info("Discovering dispensers")
         self.num_dispensers = 0
-        for port in xrange(MAX_DISPENSERS):
+        for port in range(MAX_DISPENSERS):
             self._log_startup("port %d:" % port)
             self.dispenser_select.select(port)
             sleep(.01)

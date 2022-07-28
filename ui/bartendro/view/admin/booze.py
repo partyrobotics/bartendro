@@ -11,6 +11,7 @@ from bartendro.form.booze import BoozeForm
 @app.route('/admin/booze')
 @login_required
 def admin_booze():
+    ''' admin to add or edit booze '''
     form = BoozeForm(request.form)
     boozes = Booze.query.order_by(asc(func.lower(Booze.name)))
     return render_template("admin/booze", options=app.options, boozes=boozes, form=form, title="Booze")

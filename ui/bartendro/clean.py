@@ -32,7 +32,7 @@ class CleanCycle(object):
             else:
                 disp_list.extend(self.left_set)
         else:
-            for d in xrange(self.mixer.disp_count):
+            for d in range(self.mixer.disp_count):
                 disp_list.append(d)
 
         self.mixer.driver.led_clean()

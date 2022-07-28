@@ -17,6 +17,7 @@ from bartendro.mixer import LL_OK
 @app.route('/admin')
 @login_required
 def dispenser():
+    ''' shows list of dispensers and allows you to dispense a test pour. '''
     driver = app.driver
     count = driver.count()
 
@@ -38,7 +39,7 @@ def dispenser():
 
     kwargs = {}
     fields = []
-    for i in xrange(1, 17):
+    for i in range(1, 17):
         dis = "dispenser%d" % i
         actual = "actual%d" % i
         setattr(F, dis, SelectField("%d" % i, choices=sorted_booze_list)) 

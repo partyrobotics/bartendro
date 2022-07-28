@@ -76,7 +76,7 @@ def ws_liquidlevel_out_all_set():
     driver = app.driver
 
     data = []
-    for disp in xrange(driver.count()):
+    for disp in range(driver.count()):
         out = driver.get_liquid_level(disp)
         if out < 0: 
             log.error("Failed to read liquid level threshold from dispenser %d" % (disp + 1))
@@ -103,7 +103,7 @@ def ws_liquidlevel_low_all_set():
     driver = app.driver
 
     data = []
-    for disp in xrange(driver.count()):
+    for disp in range(driver.count()):
         low = driver.get_liquid_level(disp)
         if low < 0: 
             log.error("Failed to read liquid level threshold from dispenser %d" % (disp + 1))

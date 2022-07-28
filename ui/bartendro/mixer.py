@@ -61,7 +61,6 @@ class Mixer(object):
        else in Bartendro lives for *this* *code*. :) '''
 
     def __init__(self, driver, mc):
-        import pdb
         try: 
             if driver:
                 self.driver = driver
@@ -71,7 +70,6 @@ class Mixer(object):
             self.err = ""
         except BaseException as err:
             print('error in Mixer.__init__()',err)
-            pdb.set_trace()
 
     def check_levels(self):
         with BartendroLock(app.globals):
@@ -131,7 +129,7 @@ class Mixer(object):
             if not next_state:
                 log.error("Current state %d, event %d. No next state." %
                           (cur_state, event))
-                print( "cur state: %d event: %d next state: %d" % (cur_state, event, next_state))
+                #print( "cur state: %d event: %d next state: %d" % (cur_state, event, next_state))
                 raise BartendroBrokenError(
                     "Bartendro is unable to pour drinks right now. Sorry.")
 
@@ -240,7 +238,8 @@ class Mixer(object):
         except BartendroLiquidLevelReadError:
             raise BartendroBrokenError("Failed to read liquid levels")
 
-        booze_id = self.recipe.data.keys()[0]
+        lst=[k for k in self.recipe.data.keys()]
+        booze_id=lst[0]
         dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
         for i, disp in enumerate(dispensers):
             if disp.booze_id == booze_id:
@@ -295,9 +294,9 @@ class Mixer(object):
         recipe = {}
         size = 0
         log_lines = {}
-        sql = text("SELECT id FROM booze WHERE type = :d")
-        ext_booze_list = db.session.query(text("id")) \
-            .from_statement(sql) \
+        sql = "SELECT id FROM booze WHERE type = :d"
+        ext_booze_list = db.session.query("id") \
+            .from_statement(text(sql)) \
             .params(d=BOOZE_TYPE_EXTERNAL).all()
         ext_boozes = {}
         for booze in ext_booze_list:
@@ -310,7 +309,7 @@ class Mixer(object):
                 continue
 
             found = False
-            for i in xrange(self.disp_count):
+            for i in range(self.disp_count):
                 disp = dispensers[i]
 
                 if booze_id == disp.booze_id:
@@ -321,6 +320,7 @@ class Mixer(object):
 
                     found = True
                     ml = self.recipe.data[booze_id]
+                    ml = int(ml)
                     if ml <= 0:
                         log_lines[i] = "  %-2d %-32s %d ml (not dispensed)" % (
                             i, "%s (%d)" % (disp.booze.name, disp.booze.id), ml)
@@ -354,13 +354,13 @@ class Mixer(object):
         return fsm.EVENT_POUR_DONE
 
     def _state_test_dispense(self):
-
-        booze_id = self.recipe.data.keys()[0]
+        lst=[k for k in self.recipe.data.keys()]
+        booze_id=lst[0]
         ml = self.recipe.data[booze_id]
 
         recipe = {}
         dispensers = db.session.query(Dispenser).order_by(Dispenser.id).all()
-        for i in xrange(self.disp_count):
+        for i in range(self.disp_count):
             if booze_id == dispensers[i].booze_id:
                 recipe[i] = ml
                 self._dispense_recipe(recipe, True)
@@ -433,15 +433,20 @@ class Mixer(object):
         if can_make:
             return can_make
 
-        import pdb
-        pdb.set_trace()
+        #sql = """SELECT bg.abstract_booze_id FROM booze_group bg 
+        #        WHERE id IN 
+        #         (SELECT distinct(bgb.booze_group_id) FROM booze_group_booze bgb, dispenser 
+        #                WHERE bgb.booze_id = dispenser.booze_id)"""
+        #add_boozes=db.session.query(sql)
+
+        sql = """SELECT bg.abstract_booze_id FROM booze_group bg 
+                WHERE id IN 
+                 (SELECT distinct(bgb.booze_group_id) FROM booze_group_booze bgb, dispenser 
+                        WHERE bgb.booze_id = dispenser.booze_id)"""
+
         add_boozes = db.session.query("abstract_booze_id") \
-                            .from_statement("""SELECT bg.abstract_booze_id 
-                                                 FROM booze_group bg 
-                                                WHERE id 
-                                                   IN (SELECT distinct(bgb.booze_group_id) 
-                                                         FROM booze_group_booze bgb, dispenser 
-                                                        WHERE bgb.booze_id = dispenser.booze_id)""")
+                            .from_statement(text(sql))
+
         #add_boozes = db.session.query("abstract_booze_id") \
         #                    .from_statement(text("""SELECT bg.abstract_booze_id 
         #                                         FROM booze_group bg 
@@ -455,17 +460,47 @@ class Mixer(object):
         else:
             sql = text("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d")
 
-        boozes = db.session.query(text("booze_id")) \
-            .from_statement(sql) \
-            .params(d=self.disp_count).all()
+        boozes = db.session.query("booze_id").from_statement(text(sql)).params(d=self.disp_count).all() 
         boozes.extend(add_boozes)
 
         # Load whatever external boozes we have and add them to this list
-        sql = text("SELECT id FROM booze WHERE type = :d")
-        ext_boozes = db.session.query(text("id")) \
-            .from_statement(sql) \
-            .params(d=BOOZE_TYPE_EXTERNAL).all()
+        sql = "SELECT id FROM booze WHERE type = :d"
+        ext_boozes = db.session.query("id").from_statement(text(sql)).params(d=BOOZE_TYPE_EXTERNAL).all()
+        booze_dict = {}
+        for booze_id in boozes:
+            booze_dict[booze_id[0]] = 1
+
+        drinks = db.session.query("drink_id", "booze_id") \
+                        .from_statement(text("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id")) \
+                        .all()
+        last_drink = -1
+        boozes = []
+        can_make = []
+        for drink_id, booze_id in drinks:
+            if last_drink < 0:
+                last_drink = drink_id
+            if drink_id != last_drink:
+                if self._can_make_drink(boozes, booze_dict):
+                    can_make.append(last_drink)
+                boozes = []
+            boozes.append(booze_id)
+            last_drink = drink_id
+
+        if self._can_make_drink(boozes, booze_dict):
+            can_make.append(last_drink)
+
+        self.mc.set("available_drink_list", can_make)
+        return can_make
+
+    # ----------------------------------------
+    # Private methods
+    # ----------------------------------------
+        ext_boozes = db.session.query("id") \
+            .from_statement(text(sql)).all()
         boozes.extend(ext_boozes)
+        #ext_boozes = db.session.query("id") \
+        #    .from_statement(text(sql)) \
+        #    .params(d=BOOZE_TYPE_EXTERNAL).all()
 
         booze_dict = {}
         for booze_id in boozes:
@@ -568,6 +603,9 @@ class Mixer(object):
         for disp in recipe:
             if not recipe[disp]:
                 continue
+            print(type(recipe[disp]))
+            print(type(TICKS_PER_ML))
+            recipe[disp]=int(recipe[disp])
             ticks = int(recipe[disp] * TICKS_PER_ML)
             if recipe[disp] < SLOW_DISPENSE_THRESHOLD and not always_fast:
                 speed = HALF_SPEED

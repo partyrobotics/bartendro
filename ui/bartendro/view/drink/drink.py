@@ -16,10 +16,14 @@ from bartendro import constant
 
 @app.route('/drink/<int:id>')
 def normal_drink(id):
+    ''' displays the drink page for the numbered drink '''
+
     return drink(id, 0)
 
 @app.route('/drink/<int:id>/go')
 def lucky_drink(id):
+    ''' immediately makes this drink '''
+
     return drink(id, 1)
 
 def drink(id, go):
@@ -57,6 +61,8 @@ def drink(id, go):
     show_sweet_tart = has_sweet and has_tart
     show_strength = has_alcohol and has_non_alcohol
 
+    import pdb
+    #pdb.set_trace()
     if not custom_drink:
         return render_template("drink/index", 
                                drink=drink, 
@@ -105,10 +111,15 @@ def drink(id, go):
 
 @app.route('/drink/sobriety')
 def drink_sobriety():
+    ''' Provides 'test' of your sobriety. If you can't click on a random spot
+    on the screen fast enough No Good Booze for you!'''
+    # Todo: Currently broken
     return render_template("drink/sobriety")
 
 @app.route('/drink/all')
 def drink_all():
+    ''' Returns json list of all drinks in our database '''
+
     data = [{'id':d.id, 'name':d.name.name, 'description':d.desc} for d in Drink.query.all()]
     js = json.dumps(data)
     resp = Response(js, status=200, mimetype='application/json')
@@ -116,6 +127,8 @@ def drink_all():
 
 @app.route('/drink/available')
 def drink_available():
+    ''' Returns json list of all drinks available with our current booze load. '''
+
     available = app.mixer.get_available_drink_list()
     data = [{'id':d.id, 'name':d.name.name, 'description':d.desc} for d in Drink.query.all() if d.id in available]
     js = json.dumps(data)

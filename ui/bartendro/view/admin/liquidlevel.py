@@ -9,7 +9,7 @@ def admin_liquidlevel():
     driver = app.driver
     count = driver.count()
     thresholds = []
-    for disp in xrange(count):
+    for disp in range(count):
         low, out = driver.get_liquid_level_thresholds(disp)
         thresholds.append((low, out))
 

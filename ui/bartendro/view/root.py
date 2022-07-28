@@ -105,6 +105,7 @@ def index():
 
 @app.route('/shots')
 def shots(template='shots'):
+    ''' Shows the shots page. '''
 
     if not app.options.use_shotbot_ui:
         return redirect("/")
@@ -139,6 +140,7 @@ def shots(template='shots'):
 
 @app.route('/graphical_shots')
 def graphical_shots():
+    ''' Shows the shots menu with pictures of the different booze.'''
     template='graphical_shots'
     # not sure why I can't do this.
     #return shots('graphical_shots')

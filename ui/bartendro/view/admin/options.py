@@ -10,17 +10,37 @@ from werkzeug.exceptions import Unauthorized
 from flask.ext.login import login_required
 from bartendro.model.version import DatabaseVersion
 
-def get_ip_address_from_interface(ifname):
+def get_ip_address():
+    ''' Gets the current connected address. 
+
+    This appears to work on the Mac when get_ip_address_from_interface fails '''
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
+def get_ip_address_from_interface(ifname):
+    # This is erroring out when run on a mac under emulation
     try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915,  
                                 struct.pack('256s', ifname[:15]))[20:24])
     except IOError:
+        pass
+    except struct.error:
+        pass
+    
+    try:
+        # fail over for Mac
+        add = get_ip_address()
+        return add 
+    except:
         return "[none]"
 
 @app.route('/admin/options')
 @login_required
 def admin_options():
+    ''' admin options page '''
     ver = DatabaseVersion.query.one()
     recover = not request.remote_addr.startswith("10.0.0")
 
