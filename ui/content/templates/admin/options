@@ -171,7 +171,7 @@
         <p>
         Bartendro's database contains all the information needed to run your Bartendro, including booze you've added, 
         your drink recipes and a log of your drinks poured. This information is <b>not</b> automatically backed up
-        and you should make period backups of this data base using the two buttons below.
+        and you should make periodic backups of this data base using the two buttons below.
         </p>
 
         Download Bartendro's database to your local machine. We recommend saving this file to a DropBox account!

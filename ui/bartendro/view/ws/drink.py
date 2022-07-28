@@ -96,6 +96,7 @@ def ws_drink_available(drink, state):
 
 @app.route('/ws/shots/<int:booze_id>')
 def ws_shots(booze_id):
+    ''' pour a shot of booze=booze_id '''
     if app.options.must_login_to_dispense and not current_user.is_authenticated():
         return "login required"
 
