@@ -99,9 +99,6 @@ def ws_shots(booze_id):
     ''' pour a shot of booze=booze_id '''
     # version 0.3 of flask contained a breaking change which changed is_authenticated
     # from a method to a property.
-    #print(app.options)
-    #import pdb
-    #pdb.set_trace()
     if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 

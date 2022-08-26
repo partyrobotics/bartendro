@@ -337,7 +337,7 @@ function show_dialog(title, text)
     $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
 }
 
-{% if options.must_login_to_dispense and not current_user.is_authenticated() %}
+{% if options.must_login_to_dispense and not current_user.is_authenticated %}
 function make_drink(drink, is_taster)
 {
     $("#log-in-required-dialog").dialog({ buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });

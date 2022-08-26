@@ -137,7 +137,8 @@ class Fake_MotorHAT():
 class RouterDriver(object):
     ''' plug in replacement for Bartendro RouterDriver to control the naive
     peristlatic pumps from Hello Drinkbot project. Provides a layer above
-    the AdaFruit motor library which understands pumps'''
+    the AdaFruit motor library which understands pumps. There is a lot of 
+    code here which only applies to the real Bartendro pumps.'''
 
     def __init__(self, device,  software_only=False):
         ''' device is ignored, it is required for bartendro hardware'''
@@ -159,14 +160,13 @@ class RouterDriver(object):
                 #for motor in range(4):
                     #self.ports[motor].setSpeed(255)
             except:
-                # no motor hat, but that might be fine
+                # no motor hat, but that might be fine if you are developing on another machine
                 self.mh1 = Fake_MotorHAT()
                 log.info("No Motor Hat?")
 
             self.ports = [self.mh1.getMotor(foo+1) for foo in range(4)]
             for motor in range(4):
                 self.ports[motor].setSpeed(255)
-
             pass
             # Add a second motor hat, with a second  address. Comment the
             # above lines, replace with something like this:
@@ -181,8 +181,11 @@ class RouterDriver(object):
             pass
 
         self.num_dispensers = MAX_DISPENSERS
+        # The pumptest16.py does the right thing, but here dispensers 
+        # 3 and 4, and 7 and 8 are reversed. But reversing them in this list 
+        # of dispensers doesn't do what I need.
         self.dispensers = [
-            #{'port': None, 'direction': MOTOR_DIRECTION_FORWARD},
+            #{'port': None, 'direction': MOTOR_DIRECTION_FORWARD}, 
             {'port': 0, 'direction': MOTOR_DIRECTION_FORWARD},
             {'port': 0, 'direction': MOTOR_DIRECTION_BACKWARD},
             {'port': 1, 'direction': MOTOR_DIRECTION_FORWARD},
@@ -356,10 +359,13 @@ class RouterDriver(object):
         return self._send_packet8(dispenser, PACKET_SET_MOTOR_DIRECTION, direction)
 
     def dispenser_port(self, disp):
-        """ Take a dispenser, return the port """
+        """ Take a dispenser, return the port 
+        """
 
-        port = disp//2
+        port = (disp)//2+1
+        port = (disp)//2
         print('disp: %i port: %i' % (disp, port))
+        #pdb.set_trace()
         return port
 
     def dispenser_sibling(self, disp):
@@ -367,6 +373,8 @@ class RouterDriver(object):
             sibling = disp - 1
         else:
             sibling = disp + 1
+        print('disp %i sibling %i ' % (disp, sibling))
+    
         return sibling
 
     def stop(self, dispenser=None):
@@ -406,10 +414,11 @@ class RouterDriver(object):
         except:
             pass
 
-        print('dispenser: %i ' % dispenser)
+        print('dispense_time')
+        print('\tdispenser: %i ' % dispenser)
         port = self.dispenser_port(dispenser)
-        print('port', port)
-        print(type(port))
+        print('\tport', port)
+        print('\t',type(port))
         sibling = self.dispenser_sibling(dispenser)
 
         try:
@@ -423,10 +432,30 @@ class RouterDriver(object):
         except:
             pass
 
-        if (dispenser % 2):
-            self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
-        else:
+        # I feel too stupid to properly do software. 
+        if dispenser == 0:
             self.ports[port].run(Adafruit_MotorHAT.FORWARD)
+        if dispenser == 1:
+            self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        if dispenser == 2:
+            self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        if dispenser == 3:
+            self.ports[port].run(Adafruit_MotorHAT.FORWARD)
+        if dispenser == 4:
+            self.ports[port].run(Adafruit_MotorHAT.FORWARD)
+        if dispenser == 5:
+            self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        if dispenser == 6:
+            self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        if dispenser == 7:
+            self.ports[port].run(Adafruit_MotorHAT.FORWARD)
+
+        #if (dispenser % 2):
+        #    self.ports[port].run(Adafruit_MotorHAT.BACKWARD)
+        #    print('\t dispenser %i backward' % dispenser)
+        #else:
+        #    self.ports[port].run(Adafruit_MotorHAT.FORWARD)
+        #    print('\t dispenser %i forward' % dispenser)
 
         #if not self.software_only:
         #    if (dispenser % 2):
