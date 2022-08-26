@@ -108,8 +108,7 @@ def ws_shots(booze_id):
     dispensers = db.session.query(Dispenser).all()
     dispenser = None
     for d in dispensers:
-        if d.booze.id == booze_id:
-            dispenser = d
+        if d.booze.id == booze_id: dispenser = d
 
     if not dispenser:
         return "this booze is not available"
@@ -124,6 +123,14 @@ def ws_shots(booze_id):
         raise ServiceUnavailable(err)
 
     return ""
+
+
+@app.route('/ws/dispense/<int:dispenser>/<int:ml>')
+def ws_dispense_ml(dispenser, ml):
+    '''dispense a given amount in ml from a given dispenser'''
+    print('ws_dispense_ml: %i ml: %i' % (dispenser, ml))
+    app.driver.dispense_ml(dispenser,ml)
+    return "dispenser: %i ml: %i" % (dispenser, ml)
 
 @app.route('/ws/drink/<int:id>/load')
 @login_required
