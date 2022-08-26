@@ -122,11 +122,19 @@ def ws_shots(booze_id):
     return ""
 
 
+# app.route('/ws/dispense/<int:dispenser>/<int:ml>/<int:wait>')
+#def ws_dispense_ml(dispenser, ml, wait=0):
 @app.route('/ws/dispense/<int:dispenser>/<int:ml>')
 def ws_dispense_ml(dispenser, ml):
-    '''dispense a given amount in ml from a given dispenser'''
+    '''dispense a given amount in ml from a given dispenser. if 'wait==1' then wait for it to complete 
+    before returning'''
+
     print('ws_dispense_ml: %i ml: %i' % (dispenser, ml))
     app.driver.dispense_ml(dispenser,ml)
+    print('in ws_dispense_ml look at timer')
+    #if wait==1:
+    #    while app.driver.dispensers[dispenser]['timer'].is_alive():
+    #        sleep(0.01)
     return "dispenser: %i ml: %i" % (dispenser, ml)
 
 @app.route('/ws/drink/<int:id>/load')
