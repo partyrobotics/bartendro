@@ -80,9 +80,13 @@ class Mixer(object):
         r.data = {dispenser.booze.id: ml}
         r.booze = dispenser.booze
         self.recipe = r
+        print('in dispense shot')
 
         with BartendroLock(app.globals):
+            
+            print('in dispense shot before')
             self.do_event(fsm.EVENT_MAKE_SHOT)
+            print('in dispense shot after')
             t = int(time())
             slog = ShotLog(dispenser.booze.id, t, ml)
             db.session.add(slog)
@@ -116,7 +120,6 @@ class Mixer(object):
 
     def do_event(self, event):
         cur_state = app.globals.get_state()
-
         log.info("do_event event: %r  " % (event))
         while True:
             next_state = None
@@ -295,7 +298,7 @@ class Mixer(object):
         size = 0
         log_lines = {}
         sql = "SELECT id FROM booze WHERE type = :d"
-        ext_booze_list = db.session.query("id") \
+        ext_booze_list = db.session.query(text("id")) \
             .from_statement(text(sql)) \
             .params(d=BOOZE_TYPE_EXTERNAL).all()
         ext_boozes = {}
@@ -444,10 +447,10 @@ class Mixer(object):
                  (SELECT distinct(bgb.booze_group_id) FROM booze_group_booze bgb, dispenser 
                         WHERE bgb.booze_id = dispenser.booze_id)"""
 
-        add_boozes = db.session.query("abstract_booze_id") \
+        add_boozes = db.session.query(text("abstract_booze_id")) \
                             .from_statement(text(sql))
 
-        #add_boozes = db.session.query("abstract_booze_id") \
+        #add_boozes = db.session.query(text("abstract_booze_id")) \
         #                    .from_statement(text("""SELECT bg.abstract_booze_id 
         #                                         FROM booze_group bg 
         #                                        WHERE id 
@@ -459,18 +462,21 @@ class Mixer(object):
             sql = "SELECT booze_id FROM dispenser WHERE out == 1 or out == 2 ORDER BY id LIMIT :d"
         else:
             sql = text("SELECT booze_id FROM dispenser ORDER BY id LIMIT :d")
+            sql = "SELECT booze_id FROM dispenser ORDER BY id LIMIT :d"
 
-        boozes = db.session.query("booze_id").from_statement(text(sql)).params(d=self.disp_count).all() 
+        import pdb
+        #pdb.set_trace()
+        boozes = db.session.query(text("booze_id")).from_statement(text(sql)).params(d=self.disp_count).all() 
         boozes.extend(add_boozes)
 
         # Load whatever external boozes we have and add them to this list
         sql = "SELECT id FROM booze WHERE type = :d"
-        ext_boozes = db.session.query("id").from_statement(text(sql)).params(d=BOOZE_TYPE_EXTERNAL).all()
+        ext_boozes = db.session.query(text("id")).from_statement(text(sql)).params(d=BOOZE_TYPE_EXTERNAL).all()
         booze_dict = {}
         for booze_id in boozes:
             booze_dict[booze_id[0]] = 1
 
-        drinks = db.session.query("drink_id", "booze_id") \
+        drinks = db.session.query(text("drink_id"), text("booze_id")) \
                         .from_statement(text("SELECT d.id AS drink_id, db.booze_id AS booze_id FROM drink d, drink_booze db WHERE db.drink_id = d.id ORDER BY d.id, db.booze_id")) \
                         .all()
         last_drink = -1
@@ -495,7 +501,7 @@ class Mixer(object):
     # ----------------------------------------
     # Private methods
     # ----------------------------------------
-        ext_boozes = db.session.query("id") \
+        ext_boozes = db.session.query(text("id")) \
             .from_statement(text(sql)).all()
         boozes.extend(ext_boozes)
         #ext_boozes = db.session.query("id") \

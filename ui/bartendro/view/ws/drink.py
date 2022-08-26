@@ -72,14 +72,14 @@ def ws_make_drink(drink_id):
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
     drink_mixer = app.mixer
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     return ws_make_drink(drink)
 
 @app.route('/ws/drink/custom')
 def ws_custom_drink():
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     return ws_make_drink(0)
@@ -97,7 +97,12 @@ def ws_drink_available(drink, state):
 @app.route('/ws/shots/<int:booze_id>')
 def ws_shots(booze_id):
     ''' pour a shot of booze=booze_id '''
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    # version 0.3 of flask contained a breaking change which changed is_authenticated
+    # from a method to a property.
+    #print(app.options)
+    #import pdb
+    #pdb.set_trace()
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     dispensers = db.session.query(Dispenser).all()
