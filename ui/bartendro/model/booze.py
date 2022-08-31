@@ -53,7 +53,9 @@ class Booze(db.Model):
         self.brand = data['brand']
         self.abv = int(data['abv'])
         self.type = int(data['type'])
-        self.image = int(data['image'])
+        self.image = data['image']
+        # what was I thinking with an int? rlg
+        #self.image = int(data['image'])
 
     def is_abstract(self):
         return len(self.booze_group)

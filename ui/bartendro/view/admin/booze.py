@@ -35,6 +35,7 @@ def admin_booze_save():
     form = BoozeForm(request.form)
     if request.method == 'POST' and form.validate():
         id = int(request.form.get("id") or '0')
+        print(bool(id))
         if id:
             booze = Booze.query.filter_by(id=int(id)).first()
             booze.update(form.data)
