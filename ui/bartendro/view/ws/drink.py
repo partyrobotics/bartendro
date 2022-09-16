@@ -72,14 +72,14 @@ def ws_make_drink(drink_id):
 @app.route('/ws/drink/<int:drink>')
 def ws_drink(drink):
     drink_mixer = app.mixer
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     return ws_make_drink(drink)
 
 @app.route('/ws/drink/custom')
 def ws_custom_drink():
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     return ws_make_drink(0)
@@ -97,14 +97,15 @@ def ws_drink_available(drink, state):
 @app.route('/ws/shots/<int:booze_id>')
 def ws_shots(booze_id):
     ''' pour a shot of booze=booze_id '''
-    if app.options.must_login_to_dispense and not current_user.is_authenticated():
+    # version 0.3 of flask contained a breaking change which changed is_authenticated
+    # from a method to a property.
+    if app.options.must_login_to_dispense and not current_user.is_authenticated:
         return "login required"
 
     dispensers = db.session.query(Dispenser).all()
     dispenser = None
     for d in dispensers:
-        if d.booze.id == booze_id:
-            dispenser = d
+        if d.booze.id == booze_id: dispenser = d
 
     if not dispenser:
         return "this booze is not available"
@@ -119,6 +120,21 @@ def ws_shots(booze_id):
         raise ServiceUnavailable(err)
 
     return ""
+
+
+# app.route('/ws/dispense/<int:dispenser>/<int:ml>/<int:wait>')
+#def ws_dispense_ml(dispenser, ml, wait=0):
+@app.route('/ws/dispense/<int:dispenser>/<int:ml>')
+def ws_dispense_ml(dispenser, ml):
+    '''dispense a given amount in ml from a given dispenser. if 'wait==1' then wait for it to complete 
+    before returning'''
+    print('ws_dispense_ml: %i ml: %i' % (dispenser, ml))
+    app.driver.dispense_ml(dispenser,ml)
+    print('in ws_dispense_ml look at timer')
+    #if wait==1:
+    #    while app.driver.dispensers[dispenser]['timer'].is_alive():
+    #        sleep(0.01)
+    return "dispenser: %i ml: %i" % (dispenser, ml)
 
 @app.route('/ws/drink/<int:id>/load')
 @login_required
