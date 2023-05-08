@@ -16,3 +16,9 @@ tsb      -- legacy code from our old skool drink bot prototyp Tequila Sunrise Bo
 ui       -- web interface for the bot, written in python.
 
 These various subdirectories may contain more README and COPYING files.
+
+== Downloading updated SD Card images ==
+
+In 2021 the SD card images were updated. They can be downloaded here:
+
+https://github.com/partyrobotics/bartendro/releases/tag/v-2021-05-21
