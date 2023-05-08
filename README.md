@@ -1,3 +1,6 @@
+Introduction
+============
+
 Programs for the various systems of the Bartendro drink dispensing robot.
 
 Created by Pierre Michael and Robert Kaye
@@ -17,7 +20,8 @@ ui       -- web interface for the bot, written in python.
 
 These various subdirectories may contain more README and COPYING files.
 
-== Downloading updated SD Card images ==
+Downloading updated SD Card images
+==================================
 
 In 2021 the SD card images were updated. They can be downloaded here:
 
