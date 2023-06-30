@@ -1,5 +1,5 @@
 werkzeug==0.12.2
-jinja2==2.9.6
+jinja2==2.11.3
 wtforms==2.1
 sqlalchemy==1.1.14
 python-memcached==1.58
